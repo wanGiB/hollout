@@ -20,6 +20,7 @@ android {
         versionCode 4
         versionName "1.0"
         testInstrumentationRunner "com.wan.hollout"
+        vectorDrawables.useSupportLibrary = true
     }
 
     signingConfigs {
@@ -91,6 +92,12 @@ dependencies {
     compile 'com.google.android.gms:play-services-places:11.0.2'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true;
+    }
+    compile 'com.afollestad.material-dialogs:core:0.9.0.2'
+    compile 'com.afollestad.material-dialogs:commons:0.9.0.2'
+
+    compile('com.github.naman14:app-theme-engine:0.5.2@aar') {
+        transitive = true
     }
 }
 

@@ -13,7 +13,7 @@ import com.wan.hollout.components.ApplicationLoader;
 @SuppressLint("ApplySharedPref")
 public class HolloutPreferences {
 
-    private static SharedPreferences getHolloutPreferences() {
+    public static SharedPreferences getHolloutPreferences() {
         return ApplicationLoader.getInstance().getSharedPreferences(AppConstants.HOLLOUT_PREFERENCES, Context.MODE_PRIVATE);
     }
 
@@ -37,11 +37,23 @@ public class HolloutPreferences {
     }
 
     public static void saveDocument(String documentUrl, String documentToString) {
-        getHolloutPreferences().edit().putString(documentUrl,documentToString).commit();
+        getHolloutPreferences().edit().putString(documentUrl, documentToString).commit();
     }
 
-    public static String getDocumentString(String documentUrl){
-        return getHolloutPreferences().getString(documentUrl,null);
+    public static String getDocumentString(String documentUrl) {
+        return getHolloutPreferences().getString(documentUrl, null);
     }
 
+    public static String getATEKey() {
+        return getHolloutPreferences().getBoolean("dark_theme", false) ?
+                "dark_theme" : "light_theme";
+    }
+
+    public static void setStartPageIndex(final int index) {
+        getHolloutPreferences().edit().putInt(AppConstants.START_PAGE_INDEX, index).apply();
+    }
+
+    public static int getStartPageIndex() {
+        return getHolloutPreferences().getInt(AppConstants.START_PAGE_INDEX, 0);
+    }
 }

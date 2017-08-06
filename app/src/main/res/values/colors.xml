@@ -238,5 +238,22 @@
     <color name="clear_btn_color">#787878</color>
     <color name="overflow_icon_color">#787878</color>
     <color name="hint_color">#808080</color>
+    <color name="window_background">#FFF5F5F5</color>
+    <color name="window_background_dark">#212121</color>
+    <color name="window_background_black">#000000</color>
+    <color name="bt_accent">#00B8D4</color>
+    <color name="colorPrimaryDarkTheme">#1C2736</color>
+    <color name="colorPrimaryDarkDarkTheme">#151E28</color>
+
+    <color name="progressBackgroundColorLight">#33000000</color>
+    <color name="progressBackgroundColorDark">#33ffffff</color>
+
+    <color name="colorPrimaryLightDefault">#FAFAFA</color>
+    <color name="colorAccentLightDefault">@color/colorAccent</color>
+
+    <color name="colorPrimaryDarkDefault">#37474F</color>
+    <color name="colorAccentDarkDefault">#2196F3</color>
+
+    <color name="colorSelectableItemWhite">#77ffffff</color>
 
 </resources>

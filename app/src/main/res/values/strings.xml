@@ -3,7 +3,7 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="animated_text_contents_divider">\t| </string>
-    <string name="app_intro_message">Read News, Blogs and Books with Friends.\n\nMeet and make friends with Avid Readers like you.</string>
+    <string name="app_intro_message">Read News, Blog Posts and Books with Friends.\n\nMeet and make friends with avid Readers like you.</string>
     <string name="start_here">START HERE!</string>
     <string name="it_s_just_15_seconds">It\'s just 15 seconds</string>
     <string name="setup_account">Setup your free personal account to get started.</string>
@@ -66,5 +66,7 @@
     <string name="choose_an_account_to_continue_with">Choose an account to continue with</string>
     <string name="options">Options</string>
     <string name="empty" />
+    <string name="feed">Feed</string>
+    <string name="people">People</string>
 
 </resources>

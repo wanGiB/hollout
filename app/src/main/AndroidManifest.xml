@@ -6,19 +6,18 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".components.ApplicationLoader"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:name=".components.ApplicationLoader"
         android:theme="@style/AppTheme"
-        tools:replace="android:icon">
+        tools:replace="android:icon,android:allowBackup, android:label">
 
         <meta-data
             android:name="io.fabric.ApiKey"
-            android:value="ad592a04b832e238a390d851afaba5226e6f6632"
-            />
+            android:value="ad592a04b832e238a390d851afaba5226e6f6632" />
 
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
@@ -66,7 +65,7 @@
         <activity
             android:name=".ui.activities.MainActivity"
             android:label="@string/title_activity_main"
-            android:theme="@style/LightStatusTheme" />
+            android:theme="@style/AppTheme.FullScreen.Light" />
 
         <service
             android:name=".ui.services.AppInstanceDetectionService"

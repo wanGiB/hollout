@@ -24,4 +24,6 @@ public class AppConstants {
     public static final String USER_LATITUDE = "user_latitude";
     public static final String USER_LONGITUDE = "user_longitude";
 
+    public static final String START_PAGE_INDEX = "start_page_index";
+
 }
