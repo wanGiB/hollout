@@ -1,13 +1,13 @@
 <resources>
 
-    <attr format="reference" name="cardStyle"/>
-    <attr format="reference" name="accentColor"/>
-    <attr format="reference" name="iconColor"/>
-    <attr format="reference" name="windowBackground"/>
-    <attr format="reference" name="progressBackgroundColor"/>
-    <attr format="reference" name="progressDrawable"/>
-    <attr format="reference" name="progressDrawableWithBackground" />
-    <attr format="reference" name="stateSelector" />
+    <attr name="cardStyle" format="reference" />
+    <attr name="accentColor" format="reference" />
+    <attr name="iconColor" format="reference" />
+    <attr name="windowBackground" format="reference" />
+    <attr name="progressBackgroundColor" format="reference" />
+    <attr name="progressDrawable" format="reference" />
+    <attr name="progressDrawableWithBackground" format="reference" />
+    <attr name="stateSelector" format="reference" />
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -71,6 +71,22 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="MyCustomTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="textAllCaps">true</item>
+    </style>
+
+    <style name="CustomTabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">?attr/colorAccent</item>
+        <item name="tabIndicatorHeight">4dp</item>
+        <item name="tabPaddingStart">12dp</item>
+        <item name="tabPaddingEnd">12dp</item>
+        <item name="tabBackground">?attr/selectableItemBackground</item>
+        <item name="tabTextAppearance">@style/MyCustomTabTextAppearance</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+    </style>
 
     <style name="ThemeBaseLight" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -84,7 +100,8 @@
         <item name="stateSelector">@color/state_selector_light</item>
         <item name="progressBackgroundColor">@color/progressBackgroundColorLight</item>
         <item name="progressDrawable">@drawable/progress_drawable</item>
-        <item name="progressDrawableWithBackground">@drawable/progress_drawable_withbackground</item>
+        <item name="progressDrawableWithBackground">@drawable/progress_drawable_withbackground
+        </item>
         <item name="ate_key">light_theme</item>
 
     </style>
@@ -101,19 +118,18 @@
         <item name="stateSelector">@color/state_selector_dark</item>
         <item name="progressBackgroundColor">@color/progressBackgroundColorDark</item>
         <item name="progressDrawable">@drawable/progress_drawable_dark</item>
-        <item name="progressDrawableWithBackground">@drawable/progress_drawable_withbackground_dark</item>
+        <item name="progressDrawableWithBackground">
+            @drawable/progress_drawable_withbackground_dark
+        </item>
         <item name="ate_key">dark_theme</item>
 
     </style>
 
-    <style name="AppThemeLight" parent="ThemeBaseLight">
-    </style>
+    <style name="AppThemeLight" parent="ThemeBaseLight"></style>
 
-    <style name="AppThemeNormalLight" parent="ThemeBaseLight">
-    </style>
+    <style name="AppThemeNormalLight" parent="ThemeBaseLight"></style>
 
-    <style name="AppTheme.FullScreen.Light" parent="ThemeBaseLight">
-    </style>
+    <style name="AppTheme.FullScreen.Light" parent="ThemeBaseLight"></style>
 
     <style name="AppThemeDark" parent="ThemeBaseDark">
 
@@ -132,7 +148,6 @@
         <item name="spinBars">true</item>
         <item name="color">@android:color/white</item>
     </style>
-
 
 
     <style name="TextApperance.Album.Title" parent="@style/TextAppearance.AppCompat.Large">

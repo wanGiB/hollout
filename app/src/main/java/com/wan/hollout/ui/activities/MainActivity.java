@@ -13,12 +13,14 @@ import android.support.v7.app.AppCompatDelegate;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.fragments.MainFragment;
 import com.wan.hollout.utils.HolloutPreferences;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer, NavigationView.OnNavigationItemSelectedListener {
 
@@ -43,6 +45,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
         homeRunnable.run();
     }
 
@@ -80,6 +83,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        ATE.applyMenu(this, getATEKey(), menu);
         return true;
     }
 
@@ -89,12 +93,13 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        } else if (id == android.R.id.home) {
+            drawer.openDrawer(GravityCompat.START);
+            return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

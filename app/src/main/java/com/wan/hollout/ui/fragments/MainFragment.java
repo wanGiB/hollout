@@ -1,5 +1,7 @@
 package com.wan.hollout.ui.fragments;
 
+import android.content.Context;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -12,11 +14,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.wan.hollout.R;
 import com.wan.hollout.utils.ATEUtils;
+import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.HolloutPreferences;
 
 import java.util.ArrayList;
@@ -48,11 +52,22 @@ public class MainFragment extends Fragment {
             ab.setDisplayHomeAsUpEnabled(true);
         }
         if (viewPager != null) {
-            setupViewPager(viewPager);
+            Adapter adapter = setupViewPagerAdapter(viewPager);
             viewPager.setOffscreenPageLimit(2);
+            tabLayout.setSelectedTabIndicatorHeight(6);
+            tabLayout.setupWithViewPager(viewPager);
+            setupTabs(adapter);
         }
-        tabLayout.setupWithViewPager(viewPager);
         return rootView;
+    }
+
+    private void setupTabs(Adapter pagerAdapter) {
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+            if (tab != null) {
+                tab.setCustomView(pagerAdapter.getCustomTabView(i));
+            }
+        }
     }
 
     @Override
@@ -66,11 +81,12 @@ public class MainFragment extends Fragment {
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
     }
 
-    private void setupViewPager(ViewPager viewPager) {
-        Adapter adapter = new Adapter(getChildFragmentManager());
+    private Adapter setupViewPagerAdapter(ViewPager viewPager) {
+        Adapter adapter = new Adapter(getActivity(), getChildFragmentManager());
         adapter.addFragment(new FeedFragment(), this.getString(R.string.feed));
         adapter.addFragment(new PeopleFragment(), this.getString(R.string.people));
         viewPager.setAdapter(adapter);
+        return adapter;
     }
 
     @Override
@@ -94,9 +110,13 @@ public class MainFragment extends Fragment {
     private static class Adapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragments = new ArrayList<>();
         private final List<String> mFragmentTitles = new ArrayList<>();
+        private LayoutInflater layoutInflater;
+        private Context context;
 
-        Adapter(FragmentManager fm) {
+        Adapter(Context context, FragmentManager fm) {
             super(fm);
+            this.context = context;
+            this.layoutInflater = LayoutInflater.from(context);
         }
 
         void addFragment(Fragment fragment, String title) {
@@ -118,5 +138,18 @@ public class MainFragment extends Fragment {
         public CharSequence getPageTitle(int position) {
             return mFragmentTitles.get(position);
         }
+
+        View getCustomTabView(int pos) {
+            @SuppressWarnings("InflateParams")
+            View view = layoutInflater.inflate(R.layout.tab_custom_view, null);
+            TextView tabTitle = view.findViewById(R.id.tab_title);
+            Typeface typeface = FontUtils.selectTypeface(context, 1);
+            tabTitle.setTypeface(typeface);
+            tabTitle.setText(getPageTitle(pos));
+            return view;
+        }
+
     }
+
+
 }
