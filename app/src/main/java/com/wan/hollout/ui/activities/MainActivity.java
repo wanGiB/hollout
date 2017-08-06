@@ -15,12 +15,16 @@ import android.view.MenuItem;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
+import com.arlib.floatingsearchview.FloatingSearchView;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.fragments.MainFragment;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.UiUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.wan.hollout.ui.fragments.MainFragment.floatingSearchView;
 
 public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer, NavigationView.OnNavigationItemSelectedListener {
 
@@ -74,6 +78,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (floatingSearchView.isSearchBarFocused()) {
+            floatingSearchView.setSearchFocused(false);
+            UiUtils.showView(floatingSearchView, false);
         } else {
             super.onBackPressed();
         }
@@ -98,6 +105,10 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             return true;
         } else if (id == android.R.id.home) {
             drawer.openDrawer(GravityCompat.START);
+            return true;
+        } else if (id == R.id.action_search) {
+            UiUtils.showView(floatingSearchView, true);
+            floatingSearchView.setSearchFocused(true);
             return true;
         }
         return super.onOptionsItemSelected(item);
