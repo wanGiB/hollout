@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "805027156034",
+    "firebase_url": "https://hollout-825b4.firebaseio.com",
+    "project_id": "hollout-825b4",
+    "storage_bucket": "hollout-825b4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:805027156034:android:b739d41662be8af5",
+        "android_client_info": {
+          "package_name": "com.wan.hollout"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "805027156034-etmca90h2qbghcerocc3vehjvgs4hqd1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wan.hollout",
+            "certificate_hash": "3b41bfdde40cd60c38391a364dffc9a31c1307d3"
+          }
+        },
+        {
+          "client_id": "805027156034-0euf26cm0ltv4vqttp12mb518c8r57tv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wan.hollout",
+            "certificate_hash": "7b3886462578e58b9752f44d2e28f40ce83b654b"
+          }
+        },
+        {
+          "client_id": "805027156034-mojt1l00os3r841eklbavbic4sqoqu51.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0rdPX8ZCdSqCHsl0wwmng7tFYhd-xyLg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "805027156034-mojt1l00os3r841eklbavbic4sqoqu51.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

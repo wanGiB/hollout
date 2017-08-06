@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr name="metaButtonBarStyle" format="reference" />
+        <attr name="metaButtonBarButtonStyle" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ScrimInsetsView">
+        <attr name="appInsetForeground" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="HolloutTextView">
+        <attr name="textStyle" />
+        <attr name="text_animationStyle" />
+        <attr name="typerSpeed" format="integer" />
+        <attr name="charIncrease" format="integer" />
+    </declare-styleable>
+
+    <attr name="textStyle" format="enum">
+        <enum name="regular" value="0" />
+        <enum name="bold" value="1" />
+        <enum name="italic" value="2" />
+        <enum name="light" value="3" />
+        <enum name="medium" value="4" />
+        <enum name="thin" value="5" />
+        <enum name="colophon" value="6" />
+    </attr>
+
+    <attr name="text_animationStyle" format="enum">
+        <enum name="typed" value="0" />
+        <enum name="rainbow" value="1" />
+    </attr>
+
+    <declare-styleable name="ShimmerFrameLayout">
+        <attr name="auto_start" format="boolean" />
+        <attr name="base_alpha" format="float" />
+        <attr name="duration" format="integer" />
+        <attr name="repeat_count" format="integer" />
+        <attr name="repeat_delay" format="integer" />
+        <attr name="repeat_mode" format="enum">
+            <enum name="restart" value="1" />
+            <enum name="reverse" value="2" />
+        </attr>
+        <attr name="angle" format="enum">
+            <enum name="cw_0" value="0" />
+            <enum name="cw_90" value="90" />
+            <enum name="cw_180" value="180" />
+            <enum name="cw_270" value="270" />
+        </attr>
+        <attr name="dropoff" format="float" />
+        <attr name="fixed_width" format="dimension" />
+        <attr name="fixed_height" format="dimension" />
+        <attr name="intensity" format="float" />
+        <attr name="relative_width" format="float" />
+        <attr name="relative_height" format="float" />
+        <attr name="shape" format="enum">
+            <enum name="linear" value="0" />
+            <enum name="radial" value="1" />
+        </attr>
+        <attr name="tilt" format="float" />
+    </declare-styleable>
+
+
+    <declare-styleable name="FloatingSearchView">
+        <attr name="floatingSearch_searchBarWidth" format="dimension" />
+        <attr name="floatingSearch_searchBarMarginTop" format="dimension" />
+        <attr name="floatingSearch_searchBarMarginLeft" format="dimension" />
+        <attr name="floatingSearch_searchBarMarginRight" format="dimension" />
+        <attr name="floatingSearch_searchSuggestionTextSize" format="dimension" />
+        <attr name="floatingSearch_searchInputTextSize" format="dimension" />
+        <attr name="floatingSearch_showMenuAction" format="boolean" />
+        <attr name="floatingSearch_dismissFocusOnItemSelection" format="boolean" />
+        <attr name="floatingSearch_leftActionMode">
+            <enum name="showHamburger" value="1" />
+            <enum name="showSearch" value="2" />
+            <enum name="showHome" value="3" />
+            <enum name="noLeftAction" value="4" />
+        </attr>
+        <attr name="floatingSearch_showVoiceInput" format="boolean" />
+        <attr name="floatingSearch_showSearchKey" format="boolean" />
+        <attr name="floatingSearch_voiceRecHint" format="string" />
+        <attr name="floatingSearch_searchHint" format="string" />
+        <attr name="floatingSearch_dismissOnOutsideTouch" format="boolean" />
+        <attr name="floatingSearch_showMoveSuggestionUp" format="boolean" />
+        <attr name="floatingSearch_suggestionsListAnimDuration" format="integer" />
+        <attr name="floatingSearch_hideOverflowMenuWhenFocused" format="boolean" />
+        <attr name="floatingSearch_showOverFlowMenu" format="boolean" />
+        <attr name="floatingSearch_close_search_on_keyboard_dismiss" format="boolean" />
+        <attr name="floatingSearch_menu" format="reference" />
+        <attr name="floatingSearch_leftActionColor" format="color" />
+        <attr name="floatingSearch_viewTextColor" format="color" />
+        <attr name="floatingSearch_viewSearchInputTextColor" format="color" />
+        <attr name="floatingSearch_hintTextColor" format="color" />
+        <attr name="floatingSearch_viewSuggestionItemTextColor" format="color" />
+        <attr name="floatingSearch_menuItemIconColor" format="color" />
+        <attr name="floatingSearch_actionMenuOverflowColor" format="color" />
+        <attr name="floatingSearch_clearBtnColor" format="color" />
+        <attr name="floatingSearch_backgroundColor" format="color" />
+        <attr name="floatingSearch_dividerColor" format="color" />
+        <attr name="floatingSearch_dimBackground" format="boolean" />
+        <attr name="floatingSearch_suggestionRightIconColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="CircleImageView">
+        <attr name="border_width" format="dimension" />
+        <attr name="border_color" format="color" />
+    </declare-styleable>
+
+</resources>
