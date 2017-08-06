@@ -100,6 +100,9 @@ dependencies {
         transitive = true
     }
     compile 'com.github.arimorty:floatingsearchview:2.1.1'
+    compile 'org.jsoup:jsoup:1.10.3'
+    compile 'id.arieridwan:pageloader:0.0.2'
+
 }
 
 apply plugin: 'com.google.gms.google-services'

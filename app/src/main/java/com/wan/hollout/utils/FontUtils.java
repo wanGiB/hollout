@@ -16,6 +16,7 @@ public class FontUtils {
     private static String FONT_LIGHT = "AvenirLTStd-Light.otf";
     private static String FONT_MEDIUM = "AvenirLTStd-Medium.otf";
     private static String DYSPEPSIA = "colophon.ttf";
+    private static String FONT_AWESOME = "fontawesome-webfont.ttf";
 
     private static Map<String, Typeface> sCachedFonts = new HashMap<>();
 
@@ -28,7 +29,7 @@ public class FontUtils {
     }
 
     public static Typeface selectTypeface(Context context, int textStyle) {
-        String RobotoPrefix = "fonts/Avenir/";
+        String RobotoPrefix = "fonts/";
         String font;
         switch (textStyle) {
             case 0:
@@ -46,6 +47,9 @@ public class FontUtils {
                 break;
             case 6:
                 font = FontUtils.DYSPEPSIA;
+                break;
+            case 7:
+                font = FontUtils.FONT_AWESOME;
                 break;
             default:
                 font = FontUtils.FONT_REGULAR;
