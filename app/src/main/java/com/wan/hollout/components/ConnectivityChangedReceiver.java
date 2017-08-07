@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.parse.ParseUser;
+import com.google.firebase.auth.FirebaseAuth;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 
 /**
@@ -21,7 +21,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
 
     private void startAppDetectionService(Context context) {
         try {
-            if (ParseUser.getCurrentUser() != null) {
+            if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                 Intent mAppInstanceDetectIntent = new Intent(context, AppInstanceDetectionService.class);
                 context.startService(mAppInstanceDetectIntent);
             } else {

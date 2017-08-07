@@ -26,4 +26,6 @@ public class AppConstants {
 
     public static final String START_PAGE_INDEX = "start_page_index";
 
+    public static final String NEXT_PAGE_TOKEN = "nextPageToken";
+    public static final String PREVIOUS_PAGE_TOKEN = "previousPageToken";
 }
