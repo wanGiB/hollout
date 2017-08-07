@@ -35,10 +35,10 @@ public class ApiUtils {
     }
 
     private static void withApiKey(HttpUrl.Builder builder) {
-        builder.addQueryParameter("key", AppKeys.BLOG_API_KEY);
+        builder.addQueryParameter("key", AppKeys.GOOGLE_API_KEY);
     }
 
-    public static void fetchPosts(String blogId, String pageToken, final DoneCallback<List<JSONObject>> resultCallback) {
+    public static void fetchBlogPosts(String blogId, String pageToken, final DoneCallback<List<JSONObject>> resultCallback) {
         OkHttpClient okHttpClient = getOkHttpClient();
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(AppKeys.BASE_URL + "/" + blogId + "/posts").newBuilder();
 
@@ -47,7 +47,9 @@ public class ApiUtils {
         if (pageToken != null) {
             httpUrlBuilder.addQueryParameter("pageToken", pageToken);
         }
+
         Request request = new Request.Builder().url(httpUrlBuilder.build().toString()).get().build();
+
         okHttpClient.newCall(request).enqueue(new Callback() {
 
             @Override
@@ -93,7 +95,7 @@ public class ApiUtils {
                         } else {
                             resultCallback.done(null, null);
                         }
-                        HolloutLogger.d(BLOG_REQUESTS_TAG, responseBody.string());
+                        HolloutLogger.d(BLOG_REQUESTS_TAG, responseBodyString);
                     } else {
                         HolloutLogger.d(BLOG_REQUESTS_TAG, "Something Screwy happened");
                         resultCallback.done(null, new Exception("Something Screwy happened"));

@@ -52,7 +52,6 @@ dependencies {
     compile('com.facebook.android:facebook-android-sdk:4.+') {
         exclude group: 'com.android.support', module: 'multidex'
     }
-
     apt "com.github.Raizlabs.DBFlow:dbflow-processor:${dbflow_version}"
     compile "com.github.Raizlabs.DBFlow:dbflow-core:${dbflow_version}"
     compile "com.github.Raizlabs.DBFlow:dbflow:${dbflow_version}"
@@ -91,14 +90,13 @@ dependencies {
     }
     compile 'com.afollestad.material-dialogs:core:0.9.0.2'
     compile 'com.afollestad.material-dialogs:commons:0.9.0.2'
-
     compile('com.github.naman14:app-theme-engine:0.5.2@aar') {
         transitive = true
     }
     compile 'com.github.arimorty:floatingsearchview:2.1.1'
     compile 'org.jsoup:jsoup:1.10.3'
     compile 'id.arieridwan:pageloader:0.0.2'
-
+    compile files('libs/YouTubeAndroidPlayerApi.jar')
 }
 
 apply plugin: 'com.google.gms.google-services'

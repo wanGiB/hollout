@@ -15,5 +15,5 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <include layout="@layout/feed_item_news"/>
+    <include layout="@layout/blog_post_recycler_item"/>
 </FrameLayout>

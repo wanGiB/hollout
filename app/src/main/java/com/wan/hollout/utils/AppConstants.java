@@ -28,4 +28,31 @@ public class AppConstants {
 
     public static final String NEXT_PAGE_TOKEN = "nextPageToken";
     public static final String PREVIOUS_PAGE_TOKEN = "previousPageToken";
+    public static final String POST_PUBLISHED_DATE = "published";
+    public static final String POST_ID = "id";
+    public static final String BLOG = "blog";
+    public static final String BLOG_ID = "id";
+    public static final String PUBLIC_POST_LINK = "url";
+    public static final String POST_SELF_LINK = "selfLink";
+    public static final String POST_TITLE = "title";
+    public static final String POST_CONTENT = "content";
+
+    public static final String AUTHOR = "author";
+    public static final String POST_REPLIES = "replies";
+    public static final String REPLIES_COUNT = "totalItems";
+    public static final String LABELS = "labels";
+    public static String AUTHOR_ID = "id";
+    public static String AUTHOR_DISPLAY_NAME = "displayName";
+    public static String AUTHOR_PUBLIC_URL = "url";
+    public static String AUTHOR_IMAGE = "image";
+    public static String AUTHOR_IMAGE_URL = "url";
+
+    public static String SAMPLE_HTML = "<div class=\"separator\" style=\"clear: both; text-align: center;\">\n" +
+            "    <a href=\"http://alexis.lindaikejisblog.com/photos/shares/5987896c11298.png\" imageanchor=\"1\" style=\"margin-left: 1em; margin-right: 1em;\"><img border=\"0\" data-original-height=\"756\" data-original-width=\"800\" height=\"301\" src=\"https://alexis.lindaikejisblog.com/photos/shares/5987896c11298.png\" width=\"320\" />\n" +
+            "    </a>\n" +
+            "    <object class=\"BLOG_video_class\" contentid=\"bfbcbe5c2a9d002e\" height=\"266\" id=\"BLOG_video-bfbcbe5c2a9d002e\" width=\"320\"></object>\n" +
+            "    <iframe width=\"320\" height=\"266\" class=\"YOUTUBE-iframe-video\" data-thumbnail-src=\"https://i.ytimg.com/vi/tXfPKVFz4HQ/0.jpg\" src=\"https://www.youtube.com/embed/tXfPKVFz4HQ?feature=player_embedded\" frameborder=\"0\" allowfullscreen></iframe>\n" +
+            "</div>\n" +
+            "There are people who think she had some work done on her face ...What do you think? Lolz.";
+
 }

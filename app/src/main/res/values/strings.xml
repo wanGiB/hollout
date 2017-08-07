@@ -3,7 +3,7 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="animated_text_contents_divider">\t| </string>
-    <string name="app_intro_message">Read News, Blog Posts and Gossips with Friends.\n\nMeet and make friends with avid Readers like you.</string>
+    <string name="app_intro_message">Read News, Blog Posts and do More with Friends.\n\nMeet and make friends with awesome personalities like you.</string>
     <string name="start_here">START HERE!</string>
     <string name="it_s_just_15_seconds">It\'s just 15 seconds</string>
     <string name="setup_account">Setup your free personal account to get started.</string>
@@ -69,5 +69,6 @@
     <string name="feed">Feed</string>
     <string name="people">People</string>
     <string name="search">Search</string>
+    <string name="hollout_bot">Hollout Bot</string>
 
 </resources>
