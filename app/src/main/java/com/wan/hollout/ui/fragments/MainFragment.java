@@ -7,7 +7,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -19,12 +18,10 @@ import android.widget.TextView;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
-import com.arlib.floatingsearchview.FloatingSearchView;
 import com.wan.hollout.R;
 import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.HolloutPreferences;
-import com.wan.hollout.utils.UiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +40,6 @@ public class MainFragment extends Fragment {
     @BindView(R.id.tabs)
     TabLayout tabLayout;
 
-    public static FloatingSearchView floatingSearchView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -69,21 +65,6 @@ public class MainFragment extends Fragment {
             tabLayout.setupWithViewPager(viewPager);
             setupTabs(adapter);
         }
-
-        floatingSearchView = ButterKnife.findById(rootView,R.id.floating_search_view);
-        floatingSearchView.setOnFocusChangeListener(new FloatingSearchView.OnFocusChangeListener() {
-
-            @Override
-            public void onFocus() {
-
-            }
-
-            @Override
-            public void onFocusCleared() {
-                UiUtils.showView(floatingSearchView,false);
-            }
-
-        });
         return rootView;
     }
 

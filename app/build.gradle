@@ -93,10 +93,10 @@ dependencies {
     compile('com.github.naman14:app-theme-engine:0.5.2@aar') {
         transitive = true
     }
-    compile 'com.github.arimorty:floatingsearchview:2.1.1'
     compile 'org.jsoup:jsoup:1.10.3'
-    compile 'id.arieridwan:pageloader:0.0.2'
     compile files('libs/YouTubeAndroidPlayerApi.jar')
+    compile 'com.liucanwen.app:headerfooterrecyclerview:1.0.0'
+    compile 'joda-time:joda-time:2.9.9'
 }
 
 apply plugin: 'com.google.gms.google-services'

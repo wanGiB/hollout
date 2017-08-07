@@ -38,18 +38,4 @@
 
     </android.support.design.widget.CoordinatorLayout>
 
-    <com.arlib.floatingsearchview.FloatingSearchView
-        android:id="@+id/floating_search_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        app:floatingSearch_close_search_on_keyboard_dismiss="true"
-        app:floatingSearch_leftActionMode="noLeftAction"
-        app:floatingSearch_searchBarMarginLeft="@dimen/search_view_inset"
-        app:floatingSearch_searchBarMarginRight="@dimen/search_view_inset"
-        app:floatingSearch_searchBarMarginTop="@dimen/search_view_inset"
-        app:floatingSearch_searchHint="Search..."
-        app:floatingSearch_showSearchKey="false"
-        app:floatingSearch_suggestionsListAnimDuration="250" />
-
 </FrameLayout>
