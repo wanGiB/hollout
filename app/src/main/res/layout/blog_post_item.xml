@@ -11,6 +11,8 @@
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         app:cardElevation="6dp">
 
         <LinearLayout
@@ -68,12 +70,13 @@
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="10dp"
                     android:layout_marginRight="10dp"
-                    android:src="@drawable/ic_bookmark_black_48dp" />
+                    android:src="@drawable/ic_bookmark_black_48dp"
+                    tools:ignore="ContentDescription" />
 
             </LinearLayout>
 
@@ -81,7 +84,9 @@
                 android:id="@+id/frame_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:animateLayoutChanges="true">
+                android:animateLayoutChanges="true"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -131,6 +136,8 @@
                     android:layout_gravity="bottom"
                     android:animateLayoutChanges="true"
                     android:background="#7b000000"
+                    android:clipChildren="false"
+                    android:clipToPadding="false"
                     android:orientation="vertical"
                     android:padding="10dp">
 
@@ -183,9 +190,33 @@
 
                     </RelativeLayout>
 
+                    <android.support.v7.widget.CardView
+                        android:id="@+id/reactions_card_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/white"
+                        android:paddingEnd="10dp"
+                        android:paddingLeft="10dp"
+                        android:layout_gravity="top"
+                        android:paddingRight="10dp"
+                        android:paddingStart="10dp"
+                        android:visibility="gone"
+                        app:cardCornerRadius="20dp"
+                        android:layout_marginBottom="1dp"
+                        app:cardUseCompatPadding="false">
+
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/reactions_recycler_view"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+
+                    </android.support.v7.widget.CardView>
+
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:clipChildren="false"
+                        android:clipToPadding="false">
 
                         <com.wan.hollout.ui.widgets.HolloutTextView
                             android:id="@+id/like_feed"

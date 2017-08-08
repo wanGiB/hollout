@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.widgets;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -86,12 +87,12 @@ public class Emotion {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return kfImage;
     }
 
     private void snapShotLabelView(String title) {
         LayoutInflater inflater = LayoutInflater.from(context);
+        @SuppressLint("InflateParams")
         TextView labelView = (TextView) inflater.inflate(R.layout.view_label, null, false);
         labelView.setText(title);
 

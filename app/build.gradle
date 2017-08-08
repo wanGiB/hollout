@@ -97,6 +97,7 @@ dependencies {
     compile files('libs/YouTubeAndroidPlayerApi.jar')
     compile 'com.liucanwen.app:headerfooterrecyclerview:1.0.0'
     compile 'joda-time:joda-time:2.9.9'
+    compile 'com.airbnb.android:lottie:2.1.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

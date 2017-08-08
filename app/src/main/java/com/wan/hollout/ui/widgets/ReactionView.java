@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
-
 import com.wan.hollout.ui.utils.Constants;
 
 import java.util.Arrays;
@@ -149,7 +148,6 @@ public class ReactionView extends View {
     }
 
     private void animateEmotions(float interpolatedTime) {
-
         for (Emotion emotion : emotions) {
             animateEmotionSize(emotion, interpolatedTime);
             animateEmotionPosition(emotion);

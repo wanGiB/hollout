@@ -4,11 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,6 +23,8 @@ import com.google.android.youtube.player.YouTubePlayerFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.wan.hollout.R;
+import com.wan.hollout.animations.BounceInterpolator;
+import com.wan.hollout.ui.adapters.ReactionsAdapter;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.HolloutLogger;
@@ -91,11 +97,16 @@ public class BlogPostsView extends FrameLayout {
     @BindView(R.id.like_feed)
     HolloutTextView likeFeedView;
 
-    @BindView(R.id.frame_container)
-    FrameLayout frameContainer;
+    @BindView(R.id.reactions_card_view)
+    CardView reactionsCardView;
+
+    @BindView(R.id.reactions_recycler_view)
+    RecyclerView reactionsRecyclerView;
 
     YouTubePlayer globalYoutubePlayer;
     private YouTubePlayerFragment youTubePlayerFragment;
+
+    private Animation bounceAnimation;
 
     private Activity activity;
     private Document document;
@@ -135,6 +146,12 @@ public class BlogPostsView extends FrameLayout {
         init(context);
     }
 
+    private void loadBounceAnimation() {
+        bounceAnimation = AnimationUtils.loadAnimation(activity, R.anim.bounce);
+        BounceInterpolator bounceInterpolator = new BounceInterpolator(0.2, 20);
+        bounceAnimation.setInterpolator(bounceInterpolator);
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -145,14 +162,13 @@ public class BlogPostsView extends FrameLayout {
         inflate(context, R.layout.blog_post_item, this);
     }
 
-    public void bindData(Activity context, JSONObject blogPost, int position) {
+    public void bindData(final Activity context, JSONObject blogPost) {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         this.activity = context;
         HolloutLogger.d(TAG, blogPost.toString());
-
         String postId = blogPost.optString(AppConstants.POST_ID);
-        this.globalPostId = postId;
 
+        this.globalPostId = postId;
         String publishedDate = blogPost.optString(AppConstants.POST_PUBLISHED_DATE);
 
         JSONObject blog = blogPost.optJSONObject(AppConstants.BLOG);
@@ -186,42 +202,20 @@ public class BlogPostsView extends FrameLayout {
             public void onClick(View view) {
                 switch (view.getId()) {
                     case R.id.like_feed:
-                        UiUtils.blinkView(view);
-                        attemptToRemoteReactionsView();
+                        loadBounceAnimation();
+                        likeFeedView.startAnimation(bounceAnimation);
                         break;
                 }
             }
 
         };
 
-        frameContainer.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View view) {
-                attemptToRemoteReactionsView();
-            }
-
-        });
-
         likeFeedView.setOnLongClickListener(new OnLongClickListener() {
 
             @Override
             public boolean onLongClick(View view) {
-                final ReactionView reactionView = getReactionView();
-                frameContainer.addView(reactionView);
-                reactionView.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        try {
-                            frameContainer.removeView(reactionView);
-                            frameContainer.invalidate();
-                            frameContainer.requestLayout();
-                            frameContainer.postInvalidate();
-                        } catch (Exception ignored) {
-
-                        }
-                    }
-                });
+                loadReactions(context);
+                UiUtils.showView(reactionsCardView, true);
                 return true;
             }
 
@@ -231,20 +225,17 @@ public class BlogPostsView extends FrameLayout {
         refreshViews(postId);
     }
 
-    private void attemptToRemoteReactionsView() {
-        try {
-            frameContainer.removeView(getReactionView());
-            frameContainer.invalidate();
-            frameContainer.requestLayout();
-        } catch (Exception ignored) {
-
-        }
+    private void loadReactions(Context context) {
+        ReactionsAdapter reactionsAdapter = new ReactionsAdapter(context, new ReactionsAdapter.ReactionSelectedListener() {
+            @Override
+            public void onReactionSelected(String reaction) {
+                UiUtils.showView(reactionsCardView, false);
+            }
+        });
+        reactionsRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
+        reactionsRecyclerView.setAdapter(reactionsAdapter);
     }
 
-    @NonNull
-    private ReactionView getReactionView() {
-        return new ReactionView(activity);
-    }
 
     private void fetchPostLikes() {
         long postLikes = HolloutPreferences.getPostLikes(globalPostId);
@@ -490,6 +481,7 @@ public class BlogPostsView extends FrameLayout {
                 authorImageView.setBorderColor(ContextCompat.getColor(activity, R.color.white));
                 UiUtils.loadImage(activity, authorImageUrl, authorImageView);
             }
+
         }
 
     }

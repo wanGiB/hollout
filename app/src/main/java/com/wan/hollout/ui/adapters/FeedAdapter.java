@@ -44,7 +44,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         FeedItemHolder feedItemHolder = (FeedItemHolder) holder;
         JSONObject blogPost = blogPosts.get(position).getJsonObject();
         if (blogPost != null) {
-            feedItemHolder.bindBlogPost(context, blogPost, position);
+            feedItemHolder.bindBlogPost(context, blogPost);
         }
     }
 
@@ -64,8 +64,8 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ButterKnife.bind(this, itemView);
         }
 
-        public void bindBlogPost(Activity context, JSONObject blogPost, int position) {
-            blogPostsView.bindData(context,blogPost,position);
+        public void bindBlogPost(Activity context, JSONObject blogPost) {
+            blogPostsView.bindData(context,blogPost);
         }
 
     }
