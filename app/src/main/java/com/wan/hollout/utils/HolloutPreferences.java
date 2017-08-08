@@ -59,11 +59,19 @@ public class HolloutPreferences {
 
     public static void saveCurrentPlaybackTime(String postId, int duration) {
         getHolloutPreferences().edit().putInt(postId + "_", duration).commit();
-        HolloutLogger.d("SavedVideoPosition",duration+"");
+        HolloutLogger.d("SavedVideoPosition", duration + "");
     }
 
     public static int getLastPlaybackTime(String postId) {
         return getHolloutPreferences().getInt(postId + "_", 0);
+    }
+
+    public static void setUserWelcomed() {
+        getHolloutPreferences().edit().putBoolean(AppConstants.USER_WELCOMED, true).commit();
+    }
+
+    public static boolean isUserWelcomed() {
+        return getHolloutPreferences().getBoolean(AppConstants.USER_WELCOMED, false);
     }
 
 }

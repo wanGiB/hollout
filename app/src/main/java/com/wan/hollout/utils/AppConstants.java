@@ -46,6 +46,7 @@ public class AppConstants {
     public static final String POST_REPLIES = "replies";
     public static final String REPLIES_COUNT = "totalItems";
     public static final String LABELS = "labels";
+    public static final String USER_WELCOMED = "user_here";
     public static String AUTHOR_ID = "id";
     public static String AUTHOR_DISPLAY_NAME = "displayName";
     public static String AUTHOR_PUBLIC_URL = "url";

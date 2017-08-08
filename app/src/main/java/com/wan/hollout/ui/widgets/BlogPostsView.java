@@ -3,6 +3,7 @@ package com.wan.hollout.ui.widgets;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -63,7 +64,7 @@ public class BlogPostsView extends FrameLayout {
     @BindView(R.id.vertical_feed_divider)
     View verticalFeedDivider;
 
-    @BindView(R.id.video_fragment)
+    @BindView(R.id.youtube_player_fragment)
     FrameLayout videoFragment;
 
     @BindView(R.id.reactions_parent_container)
@@ -73,6 +74,7 @@ public class BlogPostsView extends FrameLayout {
     View tintView;
 
     YouTubePlayer globalYoutubePlayer;
+    private YouTubePlayerFragment youTubePlayerFragment;
 
     private Activity activity;
     private Document document;
@@ -194,22 +196,34 @@ public class BlogPostsView extends FrameLayout {
                             UiUtils.showView(feedImageThumbnailView, false);
                             UiUtils.showView(playMediaIfVideo, false);
                             UiUtils.showView(videoFragment, true);
-                            final YouTubePlayerFragment youTubePlayerFragment = YouTubePlayerFragment.newInstance();
-                            activity.getFragmentManager().beginTransaction().replace(R.id.video_fragment, youTubePlayerFragment).addToBackStack(null).commit();
+
+                            // Delete previous added fragment
+                            int currentContainerId = videoFragment.getId();
+                            YouTubePlayerFragment oldFragment = (YouTubePlayerFragment) activity.getFragmentManager().findFragmentById(currentContainerId);
+                            if (oldFragment != null) {
+                                activity.getFragmentManager().beginTransaction().remove(oldFragment).commit();
+                            }
+                            // In order to be able of replacing a fragment on a recycler view
+                            // the target container should always have a different id ALWAYS
+                            int newContainerId = getUniqueId();
+                            // Set the new Id to our know fragment container
+                            videoFragment.setId(newContainerId);
+                            youTubePlayerFragment = YouTubePlayerFragment.newInstance();
+                            activity.getFragmentManager().beginTransaction().replace(newContainerId, youTubePlayerFragment).commit();
                             youTubePlayerFragment.initialize(AppKeys.GOOGLE_API_KEY, new YouTubePlayer.OnInitializedListener() {
 
                                 @Override
                                 public void onInitializationSuccess(YouTubePlayer.Provider provider, final YouTubePlayer youTubePlayer, boolean b) {
                                     globalYoutubePlayer = youTubePlayer;
                                     int duration = HolloutPreferences.getLastPlaybackTime(postId);
-                                    if (duration!=0){
-                                        youTubePlayer.loadVideo(finalSrc,duration);
-                                    }else {
+                                    if (duration != 0) {
+                                        youTubePlayer.loadVideo(finalSrc, duration);
+                                    } else {
                                         youTubePlayer.cueVideo(finalSrc);
                                         youTubePlayer.play();
                                     }
                                     HolloutLogger.d("SavedVideoPosition", duration + "");
-                                    youTubePlayer.setShowFullscreenButton(true);
+                                    youTubePlayer.setShowFullscreenButton(false);
                                     youTubePlayer.setManageAudioFocus(true);
                                     youTubePlayer.setPlaybackEventListener(new YouTubePlayer.PlaybackEventListener() {
 
@@ -282,6 +296,7 @@ public class BlogPostsView extends FrameLayout {
 
                                 }
                             });
+
                         }
                     });
                     feedImageThumbnailView.setOnClickListener(new OnClickListener() {
@@ -301,6 +316,11 @@ public class BlogPostsView extends FrameLayout {
         }
     }
 
+    // Method that could us an unique id
+    public int getUniqueId() {
+        return (int) SystemClock.currentThreadTimeMillis();
+    }
+
     private void refreshViews(String postId) {
         if (AppConstants.reactionsBackgroundPositions.get((postId + "").hashCode())) {
             reactionsParentContainer.setBackgroundColor(Color.parseColor("#00628F"));
@@ -314,9 +334,12 @@ public class BlogPostsView extends FrameLayout {
         super.onAttachedToWindow();
         try {
             if (globalYoutubePlayer != null) {
+                if (youTubePlayerFragment == null) {
+                    youTubePlayerFragment = YouTubePlayerFragment.newInstance();
+                }
                 playMediaIfVideo.performClick();
             }
-        }catch (IllegalStateException ignored){
+        } catch (IllegalStateException ignored) {
 
         }
     }
@@ -328,8 +351,9 @@ public class BlogPostsView extends FrameLayout {
             if (globalYoutubePlayer != null) {
                 globalYoutubePlayer.pause();
                 HolloutPreferences.saveCurrentPlaybackTime(globalPostId, globalYoutubePlayer.getCurrentTimeMillis());
+                videoFragment.setId(getUniqueId());
             }
-        }catch (IllegalStateException ignored){
+        } catch (IllegalStateException ignored) {
 
         }
     }

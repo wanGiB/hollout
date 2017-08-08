@@ -4,9 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.wan.hollout.R;
+import com.wan.hollout.utils.HolloutPreferences;
 
 import butterknife.ButterKnife;
 
@@ -24,8 +23,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void checkAuthStatus() {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
+        if (HolloutPreferences.isUserWelcomed()) {
             launchMainActivity();
         } else {
             launchWelcomeActivity();

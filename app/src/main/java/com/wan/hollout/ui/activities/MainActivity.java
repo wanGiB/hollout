@@ -32,10 +32,12 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     DrawerLayout drawer;
 
     private Runnable homeRunnable = new Runnable() {
+
         @Override
         public void run() {
             navigateToMainFragment();
         }
+
     };
 
     @Override
@@ -47,6 +49,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         homeRunnable.run();
+        HolloutPreferences.setUserWelcomed();
     }
 
     private void navigateToMainFragment() {
