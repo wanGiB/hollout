@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -15,6 +16,8 @@ import android.widget.LinearLayout;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerFragment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
@@ -67,11 +70,29 @@ public class BlogPostsView extends FrameLayout {
     @BindView(R.id.youtube_player_fragment)
     FrameLayout videoFragment;
 
-    @BindView(R.id.reactions_parent_container)
-    LinearLayout reactionsParentContainer;
+    @BindView(R.id.add_reactions_container)
+    LinearLayout addReactionsContainer;
+
+    @BindView(R.id.reactions_layout)
+    View reactionsLayout;
+
+    @BindView(R.id.feed_likes_count)
+    HolloutTextView feedLikesCountView;
+
+    @BindView(R.id.feed_comments_count)
+    HolloutTextView feedCommentsCountView;
+
+    @BindView(R.id.feed_views)
+    HolloutTextView feedViews;
 
     @BindView(R.id.tint_vew)
     View tintView;
+
+    @BindView(R.id.like_feed)
+    HolloutTextView likeFeedView;
+
+    @BindView(R.id.frame_container)
+    FrameLayout frameContainer;
 
     YouTubePlayer globalYoutubePlayer;
     private YouTubePlayerFragment youTubePlayerFragment;
@@ -89,6 +110,8 @@ public class BlogPostsView extends FrameLayout {
             " <body></body>";
 
     public static String DOCUMENT_END_GUARD = "</html>";
+
+    private FirebaseUser currentUser;
 
     private static int[] randomColors = new int[]{R.color.hollout_color,
             R.color.hollout_color_one,
@@ -123,6 +146,7 @@ public class BlogPostsView extends FrameLayout {
     }
 
     public void bindData(Activity context, JSONObject blogPost, int position) {
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
         this.activity = context;
         HolloutLogger.d(TAG, blogPost.toString());
 
@@ -156,8 +180,74 @@ public class BlogPostsView extends FrameLayout {
         document = Jsoup.parse(DOCUMENT_START_GUARD + postContent + DOCUMENT_END_GUARD);
         prepareYoutubeVideoThumbnail(context, document, postId);
 
-        refreshViews(postId);
+        View.OnClickListener onClickListener = new OnClickListener() {
 
+            @Override
+            public void onClick(View view) {
+                switch (view.getId()) {
+                    case R.id.like_feed:
+                        UiUtils.blinkView(view);
+                        attemptToRemoteReactionsView();
+                        break;
+                }
+            }
+
+        };
+
+        frameContainer.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                attemptToRemoteReactionsView();
+            }
+
+        });
+
+        likeFeedView.setOnLongClickListener(new OnLongClickListener() {
+
+            @Override
+            public boolean onLongClick(View view) {
+                final ReactionView reactionView = getReactionView();
+                frameContainer.addView(reactionView);
+                reactionView.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        try {
+                            frameContainer.removeView(reactionView);
+                            frameContainer.invalidate();
+                            frameContainer.requestLayout();
+                            frameContainer.postInvalidate();
+                        } catch (Exception ignored) {
+
+                        }
+                    }
+                });
+                return true;
+            }
+
+        });
+
+        likeFeedView.setOnClickListener(onClickListener);
+        refreshViews(postId);
+    }
+
+    private void attemptToRemoteReactionsView() {
+        try {
+            frameContainer.removeView(getReactionView());
+            frameContainer.invalidate();
+            frameContainer.requestLayout();
+        } catch (Exception ignored) {
+
+        }
+    }
+
+    @NonNull
+    private ReactionView getReactionView() {
+        return new ReactionView(activity);
+    }
+
+    private void fetchPostLikes() {
+        long postLikes = HolloutPreferences.getPostLikes(globalPostId);
     }
 
     private void prepareImageThumbnail(Activity activity, Document document) {
@@ -329,9 +419,9 @@ public class BlogPostsView extends FrameLayout {
 
     private void refreshViews(String postId) {
         if (AppConstants.reactionsBackgroundPositions.get((postId + "").hashCode())) {
-            reactionsParentContainer.setBackgroundColor(Color.parseColor("#00628F"));
+            addReactionsContainer.setBackgroundColor(Color.parseColor("#00628F"));
         } else {
-            reactionsParentContainer.setBackgroundColor(Color.parseColor("#7b000000"));
+            addReactionsContainer.setBackgroundColor(Color.parseColor("#7b000000"));
         }
     }
 
@@ -374,8 +464,8 @@ public class BlogPostsView extends FrameLayout {
     }
 
     private void toggleReactionsParentContainer(boolean show, String postId) {
-        UiUtils.showView(reactionsParentContainer, show);
-        reactionsParentContainer.setBackgroundColor(Color.parseColor("#00628F"));
+        UiUtils.showView(addReactionsContainer, show);
+        addReactionsContainer.setBackgroundColor(Color.parseColor("#00628F"));
         AppConstants.reactionsBackgroundPositions.put((postId + "").hashCode(), true);
         if (!show) {
             UiUtils.showView(tintView, false);

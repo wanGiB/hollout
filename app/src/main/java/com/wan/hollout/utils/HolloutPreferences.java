@@ -74,4 +74,12 @@ public class HolloutPreferences {
         return getHolloutPreferences().getBoolean(AppConstants.USER_WELCOMED, false);
     }
 
+    public static long getPostLikes(String globalPostId) {
+        return getHolloutPreferences().getLong(globalPostId, 0);
+    }
+
+    public static void savePostLikes(String postId, int count) {
+        getHolloutPreferences().edit().putLong(postId, count).commit();
+    }
+
 }

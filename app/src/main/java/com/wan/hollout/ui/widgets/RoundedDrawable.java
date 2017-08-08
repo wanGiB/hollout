@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-
 @SuppressWarnings("UnusedDeclaration")
 public class RoundedDrawable extends Drawable {
 

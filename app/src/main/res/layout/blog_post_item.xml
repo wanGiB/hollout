@@ -78,6 +78,7 @@
             </LinearLayout>
 
             <FrameLayout
+                android:id="@+id/frame_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true">
@@ -103,6 +104,8 @@
                         android:layout_gravity="center"
                         android:src="@drawable/youtube_icon"
                         android:visibility="visible"
+                        app:border_color="@color/white"
+                        app:border_width="3dp"
                         tools:ignore="ContentDescription" />
 
                     <FrameLayout
@@ -111,7 +114,7 @@
                         android:layout_height="300dp"
                         android:background="@color/black"
                         android:fitsSystemWindows="true"
-                        android:visibility="gone"/>
+                        android:visibility="gone" />
 
                 </FrameLayout>
 
@@ -122,7 +125,7 @@
                     android:background="#1b000000" />
 
                 <LinearLayout
-                    android:id="@+id/reactions_parent_container"
+                    android:id="@+id/add_reactions_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
@@ -131,7 +134,7 @@
                     android:orientation="vertical"
                     android:padding="10dp">
 
-                    <LinearLayout
+                    <RelativeLayout
                         android:id="@+id/reactions_layout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -139,20 +142,7 @@
                         android:visibility="gone">
 
                         <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/feed_likes_and_comments_count"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:paddingBottom="8dp"
-                            android:paddingLeft="10dp"
-                            android:paddingStart="10dp"
-                            android:textColor="@color/gray20"
-                            android:textSize="13sp"
-                            app:textStyle="medium"
-                            tools:ignore="RtlSymmetry" />
-
-                        <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/feed_views_and_shares_count"
+                            android:id="@+id/feed_likes_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:paddingBottom="8dp"
@@ -163,12 +153,39 @@
                             app:textStyle="medium"
                             tools:ignore="RtlSymmetry" />
 
-                    </LinearLayout>
+                        <com.wan.hollout.ui.widgets.HolloutTextView
+                            android:id="@+id/feed_comments_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_toEndOf="@id/feed_likes_count"
+                            android:layout_toRightOf="@id/feed_likes_count"
+                            android:paddingBottom="8dp"
+                            android:paddingLeft="10dp"
+                            android:paddingStart="10dp"
+                            android:textColor="@color/gray20"
+                            android:textSize="13sp"
+                            app:textStyle="medium"
+                            tools:ignore="RtlSymmetry" />
+
+                        <com.wan.hollout.ui.widgets.HolloutTextView
+                            android:id="@+id/feed_views"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_alignParentRight="true"
+                            android:paddingBottom="8dp"
+                            android:paddingLeft="10dp"
+                            android:paddingStart="10dp"
+                            android:textColor="@color/gray20"
+                            android:textSize="13sp"
+                            app:textStyle="medium"
+                            tools:ignore="RelativeOverlap,RtlSymmetry" />
+
+                    </RelativeLayout>
 
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:layout_height="wrap_content">
 
                         <com.wan.hollout.ui.widgets.HolloutTextView
                             android:id="@+id/like_feed"
@@ -178,6 +195,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_gravity="center_vertical"
                             android:background="@drawable/action_items_background"
+                            android:clickable="true"
                             android:gravity="center_horizontal"
                             android:maxWidth="200dp"
                             android:paddingBottom="6dp"

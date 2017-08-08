@@ -6,4 +6,6 @@
     <dimen name="nav_header_height">160dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="search_view_inset">8dp</dimen>
+    <dimen name="label_width">56dp</dimen>
+    <dimen name="label_height">24dp</dimen>
 </resources>
