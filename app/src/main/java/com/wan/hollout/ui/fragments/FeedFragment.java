@@ -16,6 +16,7 @@ import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAda
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
+import com.wan.hollout.models.HolloutObject;
 import com.wan.hollout.ui.adapters.FeedAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.ApiUtils;
@@ -25,7 +26,6 @@ import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ import butterknife.ButterKnife;
  */
 public class FeedFragment extends Fragment {
 
-    private List<JSONObject> blogPosts = new ArrayList<>();
+    private List<HolloutObject> blogPosts = new ArrayList<>();
     private FeedAdapter feedAdapter;
 
     @BindView(R.id.feed_recycler_view)
@@ -96,9 +96,9 @@ public class FeedFragment extends Fragment {
 
     private void fetchBlogPosts() {
         loadingFeed = true;
-        ApiUtils.fetchBlogPosts(AppKeys.GENERAL_BLOG_ID, null, new DoneCallback<List<JSONObject>>() {
+        ApiUtils.fetchBlogPosts(AppKeys.GENERAL_BLOG_ID, null, new DoneCallback<List<HolloutObject>>() {
             @Override
-            public void done(final List<JSONObject> result, final Exception e) {
+            public void done(final List<HolloutObject> result, final Exception e) {
                 feedRecyclerView.post(new Runnable() {
                     @Override
                     public void run() {
@@ -112,7 +112,16 @@ public class FeedFragment extends Fragment {
                         } else {
                             if (blogPosts.isEmpty()) {
                                 UiUtils.toggleFlipperState(feedContentFlipper, 1);
-                                errorMessageView.setText(e.getMessage());
+                                String errorMessage = e.getMessage();
+                                if (StringUtils.isNotEmpty(errorMessage)) {
+                                    if (!errorMessage.contains("resolve host") && !errorMessage.contains("failed to connect") && !errorMessage.contains("i/o")) {
+                                        errorMessageView.setText(errorMessage);
+                                    } else {
+                                        errorMessageView.setText(getString(R.string.screwed_data_error_message));
+                                    }
+                                } else {
+                                    errorMessageView.setText(getString(R.string.screwed_data_error_message));
+                                }
                             } else {
                                 UiUtils.showSafeToast("Error fetching more feeds. Please review your data connection");
                             }
@@ -125,8 +134,8 @@ public class FeedFragment extends Fragment {
         });
     }
 
-    private void populateBlogs(List<JSONObject> result) {
-        for (JSONObject jsonObject : result) {
+    private void populateBlogs(List<HolloutObject> result) {
+        for (HolloutObject jsonObject : result) {
             if (!blogPosts.contains(jsonObject)) {
                 blogPosts.add(jsonObject);
                 try {
@@ -155,14 +164,14 @@ public class FeedFragment extends Fragment {
             public void onLoadMore(int page, int totalItemsCount) {
                 UiUtils.showView(loadingFooterView, true);
                 if (!blogPosts.isEmpty()) {
-                    JSONObject lastBlogPost = blogPosts.get(blogPosts.size() - 1);
+                    HolloutObject lastBlogPost = blogPosts.get(blogPosts.size() - 1);
                     if (lastBlogPost != null) {
-                        String nextPageToken = lastBlogPost.optString(AppConstants.NEXT_PAGE_TOKEN);
+                        String nextPageToken = lastBlogPost.getJsonObject().optString(AppConstants.NEXT_PAGE_TOKEN);
                         if (StringUtils.isNotEmpty(nextPageToken)) {
                             ApiUtils.fetchBlogPosts(AppKeys.GENERAL_BLOG_ID, nextPageToken,
-                                    new DoneCallback<List<JSONObject>>() {
+                                    new DoneCallback<List<HolloutObject>>() {
                                         @Override
-                                        public void done(final List<JSONObject> result, final Exception e) {
+                                        public void done(final List<HolloutObject> result, final Exception e) {
                                             feedRecyclerView.post(new Runnable() {
                                                 @Override
                                                 public void run() {

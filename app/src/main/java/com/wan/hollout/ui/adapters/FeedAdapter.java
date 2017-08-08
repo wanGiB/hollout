@@ -1,13 +1,13 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.wan.hollout.R;
+import com.wan.hollout.models.HolloutObject;
 import com.wan.hollout.ui.widgets.BlogPostsView;
 
 import org.json.JSONObject;
@@ -25,9 +25,9 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private LayoutInflater layoutInflater;
     private Activity context;
-    private List<JSONObject> blogPosts;
+    private List<HolloutObject> blogPosts;
 
-    public FeedAdapter(Activity context, List<JSONObject> blogPosts) {
+    public FeedAdapter(Activity context, List<HolloutObject> blogPosts) {
         this.context = context;
         this.blogPosts = blogPosts;
         this.layoutInflater = LayoutInflater.from(context);
@@ -42,7 +42,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         FeedItemHolder feedItemHolder = (FeedItemHolder) holder;
-        JSONObject blogPost = blogPosts.get(position);
+        JSONObject blogPost = blogPosts.get(position).getJsonObject();
         if (blogPost != null) {
             feedItemHolder.bindBlogPost(context, blogPost, position);
         }

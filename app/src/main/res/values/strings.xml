@@ -71,5 +71,6 @@
     <string name="search">Search</string>
     <string name="hollout_bot">Hollout Bot</string>
     <string name="retry">RETRY</string>
+    <string name="screwed_data_error_message">Something screwy happened. Please review your data connection</string>
 
 </resources>

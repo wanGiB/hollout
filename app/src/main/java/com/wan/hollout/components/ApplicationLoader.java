@@ -57,7 +57,7 @@ public class ApplicationLoader extends Application {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
             @Override
             public void log(@NonNull String message) {
-                HolloutLogger.d("ClobbitNetworkCall", message);
+                HolloutLogger.d("HolloutNetworkCall", message);
             }
         });
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);

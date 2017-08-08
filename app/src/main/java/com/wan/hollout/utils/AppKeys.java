@@ -11,7 +11,7 @@ public class AppKeys {
     public static final String CLOBBIT_FILES_BUCKET = "gs://clobbit-99d1e.appspot.com";
 
     static String BASE_URL = "https://www.googleapis.com/blogger/v3/blogs";
-    static String GOOGLE_API_KEY = "AIzaSyBgj4cHfIu6eSPLezCK6K4a9ba5w1kwWZQ";
+    public static String GOOGLE_API_KEY = "AIzaSyBgj4cHfIu6eSPLezCK6K4a9ba5w1kwWZQ";
     public static String GENERAL_BLOG_ID = "398008235177173072";
 
 }

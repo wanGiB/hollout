@@ -56,4 +56,14 @@ public class HolloutPreferences {
     public static int getStartPageIndex() {
         return getHolloutPreferences().getInt(AppConstants.START_PAGE_INDEX, 0);
     }
+
+    public static void saveCurrentPlaybackTime(String postId, int duration) {
+        getHolloutPreferences().edit().putInt(postId + "_", duration).commit();
+        HolloutLogger.d("SavedVideoPosition",duration+"");
+    }
+
+    public static int getLastPlaybackTime(String postId) {
+        return getHolloutPreferences().getInt(postId + "_", 0);
+    }
+
 }

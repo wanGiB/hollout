@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.squareup.okhttp.HttpUrl;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.models.HolloutObject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -38,7 +39,7 @@ public class ApiUtils {
         builder.addQueryParameter("key", AppKeys.GOOGLE_API_KEY);
     }
 
-    public static void fetchBlogPosts(String blogId, String pageToken, final DoneCallback<List<JSONObject>> resultCallback) {
+    public static void fetchBlogPosts(String blogId, String pageToken, final DoneCallback<List<HolloutObject>> resultCallback) {
         OkHttpClient okHttpClient = getOkHttpClient();
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(AppKeys.BASE_URL + "/" + blogId + "/posts").newBuilder();
 
@@ -65,7 +66,7 @@ public class ApiUtils {
                     if (responseBody != null) {
                         String responseBodyString = responseBody.string();
                         if (StringUtils.isNotEmpty(responseBodyString)) {
-                            List<JSONObject> blogPosts = new ArrayList<>();
+                            List<HolloutObject> blogPosts = new ArrayList<>();
                             try {
                                 JSONObject jsonObject = new JSONObject(responseBodyString);
                                 String receivedNextPageToken = jsonObject.optString("nextPageToken");
@@ -80,8 +81,9 @@ public class ApiUtils {
                                         if (receivedPreviousPageToken != null) {
                                             blogPost.put(AppConstants.PREVIOUS_PAGE_TOKEN, receivedPreviousPageToken);
                                         }
-                                        if (!blogPosts.contains(blogPost)) {
-                                            blogPosts.add(blogPost);
+                                        HolloutObject holloutObject = new HolloutObject(blogPost);
+                                        if (!blogPosts.contains(holloutObject)) {
+                                            blogPosts.add(holloutObject);
                                         }
                                     }
                                     resultCallback.done(blogPosts, null);
@@ -111,7 +113,7 @@ public class ApiUtils {
 
     }
 
-    public static void fetchPostComments(String blogId, String postId, String pageToken, final DoneCallback<List<JSONObject>> resultCallback) {
+    public static void fetchPostComments(String blogId, String postId, String pageToken, final DoneCallback<List<HolloutObject>> resultCallback) {
         OkHttpClient okHttpClient = getOkHttpClient();
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(AppKeys.BASE_URL + "/" + blogId + "/posts/" + postId + "/comments").newBuilder();
 
@@ -136,7 +138,7 @@ public class ApiUtils {
                     if (responseBody != null) {
                         String responseBodyString = responseBody.string();
                         if (StringUtils.isNotEmpty(responseBodyString)) {
-                            List<JSONObject> blogPosts = new ArrayList<>();
+                            List<HolloutObject> blogPosts = new ArrayList<>();
                             try {
                                 JSONObject jsonObject = new JSONObject(responseBodyString);
                                 String receivedNextPageToken = jsonObject.optString("nextPageToken");
@@ -151,8 +153,9 @@ public class ApiUtils {
                                         if (receivedPreviousPageToken != null) {
                                             blogPost.put(AppConstants.PREVIOUS_PAGE_TOKEN, receivedPreviousPageToken);
                                         }
-                                        if (!blogPosts.contains(blogPost)) {
-                                            blogPosts.add(blogPost);
+                                        HolloutObject holloutObject = new HolloutObject(blogPost);
+                                        if (!blogPosts.contains(holloutObject)) {
+                                            blogPosts.add(holloutObject);
                                         }
                                     }
                                     resultCallback.done(blogPosts, null);
@@ -182,7 +185,7 @@ public class ApiUtils {
 
     }
 
-    public static void searchForPost(String blogId, String searchString, String pageToken, final DoneCallback<List<JSONObject>> resultCallback) {
+    public static void searchForPost(String blogId, String searchString, String pageToken, final DoneCallback<List<HolloutObject>> resultCallback) {
         OkHttpClient okHttpClient = getOkHttpClient();
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(AppKeys.BASE_URL + "/" + blogId + "/posts/search?q=" + searchString).newBuilder();
         withApiKey(httpUrlBuilder);
@@ -205,7 +208,7 @@ public class ApiUtils {
                     if (responseBody != null) {
                         String responseBodyString = responseBody.string();
                         if (StringUtils.isNotEmpty(responseBodyString)) {
-                            List<JSONObject> blogPosts = new ArrayList<>();
+                            List<HolloutObject> blogPosts = new ArrayList<>();
                             try {
                                 JSONObject jsonObject = new JSONObject(responseBodyString);
                                 String receivedNextPageToken = jsonObject.optString("nextPageToken");
@@ -220,8 +223,9 @@ public class ApiUtils {
                                         if (receivedPreviousPageToken != null) {
                                             blogPost.put(AppConstants.PREVIOUS_PAGE_TOKEN, receivedPreviousPageToken);
                                         }
-                                        if (!blogPosts.contains(blogPost)) {
-                                            blogPosts.add(blogPost);
+                                        HolloutObject holloutObject = new HolloutObject(blogPost);
+                                        if (!blogPosts.contains(holloutObject)) {
+                                            blogPosts.add(holloutObject);
                                         }
                                     }
                                     resultCallback.done(blogPosts, null);
@@ -251,7 +255,7 @@ public class ApiUtils {
 
     }
 
-    public static void fetchBlogPost(String blogId, String postId, final DoneCallback<JSONObject> doneCallback) {
+    public static void fetchBlogPost(String blogId, String postId, final DoneCallback<HolloutObject> doneCallback) {
         OkHttpClient okHttpClient = getOkHttpClient();
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(AppKeys.BASE_URL + "/" + blogId + "/posts/" + postId).newBuilder();
         withApiKey(httpUrlBuilder);
@@ -273,7 +277,7 @@ public class ApiUtils {
                         if (StringUtils.isNotEmpty(responseBodyString)) {
                             try {
                                 JSONObject blogPost = new JSONObject(responseBodyString);
-                                doneCallback.done(blogPost, null);
+                                doneCallback.done(new HolloutObject(blogPost), null);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 doneCallback.done(null, new Exception("Something screwy happened"));
@@ -295,7 +299,7 @@ public class ApiUtils {
 
     }
 
-    public static void fetchBlogPostComment(String blogId, String postId, String commentId, final DoneCallback<JSONObject> doneCallback) {
+    public static void fetchBlogPostComment(String blogId, String postId, String commentId, final DoneCallback<HolloutObject> doneCallback) {
         OkHttpClient okHttpClient = getOkHttpClient();
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(AppKeys.BASE_URL + "/" + blogId + "/posts/" + postId + "/comments/" + commentId).newBuilder();
         withApiKey(httpUrlBuilder);
@@ -317,7 +321,7 @@ public class ApiUtils {
                         if (StringUtils.isNotEmpty(responseBodyString)) {
                             try {
                                 JSONObject blogPost = new JSONObject(responseBodyString);
-                                doneCallback.done(blogPost, null);
+                                doneCallback.done(new HolloutObject(blogPost), null);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                                 doneCallback.done(null, new Exception("Something screwy happened"));
