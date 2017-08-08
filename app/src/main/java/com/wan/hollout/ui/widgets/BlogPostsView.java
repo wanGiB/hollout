@@ -80,6 +80,7 @@ public class BlogPostsView extends FrameLayout {
     private Document document;
 
     private String globalPostId;
+    private String youtubeVideoSource;
 
     public static String TAG = "BlogPosts";
 
@@ -166,7 +167,7 @@ public class BlogPostsView extends FrameLayout {
                 Element lastElement = elements.last();
                 String src = lastElement.attr("src");
                 if (StringUtils.isNotEmpty(src)) {
-                    HolloutLogger.d("MediaLoading", "Image src = " + src);
+                    HolloutLogger.d("MediaLoading", "Image Src = " + src);
                     UiUtils.showView(playMediaIfVideo, false);
                     UiUtils.showView(feedImageThumbnailView, true);
                     UiUtils.loadImage(activity, src, feedImageThumbnailView);
@@ -180,125 +181,13 @@ public class BlogPostsView extends FrameLayout {
         if (elements != null) {
             if (!elements.isEmpty()) {
                 Element lastElement = elements.last();
-                String src = lastElement.attr("src");
-                if (StringUtils.isNotEmpty(src)) {
-                    src = StringUtils.substringBefore(StringUtils.substringAfterLast(src, "/"), "?");
+                youtubeVideoSource = lastElement.attr("src");
+                if (StringUtils.isNotEmpty(youtubeVideoSource)) {
+                    youtubeVideoSource = StringUtils.substringBefore(StringUtils.substringAfterLast(youtubeVideoSource, "/"), "?");
                     String videoThumbnailPath = lastElement.attr("data-thumbnail-src");
                     UiUtils.showView(playMediaIfVideo, true);
-                    final String finalSrc = src;
                     UiUtils.loadImage(activity, videoThumbnailPath, feedImageThumbnailView);
-                    playMediaIfVideo.setOnClickListener(new OnClickListener() {
-
-                        @Override
-                        public void onClick(View view) {
-                            HolloutLogger.d("VideoPath", finalSrc);
-                            UiUtils.blinkView(playMediaIfVideo);
-                            UiUtils.showView(feedImageThumbnailView, false);
-                            UiUtils.showView(playMediaIfVideo, false);
-                            UiUtils.showView(videoFragment, true);
-
-                            // Delete previous added fragment
-                            int currentContainerId = videoFragment.getId();
-                            YouTubePlayerFragment oldFragment = (YouTubePlayerFragment) activity.getFragmentManager().findFragmentById(currentContainerId);
-                            if (oldFragment != null) {
-                                activity.getFragmentManager().beginTransaction().remove(oldFragment).commit();
-                            }
-                            // In order to be able of replacing a fragment on a recycler view
-                            // the target container should always have a different id ALWAYS
-                            int newContainerId = getUniqueId();
-                            // Set the new Id to our know fragment container
-                            videoFragment.setId(newContainerId);
-                            youTubePlayerFragment = YouTubePlayerFragment.newInstance();
-                            activity.getFragmentManager().beginTransaction().replace(newContainerId, youTubePlayerFragment).commit();
-                            youTubePlayerFragment.initialize(AppKeys.GOOGLE_API_KEY, new YouTubePlayer.OnInitializedListener() {
-
-                                @Override
-                                public void onInitializationSuccess(YouTubePlayer.Provider provider, final YouTubePlayer youTubePlayer, boolean b) {
-                                    globalYoutubePlayer = youTubePlayer;
-                                    int duration = HolloutPreferences.getLastPlaybackTime(postId);
-                                    if (duration != 0) {
-                                        youTubePlayer.loadVideo(finalSrc, duration);
-                                    } else {
-                                        youTubePlayer.cueVideo(finalSrc);
-                                        youTubePlayer.play();
-                                    }
-                                    HolloutLogger.d("SavedVideoPosition", duration + "");
-                                    youTubePlayer.setShowFullscreenButton(false);
-                                    youTubePlayer.setManageAudioFocus(true);
-                                    youTubePlayer.setPlaybackEventListener(new YouTubePlayer.PlaybackEventListener() {
-
-                                        @Override
-                                        public void onPlaying() {
-                                            toggleReactionsParentContainer(false, postId);
-                                            HolloutPreferences.saveCurrentPlaybackTime(postId, 0);
-                                        }
-
-                                        @Override
-                                        public void onPaused() {
-                                            toggleReactionsParentContainer(true, postId);
-                                        }
-
-                                        @Override
-                                        public void onStopped() {
-                                            toggleReactionsParentContainer(true, postId);
-                                        }
-
-                                        @Override
-                                        public void onBuffering(boolean b) {
-                                            toggleReactionsParentContainer(false, postId);
-                                        }
-
-                                        @Override
-                                        public void onSeekTo(int i) {
-
-                                        }
-
-                                    });
-
-                                    youTubePlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
-
-                                        @Override
-                                        public void onLoading() {
-
-                                        }
-
-                                        @Override
-                                        public void onLoaded(String s) {
-
-                                        }
-
-                                        @Override
-                                        public void onAdStarted() {
-
-                                        }
-
-                                        @Override
-                                        public void onVideoStarted() {
-                                            toggleReactionsParentContainer(false, postId);
-
-                                        }
-
-                                        @Override
-                                        public void onVideoEnded() {
-                                            toggleReactionsParentContainer(true, postId);
-                                        }
-
-                                        @Override
-                                        public void onError(YouTubePlayer.ErrorReason errorReason) {
-                                            toggleReactionsParentContainer(true, postId);
-                                        }
-
-                                    });
-                                }
-
-                                @Override
-                                public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
-
-                                }
-                            });
-
-                        }
-                    });
+                    attemptVideoPlay(activity, postId);
                     feedImageThumbnailView.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -314,6 +203,123 @@ public class BlogPostsView extends FrameLayout {
         } else {
             prepareImageThumbnail(activity, document);
         }
+    }
+
+    private void attemptVideoPlay(final Activity activity, final String postId) {
+        playMediaIfVideo.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                HolloutLogger.d("VideoPath", youtubeVideoSource);
+                UiUtils.blinkView(playMediaIfVideo);
+                UiUtils.showView(feedImageThumbnailView, false);
+                UiUtils.showView(playMediaIfVideo, false);
+                UiUtils.showView(videoFragment, true);
+
+                // Delete previous added fragment
+                int currentContainerId = videoFragment.getId();
+                YouTubePlayerFragment oldFragment = (YouTubePlayerFragment) activity.getFragmentManager().findFragmentById(currentContainerId);
+                if (oldFragment != null) {
+                    activity.getFragmentManager().beginTransaction().remove(oldFragment).commit();
+                }
+                // In order to be able of replacing a fragment on a recycler view
+                // the target container should always have a different id ALWAYS
+                int newContainerId = getUniqueId();
+                // Set the new Id to our know fragment container
+                videoFragment.setId(newContainerId);
+                youTubePlayerFragment = YouTubePlayerFragment.newInstance();
+                activity.getFragmentManager().beginTransaction().replace(newContainerId, youTubePlayerFragment).commit();
+                youTubePlayerFragment.initialize(AppKeys.GOOGLE_API_KEY, new YouTubePlayer.OnInitializedListener() {
+
+                    @Override
+                    public void onInitializationSuccess(YouTubePlayer.Provider provider, final YouTubePlayer youTubePlayer, boolean restored) {
+                        globalYoutubePlayer = youTubePlayer;
+                        int duration = HolloutPreferences.getLastPlaybackTime(postId);
+                        if (duration != 0) {
+                            youTubePlayer.loadVideo(youtubeVideoSource, duration);
+                        } else {
+                            youTubePlayer.cueVideo(youtubeVideoSource);
+                            youTubePlayer.play();
+                        }
+                        HolloutLogger.d("SavedVideoPosition", duration + "");
+                        youTubePlayer.setShowFullscreenButton(false);
+                        youTubePlayer.setManageAudioFocus(true);
+                        youTubePlayer.setPlaybackEventListener(new YouTubePlayer.PlaybackEventListener() {
+
+                            @Override
+                            public void onPlaying() {
+                                toggleReactionsParentContainer(false, postId);
+                                HolloutPreferences.saveCurrentPlaybackTime(postId, 0);
+                            }
+
+                            @Override
+                            public void onPaused() {
+                                toggleReactionsParentContainer(true, postId);
+                            }
+
+                            @Override
+                            public void onStopped() {
+                                toggleReactionsParentContainer(true, postId);
+                            }
+
+                            @Override
+                            public void onBuffering(boolean b) {
+                                toggleReactionsParentContainer(false, postId);
+                            }
+
+                            @Override
+                            public void onSeekTo(int i) {
+
+                            }
+
+                        });
+
+                        youTubePlayer.setPlayerStateChangeListener(new YouTubePlayer.PlayerStateChangeListener() {
+
+                            @Override
+                            public void onLoading() {
+
+                            }
+
+                            @Override
+                            public void onLoaded(String s) {
+
+                            }
+
+                            @Override
+                            public void onAdStarted() {
+
+                            }
+
+                            @Override
+                            public void onVideoStarted() {
+                                toggleReactionsParentContainer(false, postId);
+
+                            }
+
+                            @Override
+                            public void onVideoEnded() {
+                                toggleReactionsParentContainer(true, postId);
+                            }
+
+                            @Override
+                            public void onError(YouTubePlayer.ErrorReason errorReason) {
+                                toggleReactionsParentContainer(true, postId);
+                            }
+
+                        });
+
+                    }
+
+                    @Override
+                    public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+
+                    }
+
+                });
+
+            }
+        });
     }
 
     // Method that could us an unique id
@@ -332,15 +338,23 @@ public class BlogPostsView extends FrameLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        try {
-            if (globalYoutubePlayer != null) {
-                if (youTubePlayerFragment == null) {
-                    youTubePlayerFragment = YouTubePlayerFragment.newInstance();
+        if (globalYoutubePlayer != null && document != null && globalPostId != null) {
+            Elements elements = document.select(".YOUTUBE-iframe-video");
+            if (elements != null) {
+                if (!elements.isEmpty()) {
+                    Element lastElement = elements.last();
+                    youtubeVideoSource = lastElement.attr("src");
+                    if (StringUtils.isNotEmpty(youtubeVideoSource)) {
+                        youtubeVideoSource = StringUtils.substringBefore(StringUtils.substringAfterLast(youtubeVideoSource, "/"), "?");
+                        String videoThumbnailPath = lastElement.attr("data-thumbnail-src");
+                        UiUtils.showView(playMediaIfVideo, true);
+                        UiUtils.showView(videoFragment, false);
+                        UiUtils.showView(feedImageThumbnailView, true);
+                        UiUtils.loadImage(activity, videoThumbnailPath, feedImageThumbnailView);
+                        toggleReactionsParentContainer(true, globalPostId);
+                    }
                 }
-                playMediaIfVideo.performClick();
             }
-        } catch (IllegalStateException ignored) {
-
         }
     }
 
@@ -349,8 +363,9 @@ public class BlogPostsView extends FrameLayout {
         super.onDetachedFromWindow();
         try {
             if (globalYoutubePlayer != null) {
-                globalYoutubePlayer.pause();
                 HolloutPreferences.saveCurrentPlaybackTime(globalPostId, globalYoutubePlayer.getCurrentTimeMillis());
+                globalYoutubePlayer.pause();
+                globalYoutubePlayer.release();
                 videoFragment.setId(getUniqueId());
             }
         } catch (IllegalStateException ignored) {
