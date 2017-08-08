@@ -32,6 +32,9 @@ import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -50,6 +53,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
+@SuppressWarnings({"FieldCanBeLocal", "unused"})
 public class BlogPostsView extends FrameLayout {
 
     @BindView(R.id.author_image)
@@ -204,6 +208,9 @@ public class BlogPostsView extends FrameLayout {
                     case R.id.like_feed:
                         loadBounceAnimation();
                         likeFeedView.startAnimation(bounceAnimation);
+                        UiUtils.showView(reactionsCardView, false);
+                        AppConstants.ARE_REACTIONS_OPEN = false;
+                        addReactionValueToInvalidator(false);
                         break;
                 }
             }
@@ -216,13 +223,50 @@ public class BlogPostsView extends FrameLayout {
             public boolean onLongClick(View view) {
                 loadReactions(context);
                 UiUtils.showView(reactionsCardView, true);
+                AppConstants.ARE_REACTIONS_OPEN = true;
+                addReactionValueToInvalidator(true);
                 return true;
             }
 
         });
 
+        checkAndRegEventBus();
         likeFeedView.setOnClickListener(onClickListener);
-        refreshViews(postId);
+        invalidateView(postId);
+    }
+
+    private void checkAndRegEventBus() {
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+    }
+
+    private void checkAnUnRegEventBus() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
+    public void onEventAsync(final Object o) {
+        UiUtils.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                if (o instanceof String) {
+                    String message = (String) o;
+                    if (message.equals(AppConstants.CLOSE_REACTIONS)) {
+                        UiUtils.showView(reactionsCardView, false);
+                        AppConstants.ARE_REACTIONS_OPEN = false;
+                        addReactionValueToInvalidator(false);
+                    }
+                }
+            }
+        });
+    }
+
+    private void addReactionValueToInvalidator(boolean value) {
+        AppConstants.reactionsOpenPositions.put((globalPostId + "").hashCode(), value);
     }
 
     private void loadReactions(Context context) {
@@ -235,7 +279,6 @@ public class BlogPostsView extends FrameLayout {
         reactionsRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
         reactionsRecyclerView.setAdapter(reactionsAdapter);
     }
-
 
     private void fetchPostLikes() {
         long postLikes = HolloutPreferences.getPostLikes(globalPostId);
@@ -408,17 +451,19 @@ public class BlogPostsView extends FrameLayout {
         return (int) SystemClock.currentThreadTimeMillis();
     }
 
-    private void refreshViews(String postId) {
+    private void invalidateView(String postId) {
         if (AppConstants.reactionsBackgroundPositions.get((postId + "").hashCode())) {
             addReactionsContainer.setBackgroundColor(Color.parseColor("#00628F"));
         } else {
             addReactionsContainer.setBackgroundColor(Color.parseColor("#7b000000"));
         }
+        UiUtils.showView(reactionsCardView, AppConstants.reactionsOpenPositions.get((postId + "").hashCode()));
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+        checkAndRegEventBus();
         if (globalYoutubePlayer != null && document != null && globalPostId != null) {
             Elements elements = document.select(".YOUTUBE-iframe-video");
             if (elements != null) {
@@ -442,6 +487,7 @@ public class BlogPostsView extends FrameLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        checkAnUnRegEventBus();
         try {
             if (globalYoutubePlayer != null) {
                 HolloutPreferences.saveCurrentPlaybackTime(globalPostId, globalYoutubePlayer.getCurrentTimeMillis());
@@ -481,9 +527,7 @@ public class BlogPostsView extends FrameLayout {
                 authorImageView.setBorderColor(ContextCompat.getColor(activity, R.color.white));
                 UiUtils.loadImage(activity, authorImageUrl, authorImageView);
             }
-
         }
-
     }
 
 }

@@ -17,7 +17,10 @@ import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.fragments.MainFragment;
+import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutPreferences;
+
+import org.greenrobot.eventbus.EventBus;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -77,6 +80,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (AppConstants.ARE_REACTIONS_OPEN) {
+            EventBus.getDefault().post(AppConstants.CLOSE_REACTIONS);
         } else {
             super.onBackPressed();
         }

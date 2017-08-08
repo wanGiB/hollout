@@ -47,6 +47,8 @@ public class AppConstants {
     public static final String REPLIES_COUNT = "totalItems";
     public static final String LABELS = "labels";
     public static final String USER_WELCOMED = "user_here";
+    public static boolean ARE_REACTIONS_OPEN = false;
+    public static final String CLOSE_REACTIONS = "close_reactions";
     public static String AUTHOR_ID = "id";
     public static String AUTHOR_DISPLAY_NAME = "displayName";
     public static String AUTHOR_PUBLIC_URL = "url";
@@ -59,6 +61,7 @@ public class AppConstants {
     public static final SimpleDateFormat DATE_FORMATTER_IN_YEARS = new SimpleDateFormat("yyyy", Locale.getDefault());
 
     public static SparseBooleanArray reactionsBackgroundPositions = new SparseBooleanArray();
+    public static SparseBooleanArray reactionsOpenPositions = new SparseBooleanArray();
 
     public static String SAMPLE_HTML = "<div class=\"separator\" style=\"clear: both; text-align: center;\">\n" +
             "    <a href=\"http://alexis.lindaikejisblog.com/photos/shares/5987896c11298.png\" imageanchor=\"1\" style=\"margin-left: 1em; margin-right: 1em;\"><img border=\"0\" data-original-height=\"756\" data-original-width=\"800\" height=\"301\" src=\"https://alexis.lindaikejisblog.com/photos/shares/5987896c11298.png\" width=\"320\" />\n" +
@@ -69,3 +72,4 @@ public class AppConstants {
             "There are people who think she had some work done on her face ...What do you think? Lolz.";
 
 }
+
