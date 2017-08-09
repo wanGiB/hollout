@@ -133,8 +133,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 EventBus.getDefault().post(AppConstants.JUST_AUTHENTICATED);
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+                UiUtils.dismissProgressDialog();
                 if (firebaseUser != null) {
-                    UiUtils.dismissProgressDialog();
                     UiUtils.showSafeToast("Welcome, " + firebaseUser.getDisplayName());
                     updateUserState(firebaseUser);
                     logUser(firebaseUser);

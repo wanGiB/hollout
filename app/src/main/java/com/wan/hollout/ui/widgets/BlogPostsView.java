@@ -252,21 +252,7 @@ public class BlogPostsView extends FrameLayout {
                 view.startAnimation(bounceAnimation);
                 switch (view.getId()) {
                     case R.id.like_feed:
-                        UiUtils.showView(reactionsCardView, false);
-                        AppConstants.ARE_REACTIONS_OPEN = false;
-                        addReactionValueToInvalidator(false);
-                        if (currentUser == null) {
-                            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
-                                @Override
-                                public void done(Boolean result, Exception e) {
-                                    if (e == null && result) {
-                                        likeFeed(postId, "Like.json");
-                                    }
-                                }
-                            });
-                            return;
-                        }
-                        likeFeed(postId, "Like.json");
+                        handleLikesOnClickListener(postId);
                         break;
                     case R.id.comment_on_feed:
                         if (currentUser == null) {
@@ -308,6 +294,24 @@ public class BlogPostsView extends FrameLayout {
         fetchPostLikes(postId);
         checkAndRegEventBus();
         invalidateView(postId);
+    }
+
+    private void handleLikesOnClickListener(final String postId) {
+        UiUtils.showView(reactionsCardView, false);
+        AppConstants.ARE_REACTIONS_OPEN = false;
+        addReactionValueToInvalidator(false);
+        if (currentUser == null) {
+            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean result, Exception e) {
+                    if (e == null && result) {
+                        likeFeed(postId, "Like.json");
+                    }
+                }
+            });
+            return;
+        }
+        likeFeed(postId, "Like.json");
     }
 
     private void launchCommentActivity(Activity context, String postId, String blogId) {
@@ -380,18 +384,29 @@ public class BlogPostsView extends FrameLayout {
     }
 
     private void likeFeed(final String postId, String reaction) {
-        HashMap<String, Object> updatableLikeProps = new HashMap<>();
-        HashMap<String, String> reactors = new HashMap<>();
-        reactors.put(currentUser.getUid(), reaction);
-        updatableLikeProps.put(AppConstants.REACTORS, reactors);
-        FirebaseUtils.getLikesReference(postId).updateChildren(updatableLikeProps,
-                new DatabaseReference.CompletionListener() {
-                    @Override
-                    public void onComplete(DatabaseError databaseError,
-                                           DatabaseReference databaseReference) {
-                        fetchPostLikes(postId);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            HashMap<String, Object> updatableLikeProps = new HashMap<>();
+            HashMap<String, String> reactors = new HashMap<>();
+            reactors.put(currentUser.getUid(), reaction);
+            updatableLikeProps.put(AppConstants.REACTORS, reactors);
+            FirebaseUtils.getLikesReference(postId).updateChildren(updatableLikeProps,
+                    new DatabaseReference.CompletionListener() {
+                        @Override
+                        public void onComplete(DatabaseError databaseError,
+                                               DatabaseReference databaseReference) {
+                            fetchPostLikes(postId);
+                        }
+                    });
+        }else {
+            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean result, Exception e) {
+                    if (e == null && result) {
+                        likeFeed(postId, "Like.json");
                     }
-                });
+                }
+            });
+        }
     }
 
     private void fetchPostLikes(final String postId) {
@@ -421,26 +436,42 @@ public class BlogPostsView extends FrameLayout {
                             setupPostLikes(reactions, false, null);
                         }
                     } else {
+                        likeFeedView.setText(activity.getString(R.string.fa_icon_heart));
+                        UiUtils.removeAllDrawablesFromTextView(likeFeedView);
                         AppConstants.likesPositions.put(getPostHashCode(postId), false);
                         UiUtils.showView(feedLikesCountView, false);
                         UiUtils.showView(persistedPostReactionsRecyclerView, false);
+                        refreshLikeFeedButtonClickListeners();
                     }
                 } else {
+                    likeFeedView.setText(activity.getString(R.string.fa_icon_heart));
+                    UiUtils.removeAllDrawablesFromTextView(likeFeedView);
                     UiUtils.showView(feedLikesCountView, false);
                     UiUtils.showView(persistedPostReactionsRecyclerView, false);
                     AppConstants.likesPositions.put(getPostHashCode(postId), false);
+                    refreshLikeFeedButtonClickListeners();
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                refreshLikeFeedButtonClickListeners();
             }
 
         };
 
         postLikesReference.addValueEventListener(postLikesValueEventListener);
 
+    }
+
+    private void refreshLikeFeedButtonClickListeners() {
+        likeFeedView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UiUtils.blinkView(view);
+                handleLikesOnClickListener(globalPostId);
+            }
+        });
     }
 
     private void prepareImageThumbnail(Activity activity, Document document) {
@@ -737,6 +768,13 @@ public class BlogPostsView extends FrameLayout {
         } else {
             UiUtils.removeAllDrawablesFromTextView(likeFeedView);
             likeFeedView.setText(activity.getString(R.string.fa_icon_heart));
+            likeFeedView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    UiUtils.blinkView(view);
+                    likeFeed(globalPostId, "Like.json");
+                }
+            });
         }
         if (upPostLikes.size() == 1 && signedInUserLikesPost) {
             feedLikesCountView.setText(activity.getString(R.string.you));
@@ -748,7 +786,7 @@ public class BlogPostsView extends FrameLayout {
                 } else {
                     feedLikesCountView.setText(HolloutUtils.format(upPostLikes.size()));
                 }
-            }else if (upPostLikes.size()==1){
+            } else if (upPostLikes.size() == 1) {
                 feedLikesCountView.setText(HolloutUtils.format(upPostLikes.size()));
             }
         }
