@@ -185,5 +185,31 @@
         <item name="cardBackgroundColor">@color/window_background_black</item>
     </style>
 
+    <!-- Widgets -->
+    <style name="Widget" />
+
+    <!-- basea style for button -->
+    <style name="Widget.Button">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <!-- styles for Login buttons -->
+    <style name="Widget.Button.OAUTHLogin" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <!-- style for twitter login button -->
+    <style name="Widget.Button.Login.Twitter" parent="Widget.Button.OAUTHLogin">
+        <item name="colorButtonNormal">@color/colorTwitter</item>
+    </style>
+
+    <!-- style for facebook login button -->
+    <style name="Widget.Button.Login.Facebook" parent="Widget.Button.OAUTHLogin">
+        <item name="colorButtonNormal">@color/colorFacebook</item>
+    </style>
+
+    <style name="Widget.Button.Login.Google" parent="Widget.Button.OAUTHLogin">
+        <item name="colorButtonNormal">@color/colorGoogle</item>
+    </style>
 
 </resources>

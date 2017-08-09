@@ -2,6 +2,7 @@ package com.wan.hollout.ui.widgets;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
@@ -24,6 +25,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.BounceInterpolator;
+import com.wan.hollout.ui.activities.CommentsActivity;
+import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.adapters.ReactionsAdapter;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
@@ -101,6 +104,12 @@ public class BlogPostsView extends FrameLayout {
     @BindView(R.id.like_feed)
     HolloutTextView likeFeedView;
 
+    @BindView(R.id.comment_on_feed)
+    HolloutTextView commentOnFeedView;
+
+    @BindView(R.id.share_feed)
+    HolloutTextView shareFeedView;
+
     @BindView(R.id.reactions_card_view)
     CardView reactionsCardView;
 
@@ -108,6 +117,7 @@ public class BlogPostsView extends FrameLayout {
     RecyclerView reactionsRecyclerView;
 
     YouTubePlayer globalYoutubePlayer;
+
     private YouTubePlayerFragment youTubePlayerFragment;
 
     private Animation bounceAnimation;
@@ -170,13 +180,13 @@ public class BlogPostsView extends FrameLayout {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         this.activity = context;
         HolloutLogger.d(TAG, blogPost.toString());
-        String postId = blogPost.optString(AppConstants.POST_ID);
+        final String postId = blogPost.optString(AppConstants.POST_ID);
 
         this.globalPostId = postId;
         String publishedDate = blogPost.optString(AppConstants.POST_PUBLISHED_DATE);
 
         JSONObject blog = blogPost.optJSONObject(AppConstants.BLOG);
-        String blogId = blog.optString(AppConstants.BLOG_ID);
+        final String blogId = blog.optString(AppConstants.BLOG_ID);
         String postLink = blogPost.optString(AppConstants.PUBLIC_POST_LINK);
         String selfLink = blogPost.optString(AppConstants.POST_SELF_LINK);
 
@@ -204,15 +214,30 @@ public class BlogPostsView extends FrameLayout {
 
             @Override
             public void onClick(View view) {
+                loadBounceAnimation();
+                likeFeedView.startAnimation(bounceAnimation);
                 switch (view.getId()) {
                     case R.id.like_feed:
-                        loadBounceAnimation();
-                        likeFeedView.startAnimation(bounceAnimation);
                         UiUtils.showView(reactionsCardView, false);
                         AppConstants.ARE_REACTIONS_OPEN = false;
                         addReactionValueToInvalidator(false);
+                        if (currentUser == null) {
+                            ((MainActivity) (activity)).initiateAuthentication();
+                            return;
+                        }
+                        break;
+                    case R.id.comment_on_feed:
+                        if (currentUser == null) {
+                            ((MainActivity) (activity)).initiateAuthentication();
+                            return;
+                        }
+                        Intent commentIntent = new Intent(context, CommentsActivity.class);
+                        commentIntent.putExtra(AppConstants.POST_ID,postId);
+                        commentIntent.putExtra(AppConstants.BLOG_ID,blogId);
+                        context.startActivity(commentIntent);
                         break;
                 }
+
             }
 
         };
@@ -230,8 +255,11 @@ public class BlogPostsView extends FrameLayout {
 
         });
 
-        checkAndRegEventBus();
         likeFeedView.setOnClickListener(onClickListener);
+        commentOnFeedView.setOnClickListener(onClickListener);
+        shareFeedView.setOnClickListener(onClickListener);
+
+        checkAndRegEventBus();
         invalidateView(postId);
     }
 
@@ -274,10 +302,19 @@ public class BlogPostsView extends FrameLayout {
             @Override
             public void onReactionSelected(String reaction) {
                 UiUtils.showView(reactionsCardView, false);
+                if (currentUser == null) {
+                    ((MainActivity) (activity)).initiateAuthentication();
+                    return;
+                }
+                likeFeed(reaction);
             }
         });
         reactionsRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
         reactionsRecyclerView.setAdapter(reactionsAdapter);
+    }
+
+    private void likeFeed(String reaction) {
+
     }
 
     private void fetchPostLikes() {

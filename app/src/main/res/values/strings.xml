@@ -72,5 +72,8 @@
     <string name="hollout_bot">Hollout Bot</string>
     <string name="retry">RETRY</string>
     <string name="screwed_data_error_message">Something screwy happened. Please review your data connection</string>
-
+    <string name="we_would_never_post_on_your_time_line">We will never post to your timeline</string>
+    <string name="btn_text_login_fb">Log In with Facebook</string>
+    <string name="btn_text_login_google">Log In with Google</string>
+    <string name="may_we_know_you_please">May we know you please</string>
 </resources>

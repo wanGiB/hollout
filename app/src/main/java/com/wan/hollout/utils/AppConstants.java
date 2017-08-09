@@ -47,6 +47,9 @@ public class AppConstants {
     public static final String REPLIES_COUNT = "totalItems";
     public static final String LABELS = "labels";
     public static final String USER_WELCOMED = "user_here";
+    public static final String USE_ID = "user_id";
+    public static final String USER_EMAIL = "use_email";
+    public static final String JUST_AUTHENTICATED = "just_authenticated";
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
     public static String AUTHOR_ID = "id";

@@ -14,15 +14,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:icon,android:allowBackup, android:label">
-
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="ad592a04b832e238a390d851afaba5226e6f6632" />
-
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
-
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -31,7 +28,6 @@
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name" />
-
         <activity
             android:name="com.facebook.CustomTabActivity"
             android:exported="true">
@@ -44,7 +40,6 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.activities.SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -56,12 +51,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.activities.WelcomeActivity"
             android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/FullscreenTheme" />
-
         <activity
             android:name=".ui.activities.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
@@ -80,6 +73,7 @@
             </intent-filter>
         </receiver>
 
+        <activity android:name=".ui.activities.CommentsActivity"></activity>
     </application>
 
 </manifest>

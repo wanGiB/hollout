@@ -56,6 +56,13 @@ dependencies {
     compile "com.github.Raizlabs.DBFlow:dbflow-core:${dbflow_version}"
     compile "com.github.Raizlabs.DBFlow:dbflow:${dbflow_version}"
     //noinspection GradleCompatible
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
+        transitive = true;
+    }
+    compile('com.github.naman14:app-theme-engine:0.5.2@aar') {
+        transitive = true
+    }
+    compile files('libs/YouTubeAndroidPlayerApi.jar')
     compile 'com.android.support:design:26.0.0-beta2'
     compile 'com.android.support:appcompat-v7:26.0.0-beta2'
     compile 'com.android.support:cardview-v7:26.0.0-beta2'
@@ -78,26 +85,19 @@ dependencies {
     compile 'com.squareup.okhttp3:logging-interceptor:3.8.0'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    testCompile 'junit:junit:4.12'
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
     compile 'com.android.support:multidex:1.0.1'
     compile 'org.apmem.tools:layouts:1.10@aar'
     compile 'com.bartoszlipinski:viewpropertyobjectanimator:1.2.0'
     compile 'com.google.android.gms:play-services-location:11.0.2'
     compile 'com.google.android.gms:play-services-places:11.0.2'
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
-        transitive = true;
-    }
     compile 'com.afollestad.material-dialogs:core:0.9.0.2'
     compile 'com.afollestad.material-dialogs:commons:0.9.0.2'
-    compile('com.github.naman14:app-theme-engine:0.5.2@aar') {
-        transitive = true
-    }
     compile 'org.jsoup:jsoup:1.10.3'
-    compile files('libs/YouTubeAndroidPlayerApi.jar')
     compile 'com.liucanwen.app:headerfooterrecyclerview:1.0.0'
     compile 'joda-time:joda-time:2.9.9'
     compile 'com.airbnb.android:lottie:2.1.2'
+    testCompile 'junit:junit:4.12'
+    apt 'com.jakewharton:butterknife-compiler:8.4.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

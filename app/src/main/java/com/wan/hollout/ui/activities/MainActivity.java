@@ -1,38 +1,100 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatDelegate;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
 
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
+import com.crashlytics.android.Crashlytics;
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.fragments.MainFragment;
+import com.wan.hollout.ui.widgets.RevealPopupWindow;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.FirebaseUtils;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer, NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
-    @SuppressLint("StaticFieldLeak")
-    private static MainActivity sMainActivity;
+
+    /* Is there a ConnectionResult resolution in progress? */
+    private boolean mIsResolving = false;
+    /* Should we automatically resolve ConnectionResults when possible? */
+    private boolean mShouldResolve = false;
+    /* RequestCode for resolutions involving sign-in */
+    private static final int RC_SIGN_IN = 9001;
+
+    /* Client for accessing Google APIs */
+    private GoogleApiClient mGoogleApiClient;
+
+    //Facebook Callback Manager
+    private CallbackManager mCallbackManager;
+
+    private RevealPopupWindow signInOptionsWindow;
+    private FirebaseAuth firebaseAuth;
+
+    private FirebaseAuth.AuthStateListener addAuthStateListener;
+
     private boolean isDarkTheme;
 
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
+
+    @BindView(R.id.fragment_container)
+    FrameLayout containerView;
 
     private Runnable homeRunnable = new Runnable() {
 
@@ -42,17 +104,215 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         }
 
     };
+    private String TAG = "MainActivity";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        sMainActivity = this;
         isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_main);
+        firebaseAuth = FirebaseAuth.getInstance();
         ButterKnife.bind(this);
+        initGoogleApiStuffs();
+        initOAuthDialog();
+        addAuthStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
+                if (firebaseUser != null) {
+                    updateUserState(firebaseUser);
+                    EventBus.getDefault().post(AppConstants.JUST_AUTHENTICATED);
+                    logUser(firebaseUser);
+                }
+            }
+        };
         homeRunnable.run();
         HolloutPreferences.setUserWelcomed();
+    }
+
+    private void updateUserState(FirebaseUser firebaseUser) {
+        HashMap<String, String> contributorProps = new HashMap<>();
+        String userDisplayName = firebaseUser.getDisplayName();
+        if (StringUtils.isNotEmpty(userDisplayName)) {
+            contributorProps.put(AppConstants.USER_DISPLAY_NAME, userDisplayName.toLowerCase(Locale.getDefault()));
+        }
+        if (firebaseUser.getPhotoUrl() != null) {
+            contributorProps.put(AppConstants.USER_PHOTO_URL, firebaseUser.getPhotoUrl().toString());
+        }
+        contributorProps.put(AppConstants.USE_ID, firebaseUser.getUid());
+        if (firebaseUser.getEmail() != null) {
+            contributorProps.put(AppConstants.USER_EMAIL, firebaseUser.getEmail());
+        }
+        FirebaseUtils.getUsersReference().child(firebaseUser.getUid()).setValue(contributorProps);
+    }
+
+    private void initOAuthDialog() {
+        @SuppressLint("InflateParams") View oauthDialog = getLayoutInflater().inflate(R.layout.oauth_dialog, null);
+        Button facebookLoginButton = ButterKnife.findById(oauthDialog, R.id.button_login_facebook);
+        Button googleLoginButton = ButterKnife.findById(oauthDialog, R.id.button_login_google);
+        View dismissableView = ButterKnife.findById(oauthDialog, R.id.dismissable_fram);
+        signInOptionsWindow = new RevealPopupWindow(oauthDialog, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        dismissableView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (signInOptionsWindow.isShowing()) {
+                    signInOptionsWindow.dismiss();
+                }
+            }
+        });
+
+        View.OnClickListener onClickListener = new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                switch (view.getId()) {
+                    case R.id.button_login_facebook:
+                        dismissPopUps();
+                        UiUtils.showProgressDialog(MainActivity.this, "Please wait...");
+                        initFacebookLogin();
+                        break;
+                    case R.id.button_login_google:
+                        dismissPopUps();
+                        initGoogleLogin();
+                        break;
+                }
+
+            }
+
+        };
+
+        facebookLoginButton.setOnClickListener(onClickListener);
+        googleLoginButton.setOnClickListener(onClickListener);
+
+    }
+
+
+    public void initiateAuthentication() {
+        showSignInOptionsDialog();
+    }
+
+    private void showSignInOptionsDialog() {
+        if (!signInOptionsWindow.isShowing()) {
+            signInOptionsWindow.showAtLocation(containerView, Gravity.TOP, (int) containerView.getX(), (int) containerView.getY());
+        }
+    }
+
+
+    private void initGoogleLogin() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void handleFacebookSignInResult(AccessToken accessToken) {
+        AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
+        firebaseAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (!task.isSuccessful()) {
+                            UiUtils.showSafeToast("LogIn Aborted");
+                        }
+                    }
+                });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        firebaseAuth.addAuthStateListener(addAuthStateListener);
+        if (mGoogleApiClient != null && !mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.connect();
+        }
+    }
+
+    private void initFacebookLogin() {
+        HolloutLogger.d(TAG, "Facebook init");
+
+        mCallbackManager = CallbackManager.Factory.create();
+        ArrayList<String> permissions = new ArrayList<>();
+
+        permissions.add("email");
+        permissions.add("public_profile");
+
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+
+                if (loginResult != null) {
+                    HolloutLogger.d(TAG, "Login Result is not null");
+                    final AccessToken accessToken = loginResult.getAccessToken();
+                    if (accessToken != null) {
+                        HolloutLogger.d(TAG, "Access token is not null");
+                        //check declined permissions
+                        Set<String> declinedPermissions = accessToken.getDeclinedPermissions();
+                        if (declinedPermissions.isEmpty()) {
+                            handleFacebookSignInResult(accessToken);
+                        } else {
+                            UiUtils.showSafeToast("Declined Permissions, For you to sign in with your " +
+                                    "Facebook account, we require your email and your basic public profile, " +
+                                    "kindly try again, and grant access");
+                        }
+
+                    }
+
+                } else {
+                    HolloutLogger.d(TAG, "Login result is null");
+                }
+
+            }
+
+            @Override
+            public void onCancel() {
+                HolloutLogger.d(TAG, "User has canceled Login Dialog");
+            }
+
+            @Override
+            public void onError(FacebookException e) {
+                e.printStackTrace();
+                HolloutLogger.d(TAG, "Facebook Authentication Error  = " + e.getMessage());
+                Snackbar.make(containerView, e.getMessage(), Snackbar.LENGTH_SHORT)
+                        .setAction(R.string.text_retry, new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                initFacebookLogin();
+                            }
+                        }).show();
+            }
+
+        });
+
+        LoginManager.getInstance().logInWithReadPermissions(this, permissions);
+
+    }
+
+    private void dismissPopUps() {
+        if (signInOptionsWindow.isShowing()) {
+            signInOptionsWindow.dismiss();
+        }
+    }
+
+    private void logUser(FirebaseUser firebaseUser) {
+        // You can call any combination of these three methods
+        Crashlytics.setUserIdentifier(firebaseUser.getUid());
+        if (firebaseUser.getEmail() != null) {
+            Crashlytics.setUserEmail(firebaseUser.getEmail());
+        }
+        Crashlytics.setUserName(firebaseUser.getDisplayName());
+    }
+
+    private void initGoogleApiStuffs() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestProfile()
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
     }
 
     private void navigateToMainFragment() {
@@ -66,22 +326,18 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }
 
-    public static MainActivity getInstance() {
-        return sMainActivity;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        sMainActivity = this;
-    }
-
     @Override
     public void onBackPressed() {
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (AppConstants.ARE_REACTIONS_OPEN) {
             EventBus.getDefault().post(AppConstants.CLOSE_REACTIONS);
+        } else if (signInOptionsWindow != null) {
+            if (signInOptionsWindow.isShowing()) {
+                signInOptionsWindow.dismiss();
+            } else {
+                super.onBackPressed();
+            }
         } else {
             super.onBackPressed();
         }
@@ -138,9 +394,95 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        if (!mIsResolving && mShouldResolve) {
+            if (connectionResult.hasResolution()) {
+                try {
+                    connectionResult.startResolutionForResult(MainActivity.this, RC_SIGN_IN);
+                    mIsResolving = true;
+                } catch (IntentSender.SendIntentException e) {
+                    HolloutLogger.d("TAG", "Could not resolve ConnectionResult." + e.getMessage());
+                    mIsResolving = false;
+                    mGoogleApiClient.connect();
+                }
+            } else {
+                // Could not resolve the connection result, show the user an error dialog.
+                showErrorDialog();
+            }
+        }
+    }
+
+    private void showErrorDialog() {
+        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MainActivity.this) == ConnectionResult.SUCCESS) {
+            // Show the default Google Play services error dialog which may still start an intent
+            // on our behalf if the user can resolve the issue.
+            GoogleApiAvailability.getInstance().getErrorDialog(MainActivity.this,
+                    RC_SIGN_IN, 0,
+                    new DialogInterface.OnCancelListener() {
+                        @Override
+                        public void onCancel(DialogInterface dialog) {
+                            mShouldResolve = false;
+                            // updateUI(false);
+                        }
+                    }).show();
+        } else {
+            mShouldResolve = false;
+        }
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         getSupportFragmentManager().findFragmentById(R.id.fragment_container).onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RC_SIGN_IN) {
+            // If the error resolution was not successful we should not resolve further.
+            if (resultCode == RESULT_OK) {
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                handleSignInResult(result);
+                mIsResolving = false;
+                if (!mGoogleApiClient.isConnected()) {
+                    mGoogleApiClient.connect();
+                }
+            } else {
+                mShouldResolve = false;
+            }
+        } else {
+            mCallbackManager.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
+    private void handleSignInResult(GoogleSignInResult result) {
+        UiUtils.showProgressDialog(this, "Please wait...");
+        try {
+            if (result.isSuccess()) {
+                GoogleSignInAccount acct = result.getSignInAccount();
+                if (acct != null) {
+                    AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+                    firebaseAuth.signInWithCredential(credential)
+                            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (!task.isSuccessful()) {
+                                        UiUtils.showSafeToast("LogIn Aborted");
+                                    }
+                                }
+                            });
+                }
+            } else {
+                HolloutLogger.d(TAG, "Could not get result");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
 }
