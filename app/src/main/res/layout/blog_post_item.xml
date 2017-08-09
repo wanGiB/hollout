@@ -144,19 +144,30 @@
                     <RelativeLayout
                         android:id="@+id/reactions_layout"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:visibility="gone">
+                        android:layout_height="wrap_content">
+
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/post_reactions_recycler_view"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:paddingBottom="10dp"
+                            android:visibility="gone" />
 
                         <com.wan.hollout.ui.widgets.HolloutTextView
                             android:id="@+id/feed_likes_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:paddingBottom="8dp"
-                            android:paddingLeft="10dp"
-                            android:paddingStart="10dp"
+                            android:layout_centerVertical="true"
+                            android:layout_toEndOf="@id/post_reactions_recycler_view"
+                            android:layout_toRightOf="@id/post_reactions_recycler_view"
+                            android:gravity="center_vertical"
+                            android:paddingBottom="10dp"
+                            android:paddingLeft="2dp"
+                            android:paddingStart="2dp"
                             android:textColor="@color/gray20"
                             android:textSize="13sp"
+                            android:visibility="gone"
                             app:textStyle="medium"
                             tools:ignore="RtlSymmetry" />
 
@@ -166,11 +177,13 @@
                             android:layout_height="wrap_content"
                             android:layout_toEndOf="@id/feed_likes_count"
                             android:layout_toRightOf="@id/feed_likes_count"
-                            android:paddingBottom="8dp"
+                            android:gravity="center_vertical"
+                            android:paddingBottom="10dp"
                             android:paddingLeft="10dp"
                             android:paddingStart="10dp"
                             android:textColor="@color/gray20"
                             android:textSize="13sp"
+                            android:visibility="gone"
                             app:textStyle="medium"
                             tools:ignore="RtlSymmetry" />
 
@@ -180,11 +193,14 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_alignParentRight="true"
-                            android:paddingBottom="8dp"
+                            android:layout_centerVertical="true"
+                            android:gravity="center_vertical"
+                            android:paddingBottom="10dp"
                             android:paddingLeft="10dp"
                             android:paddingStart="10dp"
                             android:textColor="@color/gray20"
                             android:textSize="13sp"
+                            android:visibility="gone"
                             app:textStyle="medium"
                             tools:ignore="RelativeOverlap,RtlSymmetry" />
 
@@ -194,15 +210,15 @@
                         android:id="@+id/reactions_card_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="top"
+                        android:layout_marginBottom="1dp"
                         android:background="@android:color/white"
                         android:paddingEnd="10dp"
                         android:paddingLeft="10dp"
-                        android:layout_gravity="top"
                         android:paddingRight="10dp"
                         android:paddingStart="10dp"
                         android:visibility="gone"
                         app:cardCornerRadius="20dp"
-                        android:layout_marginBottom="1dp"
                         app:cardUseCompatPadding="false">
 
                         <android.support.v7.widget.RecyclerView

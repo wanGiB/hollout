@@ -1,16 +1,13 @@
 package com.wan.hollout.ui.fragments;
 
-
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +18,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.wan.hollout.R;
 import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
@@ -28,23 +28,27 @@ import com.wan.hollout.interfaces.DrawerRecyclerInterface;
 import com.wan.hollout.interfaces.DrawerSubmenuRecyclerInterface;
 import com.wan.hollout.ui.adapters.DrawerRecyclerAdapter;
 import com.wan.hollout.ui.adapters.DrawerSubmenuRecyclerAdapter;
+import com.wan.hollout.utils.FirebaseUtils;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Fragment handles the drawer menu.
  */
 public class DrawerFragment extends Fragment {
 
-    private static final int BANNERS_ID = -123;
-    public static final String NULL_DRAWER_LISTENER_WTF = "Null drawer listener. WTF.";
+    public static final int NOTIFICATIONS = 0x1;
+    public static final int YOUR_PROFILE = 0x2;
+    public static final int BOOKMARKS = 0x3;
+    public static final int FEED_CATEGORIES = 0x4;
+    public static final int HELP_AND_SETTINGS = 0x5;
+    public static final int THEME = 0x6;
+    public static final int LOG_OUT = 0x7;
 
-    private ProgressBar drawerProgress;
-
-    /**
-     * Button to reload drawer menu content (used when content failed to load).
-     */
-    private Button drawerRetryBtn;
     /**
      * Indicates that menu is currently loading.
      */
@@ -54,29 +58,38 @@ public class DrawerFragment extends Fragment {
      * Listener indicating events that occurred on the menu.
      */
     private FragmentDrawerListener drawerListener;
-
-    private ActionBarDrawerToggle mDrawerToggle;
-
-    // Drawer top menu fields.
     private DrawerLayout mDrawerLayout;
-    private RecyclerView drawerRecycler;
-    private DrawerRecyclerAdapter drawerRecyclerAdapter;
+
+    @BindView(R.id.drawer_recycler)
+    RecyclerView drawerRecycler;
+
+    @BindView(R.id.drawer_submenu_recycler)
+    RecyclerView drawerSubmenuRecycler;
 
     // Drawer sub menu fields
-    private LinearLayout drawerSubmenuLayout;
-    private TextView drawerSubmenuTitle;
+    @BindView(R.id.drawer_submenu_layout)
+    LinearLayout drawerSubmenuLayout;
+
+    @BindView(R.id.drawer_submenu_title)
+    TextView drawerSubmenuTitle;
+
+    @BindView(R.id.drawer_progress)
+    ProgressBar drawerProgress;
+
+    @BindView(R.id.drawer_retry_btn)
+    Button drawerRetryBtn;
+
+    @BindView(R.id.drawer_submenu_back_btn)
+    Button backBtn;
+
     private DrawerSubmenuRecyclerAdapter drawerSubmenuRecyclerAdapter;
+    private DrawerRecyclerAdapter drawerRecyclerAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflating view layout
         View layout = inflater.inflate(R.layout.fragment_drawer, container, false);
-
-        drawerSubmenuLayout = (LinearLayout) layout.findViewById(R.id.drawer_submenu_layout);
-        drawerSubmenuTitle = (TextView) layout.findViewById(R.id.drawer_submenu_title);
-        drawerProgress = (ProgressBar) layout.findViewById(R.id.drawer_progress);
-
-        drawerRetryBtn = (Button) layout.findViewById(R.id.drawer_retry_btn);
+        ButterKnife.bind(this, layout);
         drawerRetryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,10 +97,7 @@ public class DrawerFragment extends Fragment {
                     getDrawerItems();
             }
         });
-
-        prepareDrawerRecycler(layout);
-
-        Button backBtn = (Button) layout.findViewById(R.id.drawer_submenu_back_btn);
+        prepareDrawerRecycler();
         backBtn.setOnClickListener(new View.OnClickListener() {
             private long mLastClickTime = 0;
 
@@ -96,34 +106,27 @@ public class DrawerFragment extends Fragment {
                 if (SystemClock.elapsedRealtime() - mLastClickTime < 1000)
                     return;
                 mLastClickTime = SystemClock.elapsedRealtime();
-
                 animateSubListHide();
             }
         });
-
         getDrawerItems();
-
         return layout;
     }
 
     /**
      * Prepare drawer menu content views, adapters and listeners.
-     *
-     * @param view fragment base view.
      */
-    private void prepareDrawerRecycler(View view) {
-        drawerRecycler = (RecyclerView) view.findViewById(R.id.drawer_recycler);
+    private void prepareDrawerRecycler() {
         drawerRecyclerAdapter = new DrawerRecyclerAdapter(getContext(), new DrawerRecyclerInterface() {
             @Override
             public void onCategorySelected(View v, DrawerItemCategory drawerItemCategory) {
                 if (drawerItemCategory.getChildren() == null || drawerItemCategory.getChildren().isEmpty()) {
                     if (drawerListener != null) {
-                        if (drawerItemCategory.getId() == BANNERS_ID)
-                            drawerListener.onDrawerBannersSelected();
+                        if (drawerItemCategory.getId() == NOTIFICATIONS)
+                            drawerListener.onDrawersNotificationsSelected();
                         else
                             drawerListener.onDrawerItemCategorySelected(drawerItemCategory);
                         closeDrawerMenu();
-                    } else {
                     }
                 } else
                     animateSubListShow(drawerItemCategory);
@@ -134,7 +137,6 @@ public class DrawerFragment extends Fragment {
                 if (drawerListener != null) {
                     drawerListener.onDrawerItemPageSelected(drawerItemPage);
                     closeDrawerMenu();
-                } else {
                 }
             }
 
@@ -143,7 +145,6 @@ public class DrawerFragment extends Fragment {
                 if (drawerListener != null) {
                     drawerListener.onAccountSelected();
                     closeDrawerMenu();
-                } else {
                 }
             }
         });
@@ -151,7 +152,6 @@ public class DrawerFragment extends Fragment {
         drawerRecycler.setHasFixedSize(true);
         drawerRecycler.setAdapter(drawerRecyclerAdapter);
 
-        RecyclerView drawerSubmenuRecycler = (RecyclerView) view.findViewById(R.id.drawer_submenu_recycler);
         drawerSubmenuRecyclerAdapter = new DrawerSubmenuRecyclerAdapter(new DrawerSubmenuRecyclerInterface() {
             @Override
             public void onSubCategorySelected(View v, DrawerItemCategory drawerItemCategory) {
@@ -171,61 +171,11 @@ public class DrawerFragment extends Fragment {
      * Base method for layout preparation. Also set a listener that will respond to events that occurred on the menu.
      *
      * @param drawerLayout   drawer layout, which will be managed.
-     * @param toolbar        toolbar bundled with a side menu.
      * @param eventsListener corresponding listener class.
      */
-    public void setUp(DrawerLayout drawerLayout, final Toolbar toolbar, FragmentDrawerListener eventsListener) {
+    public void setUp(DrawerLayout drawerLayout, FragmentDrawerListener eventsListener) {
         mDrawerLayout = drawerLayout;
         this.drawerListener = eventsListener;
-        mDrawerToggle = new ActionBarDrawerToggle(getActivity(), drawerLayout, toolbar,
-                R.string.content_description_open_navigation_drawer,
-                R.string.content_description_close_navigation_drawer) {
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                getActivity().invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                getActivity().invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-                super.onDrawerSlide(drawerView, slideOffset);
-//                toolbar.setAlpha(1 - slideOffset / 2);
-            }
-        };
-
-        toolbar.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                toggleDrawerMenu();
-            }
-        });
-
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
-        mDrawerLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                mDrawerToggle.syncState();
-            }
-        });
-    }
-
-    /**
-     * When the drawer menu is open, close it. Otherwise open it.
-     */
-    public void toggleDrawerMenu() {
-        if (mDrawerLayout != null) {
-            if (mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
-                mDrawerLayout.closeDrawer(GravityCompat.START);
-            } else {
-                mDrawerLayout.openDrawer(GravityCompat.START);
-            }
-        }
     }
 
     /**
@@ -237,20 +187,8 @@ public class DrawerFragment extends Fragment {
         }
     }
 
-    /**
-     * Check if drawer is open. If so close it.
-     *
-     * @return false if drawer was already closed
-     */
-    public boolean onBackHide() {
-        if (mDrawerLayout != null && mDrawerLayout.isDrawerVisible(GravityCompat.START)) {
-            if (drawerSubmenuLayout.getVisibility() == View.VISIBLE)
-                animateSubListHide();
-            else
-                mDrawerLayout.closeDrawer(GravityCompat.START);
-            return true;
-        }
-        return false;
+    public boolean isSubMenuVisible() {
+        return drawerSubmenuLayout.getVisibility() == View.VISIBLE;
     }
 
     /**
@@ -264,12 +202,46 @@ public class DrawerFragment extends Fragment {
 
     private void getDrawerItems() {
         drawerLoading = true;
-        drawerProgress.setVisibility(View.VISIBLE);
+        drawerProgress.setVisibility(View.GONE);
         drawerRetryBtn.setVisibility(View.GONE);
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(NOTIFICATIONS, NOTIFICATIONS, getString(R.string.notifications)));
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(YOUR_PROFILE, YOUR_PROFILE, getString(R.string.your_profile)));
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(BOOKMARKS, BOOKMARKS, getString(R.string.bookmarks)));
 
+        FirebaseUtils.getLabelsReference().addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                DrawerItemCategory drawerItemParentCategory = new DrawerItemCategory(FEED_CATEGORIES, FEED_CATEGORIES, getString(R.string.feed_categories));
+                List<DrawerItemCategory> drawerItemCategories = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String drawerItemName = snapshot.getValue(String.class);
+                    if (drawerItemName != null) {
+                        DrawerItemCategory drawerItemCategory = new DrawerItemCategory(drawerItemName.hashCode(), drawerItemName.hashCode(), drawerItemName);
+                        drawerItemCategories.add(drawerItemCategory);
+                    }
+                }
+                if (!drawerItemCategories.isEmpty()) {
+                    drawerItemParentCategory.setChildren(drawerItemCategories);
+                }
+                drawerRecyclerAdapter.addDrawerItem(drawerItemParentCategory);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        });
+
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(HELP_AND_SETTINGS, HELP_AND_SETTINGS, getString(R.string.help_and_settings)));
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(THEME, THEME, getString(R.string.theme)));
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(LOG_OUT, LOG_OUT, getString(R.string.log_out)));
+        drawerRecyclerAdapter.notifyDataSetChanged();
+        drawerLoading = false;
     }
 
-    private void animateSubListHide() {
+    public void animateSubListHide() {
         Animation slideAwayDisappear = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_away_disappear);
         final Animation slideAwayAppear = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_away_appear);
         slideAwayDisappear.setAnimationListener(new Animation.AnimationListener() {
@@ -314,7 +286,6 @@ public class DrawerFragment extends Fragment {
                 }
             });
             drawerRecycler.startAnimation(slideInDisappear);
-        } else {
         }
     }
 
@@ -329,24 +300,17 @@ public class DrawerFragment extends Fragment {
         super.onPause();
     }
 
-    @Override
-    public void onDestroy() {
-        mDrawerLayout.removeDrawerListener(mDrawerToggle);
-        super.onDestroy();
-    }
-
     /**
      * Interface defining events initiated by {@link DrawerFragment}.
      */
     public interface FragmentDrawerListener {
-        void onDrawerBannersSelected();
+        void onDrawersNotificationsSelected();
 
         void onDrawerItemCategorySelected(DrawerItemCategory drawerItemCategory);
 
         void onDrawerItemPageSelected(DrawerItemPage drawerItemPage);
 
         void onAccountSelected();
-
-        void prepareSearchSuggestions(List<DrawerItemCategory> navigation);
     }
+
 }

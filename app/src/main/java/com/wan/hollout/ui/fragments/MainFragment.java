@@ -40,7 +40,6 @@ public class MainFragment extends Fragment {
     @BindView(R.id.tabs)
     TabLayout tabLayout;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 

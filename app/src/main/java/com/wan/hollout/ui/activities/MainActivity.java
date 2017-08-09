@@ -12,6 +12,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
 import android.view.Gravity;
 import android.view.Menu;
@@ -46,6 +47,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
+import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
+import com.wan.hollout.ui.fragments.DrawerFragment;
 import com.wan.hollout.ui.fragments.MainFragment;
 import com.wan.hollout.ui.widgets.RevealPopupWindow;
 import com.wan.hollout.utils.AppConstants;
@@ -66,8 +71,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
-
+        GoogleApiClient.OnConnectionFailedListener, DrawerFragment.FragmentDrawerListener {
 
     /* Is there a ConnectionResult resolution in progress? */
     private boolean mIsResolving = false;
@@ -109,6 +113,10 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private String TAG = "MainActivity";
 
+    private DrawerFragment drawerFragment;
+
+    private DoneCallback<Boolean> authenticationDoneCallback;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
@@ -123,15 +131,24 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         addAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                EventBus.getDefault().post(AppConstants.JUST_AUTHENTICATED);
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
+                    UiUtils.dismissProgressDialog();
+                    UiUtils.showSafeToast("Welcome, " + firebaseUser.getDisplayName());
                     updateUserState(firebaseUser);
-                    EventBus.getDefault().post(AppConstants.JUST_AUTHENTICATED);
                     logUser(firebaseUser);
+                    invalidateDrawerMenuHeader();
+                    if (authenticationDoneCallback != null) {
+                        authenticationDoneCallback.done(true, null);
+                    }
                 }
             }
         };
+
         homeRunnable.run();
+        drawerFragment = (DrawerFragment) getSupportFragmentManager().findFragmentById(R.id.main_navigation_drawer_fragment);
+        drawerFragment.setUp(drawer, this);
         HolloutPreferences.setUserWelcomed();
     }
 
@@ -185,14 +202,13 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
 
         };
-
         facebookLoginButton.setOnClickListener(onClickListener);
         googleLoginButton.setOnClickListener(onClickListener);
-
     }
 
 
-    public void initiateAuthentication() {
+    public void initiateAuthentication(DoneCallback<Boolean> authenticationDoneCallback) {
+        this.authenticationDoneCallback = authenticationDoneCallback;
         showSignInOptionsDialog();
     }
 
@@ -297,6 +313,15 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         }
     }
 
+    /**
+     * Method checks if MainActivity instance exist. If so, then drawer menu header will be invalidated.
+     */
+    public void invalidateDrawerMenuHeader() {
+        if (drawerFragment != null) {
+            drawerFragment.invalidateHeader();
+        }
+    }
+
     private void logUser(FirebaseUser firebaseUser) {
         // You can call any combination of these three methods
         Crashlytics.setUserIdentifier(firebaseUser.getUid());
@@ -332,7 +357,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawerFragment != null && drawerFragment.isSubMenuVisible()) {
+            drawerFragment.animateSubListHide();
+        } else if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (AppConstants.ARE_REACTIONS_OPEN) {
             EventBus.getDefault().post(AppConstants.CLOSE_REACTIONS);
@@ -466,4 +493,48 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onConnectionSuspended(int i) {
 
     }
+
+    @Override
+    public void onDrawersNotificationsSelected() {
+
+    }
+
+    @Override
+    public void onDrawerItemCategorySelected(DrawerItemCategory drawerItemCategory) {
+        long categoryId = drawerItemCategory.getId();
+        if (categoryId == DrawerFragment.LOG_OUT) {
+            attemptLogOut();
+        }
+    }
+
+    @Override
+    public void onDrawerItemPageSelected(DrawerItemPage drawerItemPage) {
+
+    }
+
+    @Override
+    public void onAccountSelected() {
+
+    }
+
+    private void attemptLogOut() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("Attention!");
+        builder.setMessage("Are you sure to log out?");
+        builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                UiUtils.showProgressDialog(MainActivity.this, "Logging out...");
+                FirebaseAuth.getInstance().signOut();
+                UiUtils.showSafeToast("You've being signed out");
+            }
+        }).setNegativeButton("NO", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        builder.create().show();
+    }
+
 }

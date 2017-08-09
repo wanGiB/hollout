@@ -42,6 +42,24 @@ android {
     dexOptions {
         jumboMode = true
     }
+
+    packagingOptions {
+        // findbugs
+        exclude 'META-INF/maven/com.google.code.findbugs/jsr305/pom.properties'
+        exclude 'META-INF/maven/com.google.code.findbugs/jsr305/pom.xml'
+        pickFirst 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/LICENSE-FIREBASE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/ECLIPSE_.SF'
+        exclude 'META-INF/ECLIPSE_.RSA'
+        exclude 'META-INF/ASL2.0'
+    }
+
 }
 
 dependencies {
@@ -63,6 +81,7 @@ dependencies {
         transitive = true
     }
     compile files('libs/YouTubeAndroidPlayerApi.jar')
+    //noinspection GradleCompatible
     compile 'com.android.support:design:26.0.0-beta2'
     compile 'com.android.support:appcompat-v7:26.0.0-beta2'
     compile 'com.android.support:cardview-v7:26.0.0-beta2'
@@ -99,6 +118,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
+    compile 'com.esotericsoftware:kryo:4.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -1,6 +1,9 @@
 package com.wan.hollout.ui.adapters;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,13 +22,19 @@ import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
 import com.wan.hollout.interfaces.DrawerRecyclerInterface;
 import com.wan.hollout.listeners.OnSingleClickListener;
+import com.wan.hollout.ui.widgets.CircleImageView;
+import com.wan.hollout.utils.UiUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Adapter handling list of drawer items.
  */
+@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_ITEM_CATEGORY = 1;
@@ -98,6 +107,12 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             if (user != null) {
                 viewHolderHeader.userName.setText(user.getDisplayName());
+                Uri userProfilePhotoUrl = user.getPhotoUrl();
+                if (userProfilePhotoUrl != null) {
+                    viewHolderHeader.signedInUserImageView.setBorderColor(Color.WHITE);
+                    viewHolderHeader.signedInUserImageView.setBorderWidth(5);
+                    UiUtils.loadImage((Activity) context, userProfilePhotoUrl.toString(), viewHolderHeader.signedInUserImageView);
+                }
             } else {
                 viewHolderHeader.userName.setText(context.getString(R.string.not_logged_in));
             }
@@ -158,31 +173,24 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         return drawerItemPageList.get(position - drawerItemCategoryList.size() - 1);
     }
 
-    public void addDrawerItemList(List<DrawerItemCategory> drawerItemCategories) {
-        if (drawerItemCategories != null)
-            drawerItemCategoryList.addAll(drawerItemCategories);
-    }
-
-    public void addPageItemList(List<DrawerItemPage> drawerItemPages) {
-        if (drawerItemPages != null)
-            drawerItemPageList.addAll(drawerItemPages);
-    }
-
     public void addDrawerItem(DrawerItemCategory drawerItemCategory) {
         drawerItemCategoryList.add(drawerItemCategory);
-
     }
 
     // Provide a reference to the views for each data item
-    public static class ViewHolderItemPage extends RecyclerView.ViewHolder {
-        public TextView itemText;
-        public View layout;
+    @SuppressWarnings("WeakerAccess")
+    static class ViewHolderItemPage extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.drawer_list_item_text)
+        TextView itemText;
+
+        @BindView(R.id.drawer_list_item_layout)
+        View layout;
+
         private DrawerItemPage drawerItemPage;
 
         public ViewHolderItemPage(View itemView, final DrawerRecyclerInterface drawerRecyclerInterface) {
             super(itemView);
-            itemText = (TextView) itemView.findViewById(R.id.drawer_list_item_text);
-            layout = itemView.findViewById(R.id.drawer_list_item_layout);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -194,22 +202,29 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         public void bindContent(DrawerItemPage drawerItemPage) {
             this.drawerItemPage = drawerItemPage;
         }
+
     }
 
     // Provide a reference to the views for each data item
-    public static class ViewHolderItemCategory extends RecyclerView.ViewHolder {
-        public TextView itemText;
-        public ImageView subMenuIndicator;
-        public LinearLayout layout;
-        private DrawerItemCategory drawerItemCategory;
-        private View divider;
+    @SuppressWarnings("WeakerAccess")
+    static class ViewHolderItemCategory extends RecyclerView.ViewHolder {
+        @BindView(R.id.drawer_list_item_text)
+        TextView itemText;
 
-        public ViewHolderItemCategory(View itemView, final DrawerRecyclerInterface drawerRecyclerInterface) {
+        @BindView(R.id.drawer_list_item_indicator)
+        ImageView subMenuIndicator;
+
+        @BindView(R.id.drawer_list_item_layout)
+        LinearLayout layout;
+
+        @BindView(R.id.drawer_list_item_divider)
+        View divider;
+
+        private DrawerItemCategory drawerItemCategory;
+
+        ViewHolderItemCategory(View itemView, final DrawerRecyclerInterface drawerRecyclerInterface) {
             super(itemView);
-            itemText = (TextView) itemView.findViewById(R.id.drawer_list_item_text);
-            subMenuIndicator = (ImageView) itemView.findViewById(R.id.drawer_list_item_indicator);
-            layout = (LinearLayout) itemView.findViewById(R.id.drawer_list_item_layout);
-            divider = itemView.findViewById(R.id.drawer_list_item_divider);
+            ButterKnife.bind(this, itemView);
             itemView.setOnClickListener(new OnSingleClickListener() {
                 @Override
                 public void onSingleClick(View v) {
@@ -218,17 +233,23 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             });
         }
 
-        public void bindContent(DrawerItemCategory drawerItemCategory) {
+        void bindContent(DrawerItemCategory drawerItemCategory) {
             this.drawerItemCategory = drawerItemCategory;
         }
     }
 
-    public static class ViewHolderHeader extends RecyclerView.ViewHolder {
-        public TextView userName;
+    @SuppressWarnings("WeakerAccess")
+    static class ViewHolderHeader extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.signed_in_user_image_view)
+        CircleImageView signedInUserImageView;
+
+        @BindView(R.id.signed_in_user_name)
+        TextView userName;
 
         public ViewHolderHeader(View headerView, final DrawerRecyclerInterface drawerRecyclerInterface) {
             super(headerView);
-            userName = (TextView) headerView.findViewById(R.id.navigation_drawer_list_header_text);
+            ButterKnife.bind(this, headerView);
             headerView.setOnClickListener(new OnSingleClickListener() {
                 @Override
                 public void onSingleClick(View v) {

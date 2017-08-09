@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +40,10 @@ public class ReactionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private String[] reactions = new String[]{"Like.json", "Love.json", "Haha.json", "Wow.json", "Sorry.json", "Anger.json"};
     private LayoutInflater layoutInflater;
     private Context context;
+
+    private static KeyframesDrawable imageDrawable;
+    private static InputStream stream;
+
 
     public interface ReactionSelectedListener {
         void onReactionSelected(String reaction);
@@ -117,14 +123,13 @@ public class ReactionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         }
 
         private void loadDrawables(Context context, ImageView emojiView, String reactionTag) {
-            KeyframesDrawable imageDrawable = new KeyframesDrawableBuilder().withImage(getKFImage(context, reactionTag)).build();
+            imageDrawable = new KeyframesDrawableBuilder().withImage(getKFImage(context, reactionTag)).build();
             emojiView.setImageDrawable(imageDrawable);
             imageDrawable.startAnimation();
         }
 
         private KFImage getKFImage(Context context, String fileName) {
             AssetManager assetManager = context.getAssets();
-            InputStream stream;
             KFImage kfImage = null;
             try {
                 stream = assetManager.open(fileName);
@@ -135,6 +140,19 @@ public class ReactionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             return kfImage;
         }
 
+    }
+
+    public void cleanUp() {
+        if (imageDrawable != null) {
+            imageDrawable.stopAnimation();
+        }
+        if (stream != null) {
+            try {
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 }

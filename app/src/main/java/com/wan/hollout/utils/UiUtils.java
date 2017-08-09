@@ -3,6 +3,7 @@ package com.wan.hollout.utils;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,6 +17,7 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -25,6 +27,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.wan.hollout.R;
+import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.components.ApplicationLoader;
 
 import org.apache.commons.lang3.StringUtils;
@@ -234,6 +237,51 @@ public class UiUtils {
                 }
             }
         }
+    }
+
+    public static synchronized void removeAllDrawablesFromTextView(TextView textView) {
+        if (textView != null) {
+            textView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+            textView.invalidate();
+        }
+    }
+
+    public static synchronized void attachDrawableToTextView(Context context, TextView textView, int resource, DrawableDirection direction) {
+        if (textView != null) {
+            Drawable drawableToAttach = ContextCompat.getDrawable(context, resource);
+            if (direction == DrawableDirection.LEFT) {
+                textView.setCompoundDrawablesWithIntrinsicBounds(drawableToAttach, null, null, null);
+            } else if (direction == DrawableDirection.RIGHT) {
+                textView.setCompoundDrawablesWithIntrinsicBounds(null, null, drawableToAttach, null);
+            } else if (direction == DrawableDirection.BOTTOM) {
+                textView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, drawableToAttach);
+            } else if (direction == DrawableDirection.TOP) {
+                textView.setCompoundDrawablesWithIntrinsicBounds(null, drawableToAttach, null, null);
+            }
+            textView.invalidate();
+        }
+    }
+
+    public static synchronized void attachDrawableToTextView(Context context, TextView textView, KeyframesDrawable resource, DrawableDirection direction) {
+        if (textView != null) {
+            if (direction == DrawableDirection.LEFT) {
+                textView.setCompoundDrawablesWithIntrinsicBounds(resource, null, null, null);
+            } else if (direction == DrawableDirection.RIGHT) {
+                textView.setCompoundDrawablesWithIntrinsicBounds(null, null, resource, null);
+            } else if (direction == DrawableDirection.BOTTOM) {
+                textView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, resource);
+            } else if (direction == DrawableDirection.TOP) {
+                textView.setCompoundDrawablesWithIntrinsicBounds(null, resource, null, null);
+            }
+            textView.invalidate();
+        }
+    }
+
+    public enum DrawableDirection {
+        LEFT,
+        RIGHT,
+        BOTTOM,
+        TOP
     }
 
 }

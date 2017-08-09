@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -11,6 +12,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -23,15 +25,24 @@ import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.BounceInterpolator;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.ui.activities.CommentsActivity;
 import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.adapters.ReactionsAdapter;
+import com.wan.hollout.ui.adapters.RemoteReactionsAdapter;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
+import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +57,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import butterknife.BindView;
@@ -116,10 +131,12 @@ public class BlogPostsView extends FrameLayout {
     @BindView(R.id.reactions_recycler_view)
     RecyclerView reactionsRecyclerView;
 
+    @BindView(R.id.post_reactions_recycler_view)
+    RecyclerView persistedPostReactionsRecyclerView;
+
     YouTubePlayer globalYoutubePlayer;
 
     private YouTubePlayerFragment youTubePlayerFragment;
-
     private Animation bounceAnimation;
 
     private Activity activity;
@@ -135,7 +152,6 @@ public class BlogPostsView extends FrameLayout {
             " <body></body>";
 
     public static String DOCUMENT_END_GUARD = "</html>";
-
     private FirebaseUser currentUser;
 
     private static int[] randomColors = new int[]{R.color.hollout_color,
@@ -144,6 +160,13 @@ public class BlogPostsView extends FrameLayout {
             R.color.colorTwitter,
             R.color.hollout_color_three,
             R.color.hollout_color_four, R.color.hollout_color_five};
+
+    private ValueEventListener postLikesValueEventListener;
+    private DatabaseReference postLikesReference;
+    private long comments;
+
+    private ReactionsAdapter popUpReactionsAdapter;
+    private RemoteReactionsAdapter remoteReactionsAdapter;
 
     public BlogPostsView(Context context) {
         super(context);
@@ -202,6 +225,17 @@ public class BlogPostsView extends FrameLayout {
         JSONObject postReplies = blogPost.optJSONObject(AppConstants.POST_REPLIES);
         String totalReplies = postReplies.optString(AppConstants.REPLIES_COUNT);
 
+        comments = Long.parseLong(totalReplies);
+
+        if (comments > 0) {
+            UiUtils.showView(feedCommentsCountView, true);
+            AppConstants.commentPositions.put(getPostHashCode(postId), true);
+            feedCommentsCountView.setText(comments == 1 ? "1 Comment" : HolloutUtils.format(comments) + " Comments");
+        } else {
+            UiUtils.showView(feedCommentsCountView, false);
+            AppConstants.commentPositions.put(getPostHashCode(postId), false);
+        }
+
         JSONArray labels = blogPost.optJSONArray(AppConstants.LABELS);
 
         Random random = new Random();
@@ -222,19 +256,31 @@ public class BlogPostsView extends FrameLayout {
                         AppConstants.ARE_REACTIONS_OPEN = false;
                         addReactionValueToInvalidator(false);
                         if (currentUser == null) {
-                            ((MainActivity) (activity)).initiateAuthentication();
+                            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+                                @Override
+                                public void done(Boolean result, Exception e) {
+                                    if (e == null && result) {
+                                        likeFeed(postId, "Like.json");
+                                    }
+                                }
+                            });
                             return;
                         }
+                        likeFeed(postId, "Like.json");
                         break;
                     case R.id.comment_on_feed:
                         if (currentUser == null) {
-                            ((MainActivity) (activity)).initiateAuthentication();
+                            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+                                @Override
+                                public void done(Boolean result, Exception e) {
+                                    if (e == null && result) {
+                                        launchCommentActivity(context, postId, blogId);
+                                    }
+                                }
+                            });
                             return;
                         }
-                        Intent commentIntent = new Intent(context, CommentsActivity.class);
-                        commentIntent.putExtra(AppConstants.POST_ID,postId);
-                        commentIntent.putExtra(AppConstants.BLOG_ID,blogId);
-                        context.startActivity(commentIntent);
+                        launchCommentActivity(context, postId, blogId);
                         break;
                 }
 
@@ -246,7 +292,7 @@ public class BlogPostsView extends FrameLayout {
 
             @Override
             public boolean onLongClick(View view) {
-                loadReactions(context);
+                loadReactions(postId, context);
                 UiUtils.showView(reactionsCardView, true);
                 AppConstants.ARE_REACTIONS_OPEN = true;
                 addReactionValueToInvalidator(true);
@@ -259,8 +305,20 @@ public class BlogPostsView extends FrameLayout {
         commentOnFeedView.setOnClickListener(onClickListener);
         shareFeedView.setOnClickListener(onClickListener);
 
+        fetchPostLikes(postId);
         checkAndRegEventBus();
         invalidateView(postId);
+    }
+
+    private void launchCommentActivity(Activity context, String postId, String blogId) {
+        Intent commentIntent = new Intent(context, CommentsActivity.class);
+        commentIntent.putExtra(AppConstants.POST_ID, postId);
+        commentIntent.putExtra(AppConstants.BLOG_ID, blogId);
+        context.startActivity(commentIntent);
+    }
+
+    private int getPostHashCode(String postId) {
+        return (postId + "").hashCode();
     }
 
     private void checkAndRegEventBus() {
@@ -294,31 +352,95 @@ public class BlogPostsView extends FrameLayout {
     }
 
     private void addReactionValueToInvalidator(boolean value) {
-        AppConstants.reactionsOpenPositions.put((globalPostId + "").hashCode(), value);
+        AppConstants.reactionsOpenPositions.put(getPostHashCode(globalPostId), value);
     }
 
-    private void loadReactions(Context context) {
-        ReactionsAdapter reactionsAdapter = new ReactionsAdapter(context, new ReactionsAdapter.ReactionSelectedListener() {
-            @Override
-            public void onReactionSelected(String reaction) {
-                UiUtils.showView(reactionsCardView, false);
-                if (currentUser == null) {
-                    ((MainActivity) (activity)).initiateAuthentication();
-                    return;
-                }
-                likeFeed(reaction);
-            }
-        });
+    private void loadReactions(final String postId, Context context) {
+        popUpReactionsAdapter = new ReactionsAdapter(context,
+                new ReactionsAdapter.ReactionSelectedListener() {
+                    @Override
+                    public void onReactionSelected(final String reaction) {
+                        UiUtils.showView(reactionsCardView, false);
+                        if (currentUser == null) {
+                            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+                                @Override
+                                public void done(Boolean result, Exception e) {
+                                    if (e == null && result) {
+                                        likeFeed(postId, reaction);
+                                    }
+                                }
+                            });
+                            return;
+                        }
+                        likeFeed(postId, reaction);
+                    }
+                });
         reactionsRecyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false));
-        reactionsRecyclerView.setAdapter(reactionsAdapter);
+        reactionsRecyclerView.setAdapter(popUpReactionsAdapter);
     }
 
-    private void likeFeed(String reaction) {
-
+    private void likeFeed(final String postId, String reaction) {
+        HashMap<String, Object> updatableLikeProps = new HashMap<>();
+        HashMap<String, String> reactors = new HashMap<>();
+        reactors.put(currentUser.getUid(), reaction);
+        updatableLikeProps.put(AppConstants.REACTORS, reactors);
+        FirebaseUtils.getLikesReference(postId).updateChildren(updatableLikeProps,
+                new DatabaseReference.CompletionListener() {
+                    @Override
+                    public void onComplete(DatabaseError databaseError,
+                                           DatabaseReference databaseReference) {
+                        fetchPostLikes(postId);
+                    }
+                });
     }
 
-    private void fetchPostLikes() {
-        long postLikes = HolloutPreferences.getPostLikes(globalPostId);
+    private void fetchPostLikes(final String postId) {
+        postLikesReference = FirebaseUtils.getLikesReference(postId + "/" + AppConstants.REACTORS);
+        final List<String> reactions = new LinkedList<>();
+
+        postLikesValueEventListener = new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                GenericTypeIndicator<HashMap<String, String>> hashMapGenericTypeIndicator = new GenericTypeIndicator<HashMap<String, String>>() {
+                };
+                HashMap<String, String> stringObjectHashMap = dataSnapshot.getValue(hashMapGenericTypeIndicator);
+                if (stringObjectHashMap != null) {
+                    Collection<String> values = stringObjectHashMap.values();
+                    for (String value : values) {
+                        if (!reactions.contains(value)) {
+                            reactions.add(value);
+                        }
+                    }
+                    if (!reactions.isEmpty()) {
+                        UiUtils.showView(persistedPostReactionsRecyclerView, true);
+                        AppConstants.likesPositions.put(getPostHashCode(postId), true);
+                        if (currentUser != null) {
+                            setupPostLikes(reactions, stringObjectHashMap.keySet().contains(currentUser.getUid()), stringObjectHashMap.get(currentUser.getUid()));
+                        } else {
+                            setupPostLikes(reactions, false, null);
+                        }
+                    } else {
+                        AppConstants.likesPositions.put(getPostHashCode(postId), false);
+                        UiUtils.showView(feedLikesCountView, false);
+                        UiUtils.showView(persistedPostReactionsRecyclerView, false);
+                    }
+                } else {
+                    UiUtils.showView(feedLikesCountView, false);
+                    UiUtils.showView(persistedPostReactionsRecyclerView, false);
+                    AppConstants.likesPositions.put(getPostHashCode(postId), false);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        };
+
+        postLikesReference.addValueEventListener(postLikesValueEventListener);
+
     }
 
     private void prepareImageThumbnail(Activity activity, Document document) {
@@ -489,12 +611,15 @@ public class BlogPostsView extends FrameLayout {
     }
 
     private void invalidateView(String postId) {
-        if (AppConstants.reactionsBackgroundPositions.get((postId + "").hashCode())) {
+        if (AppConstants.reactionsBackgroundPositions.get(getPostHashCode(postId))) {
             addReactionsContainer.setBackgroundColor(Color.parseColor("#00628F"));
         } else {
             addReactionsContainer.setBackgroundColor(Color.parseColor("#7b000000"));
         }
-        UiUtils.showView(reactionsCardView, AppConstants.reactionsOpenPositions.get((postId + "").hashCode()));
+        UiUtils.showView(reactionsCardView, AppConstants.reactionsOpenPositions.get(getPostHashCode(postId)));
+        UiUtils.showView(feedCommentsCountView, AppConstants.commentPositions.get(getPostHashCode(postId)));
+        UiUtils.showView(feedLikesCountView, AppConstants.likesPositions.get(getPostHashCode(postId)));
+        UiUtils.showView(persistedPostReactionsRecyclerView, AppConstants.likesPositions.get(getPostHashCode(postId)));
     }
 
     @Override
@@ -519,6 +644,9 @@ public class BlogPostsView extends FrameLayout {
                 }
             }
         }
+        if (globalPostId != null) {
+            fetchPostLikes(globalPostId);
+        }
     }
 
     @Override
@@ -535,12 +663,22 @@ public class BlogPostsView extends FrameLayout {
         } catch (IllegalStateException ignored) {
 
         }
+        if (popUpReactionsAdapter != null) {
+            popUpReactionsAdapter.cleanUp();
+        }
+        try {
+            if (postLikesReference != null && postLikesValueEventListener != null) {
+                postLikesReference.removeEventListener(postLikesValueEventListener);
+            }
+        } catch (NullPointerException ignored) {
+
+        }
     }
 
     private void toggleReactionsParentContainer(boolean show, String postId) {
         UiUtils.showView(addReactionsContainer, show);
         addReactionsContainer.setBackgroundColor(Color.parseColor("#00628F"));
-        AppConstants.reactionsBackgroundPositions.put((postId + "").hashCode(), true);
+        AppConstants.reactionsBackgroundPositions.put(getPostHashCode(postId), true);
         if (!show) {
             UiUtils.showView(tintView, false);
         }
@@ -565,6 +703,83 @@ public class BlogPostsView extends FrameLayout {
                 UiUtils.loadImage(activity, authorImageUrl, authorImageView);
             }
         }
+    }
+
+    public void setupPostLikes(List<String> upPostLikes, boolean signedInUserLikesPost, String signedInUserReactionValue) {
+        UiUtils.showView(persistedPostReactionsRecyclerView, true);
+        remoteReactionsAdapter = new RemoteReactionsAdapter(activity, upPostLikes);
+        LinearLayoutManager horizontalLinearLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
+        persistedPostReactionsRecyclerView.setLayoutManager(horizontalLinearLayoutManager);
+        persistedPostReactionsRecyclerView.setAdapter(remoteReactionsAdapter);
+        UiUtils.showView(feedLikesCountView, true);
+        if (signedInUserLikesPost) {
+            if (!signedInUserReactionValue.equals("Like.json")) {
+                likeFeedView.setText(StringUtils.strip(signedInUserReactionValue, ".json"));
+            } else {
+                likeFeedView.setText(activity.getString(R.string.unlike));
+            }
+            likeFeedView.setGravity(Gravity.CENTER_VERTICAL);
+            likeFeedView.setCompoundDrawablePadding(5);
+            int keyframesDrawable = getReactionsImage(activity, signedInUserReactionValue);
+            UiUtils.attachDrawableToTextView(activity, likeFeedView, keyframesDrawable, UiUtils.DrawableDirection.LEFT);
+            likeFeedView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    FirebaseUtils.getLikesReference(globalPostId + "/" + AppConstants.REACTORS + "/" + currentUser.getUid())
+                            .removeValue(new DatabaseReference.CompletionListener() {
+                                @Override
+                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                    fetchPostLikes(globalPostId);
+                                }
+                            });
+                }
+            });
+        } else {
+            UiUtils.removeAllDrawablesFromTextView(likeFeedView);
+            likeFeedView.setText(activity.getString(R.string.fa_icon_heart));
+        }
+        if (upPostLikes.size() == 1 && signedInUserLikesPost) {
+            feedLikesCountView.setText(activity.getString(R.string.you));
+        } else {
+            if (upPostLikes.size() > 1) {
+                if (signedInUserLikesPost) {
+                    long likesDiff = upPostLikes.size() - 1;
+                    feedLikesCountView.setText(getContext().getString(R.string.you_and).concat(HolloutUtils.format(likesDiff) + (likesDiff == 1 ? " Other" : " Others")));
+                } else {
+                    feedLikesCountView.setText(HolloutUtils.format(upPostLikes.size()));
+                }
+            }else if (upPostLikes.size()==1){
+                feedLikesCountView.setText(HolloutUtils.format(upPostLikes.size()));
+            }
+        }
+    }
+
+    private int getReactionsImage(Context context, String reactionTag) {
+        if (reactionTag.contains("Like")) {
+            return R.drawable.reactions_like_sutro;
+        } else if (reactionTag.contains("Anger")) {
+            return R.drawable.reactions_anger_sutro;
+        } else if (reactionTag.contains("Haha")) {
+            return R.drawable.reactions_haha_sutro;
+        } else if (reactionTag.contains("Love")) {
+            return R.drawable.reactions_love_sutro;
+        } else if (reactionTag.contains("Sorry")) {
+            return R.drawable.reactions_sorry_sutro;
+        } else if (reactionTag.contains("Wow")) {
+            return R.drawable.reactions_wow_sutro;
+        }
+        return R.drawable.reactions_like_sutro;
+    }
+
+    private class OverlapDecoration extends RecyclerView.ItemDecoration {
+
+        private final static int horizontalOverlap = -90;
+
+        @Override
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            outRect.set(horizontalOverlap, 0, 0, 0);
+        }
+
     }
 
 }

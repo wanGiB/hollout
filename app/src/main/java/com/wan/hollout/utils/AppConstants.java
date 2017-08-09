@@ -50,6 +50,12 @@ public class AppConstants {
     public static final String USE_ID = "user_id";
     public static final String USER_EMAIL = "use_email";
     public static final String JUST_AUTHENTICATED = "just_authenticated";
+
+    public static final String FEED_LIKES = "feed_likes";
+    public static final String REACTIONS = "reactions";
+    public static final String REACTORS = "reactors";
+    public static final String FEED_VIEWS = "feed_views";
+
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
     public static String AUTHOR_ID = "id";
@@ -65,6 +71,8 @@ public class AppConstants {
 
     public static SparseBooleanArray reactionsBackgroundPositions = new SparseBooleanArray();
     public static SparseBooleanArray reactionsOpenPositions = new SparseBooleanArray();
+    public static SparseBooleanArray commentPositions = new SparseBooleanArray();
+    public static SparseBooleanArray likesPositions = new SparseBooleanArray();
 
     public static String SAMPLE_HTML = "<div class=\"separator\" style=\"clear: both; text-align: center;\">\n" +
             "    <a href=\"http://alexis.lindaikejisblog.com/photos/shares/5987896c11298.png\" imageanchor=\"1\" style=\"margin-left: 1em; margin-right: 1em;\"><img border=\"0\" data-original-height=\"756\" data-original-width=\"800\" height=\"301\" src=\"https://alexis.lindaikejisblog.com/photos/shares/5987896c11298.png\" width=\"320\" />\n" +
