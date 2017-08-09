@@ -79,4 +79,8 @@
     <string name="login">LOGIN</string>
     <string name="find_amp_chat_nwith_your_friends"><![CDATA[Find & Chat  \n with Your friends]]></string>
     <string name="meet_new_people">Meet New People</string>
+    <string name="All_categories">Feed Categories</string>
+    <string name="not_logged_in">Not Logged In</string>
+    <string name="content_description_open_navigation_drawer">Drawer Open</string>
+    <string name="content_description_close_navigation_drawer">Drawer Close</string>
 </resources>

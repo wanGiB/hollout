@@ -7,7 +7,6 @@ import android.content.IntentSender;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -66,7 +65,7 @@ import java.util.Set;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer, NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
+public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
 
@@ -96,6 +95,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     @BindView(R.id.fragment_container)
     FrameLayout containerView;
 
+    /**
+     * Reference tied drawer menu, represented as fragment.
+     */
     private Runnable homeRunnable = new Runnable() {
 
         @Override
@@ -104,6 +106,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         }
 
     };
+
     private String TAG = "MainActivity";
 
     @Override
@@ -116,6 +119,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         ButterKnife.bind(this);
         initGoogleApiStuffs();
         initOAuthDialog();
+
         addAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -368,29 +372,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
     }
 
     @Override

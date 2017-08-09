@@ -8,4 +8,7 @@
     <dimen name="search_view_inset">8dp</dimen>
     <dimen name="label_width">56dp</dimen>
     <dimen name="label_height">24dp</dimen>
+    <dimen name="base_margin_vertical_half">8dp</dimen>
+    <!-- Size for navigation drawer. Max 320dp-->
+    <dimen name="navigation_drawer_size">290dp</dimen>
 </resources>

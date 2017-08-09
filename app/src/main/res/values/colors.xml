@@ -255,5 +255,6 @@
     <color name="colorAccentDarkDefault">#2196F3</color>
 
     <color name="colorSelectableItemWhite">#77ffffff</color>
+    <color name="windowBackground">#FFFFFF</color>
 
 </resources>
