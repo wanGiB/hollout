@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/white"
     android:orientation="vertical">
 
-    <ScrollView
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:fillViewport="true"
         android:fitsSystemWindows="true"
         android:overScrollMode="ifContentScrolls">
@@ -15,6 +19,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:orientation="vertical">
 
             <com.wan.hollout.ui.widgets.HolloutTextView
@@ -38,7 +44,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dp"
                 android:gravity="center_horizontal"
-                android:text="Meet New People "
+                android:text="@string/meet_new_people"
                 android:textColor="@color/ease_gray"
                 android:textSize="20sp"
                 app:textStyle="medium" />
@@ -47,9 +53,12 @@
                 android:id="@+id/ripple_background"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
                 app:rb_color="#eeeeee"
                 app:rb_duration="3000"
                 app:rb_radius="32dp"
+                android:layout_marginTop="20dp"
                 app:rb_rippleAmount="6"
                 app:rb_scale="6">
 
@@ -58,7 +67,8 @@
                     android:layout_width="64dp"
                     android:layout_height="64dp"
                     android:layout_centerInParent="true"
-                    android:src="@drawable/web_hi_res_512" />
+                    android:src="@drawable/web_hi_res_512"
+                    tools:ignore="ContentDescription" />
 
                 <com.wan.hollout.ui.widgets.CircleImageView
                     android:id="@+id/first_person"
@@ -123,7 +133,7 @@
             </com.skyfishjy.library.RippleBackground>
 
             <com.wan.hollout.ui.widgets.HolloutButton
-                android:id="@+id/button_start_here"
+                android:id="@+id/button_login"
                 android:layout_width="330dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -140,7 +150,6 @@
 
         </LinearLayout>
 
-    </ScrollView>
-
+    </android.support.v4.widget.NestedScrollView>
 
 </ViewFlipper>
