@@ -82,5 +82,6 @@ public class AppConstants {
             "</div>\n" +
             "There are people who think she had some work done on her face ...What do you think? Lolz.";
 
+    public static String SAMPLE_URL_TO_QUERY_FOR_LABELS = "http://www.blogname.com/search/?q=label:Graphics|label:Identity|label:Brand]";
 }
 

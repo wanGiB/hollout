@@ -89,6 +89,6 @@
     <string name="feed_categories">Feed Categories</string>
     <string name="theme">Theme</string>
     <string name="unlike">Unlike</string>
-    <string name="you_and">You and</string>
+    <string name="you_and"> You and </string>
     <string name="you">You</string>
 </resources>

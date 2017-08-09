@@ -190,7 +190,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 switch (view.getId()) {
                     case R.id.button_login_facebook:
                         dismissPopUps();
-                        UiUtils.showProgressDialog(MainActivity.this, "Please wait...");
                         initFacebookLogin();
                         break;
                     case R.id.button_login_google:
@@ -218,13 +217,14 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         }
     }
 
-
     private void initGoogleLogin() {
+        UiUtils.showProgressDialog(MainActivity.this, "Please wait...");
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     private void handleFacebookSignInResult(AccessToken accessToken) {
+        UiUtils.showProgressDialog(MainActivity.this, "Please wait...");
         AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
         firebaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -460,7 +460,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
-        UiUtils.showProgressDialog(this, "Please wait...");
         try {
             if (result.isSuccess()) {
                 GoogleSignInAccount acct = result.getSignInAccount();

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/reactions_anger"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginLeft="55dp"
+        android:layout_marginStart="55dp"
+        android:src="@drawable/reactions_anger_sutro"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/reactions_sorry"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="44dp"
+        android:layout_marginLeft="44dp"
+        android:src="@drawable/reactions_sorry_sutro"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/reactions_wow"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginStart="33dp"
+        android:layout_marginLeft="33dp"
+        android:src="@drawable/reactions_wow_sutro"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/reactions_haha"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:src="@drawable/reactions_haha_sutro"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/reactions_love"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_marginLeft="11dp"
+        android:layout_marginStart="11dp"
+        android:src="@drawable/reactions_love_sutro"
+        tools:ignore="ContentDescription" />
+
+    <ImageView
+        android:id="@+id/reactions_like"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:src="@drawable/reactions_like_sutro"
+        tools:ignore="ContentDescription" />
+
+</FrameLayout>

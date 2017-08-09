@@ -146,21 +146,23 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/post_reactions_recycler_view"
+                        <FrameLayout
+                            android:id="@+id/post_reaction_indicators_layout"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
                             android:paddingBottom="10dp"
-                            android:visibility="gone" />
+                            android:visibility="gone">
+
+                        </FrameLayout>
 
                         <com.wan.hollout.ui.widgets.HolloutTextView
                             android:id="@+id/feed_likes_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
-                            android:layout_toEndOf="@id/post_reactions_recycler_view"
-                            android:layout_toRightOf="@id/post_reactions_recycler_view"
+                            android:layout_toEndOf="@id/post_reaction_indicators_layout"
+                            android:layout_toRightOf="@id/post_reaction_indicators_layout"
                             android:gravity="center_vertical"
                             android:paddingBottom="10dp"
                             android:textColor="@color/gray20"
@@ -173,11 +175,11 @@
                             android:id="@+id/feed_comments_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
                             android:layout_toEndOf="@id/feed_likes_count"
                             android:layout_toRightOf="@id/feed_likes_count"
                             android:gravity="center_vertical"
                             android:paddingBottom="10dp"
-                            android:layout_centerVertical="true"
                             android:paddingLeft="10dp"
                             android:paddingStart="10dp"
                             android:textColor="@color/gray20"
@@ -206,7 +208,7 @@
                     </RelativeLayout>
 
                     <android.support.v7.widget.CardView
-                        android:id="@+id/reactions_card_view"
+                        android:id="@+id/reactions_pop_up_card_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="top"
@@ -221,7 +223,7 @@
                         app:cardUseCompatPadding="false">
 
                         <android.support.v7.widget.RecyclerView
-                            android:id="@+id/reactions_recycler_view"
+                            android:id="@+id/reactions_pop_up_recycler_view"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
 

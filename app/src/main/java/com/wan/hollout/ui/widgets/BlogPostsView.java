@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.SystemClock;
+import android.os.Vibrator;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
@@ -20,6 +22,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.youtube.player.YouTubeInitializationResult;
 import com.google.android.youtube.player.YouTubePlayer;
 import com.google.android.youtube.player.YouTubePlayerFragment;
@@ -43,6 +47,7 @@ import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.StringComparator;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -58,6 +63,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -71,7 +77,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
-@SuppressWarnings({"FieldCanBeLocal", "unused"})
+@SuppressWarnings({"FieldCanBeLocal", "unused", "ConstantConditions", "deprecation"})
 public class BlogPostsView extends FrameLayout {
 
     @BindView(R.id.author_image)
@@ -125,14 +131,14 @@ public class BlogPostsView extends FrameLayout {
     @BindView(R.id.share_feed)
     HolloutTextView shareFeedView;
 
-    @BindView(R.id.reactions_card_view)
+    @BindView(R.id.reactions_pop_up_card_view)
     CardView reactionsCardView;
 
-    @BindView(R.id.reactions_recycler_view)
+    @BindView(R.id.reactions_pop_up_recycler_view)
     RecyclerView reactionsRecyclerView;
 
-    @BindView(R.id.post_reactions_recycler_view)
-    RecyclerView persistedPostReactionsRecyclerView;
+    @BindView(R.id.post_reaction_indicators_layout)
+    FrameLayout reactionsIndicatorLayout;
 
     YouTubePlayer globalYoutubePlayer;
 
@@ -168,6 +174,8 @@ public class BlogPostsView extends FrameLayout {
     private ReactionsAdapter popUpReactionsAdapter;
     private RemoteReactionsAdapter remoteReactionsAdapter;
 
+    private Vibrator vibe;
+
     public BlogPostsView(Context context) {
         super(context);
         init(context);
@@ -200,6 +208,7 @@ public class BlogPostsView extends FrameLayout {
     }
 
     public void bindData(final Activity context, JSONObject blogPost) {
+        vibe = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         this.activity = context;
         HolloutLogger.d(TAG, blogPost.toString());
@@ -275,16 +284,15 @@ public class BlogPostsView extends FrameLayout {
         };
 
         likeFeedView.setOnLongClickListener(new OnLongClickListener() {
-
             @Override
             public boolean onLongClick(View view) {
-                loadReactions(postId, context);
+                vibe.vibrate(100);
                 UiUtils.showView(reactionsCardView, true);
+                loadReactions(postId, context);
                 AppConstants.ARE_REACTIONS_OPEN = true;
                 addReactionValueToInvalidator(true);
                 return true;
             }
-
         });
 
         likeFeedView.setOnClickListener(onClickListener);
@@ -297,21 +305,24 @@ public class BlogPostsView extends FrameLayout {
     }
 
     private void handleLikesOnClickListener(final String postId) {
-        UiUtils.showView(reactionsCardView, false);
-        AppConstants.ARE_REACTIONS_OPEN = false;
-        addReactionValueToInvalidator(false);
-        if (currentUser == null) {
-            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
-                @Override
-                public void done(Boolean result, Exception e) {
-                    if (e == null && result) {
-                        likeFeed(postId, "Like.json");
+        if (reactionsCardView.getVisibility() == VISIBLE) {
+            UiUtils.showView(reactionsCardView, false);
+            AppConstants.ARE_REACTIONS_OPEN = false;
+            addReactionValueToInvalidator(false);
+        } else {
+            if (currentUser == null) {
+                ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+                    @Override
+                    public void done(Boolean result, Exception e) {
+                        if (e == null && result) {
+                            likeFeed(postId, "Like.json");
+                        }
                     }
-                }
-            });
-            return;
+                });
+                return;
+            }
+            likeFeed(postId, "Like.json");
         }
-        likeFeed(postId, "Like.json");
     }
 
     private void launchCommentActivity(Activity context, String postId, String blogId) {
@@ -387,17 +398,14 @@ public class BlogPostsView extends FrameLayout {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             HashMap<String, Object> updatableLikeProps = new HashMap<>();
             HashMap<String, String> reactors = new HashMap<>();
-            reactors.put(currentUser.getUid(), reaction);
-            updatableLikeProps.put(AppConstants.REACTORS, reactors);
-            FirebaseUtils.getLikesReference(postId).updateChildren(updatableLikeProps,
-                    new DatabaseReference.CompletionListener() {
-                        @Override
-                        public void onComplete(DatabaseError databaseError,
-                                               DatabaseReference databaseReference) {
-                            fetchPostLikes(postId);
-                        }
-                    });
-        }else {
+            FirebaseUtils.getLikesReference(postId + "/" + AppConstants.REACTORS + "/" + FirebaseAuth.getInstance().getCurrentUser().getUid())
+                    .setValue(reaction).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    fetchPostLikes(postId);
+                }
+            });
+        } else {
             ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
                 @Override
                 public void done(Boolean result, Exception e) {
@@ -428,7 +436,7 @@ public class BlogPostsView extends FrameLayout {
                         }
                     }
                     if (!reactions.isEmpty()) {
-                        UiUtils.showView(persistedPostReactionsRecyclerView, true);
+                        UiUtils.showView(reactionsIndicatorLayout, true);
                         AppConstants.likesPositions.put(getPostHashCode(postId), true);
                         if (currentUser != null) {
                             setupPostLikes(reactions, stringObjectHashMap.keySet().contains(currentUser.getUid()), stringObjectHashMap.get(currentUser.getUid()));
@@ -440,14 +448,14 @@ public class BlogPostsView extends FrameLayout {
                         UiUtils.removeAllDrawablesFromTextView(likeFeedView);
                         AppConstants.likesPositions.put(getPostHashCode(postId), false);
                         UiUtils.showView(feedLikesCountView, false);
-                        UiUtils.showView(persistedPostReactionsRecyclerView, false);
+                        UiUtils.showView(reactionsIndicatorLayout, false);
                         refreshLikeFeedButtonClickListeners();
                     }
                 } else {
                     likeFeedView.setText(activity.getString(R.string.fa_icon_heart));
                     UiUtils.removeAllDrawablesFromTextView(likeFeedView);
                     UiUtils.showView(feedLikesCountView, false);
-                    UiUtils.showView(persistedPostReactionsRecyclerView, false);
+                    UiUtils.showView(reactionsIndicatorLayout, false);
                     AppConstants.likesPositions.put(getPostHashCode(postId), false);
                     refreshLikeFeedButtonClickListeners();
                 }
@@ -485,6 +493,14 @@ public class BlogPostsView extends FrameLayout {
                     UiUtils.showView(playMediaIfVideo, false);
                     UiUtils.showView(feedImageThumbnailView, true);
                     UiUtils.loadImage(activity, src, feedImageThumbnailView);
+                    feedImageThumbnailView.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            UiUtils.showView(reactionsCardView, false);
+                            AppConstants.ARE_REACTIONS_OPEN = false;
+                            addReactionValueToInvalidator(false);
+                        }
+                    });
                 }
             }
         }
@@ -505,6 +521,9 @@ public class BlogPostsView extends FrameLayout {
                     feedImageThumbnailView.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View view) {
+                            UiUtils.showView(reactionsCardView, false);
+                            AppConstants.ARE_REACTIONS_OPEN = false;
+                            addReactionValueToInvalidator(false);
                             playMediaIfVideo.performClick();
                         }
                     });
@@ -650,7 +669,7 @@ public class BlogPostsView extends FrameLayout {
         UiUtils.showView(reactionsCardView, AppConstants.reactionsOpenPositions.get(getPostHashCode(postId)));
         UiUtils.showView(feedCommentsCountView, AppConstants.commentPositions.get(getPostHashCode(postId)));
         UiUtils.showView(feedLikesCountView, AppConstants.likesPositions.get(getPostHashCode(postId)));
-        UiUtils.showView(persistedPostReactionsRecyclerView, AppConstants.likesPositions.get(getPostHashCode(postId)));
+        UiUtils.showView(reactionsIndicatorLayout, AppConstants.likesPositions.get(getPostHashCode(postId)));
     }
 
     @Override
@@ -736,12 +755,24 @@ public class BlogPostsView extends FrameLayout {
         }
     }
 
-    public void setupPostLikes(List<String> upPostLikes, boolean signedInUserLikesPost, String signedInUserReactionValue) {
-        UiUtils.showView(persistedPostReactionsRecyclerView, true);
-        remoteReactionsAdapter = new RemoteReactionsAdapter(activity, upPostLikes);
-        LinearLayoutManager horizontalLinearLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
-        persistedPostReactionsRecyclerView.setLayoutManager(horizontalLinearLayoutManager);
-        persistedPostReactionsRecyclerView.setAdapter(remoteReactionsAdapter);
+    private void setUpReactions(List<String> reactions) {
+        Collections.sort(reactions, new StringComparator());
+        reactionsIndicatorLayout.removeAllViews();
+        for (int i = 0; i < reactions.size(); i++) {
+            ImageView imageView = new ImageView(activity);
+            FrameLayout.LayoutParams layoutParams = new LayoutParams(HolloutUtils.dp(16), HolloutUtils.dp(16));
+            imageView.setImageResource(getReactionsImage(activity, reactions.get(i)));
+            if (i != 0) {
+                layoutParams.leftMargin = HolloutUtils.dp(i * 11);
+            }
+            imageView.setLayoutParams(layoutParams);
+            reactionsIndicatorLayout.addView(imageView, 0);
+        }
+    }
+
+    public void setupPostLikes(List<String> reactions, boolean signedInUserLikesPost, String signedInUserReactionValue) {
+        UiUtils.showView(reactionsIndicatorLayout, true);
+        setUpReactions(reactions);
         UiUtils.showView(feedLikesCountView, true);
         if (signedInUserLikesPost) {
             if (!signedInUserReactionValue.equals("Like.json")) {
@@ -756,13 +787,19 @@ public class BlogPostsView extends FrameLayout {
             likeFeedView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    FirebaseUtils.getLikesReference(globalPostId + "/" + AppConstants.REACTORS + "/" + currentUser.getUid())
-                            .removeValue(new DatabaseReference.CompletionListener() {
-                                @Override
-                                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                                    fetchPostLikes(globalPostId);
-                                }
-                            });
+                    if (reactionsCardView.getVisibility() == VISIBLE) {
+                        UiUtils.showView(reactionsCardView, false);
+                        AppConstants.ARE_REACTIONS_OPEN = false;
+                        addReactionValueToInvalidator(false);
+                    } else {
+                        FirebaseUtils.getLikesReference(globalPostId + "/" + AppConstants.REACTORS + "/" + currentUser.getUid())
+                                .removeValue(new DatabaseReference.CompletionListener() {
+                                    @Override
+                                    public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                                        fetchPostLikes(globalPostId);
+                                    }
+                                });
+                    }
                 }
             });
         } else {
@@ -776,18 +813,18 @@ public class BlogPostsView extends FrameLayout {
                 }
             });
         }
-        if (upPostLikes.size() == 1 && signedInUserLikesPost) {
+        if (reactions.size() == 1 && signedInUserLikesPost) {
             feedLikesCountView.setText(activity.getString(R.string.you));
         } else {
-            if (upPostLikes.size() > 1) {
+            if (reactions.size() > 1) {
                 if (signedInUserLikesPost) {
-                    long likesDiff = upPostLikes.size() - 1;
-                    feedLikesCountView.setText(getContext().getString(R.string.you_and).concat(HolloutUtils.format(likesDiff) + (likesDiff == 1 ? " Other" : " Others")));
+                    long likesDiff = reactions.size() - 1;
+                    feedLikesCountView.setText(activity.getString(R.string.you_and).concat(HolloutUtils.format(likesDiff) + (likesDiff == 1 ? " other " : " others")));
                 } else {
-                    feedLikesCountView.setText(HolloutUtils.format(upPostLikes.size()));
+                    feedLikesCountView.setText(HolloutUtils.format(reactions.size()));
                 }
-            } else if (upPostLikes.size() == 1) {
-                feedLikesCountView.setText(HolloutUtils.format(upPostLikes.size()));
+            } else if (reactions.size() == 1) {
+                feedLikesCountView.setText(HolloutUtils.format(reactions.size()));
             }
         }
     }
@@ -809,13 +846,19 @@ public class BlogPostsView extends FrameLayout {
         return R.drawable.reactions_like_sutro;
     }
 
-    private class OverlapDecoration extends RecyclerView.ItemDecoration {
+    private class ItemDecorator extends RecyclerView.ItemDecoration {
 
-        private final static int horizontalOverlap = -90;
+        private final int mSpace;
+
+        ItemDecorator(int space) {
+            this.mSpace = space;
+        }
 
         @Override
         public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            outRect.set(horizontalOverlap, 0, 0, 0);
+            int position = parent.getChildAdapterPosition(view);
+            if (position != 0)
+                outRect.top = mSpace;
         }
 
     }
