@@ -98,6 +98,7 @@ dependencies {
     compile 'com.airbnb.android:lottie:2.1.2'
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
+    compile 'com.skyfishjy.ripplebackground:library:1.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -215,7 +215,7 @@ public class BlogPostsView extends FrameLayout {
             @Override
             public void onClick(View view) {
                 loadBounceAnimation();
-                likeFeedView.startAnimation(bounceAnimation);
+                view.startAnimation(bounceAnimation);
                 switch (view.getId()) {
                     case R.id.like_feed:
                         UiUtils.showView(reactionsCardView, false);
