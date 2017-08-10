@@ -135,7 +135,10 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                 UiUtils.dismissProgressDialog();
                 if (firebaseUser != null) {
-                    UiUtils.showSafeToast("Welcome, " + firebaseUser.getDisplayName());
+                    if (!HolloutPreferences.authenticated()) {
+                        UiUtils.showSafeToast("Welcome, " + firebaseUser.getDisplayName());
+                        HolloutPreferences.setAuthenticated();
+                    }
                     updateUserState(firebaseUser);
                     logUser(firebaseUser);
                     invalidateDrawerMenuHeader();

@@ -55,6 +55,7 @@ public class AppConstants {
     public static final String REACTIONS = "reactions";
     public static final String REACTORS = "reactors";
     public static final String FEED_VIEWS = "feed_views";
+    public static final String AUTHENTICATED = "not_authenticated_before";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

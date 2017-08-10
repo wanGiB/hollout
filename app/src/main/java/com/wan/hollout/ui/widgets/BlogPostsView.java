@@ -814,17 +814,17 @@ public class BlogPostsView extends FrameLayout {
             });
         }
         if (reactions.size() == 1 && signedInUserLikesPost) {
-            feedLikesCountView.setText(activity.getString(R.string.you));
+            feedLikesCountView.setText(" "+activity.getString(R.string.you));
         } else {
             if (reactions.size() > 1) {
                 if (signedInUserLikesPost) {
                     long likesDiff = reactions.size() - 1;
-                    feedLikesCountView.setText(activity.getString(R.string.you_and).concat(HolloutUtils.format(likesDiff) + (likesDiff == 1 ? " other " : " others")));
+                    feedLikesCountView.setText(" "+activity.getString(R.string.you_and)+" ".concat(HolloutUtils.format(likesDiff) + (likesDiff == 1 ? " other " : " others")));
                 } else {
                     feedLikesCountView.setText(HolloutUtils.format(reactions.size()));
                 }
             } else if (reactions.size() == 1) {
-                feedLikesCountView.setText(HolloutUtils.format(reactions.size()));
+                feedLikesCountView.setText(" "+HolloutUtils.format(reactions.size()));
             }
         }
     }

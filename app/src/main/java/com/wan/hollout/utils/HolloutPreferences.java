@@ -82,4 +82,11 @@ public class HolloutPreferences {
         getHolloutPreferences().edit().putLong(postId, count).commit();
     }
 
+    public static boolean authenticated() {
+        return getHolloutPreferences().getBoolean(AppConstants.AUTHENTICATED, false);
+    }
+
+    public static void setAuthenticated() {
+        getHolloutPreferences().edit().putBoolean(AppConstants.AUTHENTICATED, true).commit();
+    }
 }
