@@ -22,6 +22,7 @@ import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.List;
@@ -98,19 +99,19 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             if (personObject != null) {
                 final String personName = personObject.getString(AppConstants.NAME);
                 boolean selected = personObject.getBoolean(AppConstants.SELECTED);
-                setCareerName(context, searchedString, WordUtils.capitalize(personName.toLowerCase(Locale.getDefault())));
+                setPeopleName(context, searchedString, WordUtils.capitalize(personName.toLowerCase(Locale.getDefault())));
                 selections.put(personName.hashCode(), selected);
                 refreshViewState(context, personName);
                 handleItemViewClick(context, personObject);
             }
         }
 
-        private void setCareerName(Context context, String searchedString, String careerName) {
+        private void setPeopleName(Context context, String searchedString, String careerName) {
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(searchedString)) {
-                chipItemView.setText(UiUtils.highlightTextIfNecessary(searchedString, WordUtils.capitalize(careerName + "s"),
+                chipItemView.setText(UiUtils.highlightTextIfNecessary(searchedString, WordUtils.capitalize(getPluralForm(careerName)),
                         ContextCompat.getColor(context, R.color.hollout_color_three)));
             } else {
-                chipItemView.setText(WordUtils.capitalize(careerName + "s".toLowerCase(Locale.getDefault())));
+                chipItemView.setText(WordUtils.capitalize(getPluralForm(careerName).toLowerCase(Locale.getDefault())));
             }
         }
 
@@ -157,6 +158,18 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                     ContextCompat.getDrawable(context, R.drawable.chip_unselected));
         }
 
+    }
+
+    private static String getPluralForm(String careerName) {
+        String pluralizedOccupation;
+        if (StringUtils.endsWithIgnoreCase(careerName.toLowerCase(), "man")) {
+            pluralizedOccupation = StringUtils.replace(careerName.toLowerCase(), "man", "men");
+        } else if (StringUtils.endsWithIgnoreCase(careerName.toLowerCase(), "s")) {
+            pluralizedOccupation = careerName;
+        } else {
+            pluralizedOccupation = StringUtils.capitalize(careerName.toLowerCase()) + "s";
+        }
+        return pluralizedOccupation;
     }
 
 }
