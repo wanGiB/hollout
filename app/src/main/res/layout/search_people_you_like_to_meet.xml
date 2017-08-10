@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/search_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/light_gray"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:background="#10000000" />
+
+        <LinearLayout
+            android:id="@+id/search_top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:orientation="horizontal"
+            android:background="@android:color/white">
+
+            <ImageView
+                android:id="@+id/action_up_btn"
+                android:contentDescription="@null"
+                android:layout_width="20dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_search_grey_48dp" />
+
+            <EditText
+                android:id="@+id/searchTextView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:hint="@string/search_here"
+                android:layout_weight="1"
+                android:imeOptions="actionSearch"
+                android:inputType="textNoSuggestions"
+                android:layout_gravity="center_vertical"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:textColor="#212121"
+                android:textColorHint="#727272"
+                android:textSize="16sp" />
+
+            <ImageView
+                android:id="@+id/action_empty_btn"
+                android:contentDescription="@null"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:visibility="gone"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/ic_action_navigation_close" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

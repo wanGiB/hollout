@@ -11,4 +11,6 @@
     <dimen name="base_margin_vertical_half">8dp</dimen>
     <!-- Size for navigation drawer. Max 320dp-->
     <dimen name="navigation_drawer_size">290dp</dimen>
+    <dimen name="search_icon_padding">12dp</dimen>
+    <dimen name="search_view_text_padding">65dp</dimen>
 </resources>

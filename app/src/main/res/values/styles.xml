@@ -212,4 +212,13 @@
         <item name="colorButtonNormal">@color/colorGoogle</item>
     </style>
 
+
+    <style name="MSV_ImageButton">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:paddingLeft">@dimen/search_icon_padding</item>
+        <item name="android:paddingRight">@dimen/search_icon_padding</item>
+    </style>
+
 </resources>

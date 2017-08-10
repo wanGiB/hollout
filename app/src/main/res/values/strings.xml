@@ -99,4 +99,7 @@
     <string name="describe_yourself">Please, more about you using only KEYWORS---E.g Pharmacist</string>
     <string name="about_you">About You</string>
     <string name="tap_kinds_of_people_">Tap all kinds of people you like to meet</string>
+    <string name="search_here">Search here</string>
+    <string name="meet_people">Meet People</string>
+    <string name="tap_all_kinds_of_people_you_like_to_meet">Tap all kinds of people you like to meet</string>
 </resources>
