@@ -197,18 +197,18 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     private void createNewUserOnParse(final FirebaseUser firebaseUser) {
         UiUtils.showProgressDialog(this, "Creating account...");
         setupCrashlyticsUser(firebaseUser);
-
         ParseUser newUser = new ParseUser();
         newUser.setUsername(firebaseUser.getUid());
         newUser.setPassword(firebaseUser.getUid());
-        newUser.put(AppConstants.USER_DISPLAY_NAME, firebaseUser.getDisplayName());
+        if (firebaseUser.getDisplayName() != null) {
+            newUser.put(AppConstants.USER_DISPLAY_NAME, firebaseUser.getDisplayName().toLowerCase());
+        }
         if (firebaseUser.getEmail() != null) {
             newUser.setEmail(firebaseUser.getEmail());
         }
         if (firebaseUser.getPhotoUrl() != null) {
             newUser.put(AppConstants.USER_PHOTO_URL, firebaseUser.getPhotoUrl().toString());
         }
-
         newUser.signUpInBackground(new SignUpCallback() {
             @Override
             public void done(ParseException e) {

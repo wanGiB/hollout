@@ -6,6 +6,8 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +15,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -34,7 +37,6 @@ import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
-import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -71,14 +73,14 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     HolloutTextView reasonForInterestsView;
 
     @BindView(R.id.button_continue)
-    HolloutTextView buttonContinue;
+    CardView buttonContinue;
 
     @BindView(R.id.rootLayout)
     View rootLayout;
 
     private ParseUser signedInUser;
 
-    private String NO_QUALIFIER_TIP = "Do not use the,I,a,am,an qualifiers. Use only keywords.<br/><br/><b>Example: Fashion Designer.</b> and not <b>A fashion Designer</b>";
+    private String NO_QUALIFIER_TIP = "Do not use the <b>I,a,am,an</b> prefixes. Use only keywords.<br/><br/><b>Example: Fashion Designer.</b> and not <b>A fashion Designer</b>";
 
     private Vibrator vibrator;
     private Animation shakeAnimation;
@@ -92,8 +94,8 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
         isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.about_user_layout);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
@@ -107,6 +109,16 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
         initShakeAnimation();
         attemptToOffloadPersistedInfoAboutUser();
         initComponents();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchItem.setVisible(false);
+        MenuItem settingsActionItem = menu.findItem(R.id.action_settings);
+        settingsActionItem.setVisible(false);
+        supportInvalidateOptionsMenu();
+        return super.onPrepareOptionsMenu(menu);
     }
 
     private void attemptToOffloadPersistedInfoAboutUser() {
@@ -133,9 +145,23 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
         interestsQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
-                if (e == null && StringUtils.isNotEmpty(moreAboutUserField.getText().toString().trim())) {
-                    initInterestsAdapter(searchKey, objects);
-                    UiUtils.showView(interestsSuggestionRecyclerView, true);
+                if (e == null) {
+                    if (StringUtils.isNotEmpty(moreAboutUserField.getText().toString().trim())) {
+                        if (objects != null) {
+                            if (!objects.isEmpty()) {
+                                initInterestsAdapter(searchKey, objects);
+                                UiUtils.showView(interestsSuggestionRecyclerView, true);
+                            } else {
+                                UiUtils.showView(interestsSuggestionRecyclerView, false);
+                            }
+                        } else {
+                            UiUtils.showView(interestsSuggestionRecyclerView, false);
+                        }
+                    } else {
+                        UiUtils.showView(interestsSuggestionRecyclerView, false);
+                    }
+                } else {
+                    UiUtils.showView(interestsSuggestionRecyclerView, false);
                 }
             }
         });
@@ -168,8 +194,8 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     }
 
     private void initComponents() {
-        reasonForInterestsView.setText(UiUtils.fromHtml("Describe what you <b>do</b> or who you are using <b>ONLY KEYWORDS</b>."));
         reasonForInterestsView.setMovementMethod(ScrollingMovementMethod.getInstance());
+
         if (signedInUser != null) {
             interestsSuggestionRecyclerView.setNestedScrollingEnabled(true);
         }
@@ -208,6 +234,9 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "An ")
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "The ")) {
                     vibrateDevice();
+                } else {
+                    reasonForInterestsView.setTextColor(ContextCompat.getColor(AboutUserActivity.this, R.color.light_grey));
+                    UiUtils.showView(reasonForInterestsView, false);
                 }
             }
 
@@ -289,10 +318,11 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     }
 
     private void vibrateDevice() {
-        vibrator.vibrate(3000);
+        vibrator.vibrate(100);
         moreAboutUserField.startAnimation(shakeAnimation);
         UiUtils.showView(reasonForInterestsView, true);
-        reasonForInterestsView.setText(NO_QUALIFIER_TIP);
+        reasonForInterestsView.setTextColor(ContextCompat.getColor(AboutUserActivity.this, R.color.dark_gray));
+        reasonForInterestsView.setText(UiUtils.fromHtml(NO_QUALIFIER_TIP));
     }
 
     @Override

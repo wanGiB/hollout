@@ -56,7 +56,7 @@ public class InterestsSuggestionAdapter extends RecyclerView.Adapter<RecyclerVie
         OccupationsHolder occupationsHolder = (OccupationsHolder) holder;
         ParseObject parseObject = occupations.get(position);
         if (parseObject != null) {
-            occupationsHolder.bindOccupation(context, parseObject, searchKey, occupationSelectedListener);
+            occupationsHolder.bindInterest(context, parseObject, searchKey, occupationSelectedListener);
         }
     }
 
@@ -76,27 +76,22 @@ public class InterestsSuggestionAdapter extends RecyclerView.Adapter<RecyclerVie
             ButterKnife.bind(this, itemView);
         }
 
-        public void bindOccupation(Context context, ParseObject parseObject, String searchKey,
-                                   final OccupationSelectedListener occupationSelectedListener) {
-
+        public void bindInterest(Context context, ParseObject parseObject, String searchKey,
+                                 final OccupationSelectedListener occupationSelectedListener) {
             final String occupationName = StringUtils.capitalize(parseObject.getString("name"));
-
-            occupationNameView.setText(UiUtils.highlightTextIfNecessary(searchKey, new SpannableString(occupationName),
+            occupationNameView.setText(UiUtils.highlightTextIfNecessary(searchKey,
+                    new SpannableString(occupationName),
                     ContextCompat.getColor(context, R.color.colorAccent)));
 
             itemView.setOnClickListener(new View.OnClickListener() {
-
                 @Override
                 public void onClick(View v) {
                     if (occupationSelectedListener != null) {
                         occupationSelectedListener.onSelectedOccupation(occupationName);
                     }
                 }
-
             });
-
         }
-
     }
 
 }
