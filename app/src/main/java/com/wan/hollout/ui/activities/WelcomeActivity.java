@@ -139,6 +139,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         continueWithFacebook.setOnClickListener(this);
         continueWithGoogle.setOnClickListener(this);
         initDividerBlinkingAnimation();
+        startTypingAnimation(fieldIndex);
     }
 
     private void authenticateUserOnParse(final FirebaseUser firebaseUser) {
