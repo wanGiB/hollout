@@ -3,6 +3,7 @@ package com.wan.hollout.utils;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.media.MediaPlayer;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
@@ -59,6 +60,16 @@ public class HolloutUtils {
 
     public static String stripDollar(String string) {
         return StringUtils.replace(string, "$", "USD");
+    }
+
+    public static void bangSound(Context context, boolean reduceSound, int soundId) {
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, soundId);
+        if (reduceSound) {
+            mediaPlayer.setVolume(0.2f, 0.2f);
+        } else {
+            mediaPlayer.setVolume(0.5f, 0.5f);
+        }
+        mediaPlayer.start();
     }
 
     public static void checkDisplaySize(Context context, Configuration newConfiguration) {
