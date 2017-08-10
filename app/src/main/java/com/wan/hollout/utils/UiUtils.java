@@ -11,11 +11,15 @@ import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +40,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.indexOfIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
@@ -193,6 +199,11 @@ public class UiUtils {
         }
     }
 
+    public static void dismissKeyboard(View trigger) {
+        InputMethodManager imm = (InputMethodManager) ApplicationLoader.getInstance().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(trigger.getWindowToken(), 0);
+    }
+
     public static void loadImage(final Activity context, final String photoPath, final ImageView imageView) {
         if (imageView != null) {
             if (isNotEmpty(photoPath)) {
@@ -262,18 +273,28 @@ public class UiUtils {
         }
     }
 
-    public static synchronized void attachDrawableToTextView(Context context, TextView textView, KeyframesDrawable resource, DrawableDirection direction) {
-        if (textView != null) {
-            if (direction == DrawableDirection.LEFT) {
-                textView.setCompoundDrawablesWithIntrinsicBounds(resource, null, null, null);
-            } else if (direction == DrawableDirection.RIGHT) {
-                textView.setCompoundDrawablesWithIntrinsicBounds(null, null, resource, null);
-            } else if (direction == DrawableDirection.BOTTOM) {
-                textView.setCompoundDrawablesWithIntrinsicBounds(null, null, null, resource);
-            } else if (direction == DrawableDirection.TOP) {
-                textView.setCompoundDrawablesWithIntrinsicBounds(null, resource, null, null);
+    public static Spannable highlightTextIfNecessary(String search, Spanned originalText, int color) {
+        try {
+            if (isNotEmpty(search)) {
+                if (containsIgnoreCase(originalText, search.trim())) {
+                    int startPost = indexOfIgnoreCase(originalText, search.trim());
+                    int endPost = startPost + search.length();
+                    Spannable spanText = Spannable.Factory.getInstance().newSpannable(originalText);
+                    if (startPost != -1) {
+                        spanText.setSpan(new ForegroundColorSpan(color), startPost, endPost, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        return spanText;
+                    } else {
+                        return new SpannableString(originalText);
+                    }
+                } else {
+                    return new SpannableString(originalText);
+                }
+
+            } else {
+                return new SpannableString(originalText);
             }
-            textView.invalidate();
+        } catch (IndexOutOfBoundsException e) {
+            return new SpannableString(originalText);
         }
     }
 

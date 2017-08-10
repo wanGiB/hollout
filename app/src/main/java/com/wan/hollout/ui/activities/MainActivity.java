@@ -64,7 +64,13 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         homeRunnable.run();
         drawerFragment = (DrawerFragment) getSupportFragmentManager().findFragmentById(R.id.main_navigation_drawer_fragment);
         drawerFragment.setUp(drawer, this);
-        HolloutPreferences.setUserWelcomed();
+        ParseUser signedInUser = ParseUser.getCurrentUser();
+        if (!HolloutPreferences.isUserWelcomed()) {
+            if (signedInUser != null) {
+                UiUtils.showSafeToast("Welcome, " + signedInUser.getString(AppConstants.USER_DISPLAY_NAME));
+            }
+            HolloutPreferences.setUserWelcomed();
+        }
     }
 
     /**

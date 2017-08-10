@@ -95,4 +95,8 @@
     <string name="i_am">Am a/an</string>
     <string name="accountant">E.g Accountant, Pets Lover</string>
     <string name="continue_">Continue ></string>
+    <string name="about_you_please">About You Please</string>
+    <string name="describe_yourself">Please, more about you using only KEYWORS---E.g Pharmacist</string>
+    <string name="about_you">About You</string>
+    <string name="tap_kinds_of_people_">Tap all kinds of people you like to meet</string>
 </resources>

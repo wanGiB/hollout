@@ -65,7 +65,14 @@
         <activity
             android:name=".ui.activities.AboutUserActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
-            android:label="@string/app_name"
+            android:label="@string/about_you"
+            android:theme="@style/AppTheme.FullScreen.Light"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".ui.activities.PeopleILikeToMeetActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
+            android:label="@string/people"
             android:theme="@style/AppTheme.FullScreen.Light"
             android:windowSoftInputMode="stateHidden" />
 
