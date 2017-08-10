@@ -33,7 +33,7 @@ public class PeopleILikeToMeetActivity extends AppCompatActivity implements View
     ViewFlipper contentFlipper;
 
     @BindView(R.id.people_to_meet_recycler_view)
-    RecyclerView peopleToMeetRecyclerView
+    RecyclerView peopleToMeetRecyclerView;
 
     @BindView(R.id.selected_people_recycler_view)
     RecyclerView selectedPeopleRecyclerView;
