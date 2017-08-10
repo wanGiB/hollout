@@ -1,9 +1,9 @@
 package com.wan.hollout.ui.widgets;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.os.Vibrator;
@@ -118,9 +118,6 @@ public class BlogPostsView extends FrameLayout {
 
     @BindView(R.id.feed_views)
     HolloutTextView feedViews;
-
-    @BindView(R.id.tint_vew)
-    View tintView;
 
     @BindView(R.id.like_feed)
     HolloutTextView likeFeedView;
@@ -248,7 +245,8 @@ public class BlogPostsView extends FrameLayout {
         JSONArray labels = blogPost.optJSONArray(AppConstants.LABELS);
 
         Random random = new Random();
-        verticalFeedDivider.setBackgroundColor(ContextCompat.getColor(context, randomColors[random.nextInt(randomColors.length - 1)]));
+        int randomColor = ContextCompat.getColor(context, randomColors[random.nextInt(randomColors.length - 1)]);
+        verticalFeedDivider.setBackgroundColor(randomColor);
 
         document = Jsoup.parse(DOCUMENT_START_GUARD + postContent + DOCUMENT_END_GUARD);
         prepareYoutubeVideoThumbnail(context, document, postId);
@@ -273,9 +271,9 @@ public class BlogPostsView extends FrameLayout {
                                     }
                                 }
                             });
-                            return;
+                        } else {
+                            launchCommentActivity(context, postId, blogId);
                         }
-                        launchCommentActivity(context, postId, blogId);
                         break;
                 }
 
@@ -319,9 +317,9 @@ public class BlogPostsView extends FrameLayout {
                         }
                     }
                 });
-                return;
+            } else {
+                likeFeed(postId, "Like.json");
             }
-            likeFeed(postId, "Like.json");
         }
     }
 
@@ -582,23 +580,23 @@ public class BlogPostsView extends FrameLayout {
 
                             @Override
                             public void onPlaying() {
-                                toggleReactionsParentContainer(false, postId);
+                                addVideoStateToReactionParentContainer(false, postId);
                                 HolloutPreferences.saveCurrentPlaybackTime(postId, 0);
                             }
 
                             @Override
                             public void onPaused() {
-                                toggleReactionsParentContainer(true, postId);
+                                addVideoStateToReactionParentContainer(true, postId);
                             }
 
                             @Override
                             public void onStopped() {
-                                toggleReactionsParentContainer(true, postId);
+                                addVideoStateToReactionParentContainer(true, postId);
                             }
 
                             @Override
                             public void onBuffering(boolean b) {
-                                toggleReactionsParentContainer(false, postId);
+                                addVideoStateToReactionParentContainer(false, postId);
                             }
 
                             @Override
@@ -627,18 +625,18 @@ public class BlogPostsView extends FrameLayout {
 
                             @Override
                             public void onVideoStarted() {
-                                toggleReactionsParentContainer(false, postId);
+                                addVideoStateToReactionParentContainer(false, postId);
 
                             }
 
                             @Override
                             public void onVideoEnded() {
-                                toggleReactionsParentContainer(true, postId);
+                                addVideoStateToReactionParentContainer(true, postId);
                             }
 
                             @Override
                             public void onError(YouTubePlayer.ErrorReason errorReason) {
-                                toggleReactionsParentContainer(true, postId);
+                                addVideoStateToReactionParentContainer(true, postId);
                             }
 
                         });
@@ -662,11 +660,6 @@ public class BlogPostsView extends FrameLayout {
     }
 
     private void invalidateView(String postId) {
-        if (AppConstants.reactionsBackgroundPositions.get(getPostHashCode(postId))) {
-            addReactionsContainer.setBackgroundColor(Color.parseColor("#00628F"));
-        } else {
-            addReactionsContainer.setBackgroundColor(Color.parseColor("#7b000000"));
-        }
         UiUtils.showView(reactionsCardView, AppConstants.reactionsOpenPositions.get(getPostHashCode(postId)));
         UiUtils.showView(feedCommentsCountView, AppConstants.commentPositions.get(getPostHashCode(postId)));
         UiUtils.showView(feedLikesCountView, AppConstants.likesPositions.get(getPostHashCode(postId)));
@@ -690,7 +683,7 @@ public class BlogPostsView extends FrameLayout {
                         UiUtils.showView(videoFragment, false);
                         UiUtils.showView(feedImageThumbnailView, true);
                         UiUtils.loadImage(activity, videoThumbnailPath, feedImageThumbnailView);
-                        toggleReactionsParentContainer(true, globalPostId);
+                        addVideoStateToReactionParentContainer(true, globalPostId);
                     }
                 }
             }
@@ -726,13 +719,8 @@ public class BlogPostsView extends FrameLayout {
         }
     }
 
-    private void toggleReactionsParentContainer(boolean show, String postId) {
-        UiUtils.showView(addReactionsContainer, show);
-        addReactionsContainer.setBackgroundColor(Color.parseColor("#00628F"));
+    private void addVideoStateToReactionParentContainer(boolean show, String postId) {
         AppConstants.reactionsBackgroundPositions.put(getPostHashCode(postId), true);
-        if (!show) {
-            UiUtils.showView(tintView, false);
-        }
     }
 
     private void setupAuthorAndPublishedDate(Activity activity, JSONObject author, String publishedDate) {
@@ -771,6 +759,7 @@ public class BlogPostsView extends FrameLayout {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     public void setupPostLikes(List<String> reactions, boolean signedInUserLikesPost, String signedInUserReactionValue) {
         UiUtils.showView(reactionsIndicatorLayout, true);
         setUpReactions(reactions);

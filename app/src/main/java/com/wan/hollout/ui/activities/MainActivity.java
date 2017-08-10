@@ -141,10 +141,11 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                     }
                     updateUserState(firebaseUser);
                     logUser(firebaseUser);
-                    invalidateDrawerMenuHeader();
                     if (authenticationDoneCallback != null) {
                         authenticationDoneCallback.done(true, null);
                     }
+                } else {
+                    invalidateDrawerMenuHeader();
                 }
             }
         };
@@ -175,9 +176,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         @SuppressLint("InflateParams") View oauthDialog = getLayoutInflater().inflate(R.layout.oauth_dialog, null);
         Button facebookLoginButton = ButterKnife.findById(oauthDialog, R.id.button_login_facebook);
         Button googleLoginButton = ButterKnife.findById(oauthDialog, R.id.button_login_google);
-        View dismissableView = ButterKnife.findById(oauthDialog, R.id.dismissable_fram);
+        View dismissibleView = ButterKnife.findById(oauthDialog, R.id.dismissable_fram);
         signInOptionsWindow = new RevealPopupWindow(oauthDialog, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        dismissableView.setOnClickListener(new View.OnClickListener() {
+        dismissibleView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (signInOptionsWindow.isShowing()) {
@@ -516,7 +517,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public void onAccountSelected() {
-
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            initiateAuthentication(null);
+        }
     }
 
     private void attemptLogOut() {

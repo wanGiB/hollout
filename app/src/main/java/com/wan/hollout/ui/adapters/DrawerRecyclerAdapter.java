@@ -115,6 +115,7 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 }
             } else {
                 viewHolderHeader.userName.setText(context.getString(R.string.not_logged_in));
+                viewHolderHeader.signedInUserImageView.setImageResource(R.drawable.user);
             }
         }
     }

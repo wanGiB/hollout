@@ -1,372 +1,351 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    android:orientation="vertical"
-    android:paddingTop="2dp">
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    app:cardElevation="0dp">
 
-    <android.support.v7.widget.CardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        app:cardElevation="6dp">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal">
+
+            <com.wan.hollout.ui.widgets.RoundedImageView
+                android:id="@+id/author_image"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="5dp"
+                android:src="@mipmap/ic_launcher" />
 
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <com.wan.hollout.ui.widgets.RoundedImageView
-                    android:id="@+id/author_image"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginTop="5dp"
-                    android:src="@mipmap/ic_launcher" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/author_name"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:text="@string/hollout_bot"
+                    android:textColor="@color/text_black"
+                    android:textSize="16sp"
+                    app:textStyle="medium" />
 
-                    <com.wan.hollout.ui.widgets.HolloutTextView
-                        android:id="@+id/author_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/hollout_bot"
-                        android:textColor="@color/text_black"
-                        android:textSize="16sp"
-                        app:textStyle="medium" />
-
-                    <com.wan.hollout.ui.widgets.HolloutTextView
-                        android:id="@+id/published_date"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingEnd="5dp"
-                        android:paddingLeft="2dp"
-                        android:paddingRight="5dp"
-                        android:paddingStart="2dp"
-                        android:textColor="@color/ease_gray"
-                        android:textSize="14sp"
-                        app:textStyle="medium"
-                        tools:ignore="RtlSymmetry" />
-
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginEnd="10dp"
-                    android:layout_marginRight="10dp"
-                    android:src="@drawable/ic_bookmark_black_48dp"
-                    tools:ignore="ContentDescription" />
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/published_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingEnd="5dp"
+                    android:paddingLeft="2dp"
+                    android:paddingRight="5dp"
+                    android:paddingStart="2dp"
+                    android:textColor="@color/ease_gray"
+                    android:textSize="14sp"
+                    app:textStyle="medium"
+                    tools:ignore="RtlSymmetry" />
 
             </LinearLayout>
 
-            <FrameLayout
-                android:id="@+id/frame_container"
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:src="@drawable/ic_bookmark_black_48dp"
+                tools:ignore="ContentDescription" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:background="@color/ease_gray"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <com.wan.hollout.ui.widgets.DynamicHeightImageView
+                android:id="@+id/feed_image_thumbnail"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:animateLayoutChanges="true"
-                android:clipChildren="false"
-                android:clipToPadding="false">
+                android:layout_height="200dp"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:visibility="visible"
+                tools:ignore="ContentDescription" />
 
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:background="@color/ease_gray">
+            <com.wan.hollout.ui.widgets.CircleImageView
+                android:id="@+id/play_media_if_video"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:src="@drawable/youtube_icon"
+                android:visibility="visible"
+                app:border_color="@color/white"
+                app:border_width="3dp"
+                tools:ignore="ContentDescription" />
 
-                    <com.wan.hollout.ui.widgets.DynamicHeightImageView
-                        android:id="@+id/feed_image_thumbnail"
-                        android:layout_width="match_parent"
-                        android:layout_height="300dp"
-                        android:adjustViewBounds="true"
-                        android:scaleType="centerCrop"
-                        android:visibility="visible"
-                        tools:ignore="ContentDescription" />
+            <FrameLayout
+                android:id="@+id/youtube_player_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="@color/black"
+                android:fitsSystemWindows="true"
+                android:visibility="gone" />
 
-                    <com.wan.hollout.ui.widgets.CircleImageView
-                        android:id="@+id/play_media_if_video"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/youtube_icon"
-                        android:visibility="visible"
-                        app:border_color="@color/white"
-                        app:border_width="3dp"
-                        tools:ignore="ContentDescription" />
+        </FrameLayout>
 
-                    <FrameLayout
-                        android:id="@+id/youtube_player_fragment"
-                        android:layout_width="match_parent"
-                        android:layout_height="300dp"
-                        android:background="@color/black"
-                        android:fitsSystemWindows="true"
-                        android:visibility="gone" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#fefefe"
+            android:orientation="horizontal">
 
-                </FrameLayout>
-
-                <View
-                    android:id="@+id/tint_vew"
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp"
-                    android:background="#1b000000" />
-
-                <LinearLayout
-                    android:id="@+id/add_reactions_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:animateLayoutChanges="true"
-                    android:background="#7b000000"
-                    android:clipChildren="false"
-                    android:clipToPadding="false"
-                    android:orientation="vertical"
-                    android:padding="10dp">
-
-                    <RelativeLayout
-                        android:id="@+id/reactions_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <FrameLayout
-                            android:id="@+id/post_reaction_indicators_layout"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:paddingBottom="10dp"
-                            android:visibility="gone">
-
-                        </FrameLayout>
-
-                        <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/feed_likes_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_toEndOf="@id/post_reaction_indicators_layout"
-                            android:layout_toRightOf="@id/post_reaction_indicators_layout"
-                            android:gravity="center_vertical"
-                            android:paddingBottom="10dp"
-                            android:textColor="@color/gray20"
-                            android:textSize="13sp"
-                            android:visibility="gone"
-                            app:textStyle="medium"
-                            tools:ignore="RtlSymmetry" />
-
-                        <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/feed_comments_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerVertical="true"
-                            android:layout_toEndOf="@id/feed_likes_count"
-                            android:layout_toRightOf="@id/feed_likes_count"
-                            android:gravity="center_vertical"
-                            android:paddingBottom="10dp"
-                            android:paddingLeft="10dp"
-                            android:paddingStart="10dp"
-                            android:textColor="@color/gray20"
-                            android:textSize="13sp"
-                            android:visibility="gone"
-                            app:textStyle="medium"
-                            tools:ignore="RtlSymmetry" />
-
-                        <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/feed_views"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentRight="true"
-                            android:layout_centerVertical="true"
-                            android:gravity="center_vertical"
-                            android:paddingBottom="10dp"
-                            android:paddingLeft="10dp"
-                            android:paddingStart="10dp"
-                            android:textColor="@color/gray20"
-                            android:textSize="13sp"
-                            android:visibility="gone"
-                            app:textStyle="medium"
-                            tools:ignore="RelativeOverlap,RtlSymmetry" />
-
-                    </RelativeLayout>
-
-                    <android.support.v7.widget.CardView
-                        android:id="@+id/reactions_pop_up_card_view"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="top"
-                        android:layout_marginBottom="1dp"
-                        android:background="@android:color/white"
-                        android:paddingEnd="10dp"
-                        android:paddingLeft="10dp"
-                        android:paddingRight="10dp"
-                        android:paddingStart="10dp"
-                        android:visibility="gone"
-                        app:cardCornerRadius="20dp"
-                        app:cardUseCompatPadding="false">
-
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/reactions_pop_up_recycler_view"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                    </android.support.v7.widget.CardView>
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipChildren="false"
-                        android:clipToPadding="false">
-
-                        <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/like_feed"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentLeft="true"
-                            android:layout_alignParentStart="true"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/action_items_background"
-                            android:clickable="true"
-                            android:gravity="center_horizontal"
-                            android:maxWidth="200dp"
-                            android:paddingBottom="6dp"
-                            android:paddingEnd="16dp"
-                            android:paddingLeft="16dp"
-                            android:paddingRight="16dp"
-                            android:paddingStart="16dp"
-                            android:paddingTop="6dp"
-                            android:text="@string/fa_icon_heart"
-                            android:textColor="@color/whitesmoke"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:textStyle="font_awesome"
-                            tools:ignore="RtlSymmetry" />
-
-                        <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/comment_on_feed"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true"
-                            android:layout_gravity="center_vertical"
-                            android:background="@drawable/action_items_background"
-                            android:gravity="center_horizontal"
-                            android:maxWidth="200dp"
-                            android:paddingBottom="6dp"
-                            android:paddingEnd="16dp"
-                            android:paddingLeft="16dp"
-                            android:paddingRight="16dp"
-                            android:paddingStart="16dp"
-                            android:paddingTop="6dp"
-                            android:text="@string/fa_icon_comment"
-                            android:textColor="@color/whitesmoke"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:textStyle="font_awesome" />
-
-                        <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/share_feed"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_alignParentRight="true"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginRight="10dp"
-                            android:background="@drawable/action_items_background"
-                            android:gravity="center_vertical"
-                            android:maxWidth="200dp"
-                            android:paddingBottom="6dp"
-                            android:paddingEnd="16dp"
-                            android:paddingLeft="16dp"
-                            android:paddingRight="16dp"
-                            android:paddingStart="16dp"
-                            android:paddingTop="6dp"
-                            android:text="@string/fa_icon_share"
-                            android:textColor="@color/whitesmoke"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            app:textStyle="font_awesome"
-                            tools:ignore="RelativeOverlap" />
-
-                    </RelativeLayout>
-
-                </LinearLayout>
-
-            </FrameLayout>
+            <View
+                android:id="@+id/vertical_feed_divider"
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="6dp"
+                android:layout_marginLeft="4dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="6dp"
+                android:background="@color/colorBlue" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#fefefe"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
                 android:orientation="horizontal">
 
-                <View
-                    android:id="@+id/vertical_feed_divider"
-                    android:layout_width="2dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginBottom="6dp"
-                    android:layout_marginLeft="4dp"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginTop="6dp"
-                    android:background="@color/colorBlue" />
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/feed_title"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:background="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:orientation="horizontal">
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:padding="8dp"
+                    android:paddingEnd="16dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="16dp"
+                    android:paddingStart="5dp"
+                    android:textColor="@color/gray70"
+                    android:textSize="16sp"
+                    app:textStyle="medium" />
 
-                    <com.wan.hollout.ui.widgets.HolloutTextView
-                        android:id="@+id/feed_title"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_weight="1"
-                        android:ellipsize="end"
-                        android:maxLines="2"
-                        android:padding="8dp"
-                        android:paddingEnd="16dp"
-                        android:paddingLeft="5dp"
-                        android:paddingRight="16dp"
-                        android:paddingStart="5dp"
-                        android:textColor="@color/gray70"
-                        android:textSize="16sp"
-                        app:textStyle="medium" />
-
-                    <ImageView
-                        android:id="@+id/feed_bookmark"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end|center_vertical"
-                        android:layout_marginEnd="10dp"
-                        android:layout_marginRight="10dp"
-                        android:src="@drawable/ic_chevron_right_black_24dp"
-                        tools:ignore="ContentDescription,RtlSymmetry" />
-
-                </LinearLayout>
+                <ImageView
+                    android:id="@+id/feed_bookmark"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginRight="10dp"
+                    android:src="@drawable/ic_chevron_right_black_24dp"
+                    tools:ignore="ContentDescription,RtlSymmetry" />
 
             </LinearLayout>
 
         </LinearLayout>
 
-    </android.support.v7.widget.CardView>
+        <LinearLayout
+            android:id="@+id/add_reactions_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:animateLayoutChanges="true"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="vertical"
+            android:padding="10dp">
 
-</FrameLayout>
+            <RelativeLayout
+                android:id="@+id/reactions_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <FrameLayout
+                    android:id="@+id/post_reaction_indicators_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:paddingBottom="10dp"
+                    android:visibility="gone">
+
+                </FrameLayout>
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/feed_likes_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/post_reaction_indicators_layout"
+                    android:layout_toRightOf="@id/post_reaction_indicators_layout"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="10dp"
+                    android:textColor="@color/gray70"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    app:textStyle="medium"
+                    tools:ignore="RtlSymmetry" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/feed_comments_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/feed_likes_count"
+                    android:layout_toRightOf="@id/feed_likes_count"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingStart="10dp"
+                    android:textColor="@color/gray70"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    app:textStyle="medium"
+                    tools:ignore="RtlSymmetry" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/feed_views"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingStart="10dp"
+                    android:textColor="@color/gray70"
+                    android:textSize="13sp"
+                    android:visibility="gone"
+                    app:textStyle="medium"
+                    tools:ignore="RelativeOverlap,RtlSymmetry" />
+
+            </RelativeLayout>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/reactions_pop_up_card_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_marginBottom="2dp"
+                android:background="@android:color/white"
+                android:paddingEnd="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingStart="10dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/whitesmoke"
+                app:cardCornerRadius="20dp"
+                app:cardUseCompatPadding="false">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/reactions_pop_up_recycler_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </android.support.v7.widget.CardView>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/like_feed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/action_items_background"
+                    android:clickable="true"
+                    android:gravity="center_horizontal"
+                    android:maxWidth="200dp"
+                    android:paddingBottom="6dp"
+                    android:paddingEnd="16dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingTop="6dp"
+                    android:text="@string/fa_icon_heart"
+                    android:textColor="#888888"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:textStyle="font_awesome"
+                    tools:ignore="RtlSymmetry" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/comment_on_feed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:layout_gravity="center_vertical"
+                    android:background="@drawable/action_items_background"
+                    android:gravity="center_horizontal"
+                    android:maxWidth="200dp"
+                    android:paddingBottom="6dp"
+                    android:paddingEnd="16dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingTop="6dp"
+                    android:text="@string/fa_icon_comment"
+                    android:textColor="#888888"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:textStyle="font_awesome" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/share_feed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@drawable/action_items_background"
+                    android:gravity="center_vertical"
+                    android:maxWidth="200dp"
+                    android:paddingBottom="6dp"
+                    android:paddingEnd="16dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="16dp"
+                    android:paddingStart="16dp"
+                    android:paddingTop="6dp"
+                    android:text="@string/fa_icon_share"
+                    android:textColor="#888888"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    app:textStyle="font_awesome"
+                    tools:ignore="RelativeOverlap" />
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
