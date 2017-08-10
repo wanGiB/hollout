@@ -19,29 +19,29 @@
             android:id="@+id/search_top_bar"
             android:layout_width="match_parent"
             android:layout_height="45dp"
-            android:orientation="horizontal"
-            android:background="@android:color/white">
+            android:background="@android:color/white"
+            android:orientation="horizontal">
 
             <ImageView
-                android:id="@+id/action_up_btn"
-                android:contentDescription="@null"
                 android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="16dp"
                 android:layout_marginStart="16dp"
-                android:layout_height="20dp"
+                android:contentDescription="@null"
                 android:src="@drawable/ic_search_grey_48dp" />
 
             <EditText
                 android:id="@+id/searchTextView"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:background="@null"
-                android:hint="@string/search_here"
+                android:layout_gravity="center_vertical"
                 android:layout_weight="1"
+                android:background="@null"
+                android:cursorVisible="false"
+                android:hint="@string/search_here"
                 android:imeOptions="actionSearch"
                 android:inputType="textNoSuggestions"
-                android:layout_gravity="center_vertical"
                 android:paddingLeft="14dp"
                 android:paddingRight="14dp"
                 android:textColor="#212121"
@@ -50,14 +50,14 @@
 
             <ImageView
                 android:id="@+id/action_empty_btn"
-                android:contentDescription="@null"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
+                android:layout_gravity="center_vertical"
                 android:layout_marginEnd="16dp"
                 android:layout_marginRight="16dp"
-                android:visibility="gone"
-                android:layout_gravity="center_vertical"
-                android:src="@drawable/ic_action_navigation_close" />
+                android:contentDescription="@null"
+                android:src="@drawable/ic_action_navigation_close"
+                android:visibility="gone" />
 
         </LinearLayout>
 

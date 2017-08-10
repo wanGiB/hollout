@@ -5,6 +5,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 
+import com.wan.hollout.layoutmanagers.chipslayoutmanager.ChipsLayoutManager;
+
 /**
  * @author Wan Clem
  */
@@ -24,6 +26,10 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
     private RecyclerView.LayoutManager mLayoutManager;
 
     public EndlessRecyclerViewScrollListener(LinearLayoutManager layoutManager) {
+        this.mLayoutManager = layoutManager;
+    }
+
+    public EndlessRecyclerViewScrollListener(ChipsLayoutManager layoutManager) {
         this.mLayoutManager = layoutManager;
     }
 
@@ -65,6 +71,8 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
             lastVisibleItemPosition = ((LinearLayoutManager) mLayoutManager).findLastVisibleItemPosition();
         } else if (mLayoutManager instanceof GridLayoutManager) {
             lastVisibleItemPosition = ((GridLayoutManager) mLayoutManager).findLastVisibleItemPosition();
+        }else if (mLayoutManager instanceof ChipsLayoutManager){
+            lastVisibleItemPosition = ((ChipsLayoutManager)mLayoutManager).findLastVisibleItemPosition();
         }
 
         // If the total item count is zero and the previous isn't, assume the

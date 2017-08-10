@@ -8,6 +8,14 @@
     android:background="@color/white"
     android:orientation="vertical">
 
+    <com.pnikosis.materialishprogress.ProgressWheel
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_gravity="center"
+        app:barColor="@color/white"
+        app:progressIndeterminate="true"
+        app:rimColor="@color/ease_gray" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -46,7 +54,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="16dp"
                 android:layout_marginRight="16dp"
-                android:src="@drawable/ic_done_black_48dp" />
+                android:src="@drawable/ic_done_black_48dp"
+                tools:ignore="ContentDescription" />
 
         </LinearLayout>
 
@@ -110,13 +119,5 @@
             android:background="@color/white" />
 
     </RelativeLayout>
-
-    <com.pnikosis.materialishprogress.ProgressWheel
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_gravity="center"
-        app:barColor="@color/white"
-        app:progressIndeterminate="true"
-        app:rimColor="@color/ease_gray" />
 
 </ViewFlipper>
