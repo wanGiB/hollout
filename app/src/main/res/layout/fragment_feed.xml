@@ -4,7 +4,7 @@
     android:id="@+id/feedContentFlipper"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#eaeaea">
+    android:background="#dddddd">
 
     <FrameLayout
         android:id="@+id/progress_frame"

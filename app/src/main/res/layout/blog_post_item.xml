@@ -204,6 +204,7 @@
                     android:textSize="13sp"
                     android:visibility="gone"
                     app:textStyle="medium"
+                    android:drawablePadding="2dp"
                     tools:ignore="RtlSymmetry" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
