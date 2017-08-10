@@ -304,9 +304,7 @@ public class BlogPostsView extends FrameLayout {
 
     private void handleLikesOnClickListener(final String postId) {
         if (reactionsCardView.getVisibility() == VISIBLE) {
-            UiUtils.showView(reactionsCardView, false);
-            AppConstants.ARE_REACTIONS_OPEN = false;
-            addReactionValueToInvalidator(false);
+            closeReactionsPopUp();
         } else {
             if (currentUser == null) {
                 ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
@@ -355,13 +353,17 @@ public class BlogPostsView extends FrameLayout {
                 if (o instanceof String) {
                     String message = (String) o;
                     if (message.equals(AppConstants.CLOSE_REACTIONS)) {
-                        UiUtils.showView(reactionsCardView, false);
-                        AppConstants.ARE_REACTIONS_OPEN = false;
-                        addReactionValueToInvalidator(false);
+                        closeReactionsPopUp();
                     }
                 }
             }
         });
+    }
+
+    private void closeReactionsPopUp() {
+        UiUtils.showView(reactionsCardView, false);
+        AppConstants.ARE_REACTIONS_OPEN = false;
+        addReactionValueToInvalidator(false);
     }
 
     private void addReactionValueToInvalidator(boolean value) {
@@ -495,9 +497,7 @@ public class BlogPostsView extends FrameLayout {
                     feedImageThumbnailView.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            UiUtils.showView(reactionsCardView, false);
-                            AppConstants.ARE_REACTIONS_OPEN = false;
-                            addReactionValueToInvalidator(false);
+                            closeReactionsPopUp();
                         }
                     });
                 }
@@ -520,9 +520,7 @@ public class BlogPostsView extends FrameLayout {
                     feedImageThumbnailView.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            UiUtils.showView(reactionsCardView, false);
-                            AppConstants.ARE_REACTIONS_OPEN = false;
-                            addReactionValueToInvalidator(false);
+                            closeReactionsPopUp();
                             playMediaIfVideo.performClick();
                         }
                     });
@@ -717,6 +715,7 @@ public class BlogPostsView extends FrameLayout {
         } catch (NullPointerException ignored) {
 
         }
+        closeReactionsPopUp();
     }
 
     private void addVideoStateToReactionParentContainer(boolean show, String postId) {
@@ -778,9 +777,7 @@ public class BlogPostsView extends FrameLayout {
                 @Override
                 public void onClick(View view) {
                     if (reactionsCardView.getVisibility() == VISIBLE) {
-                        UiUtils.showView(reactionsCardView, false);
-                        AppConstants.ARE_REACTIONS_OPEN = false;
-                        addReactionValueToInvalidator(false);
+                        closeReactionsPopUp();
                     } else {
                         FirebaseUtils.getLikesReference(globalPostId + "/" + AppConstants.REACTORS + "/" + currentUser.getUid())
                                 .removeValue(new DatabaseReference.CompletionListener() {

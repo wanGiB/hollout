@@ -148,12 +148,11 @@
                     android:paddingLeft="5dp"
                     android:paddingRight="16dp"
                     android:paddingStart="5dp"
-                    android:textColor="@color/gray70"
+                    android:textColor="@color/text_black"
                     android:textSize="16sp"
                     app:textStyle="medium" />
 
                 <ImageView
-                    android:id="@+id/feed_bookmark"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end|center_vertical"
@@ -255,7 +254,7 @@
                 android:paddingRight="10dp"
                 android:paddingStart="10dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="@color/whitesmoke"
+                app:cardBackgroundColor="@color/ease_white"
                 app:cardCornerRadius="20dp"
                 app:cardUseCompatPadding="false">
 
