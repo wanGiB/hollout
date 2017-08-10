@@ -1,123 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.wan.hollout.ui.widgets.ScrimInsetsFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.wan.hollout.ui.activities.WelcomeActivity">
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
 
-    <ImageView
+    <com.wan.hollout.ui.widgets.ScrimInsetsFrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:src="@drawable/authentication_background_image"
-        tools:ignore="ContentDescription" />
+        android:layout_height="wrap_content"
+        android:fitsSystemWindows="true"
+        tools:context="com.wan.hollout.ui.activities.WelcomeActivity">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#da143d52" />
-
-    <RelativeLayout
-        android:id="@+id/splash_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipChildren="false"
-        android:clipToPadding="false">
-
-        <LinearLayout
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/authentication_background_image"
+            tools:ignore="ContentDescription" />
 
-            <com.wan.hollout.ui.widgets.ShimmerFrameLayout
-                android:id="@+id/shimmer_view_container"
-                android:layout_width="wrap_content"
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#9b000000" />
+
+        <RelativeLayout
+            android:id="@+id/splash_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginBottom="15dp"
-                android:layout_marginLeft="3dp"
-                android:layout_marginStart="3dp"
-                android:layout_marginTop="5dp"
-                android:padding="10dp"
-                app:base_alpha="0.8"
-                app:duration="2500">
+                android:layout_centerInParent="true"
+                android:orientation="vertical">
+
+                <com.wan.hollout.ui.widgets.ShimmerFrameLayout
+                    android:id="@+id/shimmer_view_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginTop="5dp"
+                    android:padding="10dp"
+                    app:base_alpha="0.8"
+                    app:duration="2500">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.wan.hollout.ui.widgets.HolloutTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/clobb"
+                            android:textColor="@color/ease_white"
+                            android:textSize="25sp"
+                            app:textStyle="bold" />
+
+                        <com.wan.hollout.ui.widgets.HolloutTextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/it"
+                            android:textColor="@color/light_gray"
+                            android:textSize="25sp"
+                            app:textStyle="light" />
+
+                    </LinearLayout>
+
+                </com.wan.hollout.ui.widgets.ShimmerFrameLayout>
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/app_intro_message"
+                    style="@style/TextAppearance.Welcome"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="30dp"
+                    android:gravity="center_horizontal"
+                    android:lineSpacingExtra="1.1dp"
+                    android:lineSpacingMultiplier="1.2"
+                    android:paddingEnd="20dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingStart="20dp"
+                    android:text="@string/app_intro_message"
+                    android:textColor="@color/gray5"
+                    app:textStyle="medium" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="20dp"
+                    android:clipToPadding="false"
                     android:orientation="horizontal">
 
                     <com.wan.hollout.ui.widgets.HolloutTextView
+                        style="@style/TextAppearance.Welcome"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/clobb"
-                        android:textColor="@color/ease_white"
-                        android:textSize="25sp"
-                        app:textStyle="bold" />
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:lineSpacingExtra="1.1dp"
+                        android:lineSpacingMultiplier="1.2"
+                        android:paddingLeft="20dp"
+                        android:paddingStart="20dp"
+                        android:text="Find"
+                        android:textColor="@color/white" />
 
                     <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/typing_text_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/it"
-                        android:textColor="@color/light_gray"
-                        android:textSize="25sp"
-                        app:textStyle="light" />
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:lineSpacingExtra="1.1dp"
+                        android:lineSpacingMultiplier="1.2"
+                        android:paddingLeft="20dp"
+                        android:paddingStart="20dp"
+                        android:textColor="@color/hollout_color_three"
+                        android:textSize="20sp"
+                        app:charIncrease="4"
+                        app:textStyle="bold"
+                        app:text_animationStyle="typed"
+                        app:typerSpeed="50"
+                        tools:ignore="RtlSymmetry" />
+
+                    <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/blinking_divider"
+                        style="@style/TextAppearance.Welcome"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical"
+                        android:text="@string/animated_text_contents_divider"
+                        android:textColor="@color/whitesmoke"
+                        app:textStyle="medium" />
 
                 </LinearLayout>
 
-            </com.wan.hollout.ui.widgets.ShimmerFrameLayout>
+            </LinearLayout>
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/app_intro_message"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/bottom_view"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:gravity="center_horizontal"
-                android:lineSpacingExtra="1.1dp"
-                android:lineSpacingMultiplier="1.2"
-                android:paddingEnd="20dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:paddingStart="20dp"
-                android:text="@string/app_intro_message"
-                android:textColor="@color/gray5"
-                android:textSize="17sp"
-                app:textStyle="medium" />
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="65dp"
+                android:orientation="vertical"
+                android:padding="10dp">
 
-        </LinearLayout>
+                <Button
+                    android:id="@+id/button_login_facebook"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:drawableLeft="@drawable/glyph_facebook"
+                    android:drawableStart="@drawable/glyph_facebook"
+                    android:gravity="center"
+                    android:text="@string/btn_text_login_fb"
+                    android:theme="@style/Widget.Button.Login.Facebook" />
 
-        <LinearLayout
-            android:id="@+id/bottom_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="65dp"
-            android:orientation="vertical"
-            android:padding="10dp">
+                <Button
+                    android:id="@+id/button_login_google"
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:drawableLeft="@drawable/glyph_google"
+                    android:drawableStart="@drawable/glyph_google"
+                    android:gravity="center"
+                    android:text="@string/btn_text_login_google"
+                    android:theme="@style/Widget.Button.Login.Google" />
 
-            <com.wan.hollout.ui.widgets.HolloutButton
-                android:id="@+id/button_start_here"
-                android:layout_width="330dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/get_started_button_background"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:gravity="center"
-                android:padding="10dp"
-                android:text="@string/start_here"
-                android:textColor="@color/colorBlue"
-                android:theme="@style/Widget.Button.Login.StartHere"
-                app:textStyle="bold" />
+            </LinearLayout>
 
-        </LinearLayout>
+        </RelativeLayout>
 
-    </RelativeLayout>
+    </com.wan.hollout.ui.widgets.ScrimInsetsFrameLayout>
 
-</com.wan.hollout.ui.widgets.ScrimInsetsFrameLayout>
+</ScrollView>
+

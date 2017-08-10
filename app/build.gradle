@@ -103,7 +103,6 @@ dependencies {
     compile 'com.github.machinarius:preferencefragment:0.1.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.8.0'
     compile 'org.greenrobot:eventbus:3.0.0'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:multidex:1.0.1'
     compile 'org.apmem.tools:layouts:1.10@aar'
     compile 'com.bartoszlipinski:viewpropertyobjectanimator:1.2.0'
@@ -114,11 +113,12 @@ dependencies {
     compile 'org.jsoup:jsoup:1.10.3'
     compile 'com.liucanwen.app:headerfooterrecyclerview:1.0.0'
     compile 'joda-time:joda-time:2.9.9'
-    compile 'com.airbnb.android:lottie:2.1.2'
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.esotericsoftware:kryo:4.0.0'
+    compile 'com.parse:parse-livequery-android:1.0.4'
+    compile 'com.parse:parse-android:1.15.8'
 }
 
 apply plugin: 'com.google.gms.google-services'

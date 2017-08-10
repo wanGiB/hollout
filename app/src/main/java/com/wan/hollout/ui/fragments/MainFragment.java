@@ -89,8 +89,8 @@ public class MainFragment extends Fragment {
 
     private Adapter setupViewPagerAdapter(ViewPager viewPager) {
         Adapter adapter = new Adapter(getActivity(), getChildFragmentManager());
-        adapter.addFragment(new FeedFragment(), this.getString(R.string.feed));
-        adapter.addFragment(new PeopleFragment(), this.getString(R.string.people));
+        adapter.addFragment(new PeopleFragment(), this.getString(R.string.feed));
+        adapter.addFragment(new ChatsFragment(), this.getString(R.string.people));
         viewPager.setAdapter(adapter);
         return adapter;
     }

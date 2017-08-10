@@ -3,7 +3,6 @@ package com.wan.hollout.ui.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -15,14 +14,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
 import com.wan.hollout.interfaces.DrawerRecyclerInterface;
 import com.wan.hollout.listeners.OnSingleClickListener;
 import com.wan.hollout.ui.widgets.CircleImageView;
+import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.UiUtils;
 
 import java.util.ArrayList;
@@ -104,14 +103,14 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         } else if (holder instanceof ViewHolderHeader) {
             ViewHolderHeader viewHolderHeader = (ViewHolderHeader) holder;
 
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            ParseUser user = ParseUser.getCurrentUser();
             if (user != null) {
-                viewHolderHeader.userName.setText(user.getDisplayName());
-                Uri userProfilePhotoUrl = user.getPhotoUrl();
+                viewHolderHeader.userName.setText(user.getString(AppConstants.USER_DISPLAY_NAME));
+                String userProfilePhotoUrl = user.getString(AppConstants.USER_PHOTO_URL);
                 if (userProfilePhotoUrl != null) {
                     viewHolderHeader.signedInUserImageView.setBorderColor(Color.WHITE);
                     viewHolderHeader.signedInUserImageView.setBorderWidth(5);
-                    UiUtils.loadImage((Activity) context, userProfilePhotoUrl.toString(), viewHolderHeader.signedInUserImageView);
+                    UiUtils.loadImage((Activity) context, userProfilePhotoUrl, viewHolderHeader.signedInUserImageView);
                 }
             } else {
                 viewHolderHeader.userName.setText(context.getString(R.string.not_logged_in));

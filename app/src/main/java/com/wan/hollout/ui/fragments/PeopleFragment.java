@@ -3,11 +3,13 @@ package com.wan.hollout.ui.fragments;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,18 +18,24 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.ViewFlipper;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.skyfishjy.library.RippleBackground;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
+import com.wan.hollout.models.HolloutObject;
+import com.wan.hollout.ui.adapters.FeedAdapter;
+import com.wan.hollout.ui.widgets.HolloutTextView;
+import com.wan.hollout.utils.ApiUtils;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AppKeys;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.UiUtils;
 
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -35,8 +43,25 @@ import butterknife.ButterKnife;
 /**
  * @author Wan Clem
  */
-
 public class PeopleFragment extends Fragment {
+
+    private List<HolloutObject> blogPosts = new ArrayList<>();
+    private FeedAdapter feedAdapter;
+
+    @BindView(R.id.people_recycler_view)
+    RecyclerView feedRecyclerView;
+
+    @BindView(R.id.content_flipper)
+    ViewFlipper contentFlipper;
+
+    @BindView(R.id.error_message)
+    HolloutTextView errorMessageView;
+
+    @BindView(R.id.retry)
+    HolloutTextView retryButton;
+
+    @BindView(R.id.swipe_refresh_layout)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @BindView(R.id.ripple_background)
     RippleBackground rippleBackground;
@@ -53,72 +78,56 @@ public class PeopleFragment extends Fragment {
     @BindView(R.id.fourth_person)
     ImageView fourthPerson;
 
-    @BindView(R.id.content_flipper)
-    ViewFlipper contentFlipper;
+    private View loadingFooterView;
+    private String TAG = "PeopleFragment";
 
-    @BindView(R.id.swipe_refresh_layout)
-    SwipeRefreshLayout swipeRefreshLayout;
-
-    @BindView(R.id.people_recycler_view)
-    RecyclerView peopleRecyclerView;
+    private boolean loadingPeople = false;
 
     private Handler handler = new Handler();
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View peopleView = inflater.inflate(R.layout.fragment_people, container, false);
-        ButterKnife.bind(this, peopleView);
-        return peopleView;
+        View feedView = inflater.inflate(R.layout.fragment_people, container, false);
+        ButterKnife.bind(this, feedView);
+        return feedView;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        UiUtils.setUpRefreshColorSchemes(getActivity(), swipeRefreshLayout);
-        rippleBackground.startRippleAnimation();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                foundDevice(firstPerson);
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        delayAndAnimateFoundView(secondPerson);
+        if (getActivity() != null) {
+            UiUtils.setUpRefreshColorSchemes(getActivity(), swipeRefreshLayout);
+            rippleBackground.startRippleAnimation();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    foundDevice(firstPerson);
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            delayAndAnimateFoundView(secondPerson);
+                        }
+                    }, 3000);
+                }
+            }, 3000);
+            setupAdapter();
+            fetchPeopleAround();
+            swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    if (!loadingPeople) {
+                        fetchPeopleAround();
                     }
-                }, 3000);
-            }
-        }, 3000);
-        checkAndRegEventBus();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        checkAndRegEventBus();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        checkAnUnRegEventBus();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        checkAnUnRegEventBus();
-    }
-
-    private void checkAndRegEventBus() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    private void checkAnUnRegEventBus() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
+                }
+            });
+            retryButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    UiUtils.toggleFlipperState(contentFlipper, 0);
+                    fetchPeopleAround();
+                }
+            });
         }
     }
 
@@ -129,25 +138,6 @@ public class PeopleFragment extends Fragment {
                 foundDevice(view);
             }
         }, 3000);
-    }
-
-    @SuppressWarnings("unused")
-    @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
-    public void onEventAsync(final Object o) {
-        UiUtils.runOnMain(new Runnable() {
-            @Override
-            public void run() {
-                if (o instanceof String) {
-                    String message = (String) o;
-                    if (message.equals(AppConstants.JUST_AUTHENTICATED)) {
-                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                        if (firebaseUser == null) {
-                            UiUtils.toggleFlipperState(contentFlipper, 0);
-                        }
-                    }
-                }
-            }
-        });
     }
 
     private void foundDevice(View foundDevice) {
@@ -162,6 +152,106 @@ public class PeopleFragment extends Fragment {
         animatorSet.playTogether(animatorList);
         foundDevice.setVisibility(View.VISIBLE);
         animatorSet.start();
+    }
+
+    private void fetchPeopleAround() {
+        loadingPeople = true;
+        ApiUtils.fetchBlogPosts(AppKeys.GENERAL_BLOG_ID, null, new DoneCallback<List<HolloutObject>>() {
+            @Override
+            public void done(final List<HolloutObject> result, final Exception e) {
+                feedRecyclerView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (e == null) {
+                            if (result != null) {
+                                if (!result.isEmpty()) {
+                                    UiUtils.toggleFlipperState(contentFlipper, 2);
+                                    populateBlogs(result);
+                                }
+                            }
+                        } else {
+                            if (blogPosts.isEmpty()) {
+                                UiUtils.toggleFlipperState(contentFlipper, 1);
+                                String errorMessage = e.getMessage();
+                                if (StringUtils.isNotEmpty(errorMessage)) {
+                                    if (!errorMessage.contains("resolve host") && !errorMessage.contains("failed to connect") && !errorMessage.contains("i/o")) {
+                                        errorMessageView.setText(errorMessage);
+                                    } else {
+                                        errorMessageView.setText(getString(R.string.screwed_data_error_message));
+                                    }
+                                } else {
+                                    errorMessageView.setText(getString(R.string.screwed_data_error_message));
+                                }
+                            } else {
+                                UiUtils.showSafeToast("Error fetching more feeds. Please review your data connection");
+                            }
+                        }
+                        loadingPeople = false;
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                });
+            }
+        });
+    }
+
+    private void populateBlogs(List<HolloutObject> result) {
+        for (HolloutObject jsonObject : result) {
+            if (!blogPosts.contains(jsonObject)) {
+                blogPosts.add(jsonObject);
+                try {
+                    feedAdapter.notifyItemInserted(blogPosts.size() - 1);
+                } catch (IllegalStateException ie) {
+                    HolloutLogger.d(TAG, ie.getMessage());
+                }
+            }
+        }
+    }
+
+    @SuppressLint("InflateParams")
+    public void setupAdapter() {
+        feedAdapter = new FeedAdapter(getActivity(), blogPosts);
+        HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(feedAdapter);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        feedRecyclerView.setLayoutManager(linearLayoutManager);
+        feedRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
+
+        loadingFooterView = getActivity().getLayoutInflater().inflate(R.layout.loading_footer, null);
+        headerAndFooterRecyclerViewAdapter.addFooterView(loadingFooterView);
+        UiUtils.showView(loadingFooterView, false);
+
+        feedRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                UiUtils.showView(loadingFooterView, true);
+                if (!blogPosts.isEmpty()) {
+                    HolloutObject lastBlogPost = blogPosts.get(blogPosts.size() - 1);
+                    if (lastBlogPost != null) {
+                        String nextPageToken = lastBlogPost.getJsonObject().optString(AppConstants.NEXT_PAGE_TOKEN);
+                        if (StringUtils.isNotEmpty(nextPageToken)) {
+                            ApiUtils.fetchBlogPosts(AppKeys.GENERAL_BLOG_ID, nextPageToken,
+                                    new DoneCallback<List<HolloutObject>>() {
+                                        @Override
+                                        public void done(final List<HolloutObject> result, final Exception e) {
+                                            feedRecyclerView.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    if (e == null) {
+                                                        if (result != null) {
+                                                            if (!result.isEmpty()) {
+                                                                populateBlogs(result);
+                                                            }
+                                                        }
+                                                    }
+                                                    UiUtils.showView(loadingFooterView, false);
+                                                }
+                                            });
+                                        }
+                                    });
+                        }
+                    }
+                }
+            }
+        });
     }
 
 }

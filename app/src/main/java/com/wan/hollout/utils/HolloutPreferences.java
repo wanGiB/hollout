@@ -89,4 +89,27 @@ public class HolloutPreferences {
     public static void setAuthenticated() {
         getHolloutPreferences().edit().putBoolean(AppConstants.AUTHENTICATED, true).commit();
     }
+
+    public static String getAvailableUsername() {
+        return getHolloutPreferences().getString(AppConstants.APP_USER_NAME, null);
+    }
+
+    public static String getAvailablePassword() {
+        return getHolloutPreferences().getString(AppConstants.APP_USER_PASSWORD, null);
+    }
+
+    public static void persistCredentials(String username, String password) {
+        SharedPreferences.Editor editor = getHolloutPreferences().edit();
+        editor.putString(AppConstants.APP_USER_NAME, username);
+        editor.putString(AppConstants.APP_USER_PASSWORD, password);
+        editor.commit();
+    }
+
+    public static void clearPersistedCredentials() {
+        SharedPreferences.Editor editor = getHolloutPreferences().edit();
+        editor.putString(AppConstants.APP_USER_NAME, null);
+        editor.putString(AppConstants.APP_USER_PASSWORD, null);
+        editor.commit();
+    }
+
 }

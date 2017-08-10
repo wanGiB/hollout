@@ -5,157 +5,130 @@
     android:id="@+id/content_flipper"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
-    android:orientation="vertical">
+    android:background="#dddddd">
 
-    <android.support.v4.widget.NestedScrollView
+    <com.skyfishjy.library.RippleBackground
+        android:id="@+id/ripple_background"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:fillViewport="true"
-        android:fitsSystemWindows="true"
-        android:overScrollMode="ifContentScrolls">
+        app:rb_color="#eeeeee"
+        app:rb_duration="3000"
+        app:rb_radius="32dp"
+        app:rb_rippleAmount="6"
+        app:rb_scale="6">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/centerImage"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/web_hi_res_512"
+            tools:ignore="ContentDescription" />
+
+        <com.wan.hollout.ui.widgets.CircleImageView
+            android:id="@+id/first_person"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_above="@id/centerImage"
+            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_toLeftOf="@id/centerImage"
+            android:layout_toStartOf="@id/centerImage"
+            android:src="@drawable/authentication_background_image"
+            android:visibility="invisible"
+            app:border_color="@android:color/white"
+            app:border_width="3dp" />
+
+        <com.wan.hollout.ui.widgets.CircleImageView
+            android:id="@+id/second_person"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_above="@id/centerImage"
+            android:layout_marginBottom="32dp"
+            android:layout_marginLeft="6dp"
+            android:layout_marginStart="6dp"
+            android:layout_toEndOf="@id/centerImage"
+            android:layout_toRightOf="@id/centerImage"
+            android:src="@drawable/authentication_background_image"
+            android:visibility="invisible"
+            app:border_color="@android:color/white"
+            app:border_width="3dp" />
+
+        <com.wan.hollout.ui.widgets.CircleImageView
+            android:id="@+id/third_person"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_below="@id/centerImage"
+            android:layout_marginLeft="6dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="6dp"
+            android:layout_toEndOf="@id/centerImage"
+            android:layout_toRightOf="@id/centerImage"
+            android:src="@drawable/authentication_background_image"
+            android:visibility="invisible"
+            app:border_color="@android:color/white"
+            app:border_width="3dp" />
+
+        <com.wan.hollout.ui.widgets.CircleImageView
+            android:id="@+id/fourth_person"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_below="@id/centerImage"
+            android:layout_marginEnd="6dp"
+            android:layout_marginRight="6dp"
+            android:layout_marginTop="6dp"
+            android:layout_toLeftOf="@id/centerImage"
+            android:layout_toStartOf="@id/centerImage"
+            android:src="@drawable/authentication_background_image"
+            android:visibility="invisible"
+            app:border_color="@android:color/white"
+            app:border_width="3dp" />
+
+    </com.skyfishjy.library.RippleBackground>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/error_message"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:orientation="vertical">
+            android:gravity="center"
+            android:paddingEnd="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingStart="16dp"
+            android:textColor="@color/dark_gray"
+            android:textSize="18sp"
+            app:textStyle="medium" />
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center_horizontal"
-                android:paddingEnd="20dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:paddingStart="20dp"
-                android:paddingTop="30dp"
-                android:text="@string/find_amp_chat_nwith_your_friends"
-                android:textColor="@color/colorPrimary"
-                android:textSize="25sp"
-                app:textStyle="bold" />
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/retry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:background="@color/colorBlue"
+            android:paddingBottom="5dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:paddingTop="5dp"
+            android:text="@string/retry"
+            android:textColor="@color/white"
+            app:textStyle="medium" />
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:gravity="center_horizontal"
-                android:text="@string/meet_new_people"
-                android:textColor="@color/ease_gray"
-                android:textSize="20sp"
-                app:textStyle="medium" />
-
-            <com.skyfishjy.library.RippleBackground
-                android:id="@+id/ripple_background"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginTop="20dp"
-                android:clipChildren="false"
-                android:clipToPadding="false"
-                app:rb_color="#eeeeee"
-                app:rb_duration="3000"
-                app:rb_radius="32dp"
-                app:rb_rippleAmount="6"
-                app:rb_scale="6">
-
-                <ImageView
-                    android:id="@+id/centerImage"
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:layout_centerInParent="true"
-                    android:src="@drawable/web_hi_res_512"
-                    tools:ignore="ContentDescription" />
-
-                <com.wan.hollout.ui.widgets.CircleImageView
-                    android:id="@+id/first_person"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_above="@id/centerImage"
-                    android:layout_marginBottom="32dp"
-                    android:layout_marginEnd="6dp"
-                    android:layout_marginRight="6dp"
-                    android:layout_toLeftOf="@id/centerImage"
-                    android:layout_toStartOf="@id/centerImage"
-                    android:src="@drawable/authentication_background_image"
-                    android:visibility="invisible"
-                    app:border_color="@android:color/white"
-                    app:border_width="3dp" />
-
-                <com.wan.hollout.ui.widgets.CircleImageView
-                    android:id="@+id/second_person"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_above="@id/centerImage"
-                    android:layout_marginBottom="32dp"
-                    android:layout_marginLeft="6dp"
-                    android:layout_marginStart="6dp"
-                    android:layout_toEndOf="@id/centerImage"
-                    android:layout_toRightOf="@id/centerImage"
-                    android:src="@drawable/authentication_background_image"
-                    android:visibility="invisible"
-                    app:border_color="@android:color/white"
-                    app:border_width="3dp" />
-
-                <com.wan.hollout.ui.widgets.CircleImageView
-                    android:id="@+id/third_person"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_below="@id/centerImage"
-                    android:layout_marginLeft="6dp"
-                    android:layout_marginStart="6dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_toEndOf="@id/centerImage"
-                    android:layout_toRightOf="@id/centerImage"
-                    android:src="@drawable/authentication_background_image"
-                    android:visibility="invisible"
-                    app:border_color="@android:color/white"
-                    app:border_width="3dp" />
-
-                <com.wan.hollout.ui.widgets.CircleImageView
-                    android:id="@+id/fourth_person"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_below="@id/centerImage"
-                    android:layout_marginEnd="6dp"
-                    android:layout_marginRight="6dp"
-                    android:layout_marginTop="6dp"
-                    android:layout_toLeftOf="@id/centerImage"
-                    android:layout_toStartOf="@id/centerImage"
-                    android:src="@drawable/authentication_background_image"
-                    android:visibility="invisible"
-                    app:border_color="@android:color/white"
-                    app:border_width="3dp" />
-
-            </com.skyfishjy.library.RippleBackground>
-
-            <com.wan.hollout.ui.widgets.HolloutButton
-                android:id="@+id/button_login"
-                android:layout_width="330dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/get_started_button_background"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:gravity="center"
-                android:padding="10dp"
-                android:text="@string/login"
-                android:textColor="@color/colorBlue"
-                android:theme="@style/Widget.Button.Login.StartHere"
-                app:textStyle="bold" />
-
-        </LinearLayout>
-
-    </android.support.v4.widget.NestedScrollView>
+    </LinearLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
-        android:layout_width="match_parent"
         android:id="@+id/swipe_refresh_layout"
+        android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <android.support.v7.widget.RecyclerView

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" />
+
+    </android.support.design.widget.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:overScrollMode="always">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:animateLayoutChanges="true"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <com.wan.hollout.ui.widgets.CircleImageView
+                android:id="@+id/pick_photo_view"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:scaleType="centerCrop"
+                android:src="@drawable/empty_profile"
+                android:textColor="@android:color/white"
+                android:textSize="28sp"
+                app:border_color="@color/white"
+                app:border_width="2dp"
+                app:fontName="Roboto-Regular.ttf" />
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:paddingTop="40dp"
+                android:text="@string/i_am"
+                android:textColor="@android:color/black"
+                android:textSize="25sp"
+                app:textStyle="medium" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/interests_suggestion_recycler_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/more_about_user_field"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/blue_grey_thin_edit_text_bg"
+                android:gravity="center_horizontal"
+                android:hint="@string/accountant"
+                android:imeOptions="actionDone"
+                android:inputType="textMultiLine"
+                android:overScrollMode="ifContentScrolls"
+                android:padding="10dp"
+                android:textColor="@color/white"
+                android:textColorHint="#aeaeae"
+                android:textSize="20sp" />
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/reason_for_interests_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:maxLines="5"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="20dp"
+                android:textColor="@color/light_grey"
+                android:textSize="17sp"
+                app:fontName="Roboto-Regular.ttf" />
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/button_continue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="#f6f6f6"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="1dp"
+        app:cardPreventCornerOverlap="false"
+        app:cardUseCompatPadding="true">
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:gravity="center_vertical"
+            android:paddingBottom="10dp"
+            android:paddingEnd="20dp"
+            android:paddingStart="20dp"
+            android:paddingTop="10dp"
+            android:text="@string/continue_"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:fontName="Roboto-Medium.ttf" />
+
+    </android.support.v7.widget.CardView>
+
+</RelativeLayout>

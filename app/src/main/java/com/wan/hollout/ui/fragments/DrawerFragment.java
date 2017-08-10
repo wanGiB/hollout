@@ -18,9 +18,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.wan.hollout.R;
 import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
@@ -28,10 +25,6 @@ import com.wan.hollout.interfaces.DrawerRecyclerInterface;
 import com.wan.hollout.interfaces.DrawerSubmenuRecyclerInterface;
 import com.wan.hollout.ui.adapters.DrawerRecyclerAdapter;
 import com.wan.hollout.ui.adapters.DrawerSubmenuRecyclerAdapter;
-import com.wan.hollout.utils.FirebaseUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,10 +34,8 @@ import butterknife.ButterKnife;
  */
 public class DrawerFragment extends Fragment {
 
-    public static final int NOTIFICATIONS = 0x1;
+    public static final int PEOPLE_I_LIKE_TO_MEET = 0x1;
     public static final int YOUR_PROFILE = 0x2;
-    public static final int BOOKMARKS = 0x3;
-    public static final int FEED_CATEGORIES = 0x4;
     public static final int HELP_AND_SETTINGS = 0x5;
     public static final int THEME = 0x6;
     public static final int LOG_OUT = 0x7;
@@ -122,8 +113,8 @@ public class DrawerFragment extends Fragment {
             public void onCategorySelected(View v, DrawerItemCategory drawerItemCategory) {
                 if (drawerItemCategory.getChildren() == null || drawerItemCategory.getChildren().isEmpty()) {
                     if (drawerListener != null) {
-                        if (drawerItemCategory.getId() == NOTIFICATIONS)
-                            drawerListener.onDrawersNotificationsSelected();
+                        if (drawerItemCategory.getId() == PEOPLE_I_LIKE_TO_MEET)
+                            drawerListener.onDrawersPeopleOfSharedInterestsSelected();
                         else
                             drawerListener.onDrawerItemCategorySelected(drawerItemCategory);
                         closeDrawerMenu();
@@ -204,36 +195,8 @@ public class DrawerFragment extends Fragment {
         drawerLoading = true;
         drawerProgress.setVisibility(View.GONE);
         drawerRetryBtn.setVisibility(View.GONE);
-        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(NOTIFICATIONS, NOTIFICATIONS, getString(R.string.notifications)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(YOUR_PROFILE, YOUR_PROFILE, getString(R.string.your_profile)));
-        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(BOOKMARKS, BOOKMARKS, getString(R.string.bookmarks)));
-
-        FirebaseUtils.getLabelsReference().addListenerForSingleValueEvent(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                DrawerItemCategory drawerItemParentCategory = new DrawerItemCategory(FEED_CATEGORIES, FEED_CATEGORIES, getString(R.string.feed_categories));
-                List<DrawerItemCategory> drawerItemCategories = new ArrayList<>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    String drawerItemName = snapshot.getValue(String.class);
-                    if (drawerItemName != null) {
-                        DrawerItemCategory drawerItemCategory = new DrawerItemCategory(drawerItemName.hashCode(), drawerItemName.hashCode(), drawerItemName);
-                        drawerItemCategories.add(drawerItemCategory);
-                    }
-                }
-                if (!drawerItemCategories.isEmpty()) {
-                    drawerItemParentCategory.setChildren(drawerItemCategories);
-                }
-                drawerRecyclerAdapter.addDrawerItem(drawerItemParentCategory);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-
-        });
-
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(PEOPLE_I_LIKE_TO_MEET, PEOPLE_I_LIKE_TO_MEET, getString(R.string.your_profile)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(HELP_AND_SETTINGS, HELP_AND_SETTINGS, getString(R.string.help_and_settings)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(THEME, THEME, getString(R.string.theme)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(LOG_OUT, LOG_OUT, getString(R.string.log_out)));
@@ -304,7 +267,7 @@ public class DrawerFragment extends Fragment {
      * Interface defining events initiated by {@link DrawerFragment}.
      */
     public interface FragmentDrawerListener {
-        void onDrawersNotificationsSelected();
+        void onDrawersPeopleOfSharedInterestsSelected();
 
         void onDrawerItemCategorySelected(DrawerItemCategory drawerItemCategory);
 

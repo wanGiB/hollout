@@ -11,12 +11,18 @@ import android.support.multidex.MultiDex;
 import com.afollestad.appthemeengine.ATE;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
+import com.parse.Parse;
+import com.parse.ParseLiveQueryClient;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
+import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.HolloutLogger;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import io.fabric.sdk.android.Fabric;
 import okhttp3.OkHttpClient;
@@ -26,9 +32,11 @@ import okhttp3.logging.HttpLoggingInterceptor;
  * @author Wan Clem
  */
 
+@SuppressWarnings("unused")
 public class ApplicationLoader extends Application {
 
     private static ApplicationLoader sInstance;
+    private static ParseLiveQueryClient parseLiveQueryClient;
 
     BroadcastReceiver connectivityChangedReceiver = new BroadcastReceiver() {
         @Override
@@ -44,13 +52,41 @@ public class ApplicationLoader extends Application {
         super.onCreate();
         sInstance = this;
         AppEventsLogger.activateApp(this);
+        initParse();
         Fabric.with(this, new Crashlytics());
         FlowManager.init(this);
         configureThemes();
     }
 
+    private void initParse() {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                Parse.initialize(new Parse.Configuration.Builder(ApplicationLoader.this)
+                        .applicationId(AppKeys.APPLICATION_ID) // should correspond to APP_ID env variable
+                        .clientKey(AppKeys.SERVER_CLIENT_KEY)  // set explicitly blank unless clientKey is configured on Parse server
+                        .server(AppKeys.SERVER_ENDPOINT)
+                        .enableLocalDataStore()
+                        .clientBuilder(getOkHttpClientBuilder())
+                        .build());
+                try {
+                    parseLiveQueryClient = ParseLiveQueryClient.Factory.getClient(new URI(AppKeys.SERVER_ENDPOINT));
+                } catch (URISyntaxException e) {
+                    HolloutLogger.d("ParseLiveQueryClient", "Exception = " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        };
+        thread.start();
+    }
+
     public static synchronized ApplicationLoader getInstance() {
         return sInstance;
+    }
+
+    public static ParseLiveQueryClient getParseLiveQueryClient() {
+        return parseLiveQueryClient;
     }
 
     public static OkHttpClient.Builder getOkHttpClientBuilder() {
@@ -78,8 +114,8 @@ public class ApplicationLoader extends Application {
         MultiDex.install(this);
     }
 
-
-    private void configureThemes(){
+    private void configureThemes() {
+        
         if (!ATE.config(this, "light_theme").isConfigured()) {
             ATE.config(this, "light_theme")
                     .activityTheme(R.style.AppThemeLight)
@@ -89,6 +125,7 @@ public class ApplicationLoader extends Application {
                     .usingMaterialDialogs(true)
                     .commit();
         }
+
         if (!ATE.config(this, "dark_theme").isConfigured()) {
             ATE.config(this, "dark_theme")
                     .activityTheme(R.style.AppThemeDark)
@@ -98,6 +135,7 @@ public class ApplicationLoader extends Application {
                     .usingMaterialDialogs(true)
                     .commit();
         }
+
         if (!ATE.config(this, "light_theme_notoolbar").isConfigured()) {
             ATE.config(this, "light_theme_notoolbar")
                     .activityTheme(R.style.AppThemeLight)
@@ -108,6 +146,7 @@ public class ApplicationLoader extends Application {
                     .usingMaterialDialogs(true)
                     .commit();
         }
+
         if (!ATE.config(this, "dark_theme_notoolbar").isConfigured()) {
             ATE.config(this, "dark_theme_notoolbar")
                     .activityTheme(R.style.AppThemeDark)

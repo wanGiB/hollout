@@ -17,15 +17,14 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
+import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
+import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppStateManager;
-import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -34,7 +33,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -54,23 +52,22 @@ public class AppInstanceDetectionService extends Service implements
     private LocationRequest mLocationRequest;
     private String TAG = AppInstanceDetectionService.class.getSimpleName();
 
-    private FirebaseUser signedInUser;
-    private HashMap<String, Object> updatableProps = new HashMap<>();
+    private ParseUser signedInUser;
     private AppStateManager appStateManager;
 
     private AppStateManager.Listener myListener = new AppStateManager.Listener() {
 
         public void onBecameForeground() {
-            updatableProps.put(AppConstants.ONLINE_STATUS, AppConstants.ONLINE);
-            updatableProps.put(AppConstants.USER_LAST_SEEN, System.currentTimeMillis());
-            updateSignedInUserProps(updatableProps);
+            signedInUser.put(AppConstants.ONLINE_STATUS, AppConstants.ONLINE);
+            signedInUser.put(AppConstants.USER_LAST_SEEN, System.currentTimeMillis());
+            updateSignedInUserProps();
         }
 
         public void onBecameBackground() {
             //This is also a good place to blow new message notifications for a foregrounded app
-            updatableProps.put(AppConstants.ONLINE_STATUS, AppConstants.OFFLINE);
-            updatableProps.put(AppConstants.USER_LAST_SEEN, System.currentTimeMillis());
-            updateSignedInUserProps(updatableProps);
+            signedInUser.put(AppConstants.ONLINE_STATUS, AppConstants.OFFLINE);
+            signedInUser.put(AppConstants.USER_LAST_SEEN, System.currentTimeMillis());
+            updateSignedInUserProps();
         }
 
     };
@@ -79,7 +76,7 @@ public class AppInstanceDetectionService extends Service implements
     public void onCreate() {
         super.onCreate();
         attemptToConnectGoogleApiClient();
-        signedInUser = FirebaseAuth.getInstance().getCurrentUser();
+        signedInUser = ParseUser.getCurrentUser();
         appStateManager = AppStateManager.init(ApplicationLoader.getInstance());
     }
 
@@ -92,7 +89,7 @@ public class AppInstanceDetectionService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (signedInUser == null) {
-            signedInUser = FirebaseAuth.getInstance().getCurrentUser();
+            signedInUser = ParseUser.getCurrentUser();
         }
         if (appStateManager == null) {
             appStateManager = AppStateManager.init(ApplicationLoader.getInstance());
@@ -134,42 +131,42 @@ public class AppInstanceDetectionService extends Service implements
             Geocoder geocoder = new Geocoder(context, Locale.getDefault());
             // Get the current location from the input parameter list
             final Location loc = params[0];
-            if (updatableProps != null) {
-                HashMap<String,Double> userGeoPoint = new HashMap<>();
-                userGeoPoint.put(AppConstants.USER_LATITUDE,loc.getLatitude());
-                userGeoPoint.put(AppConstants.USER_LONGITUDE,loc.getLongitude());
-                updatableProps.put(AppConstants.APP_USER_GEO_POINT, userGeoPoint);
+            if (signedInUser != null) {
+                ParseGeoPoint userGeoPoint = new ParseGeoPoint();
+                userGeoPoint.setLatitude(loc.getLatitude());
+                userGeoPoint.setLongitude(loc.getLongitude());
+                signedInUser.put(AppConstants.APP_USER_GEO_POINT, userGeoPoint);
             }
             try {
                 addresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
             } catch (IOException | IllegalArgumentException ignored) {
 
             }
-            if (addresses != null && addresses.size() > 0 && updatableProps != null) {
+            if (addresses != null && addresses.size() > 0 && signedInUser != null) {
                 // Get the first address
                 Address address = addresses.get(0);
                 // COUNTRY
                 final String countryName = address.getCountryName();
                 //COUNTRY
                 if (StringUtils.isNotEmpty(countryName)) {
-                    updatableProps.put(AppConstants.APP_USER_COUNTRY, HolloutUtils.stripDollar(countryName));
+                    signedInUser.put(AppConstants.APP_USER_COUNTRY, HolloutUtils.stripDollar(countryName));
                 }
                 //STREET
                 final String streetAddress = address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "";
                 if (StringUtils.isNotEmpty(streetAddress)) {
-                    updatableProps.put(AppConstants.APP_USER_STREET, HolloutUtils.stripDollar(streetAddress));
+                    signedInUser.put(AppConstants.APP_USER_STREET, HolloutUtils.stripDollar(streetAddress));
                 }
                 //LOCALITY
                 String locality = address.getLocality();
                 if (StringUtils.isNotEmpty(locality)) {
-                    updatableProps.put(AppConstants.APP_USER_LOCALITY, HolloutUtils.stripDollar(locality));
+                    signedInUser.put(AppConstants.APP_USER_LOCALITY, HolloutUtils.stripDollar(locality));
                 }
                 //Admin
                 String adminAddress = address.getAdminArea();
                 if (StringUtils.isNotEmpty(adminAddress)) {
-                    updatableProps.put(AppConstants.APP_USER_ADMIN_AREA, HolloutUtils.stripDollar(adminAddress));
+                    signedInUser.put(AppConstants.APP_USER_ADMIN_AREA, HolloutUtils.stripDollar(adminAddress));
                 }
-                updateSignedInUserProps(updatableProps);
+                updateSignedInUserProps();
             }
             return null;
         }
@@ -231,17 +228,16 @@ public class AppInstanceDetectionService extends Service implements
         processLocation(location);
     }
 
-    private void updateSignedInUserProps(HashMap<String, Object> updatableProps) {
+    private void updateSignedInUserProps() {
         if (signedInUser != null) {
-            FirebaseUtils.getUsersReference().child(signedInUser.getUid()).updateChildren(updatableProps, new DatabaseReference.CompletionListener() {
+            signedInUser.saveInBackground(new SaveCallback() {
                 @Override
-                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                    if (databaseError == null) {
+                public void done(ParseException e) {
+                    if (e == null) {
                         EventBus.getDefault().post(new ConnectivityChangedAction(true));
                     }
                 }
             });
         }
     }
-
 }

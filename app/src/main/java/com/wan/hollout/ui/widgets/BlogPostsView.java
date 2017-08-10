@@ -263,14 +263,14 @@ public class BlogPostsView extends FrameLayout {
                         break;
                     case R.id.comment_on_feed:
                         if (currentUser == null) {
-                            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
-                                @Override
-                                public void done(Boolean result, Exception e) {
-                                    if (e == null && result) {
-                                        launchCommentActivity(context, postId, blogId);
-                                    }
-                                }
-                            });
+//                            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+//                                @Override
+//                                public void done(Boolean result, Exception e) {
+//                                    if (e == null && result) {
+//                                        launchCommentActivity(context, postId, blogId);
+//                                    }
+//                                }
+//                            });
                         } else {
                             launchCommentActivity(context, postId, blogId);
                         }
@@ -298,8 +298,30 @@ public class BlogPostsView extends FrameLayout {
         shareFeedView.setOnClickListener(onClickListener);
 
         fetchPostLikes(postId);
+        setPostDescription();
         checkAndRegEventBus();
         invalidateView(postId);
+    }
+
+    private void setPostDescription() {
+        String description = null;
+        if (document != null) {
+            Elements images = document.select("img");
+            if (images != null) {
+                for (Element element : images) {
+                    String html = element.outerHtml();
+                    description = StringUtils.strip(document.toString(), html);
+                }
+            }
+        }
+        Elements videoElements = document.select(".YOUTUBE-iframe-video");
+        if (videoElements != null) {
+            for (Element element : videoElements) {
+                String html = element.outerHtml();
+                description = StringUtils.strip(document.toString(), html);
+            }
+        }
+        HolloutLogger.d("Html", "Result after stripping = " + description);
     }
 
     private void handleLikesOnClickListener(final String postId) {
@@ -307,14 +329,14 @@ public class BlogPostsView extends FrameLayout {
             closeReactionsPopUp();
         } else {
             if (currentUser == null) {
-                ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
-                    @Override
-                    public void done(Boolean result, Exception e) {
-                        if (e == null && result) {
-                            likeFeed(postId, "Like.json");
-                        }
-                    }
-                });
+//                ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+//                    @Override
+//                    public void done(Boolean result, Exception e) {
+//                        if (e == null && result) {
+//                            likeFeed(postId, "Like.json");
+//                        }
+//                    }
+//                });
             } else {
                 likeFeed(postId, "Like.json");
             }
@@ -377,14 +399,14 @@ public class BlogPostsView extends FrameLayout {
                     public void onReactionSelected(final String reaction) {
                         UiUtils.showView(reactionsCardView, false);
                         if (currentUser == null) {
-                            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
-                                @Override
-                                public void done(Boolean result, Exception e) {
-                                    if (e == null && result) {
-                                        likeFeed(postId, reaction);
-                                    }
-                                }
-                            });
+//                            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+//                                @Override
+//                                public void done(Boolean result, Exception e) {
+//                                    if (e == null && result) {
+//                                        likeFeed(postId, reaction);
+//                                    }
+//                                }
+//                            });
                             return;
                         }
                         likeFeed(postId, reaction);
@@ -406,14 +428,14 @@ public class BlogPostsView extends FrameLayout {
                 }
             });
         } else {
-            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
-                @Override
-                public void done(Boolean result, Exception e) {
-                    if (e == null && result) {
-                        likeFeed(postId, "Like.json");
-                    }
-                }
-            });
+//            ((MainActivity) (activity)).initiateAuthentication(new DoneCallback<Boolean>() {
+//                @Override
+//                public void done(Boolean result, Exception e) {
+//                    if (e == null && result) {
+//                        likeFeed(postId, "Like.json");
+//                    }
+//                }
+//            });
         }
     }
 

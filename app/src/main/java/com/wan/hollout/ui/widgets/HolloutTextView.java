@@ -109,11 +109,9 @@ public class HolloutTextView extends AppCompatTextView {
 
     private void applyCustomFont(Context context, int textStyle) {
         Typeface typeface = FontUtils.selectTypeface(context, textStyle);
-
         if (typeface != null) {
             setTypeface(typeface);
         }
-
     }
 
     public void setProgress(float progress) {
