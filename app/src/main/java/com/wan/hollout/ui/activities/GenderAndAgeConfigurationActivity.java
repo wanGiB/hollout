@@ -144,6 +144,8 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
                         Snackbar.make(ageBox, "Your age please", Snackbar.LENGTH_LONG).show();
                         return;
                     }
+                    signedInUser.put(AppConstants.APP_USER_GENDER, selectedGenderType);
+                    signedInUser.put(AppConstants.APP_USER_AGE,ageBox.getText().toString().trim());
                     UiUtils.showProgressDialog(GenderAndAgeConfigurationActivity.this,"Please wait...");
                     signedInUser.saveInBackground(new SaveCallback() {
                         @Override
