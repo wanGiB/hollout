@@ -217,7 +217,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                     if (objects != null) {
                         if (!objects.isEmpty()) {
                             UiUtils.toggleFlipperState(contentFlipper, 2);
-                            loadPeople(objects, skip,searchString);
+                            loadPeople(objects, skip, searchString);
                         } else {
                             tryShowNoResultFound(searchString);
                         }
@@ -266,7 +266,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             String name = parseObject.getString(AppConstants.NAME);
             if (signedInUserInterests != null) {
                 if (signedInUserInterests.contains(name)) {
-                    if (!selectedPeopleToMeet.contains(parseObject) && searchString==null) {
+                    if (!selectedPeopleToMeet.contains(parseObject) && searchString == null) {
                         parseObject.put(AppConstants.SELECTED, true);
                         selectedPeopleToMeet.add(parseObject);
                         selectedPeopleToMeetAdapter.notifyItemInserted(selectedPeopleToMeet.size() - 1);
@@ -316,9 +316,11 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 searchTextView.setText("");
                 break;
             case R.id.done_with_selection:
+                UiUtils.showProgressDialog(MeetPeopleActivity.this, "Please wait...");
                 signedInUser.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
+                        UiUtils.dismissProgressDialog();
                         List<String> userInterests = ParseUser.getCurrentUser().getList(AppConstants.INTERESTS);
                         HolloutUtils.updateCurrentParseInstallation(userInterests, null);
                         sendBackResultToCaller();
