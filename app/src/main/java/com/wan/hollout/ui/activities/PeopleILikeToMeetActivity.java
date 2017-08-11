@@ -12,10 +12,22 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ViewFlipper;
 
+import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
+import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
+import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseUser;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.layoutmanagers.chipslayoutmanager.ChipsLayoutManager;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
+import com.wan.hollout.ui.widgets.HolloutTextView;
+import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.UiUtils;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +45,10 @@ public class PeopleILikeToMeetActivity extends AppCompatActivity implements View
     ViewFlipper contentFlipper;
 
     @BindView(R.id.people_to_meet_recycler_view)
-    RecyclerView peopleToMeetRecyclerView;
+    RecyclerView potentialPeopleToMeetRecyclerView;
 
     @BindView(R.id.selected_people_recycler_view)
-    RecyclerView selectedPeopleRecyclerView;
+    RecyclerView selectedPeopleToMeetRecyclerView;
 
     @BindView(R.id.close_activity)
     ImageView closeActivity;
@@ -50,31 +62,55 @@ public class PeopleILikeToMeetActivity extends AppCompatActivity implements View
     @BindView(R.id.action_empty_btn)
     ImageView clearSearchBox;
 
-    private PeopleToMeetAdapter peopleToMeetAdapter, selectedPeopleAdapter;
+    @BindView(R.id.error_message)
+    HolloutTextView errorMessageView;
 
-    private ChipsLayoutManager newPeopleToMeetLayoutManager;
-    private LinearLayoutManager selectedPeopleToMeetLayoutManager;
+    @BindView(R.id.retry)
+    HolloutTextView retry;
 
-    private List<ParseObject> peopleToMeet = new ArrayList<>();
-    private List<ParseObject> alreadySelectedPeople = new ArrayList<>();
-    private View peopleToMeetFooter;
+    @BindView(R.id.no_result_found_view)
+    HolloutTextView noResultFoundView;
+
+    private PeopleToMeetAdapter potentialPeopleToMeetAdapter, selectedPeopleToMeetAdapter;
+
+    private ChipsLayoutManager potentialPeopleToMeetLayoutManager;
+
+    private List<ParseObject> potentialPeopleToMeet = new ArrayList<>();
+    private List<ParseObject> selectedPeopleToMeet = new ArrayList<>();
+    private View potentialPeopleToMeetFooterView;
+
+    private ParseUser signedInUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_people_i_like_to_meet_with);
         ButterKnife.bind(this);
+        signedInUser = ParseUser.getCurrentUser();
         initEventHandlers();
         initFooters();
+        setupPotentialPeopleToMeetAdapter();
+        setupSelectedPeopleToMeetAdapter();
+        fetchPeople(null, 0);
+        retry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (StringUtils.isEmpty(searchTextView.getText().toString().trim())) {
+                    fetchPeople(null, 0);
+                } else {
+                    fetchPeople(searchTextView.getText().toString().trim(), 0);
+                }
+            }
+        });
     }
 
     @SuppressLint("InflateParams")
     private void initFooters() {
-        peopleToMeetFooter = getLayoutInflater().inflate(R.layout.loading_footer, null);
+        potentialPeopleToMeetFooterView = getLayoutInflater().inflate(R.layout.loading_footer, null);
     }
 
     private void initNewPeopleToMeetLayoutManager() {
-        newPeopleToMeetLayoutManager = ChipsLayoutManager.newBuilder(this)
+        potentialPeopleToMeetLayoutManager = ChipsLayoutManager.newBuilder(this)
                 //whether RecyclerView can scroll. TRUE by default
                 .setScrollingEnabled(true)
                 //set maximum views count in a particular row
@@ -90,11 +126,114 @@ public class PeopleILikeToMeetActivity extends AppCompatActivity implements View
                 // whether strategy is applied to last row. FALSE by default
                 .withLastRow(true)
                 .build();
-        peopleToMeetRecyclerView.setLayoutManager(newPeopleToMeetLayoutManager);
+        potentialPeopleToMeetRecyclerView.setLayoutManager(potentialPeopleToMeetLayoutManager);
     }
 
-    private void setupPeopleToMeetAdapter() {
-        peopleToMeetAdapter = new PeopleToMeetAdapter(this, peopleToMeet);
+    private void setupPotentialPeopleToMeetAdapter() {
+        potentialPeopleToMeetAdapter = new PeopleToMeetAdapter(this, potentialPeopleToMeet, AppConstants.PEOPLE_TO_MEET_HOST_TYPE_POTENTIAL);
+        HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(potentialPeopleToMeetAdapter);
+        initNewPeopleToMeetLayoutManager();
+        potentialPeopleToMeetRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
+        RecyclerViewUtils.setFooterView(potentialPeopleToMeetRecyclerView, potentialPeopleToMeetFooterView);
+        UiUtils.showView(potentialPeopleToMeetFooterView, false);
+        potentialPeopleToMeetRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(potentialPeopleToMeetLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                if (!potentialPeopleToMeet.isEmpty()) {
+                    UiUtils.showView(potentialPeopleToMeetFooterView, true);
+                    if (StringUtils.isEmpty(searchTextView.getText().toString().trim())) {
+                        fetchPeople(null, potentialPeopleToMeet.size() - 1);
+                    } else {
+                        fetchPeople(searchTextView.getText().toString().trim(), potentialPeopleToMeet.size() - 1);
+                    }
+                }
+            }
+        });
+    }
+
+    private void fetchPeople(final String searchString, final int skip) {
+        ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.INTERESTS);
+        if (StringUtils.isNotEmpty(searchString)) {
+            peopleQuery.whereContains(AppConstants.NAME, searchString.toLowerCase());
+        }
+        peopleQuery.setLimit(30);
+        if (skip != 0) {
+            peopleQuery.setSkip(skip);
+        }
+        peopleQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null) {
+                    if (StringUtils.isNotEmpty(searchString)) {
+                        potentialPeopleToMeetAdapter.setSearchedString(searchString);
+                    }
+                    if (objects != null) {
+                        if (!objects.isEmpty()) {
+                            UiUtils.toggleFlipperState(contentFlipper, 2);
+                            loadPeople(objects, skip);
+                        }
+                    }
+                } else {
+                    if (potentialPeopleToMeet.isEmpty()) {
+                        UiUtils.toggleFlipperState(contentFlipper, 1);
+                        String errorMessage = e.getMessage();
+                        if (StringUtils.isNotEmpty(errorMessage)) {
+                            if (!errorMessage.contains("i/o")) {
+                                errorMessageView.setText(errorMessage);
+                            } else {
+                                errorMessageView.setText(getString(R.string.screwed_data_error_message));
+                            }
+                        } else {
+                            errorMessageView.setText(getString(R.string.screwed_data_error_message));
+                        }
+                    }
+                }
+                UiUtils.showView(potentialPeopleToMeetFooterView, false);
+            }
+        });
+    }
+
+    private void loadPeople(List<ParseObject> objects, int skip) {
+        List<String> signedInUserInterests = signedInUser.getList(AppConstants.INTERESTS);
+        ParseObject.pinAllInBackground(objects);
+        if (skip == 0) {
+            clearData();
+        }
+        for (ParseObject parseObject : objects) {
+            String name = parseObject.getString(AppConstants.NAME);
+            if (signedInUserInterests != null) {
+                if (signedInUserInterests.contains(name)) {
+                    if (!selectedPeopleToMeet.contains(parseObject)) {
+                        selectedPeopleToMeet.add(parseObject);
+                        selectedPeopleToMeetAdapter.notifyItemInserted(selectedPeopleToMeet.size() - 1);
+                    }
+                } else {
+                    if (!potentialPeopleToMeet.contains(parseObject)) {
+                        potentialPeopleToMeet.add(parseObject);
+                        potentialPeopleToMeetAdapter.notifyItemInserted(potentialPeopleToMeet.size() - 1);
+                    }
+                }
+            } else {
+                if (!potentialPeopleToMeet.contains(parseObject)) {
+                    potentialPeopleToMeet.add(parseObject);
+                    potentialPeopleToMeetAdapter.notifyItemInserted(potentialPeopleToMeet.size() - 1);
+                }
+            }
+        }
+    }
+
+    private void clearData() {
+        selectedPeopleToMeet.clear();
+        potentialPeopleToMeet.clear();
+        selectedPeopleToMeetAdapter.notifyDataSetChanged();
+        potentialPeopleToMeetAdapter.notifyDataSetChanged();
+    }
+
+    private void setupSelectedPeopleToMeetAdapter() {
+        selectedPeopleToMeetAdapter = new PeopleToMeetAdapter(this, selectedPeopleToMeet, AppConstants.PEOPLE_TO_MEET_HOST_TYPE_SELECTED);
+        LinearLayoutManager selectedPeopleToMeetLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        selectedPeopleToMeetRecyclerView.setLayoutManager(selectedPeopleToMeetLayoutManager);
+        selectedPeopleToMeetRecyclerView.setAdapter(selectedPeopleToMeetAdapter);
     }
 
     private void initEventHandlers() {

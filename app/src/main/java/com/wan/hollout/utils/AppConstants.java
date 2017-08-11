@@ -63,7 +63,8 @@ public class AppConstants {
     public static final String INTERESTS = "interests";
     public static final String NAME = "name";
     public static final String SELECTED = "selected";
-
+    public static final String PEOPLE_TO_MEET_HOST_TYPE_SELECTED = "selected_people_to_meet";
+    public static final String PEOPLE_TO_MEET_HOST_TYPE_POTENTIAL = "selected_people_to_meet";
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
     public static String AUTHOR_ID = "id";

@@ -3,7 +3,7 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="animated_text_contents_divider">\t| </string>
-    <string name="app_intro_message">Connect with people of shared interests and profession around you.</string>
+    <string name="app_intro_message">Connect and Holla people of shared interests and profession around you.</string>
     <string name="start_here">START HERE!</string>
     <string name="it_s_just_15_seconds">It\'s just 15 seconds</string>
     <string name="setup_account">Setup your free personal account to get started.</string>
@@ -101,5 +101,6 @@
     <string name="tap_kinds_of_people_">Tap all kinds of people you like to meet</string>
     <string name="search_here">Search here</string>
     <string name="meet_people">Meet People</string>
-    <string name="tap_all_kinds_of_people_you_like_to_meet">Tap all kinds of people you like to meet</string>
+    <string name="tap_all_kinds_of_people_you_like_to_meet">Tap all kinds of people you like to meet around you</string>
+    <string name="no_result_found_for_kind_search">Sorry, no result found</string>
 </resources>

@@ -16,6 +16,42 @@
         app:progressIndeterminate="true"
         app:rimColor="@color/ease_gray" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/error_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingEnd="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingStart="16dp"
+            android:textColor="@color/dark_gray"
+            android:textSize="18sp"
+            app:textStyle="medium" />
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/retry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:background="@color/colorBlue"
+            android:paddingBottom="5dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:paddingTop="5dp"
+            android:text="@string/retry"
+            android:textColor="@color/white"
+            app:textStyle="medium" />
+
+    </LinearLayout>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -110,13 +146,36 @@
 
         </LinearLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/people_to_meet_recycler_view"
+        <FrameLayout
+            android:id="@+id/people_to_meet_frame"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_above="@+id/bottom_bar"
-            android:layout_below="@+id/bottom_view"
-            android:background="@color/white" />
+            android:layout_below="@+id/bottom_view">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/people_to_meet_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white" />
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:layout_width="wrap_content"
+                android:id="@+id/no_result_found_view"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center_horizontal"
+                android:paddingBottom="10dp"
+                android:paddingEnd="16dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="16dp"
+                android:text="@string/no_result_found_for_kind_search"
+                android:textColor="@color/base_gray"
+                android:textSize="15sp" />
+
+        </FrameLayout>
 
     </RelativeLayout>
 

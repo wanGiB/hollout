@@ -42,10 +42,12 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private Context context;
     private String searchedString;
     private static SparseBooleanArray selections;
+    private String host;
 
-    public PeopleToMeetAdapter(Context context, List<ParseObject> people) {
+    public PeopleToMeetAdapter(Context context, List<ParseObject> people, String host) {
         this.context = context;
         this.people = people;
+        this.host = host;
         this.layoutInflater = LayoutInflater.from(context);
         selections = new SparseBooleanArray();
     }
@@ -61,7 +63,7 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         PeopleToMeetViewHolder peopleToMeetViewHolder = (PeopleToMeetViewHolder) holder;
         ParseObject careerObject = people.get(position);
         if (careerObject != null) {
-            peopleToMeetViewHolder.bindPerson(context, careerObject, getSearchedString());
+            peopleToMeetViewHolder.bindPerson(context, careerObject, position, people, host, this, getSearchedString());
         }
     }
 
@@ -95,14 +97,14 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             bounceAnimation.setInterpolator(bounceInterpolator);
         }
 
-        void bindPerson(final Context context, final ParseObject personObject, String searchedString) {
+        void bindPerson(final Context context, final ParseObject personObject, int position, List<ParseObject> people, String host, PeopleToMeetAdapter peopleToMeetAdapter, String searchedString) {
             if (personObject != null) {
                 final String personName = personObject.getString(AppConstants.NAME);
                 boolean selected = personObject.getBoolean(AppConstants.SELECTED);
                 setPeopleName(context, searchedString, WordUtils.capitalize(personName.toLowerCase(Locale.getDefault())));
                 selections.put(personName.hashCode(), selected);
                 refreshViewState(context, personName);
-                handleItemViewClick(context, personObject);
+                handleItemViewClick(context, host, position, people, peopleToMeetAdapter, personObject);
             }
         }
 
@@ -115,7 +117,7 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             }
         }
 
-        private void handleItemViewClick(final Context context, final ParseObject personObject) {
+        private void handleItemViewClick(final Context context, final String host, final int position, final List<ParseObject> people, final PeopleToMeetAdapter peopleToMeetAdapter, final ParseObject personObject) {
             final ParseUser parseUser = ParseUser.getCurrentUser();
             final String personName = personObject.getString(AppConstants.NAME);
             final List<String> selectedPeopleToMeet = parseUser.getList(AppConstants.INTERESTS);
@@ -124,21 +126,32 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 @Override
                 public void onClick(View v) {
                     itemView.startAnimation(bounceAnimation);
-                    if (!selectedPeopleToMeet.contains(personName)) {
-                        HolloutUtils.bangSound(context, true, R.raw.tipjar_send);
-                        selections.put(personName.hashCode(), true);
-                        selectedPeopleToMeet.add(personName);
-                        parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
-                        personObject.put(AppConstants.SELECTED, true);
-                    } else {
-                        if (selectedPeopleToMeet.contains(personName)) {
-                            selections.put(personName.hashCode(), false);
-                            selectedPeopleToMeet.remove(personName);
+                    if (host.equals(AppConstants.PEOPLE_TO_MEET_HOST_TYPE_SELECTED)) {
+                        if (people.contains(personObject)) {
+                            people.remove(personObject);
+                            if (selectedPeopleToMeet.contains(personName)) {
+                                selectedPeopleToMeet.remove(personName);
+                            }
+                            peopleToMeetAdapter.notifyItemRemoved(position);
                             parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
-                            personObject.put(AppConstants.SELECTED, false);
                         }
+                    } else {
+                        if (!selectedPeopleToMeet.contains(personName)) {
+                            HolloutUtils.bangSound(context, true, R.raw.tipjar_send);
+                            selections.put(personName.hashCode(), true);
+                            selectedPeopleToMeet.add(personName);
+                            parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
+                            personObject.put(AppConstants.SELECTED, true);
+                        } else {
+                            if (selectedPeopleToMeet.contains(personName)) {
+                                selections.put(personName.hashCode(), false);
+                                selectedPeopleToMeet.remove(personName);
+                                parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
+                                personObject.put(AppConstants.SELECTED, false);
+                            }
+                        }
+                        refreshViewState(context, personName);
                     }
-                    refreshViewState(context, personName);
                 }
 
             });
