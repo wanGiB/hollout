@@ -29,7 +29,6 @@ import com.wan.hollout.layoutmanagers.chipslayoutmanager.ChipsLayoutManager;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
-import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -218,7 +217,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                     if (objects != null) {
                         if (!objects.isEmpty()) {
                             UiUtils.toggleFlipperState(contentFlipper, 2);
-                            loadPeople(objects, skip);
+                            loadPeople(objects, skip,searchString);
                         } else {
                             tryShowNoResultFound(searchString);
                         }
@@ -257,7 +256,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         }
     }
 
-    private void loadPeople(List<ParseObject> objects, int skip) {
+    private void loadPeople(List<ParseObject> objects, int skip, String searchString) {
         List<String> signedInUserInterests = signedInUser.getList(AppConstants.INTERESTS);
         ParseObject.pinAllInBackground(objects);
         if (skip == 0) {
@@ -267,7 +266,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             String name = parseObject.getString(AppConstants.NAME);
             if (signedInUserInterests != null) {
                 if (signedInUserInterests.contains(name)) {
-                    if (!selectedPeopleToMeet.contains(parseObject)) {
+                    if (!selectedPeopleToMeet.contains(parseObject) && searchString==null) {
                         parseObject.put(AppConstants.SELECTED, true);
                         selectedPeopleToMeet.add(parseObject);
                         selectedPeopleToMeetAdapter.notifyItemInserted(selectedPeopleToMeet.size() - 1);
@@ -370,15 +369,25 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                     SelectedPerson selectedPerson = (SelectedPerson) o;
                     ParseObject parseObject = selectedPerson.getPersonObject();
                     if (parseObject != null) {
-                        if (!selectedPeopleToMeet.contains(parseObject)) {
-                            selectedPeopleToMeet.add(parseObject);
-                            selectedPeopleToMeetAdapter.notifyDataSetChanged();
-                            selectedPeopleToMeetRecyclerView.smoothScrollToPosition(selectedPeopleToMeet.size() - 1);
+                        if (selectedPerson.isSelected()) {
+                            if (!selectedPeopleToMeet.contains(parseObject)) {
+                                selectedPeopleToMeet.add(parseObject);
+                                selectedPeopleToMeetAdapter.notifyDataSetChanged();
+                                selectedPeopleToMeetRecyclerView.smoothScrollToPosition(selectedPeopleToMeet.size() - 1);
+                            }
+                        } else {
+                            if (selectedPeopleToMeet.contains(parseObject)) {
+                                int position = selectedPeopleToMeet.indexOf(parseObject);
+                                if (position != -1) {
+                                    selectedPeopleToMeet.remove(parseObject);
+                                    selectedPeopleToMeetAdapter.notifyItemRemoved(position);
+                                    selectedPeopleToMeetRecyclerView.smoothScrollToPosition(position);
+                                }
+                            }
                         }
                     }
                 }
             }
         });
     }
-
 }

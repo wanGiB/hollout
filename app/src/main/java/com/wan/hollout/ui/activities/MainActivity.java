@@ -87,6 +87,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
             HolloutPreferences.setUserWelcomed();
         }
+        checkAndRegEventBus();
     }
 
     @Override

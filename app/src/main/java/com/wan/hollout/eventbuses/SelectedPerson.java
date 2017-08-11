@@ -9,9 +9,15 @@ import com.parse.ParseObject;
 public class SelectedPerson {
 
     private ParseObject personObject;
+    private boolean selected;
 
-    public SelectedPerson(ParseObject personObject) {
+    public SelectedPerson(ParseObject personObject,boolean selected) {
         this.personObject = personObject;
+        this.selected = selected;
+    }
+
+    public boolean isSelected() {
+        return selected;
     }
 
     public ParseObject getPersonObject() {

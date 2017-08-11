@@ -144,13 +144,14 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             selectedPeopleToMeet.add(personName);
                             parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
                             personObject.put(AppConstants.SELECTED, true);
-                            EventBus.getDefault().post(new SelectedPerson(personObject));
+                            EventBus.getDefault().post(new SelectedPerson(personObject, true));
                         } else {
                             if (selectedPeopleToMeet.contains(personName)) {
                                 selections.put(personName.hashCode(), false);
                                 selectedPeopleToMeet.remove(personName);
                                 parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
                                 personObject.put(AppConstants.SELECTED, false);
+                                EventBus.getDefault().post(new SelectedPerson(personObject, false));
                             }
                         }
                         refreshViewState(context, personName);
