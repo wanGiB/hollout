@@ -1,9 +1,19 @@
 package com.wan.hollout.utils;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
@@ -12,23 +22,33 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.parse.ParseObject;
+import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.models.HolloutObject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.math.RoundingMode;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
+
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * @author Wan Clem
@@ -70,6 +90,66 @@ public class HolloutUtils {
             mediaPlayer.setVolume(0.5f, 0.5f);
         }
         mediaPlayer.start();
+    }
+
+    public static String resolveToBestLocation(ParseObject referenceUser) {
+
+        String displayableUserLocation = "";
+        String referenceHolloutCountry = (String) referenceUser.get(AppConstants.APP_USER_COUNTRY);
+        String referenceHolloutAdmin = (String) referenceUser.get(AppConstants.APP_USER_ADMIN_AREA);
+        String referenceHolloutLocality = (String) referenceUser.get(AppConstants.APP_USER_LOCALITY);
+        String referenceHolloutStreetAddress = (String) referenceUser.get(AppConstants.APP_USER_STREET);
+
+        ParseUser signedInUser = ParseUser.getCurrentUser();
+
+        if (signedInUser != null) {
+
+            String currentUserCountry = signedInUser.getString(AppConstants.APP_USER_COUNTRY);
+            String currentUserAdminArea = signedInUser.getString(AppConstants.APP_USER_ADMIN_AREA);
+            String currentUserLocality = signedInUser.getString(AppConstants.APP_USER_LOCALITY);
+            String currentUserStreetAddress = signedInUser.getString(AppConstants.APP_USER_STREET);
+
+            //Lets put a lot of things into consideration before showing location
+            if (isNotEmpty(currentUserCountry) && isNotEmpty(referenceHolloutCountry)) {
+                if (currentUserCountry.equals(referenceHolloutCountry)) {
+                    //If this contact is still in my country,show me his/her discreet location
+                    if (isNotEmpty(currentUserAdminArea) && isNotEmpty(referenceHolloutAdmin)) {
+                        //Go down to admin level
+                        if (currentUserAdminArea.equals(referenceHolloutAdmin)) {
+                            //Go down a little bit
+                            if (isNotEmpty(currentUserLocality) && isNotEmpty(referenceHolloutLocality)) {
+                                if (currentUserLocality.equals(referenceHolloutLocality)) {
+                                    //Go down to street level
+                                    if (isNotEmpty(currentUserStreetAddress) && isNotEmpty(referenceHolloutStreetAddress)) {
+                                        displayableUserLocation = referenceHolloutStreetAddress;
+                                    }
+                                } else {
+                                    displayableUserLocation = referenceHolloutLocality + ",".concat(referenceHolloutAdmin);
+                                }
+                            } else {
+                                displayableUserLocation = referenceHolloutAdmin;
+                            }
+                        } else {
+                            displayableUserLocation = referenceHolloutAdmin;
+                        }
+                    } else {
+                        if (StringUtils.isNotEmpty(referenceHolloutStreetAddress)) {
+                            displayableUserLocation = referenceHolloutStreetAddress;
+                        }
+                    }
+                } else {
+                    //My contact is no longer in my country,display his new location
+                    displayableUserLocation = referenceHolloutCountry;
+                }
+            }
+        }
+        return displayableUserLocation;
+    }
+
+    public static String formatDistance(double distanceBetweenTwoLocations) {
+        DecimalFormat decimalFormat = new DecimalFormat("#.#");
+        decimalFormat.setRoundingMode(RoundingMode.CEILING);
+        return decimalFormat.format(distanceBetweenTwoLocations);
     }
 
     public static void checkDisplaySize(Context context, Configuration newConfiguration) {
@@ -174,6 +254,130 @@ public class HolloutUtils {
         long truncated = value / (divideBy / 10); //the number part of the output times 10
         boolean hasDecimal = truncated < 100 && (truncated / 10d) != (truncated / 10);
         return hasDecimal ? (truncated / 10d) + suffix : (truncated / 10) + suffix;
+    }
+
+    /**
+     * check if network avalable
+     */
+    public static boolean isNetWorkConnected(Context context) {
+        if (context != null) {
+            ConnectivityManager
+                    mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            if (mNetworkInfo != null) {
+                return mNetworkInfo.isAvailable() && mNetworkInfo.isConnected();
+            }
+        }
+        return false;
+    }
+
+    public static void sendChatState(String chatState, String recipientId) {
+        ParseUser signedInUserObject = ParseUser.getCurrentUser();
+        JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
+        JSONObject chatStates = existingChatStates != null ? existingChatStates : new JSONObject();
+        try {
+            chatStates.put(recipientId, chatState);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        signedInUserObject.put(AppConstants.APP_USER_CHAT_STATES, chatStates);
+        signedInUserObject.saveInBackground();
+    }
+
+//    public static String convertAdditionalPhotosToString(List<Object> additionalPhotosOfUser) {
+//        Type listType = new TypeToken<List<String>>() {
+//        }.getType();
+//        return new Gson().toJson(additionalPhotosOfUser, listType);
+//    }
+//
+//    public static List<String> extractAdditionalPhotosFromString(String string) {
+//        if (StringUtils.isNotEmpty(string)) {
+//            Type listType = new TypeToken<List<String>>() {
+//            }.getType();
+//
+//            return new Gson().fromJson(string, listType);
+//        } else {
+//            return null;
+//        }
+//    }
+
+    public static ArrayList<String> getAllOfAUserPhotos(String profilePhoto, List<String> additionalPhotos) {
+        ArrayList<String> resultantPhotos = new ArrayList<>();
+        resultantPhotos.add(profilePhoto);
+        if (additionalPhotos != null) {
+            for (String additionalPhoto : additionalPhotos) {
+                if (!additionalPhoto.equals(profilePhoto) && !resultantPhotos.contains(additionalPhoto)) {
+                    resultantPhotos.add(additionalPhoto);
+                }
+            }
+        }
+        return resultantPhotos;
+    }
+
+    /**
+     * Code for composing an email and launching an
+     * email client installed on the device
+     * Used for sending feedback
+     */
+    public static void composeEmail(String[] addresses, String subject, Context context) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // only email apps should handle this
+        intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        if (intent.resolveActivity(context.getPackageManager()) != null) {
+            context.startActivity(intent);
+        }
+    }
+
+    public static int hashCode(@Nullable Object... objects) {
+        return Arrays.hashCode(objects);
+    }
+
+    public static boolean equals(@Nullable Object a, @Nullable Object b) {
+        return a == b || (a != null && a.equals(b));
+    }
+
+//    public static void startImagePicker(Activity activity) {
+//        new ImagePicker.Builder(activity)
+//                .mode(ImagePicker.Mode.CAMERA_AND_GALLERY)
+//                .compressLevel(ImagePicker.ComperesLevel.NONE)
+//                .directory(ImagePicker.Directory.DEFAULT)
+//                .extension(ImagePicker.Extension.PNG)
+//                .allowMultipleImages(false)
+//                .enableDebuggingMode(true)
+//                .build();
+//    }
+
+    public static String getEncodedString(String string) {
+        return string;
+    }
+
+    public static Bitmap convertDrawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+        int width = drawable.getIntrinsicWidth();
+        width = width > 0 ? width : 80;
+        int height = drawable.getIntrinsicHeight();
+        height = height > 0 ? height : 80;
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
+    private static String[] suffix = new String[]{"","k", "m", "b", "t"};
+    private static int MAX_LENGTH = 4;
+
+    public static String format(double number) {
+        String r = new DecimalFormat("##0E0").format(number);
+        r = r.replaceAll("E[0-9]", suffix[Character.getNumericValue(r.charAt(r.length() - 1)) / 3]);
+        while(r.length() > MAX_LENGTH || r.matches("[0-9]+\\.[a-z]")){
+            r = r.substring(0, r.length()-2) + r.substring(r.length() - 1);
+        }
+        return r;
     }
 
 }

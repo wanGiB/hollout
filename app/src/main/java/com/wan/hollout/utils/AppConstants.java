@@ -11,11 +11,11 @@ import java.util.Locale;
 
 public class AppConstants {
 
-    public static final String USER_DISPLAY_NAME = "user_display_name";
-    public static final String USER_PHOTO_URL = "user_photo_url";
-    public static final String ONLINE_STATUS = "online_status";
+    public static final String APP_USER_DISPLAY_NAME = "app_user_display_name";
+    public static final String APP_USER_PROFILE_PHOTO_URL = "app_user_profile_photo_url";
+    public static final String APP_USER_ONLINE_STATUS = "app_user_online_status";
     public static final String ONLINE = "online";
-    public static final String USER_LAST_SEEN = "user_last_seen";
+    public static final String APP_USER_LAST_SEEN = "app_user_last_seen";
     public static final String OFFLINE = "offline";
     public static final String APP_USER_GEO_POINT = "app_user_geo_point";
     public static final String APP_USER_COUNTRY = "app_user_country";
@@ -25,9 +25,6 @@ public class AppConstants {
     public static final String HOLLOUT_PREFERENCES = "hollout_preferences";
     public static final String CAN_ACCESS_LOCATION = "can_access_location";
     public static final String USERS = "users";
-
-    public static final String USER_LATITUDE = "user_latitude";
-    public static final String USER_LONGITUDE = "user_longitude";
 
     public static final String START_PAGE_INDEX = "start_page_index";
 
@@ -65,6 +62,37 @@ public class AppConstants {
     public static final String SELECTED = "selected";
     public static final String PEOPLE_TO_MEET_HOST_TYPE_SELECTED = "selected_people_to_meet";
     public static final String PEOPLE_TO_MEET_HOST_TYPE_POTENTIAL = "selected_people_to_meet";
+
+    public static final int ENTITY_TYPE_CLOSEBY = 0;
+
+    public static final String LOCATION_VISIBILITY_PREF = "who_sees_my_location";
+    public static final String LAST_SEEN_VISIBILITY_PREF = "who_sees_my_last_seen";
+    public static final String STATUS_VISIBILITY_PREF = "who_sees_my_status";
+    public static final String AGE_VISIBILITY_PREF = "who_sees_my_age";
+
+    public static final String MESSAGES_TEXT_SIZE = "messages_text_size_preference";
+    public static final String SAVE_TO_GALLERY = "save_to_gallery";
+    public static final String SETTINGS_FRAGMENT_NAME = "settings_fragment_name";
+    public static final String NOTIFICATION_SETTINGS_FRAGMENT = "settings_fragment_type_notification";
+    public static final String CHATS_SETTINGS_FRAGMENT = "settings_fragment_type_chat";
+    public static final String SUPPORT_SETTINGS_FRAGMENT = "settings_fragment_type_support";
+    public static final String PRIVACY_AND_SECURITY_FRAGMENT = "settings_fragment_type_privacy_and_security";
+    public static final String WAKE_PHONE_ON_NOTIFICATION = "wake_phone_on_notification";
+    public static final String SHOW_MESSAGE_TICKER = "show_message_ticker";
+    public static final String VIBRATE_ON_NEW_NOTIFICATION = "vibrate_on_notification";
+    public static final String PLAY_SOUND_ON_NEW_MESAGE_NOTIF = "play_sound_on_new_message_notifications";
+    public static final String APP_USER_GENDER = "app_user_gender";
+    public static final String UNKNOWN = "unknown";
+    public static final String APP_USER_AGE = "app_user_age";
+    public static final String USER_PROFILE_PHOTO_UPLOAD_TIME = "app_user_profile_photo_upload_time";
+    public static final String APP_USER_STATUS = "app_user_status";
+    public static final String APP_USER_CHAT_STATES = "app_user_chat_states";
+    public static final String APP_USER_ADDITIONAL_USER_PHOTOS = "app_user_additional_photos";
+    public static final String EXTRA_TITLE = "extra_title";
+    public static final String USER_ID = "user_id";
+    public static final String EXTRA_PICTURES = "pictures";
+    public static final String USER_PROPERTIES = "user_properties";
+
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
     public static String AUTHOR_ID = "id";

@@ -34,7 +34,7 @@ import butterknife.ButterKnife;
  */
 public class DrawerFragment extends Fragment {
 
-    public static final int PEOPLE_I_LIKE_TO_MEET = 0x1;
+    public static final int MEET_PEOPLE = 0x1;
     public static final int YOUR_PROFILE = 0x2;
     public static final int HELP_AND_SETTINGS = 0x5;
     public static final int THEME = 0x6;
@@ -113,7 +113,7 @@ public class DrawerFragment extends Fragment {
             public void onCategorySelected(View v, DrawerItemCategory drawerItemCategory) {
                 if (drawerItemCategory.getChildren() == null || drawerItemCategory.getChildren().isEmpty()) {
                     if (drawerListener != null) {
-                        if (drawerItemCategory.getId() == PEOPLE_I_LIKE_TO_MEET)
+                        if (drawerItemCategory.getId() == MEET_PEOPLE)
                             drawerListener.onDrawersPeopleOfSharedInterestsSelected();
                         else
                             drawerListener.onDrawerItemCategorySelected(drawerItemCategory);
@@ -195,8 +195,8 @@ public class DrawerFragment extends Fragment {
         drawerLoading = true;
         drawerProgress.setVisibility(View.GONE);
         drawerRetryBtn.setVisibility(View.GONE);
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(MEET_PEOPLE, MEET_PEOPLE, getString(R.string.meet_people)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(YOUR_PROFILE, YOUR_PROFILE, getString(R.string.your_profile)));
-        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(PEOPLE_I_LIKE_TO_MEET, PEOPLE_I_LIKE_TO_MEET, getString(R.string.your_profile)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(HELP_AND_SETTINGS, HELP_AND_SETTINGS, getString(R.string.help_and_settings)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(THEME, THEME, getString(R.string.theme)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(LOG_OUT, LOG_OUT, getString(R.string.log_out)));

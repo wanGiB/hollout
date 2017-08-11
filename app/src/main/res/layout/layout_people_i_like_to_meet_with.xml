@@ -69,6 +69,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="16dp"
                 android:layout_marginStart="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
                 android:src="@drawable/ic_close_black_48dp"
                 tools:ignore="ContentDescription" />
 
@@ -90,6 +92,8 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginEnd="16dp"
                 android:layout_marginRight="16dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
                 android:src="@drawable/ic_done_black_48dp"
                 tools:ignore="ContentDescription" />
 
@@ -130,10 +134,10 @@
                 app:textStyle="medium" />
 
             <!--<View-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="1dp"-->
-                <!--android:layout_below="@+id/tap_people"-->
-                <!--android:background="@color/light_gray" />-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="1dp"-->
+            <!--android:layout_below="@+id/tap_people"-->
+            <!--android:background="@color/light_gray" />-->
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/selected_people_recycler_view"

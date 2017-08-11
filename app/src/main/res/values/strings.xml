@@ -104,4 +104,19 @@
     <string name="tap_all_kinds_of_people_you_like_to_meet">Tap all kinds of people you like to meet around you</string>
     <string name="no_result_found_for_kind_search">Sorry, no result found</string>
     <string name="selected">SELECTED</string>
+    <string name="anyone">Anyone</string>
+    <string name="text_size_default">14</string>
+    <string name="only_closebies">Only Closebies</string>
+    <string name="only_chats">Only Chats</string>
+    <string name="visible_to_only_me">Only me</string>
+    <string name="hey_there_holla_me_on_hollout">Hey there, holla me.</string>
+    <string name="chat">CHAT</string>
+    <string name="full_info">VIEW PROFILE</string>
+    <string name="UPLOAD">UPLOAD</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
+    <string name="today">today</string>
+    <string name="yesterday">yesterday</string>
+    <string name="upload_new_photo_first">You need to upload at least a profile photo before you can start a chat</string>
+    <string name="profile">Profile</string>
 </resources>

@@ -405,7 +405,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
     private void loadSignedInUserPhoto() {
         if (signedInUser != null) {
-            String signedInUserPhotoUrl = signedInUser.getString(AppConstants.USER_PHOTO_URL);
+            String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
                 UiUtils.loadImage(this, signedInUserPhotoUrl, userPhotoView);
             }

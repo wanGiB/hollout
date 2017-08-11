@@ -25,6 +25,7 @@ import com.wan.hollout.ui.fragments.DrawerFragment;
 import com.wan.hollout.ui.fragments.MainFragment;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -67,7 +68,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         ParseUser signedInUser = ParseUser.getCurrentUser();
         if (!HolloutPreferences.isUserWelcomed()) {
             if (signedInUser != null) {
-                UiUtils.showSafeToast("Welcome, " + signedInUser.getString(AppConstants.USER_DISPLAY_NAME));
+                UiUtils.showSafeToast("Welcome, " + signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
             }
             HolloutPreferences.setUserWelcomed();
         }
@@ -175,6 +176,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onDrawerItemCategorySelected(DrawerItemCategory drawerItemCategory) {
         if (drawerItemCategory.getId() == DrawerFragment.LOG_OUT) {
             attemptLogOut();
+        } else if (drawerItemCategory.getId() == DrawerFragment.MEET_PEOPLE) {
+            Intent meetPeopleIntent = new Intent(MainActivity.this, PeopleILikeToMeetActivity.class);
+            startActivityForResult(meetPeopleIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
         }
     }
 
@@ -187,4 +191,5 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onAccountSelected() {
 
     }
+
 }

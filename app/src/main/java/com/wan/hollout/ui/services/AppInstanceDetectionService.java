@@ -58,15 +58,15 @@ public class AppInstanceDetectionService extends Service implements
     private AppStateManager.Listener myListener = new AppStateManager.Listener() {
 
         public void onBecameForeground() {
-            signedInUser.put(AppConstants.ONLINE_STATUS, AppConstants.ONLINE);
-            signedInUser.put(AppConstants.USER_LAST_SEEN, System.currentTimeMillis());
+            signedInUser.put(AppConstants.APP_USER_ONLINE_STATUS, AppConstants.ONLINE);
+            signedInUser.put(AppConstants.APP_USER_LAST_SEEN, System.currentTimeMillis());
             updateSignedInUserProps();
         }
 
         public void onBecameBackground() {
             //This is also a good place to blow new message notifications for a foregrounded app
-            signedInUser.put(AppConstants.ONLINE_STATUS, AppConstants.OFFLINE);
-            signedInUser.put(AppConstants.USER_LAST_SEEN, System.currentTimeMillis());
+            signedInUser.put(AppConstants.APP_USER_ONLINE_STATUS, AppConstants.OFFLINE);
+            signedInUser.put(AppConstants.APP_USER_LAST_SEEN, System.currentTimeMillis());
             updateSignedInUserProps();
         }
 

@@ -13,4 +13,14 @@
     <dimen name="navigation_drawer_size">290dp</dimen>
     <dimen name="search_icon_padding">12dp</dimen>
     <dimen name="search_view_text_padding">65dp</dimen>
+
+    <dimen name="padding_list_row">15dp</dimen>
+    <dimen name="messages_padding_left">72dp</dimen>
+    <dimen name="icon_width_height">45dp</dimen>
+    <dimen name="msg_text_primary">18sp</dimen>
+    <dimen name="msg_text_secondary">16sp</dimen>
+    <dimen name="icon_star">25dp</dimen>
+    <dimen name="icon_text">22sp</dimen>
+    <dimen name="timestamp">12sp</dimen>
+
 </resources>

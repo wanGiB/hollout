@@ -78,6 +78,20 @@
             android:theme="@style/AppTheme.FullScreen.Light"
             android:windowSoftInputMode="stateHidden" />
 
+        <activity
+            android:name=".ui.activities.ChatActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
+            android:label="@string/chat"
+            android:theme="@style/AppTheme.FullScreen.Light"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".ui.activities.UserProfileActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
+            android:label="@string/profile"
+            android:theme="@style/AppTheme.FullScreen.Light"
+            android:windowSoftInputMode="stateHidden" />
+
         <service
             android:name=".ui.services.AppInstanceDetectionService"
             android:enabled="true" />
@@ -91,6 +105,11 @@
         </receiver>
 
         <activity android:name=".ui.activities.CommentsActivity" />
+
+        <activity
+            android:name=".ui.activities.SlidePagerActivity"
+            android:configChanges="orientation|screenLayout|screenSize"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
 
     </application>
 

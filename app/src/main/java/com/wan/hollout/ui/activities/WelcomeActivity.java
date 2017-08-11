@@ -197,19 +197,33 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     private void createNewUserOnParse(final FirebaseUser firebaseUser) {
         UiUtils.showProgressDialog(this, "Creating account...");
         setupCrashlyticsUser(firebaseUser);
-        ParseUser newUser = new ParseUser();
-        newUser.setUsername(firebaseUser.getUid());
-        newUser.setPassword(firebaseUser.getUid());
+        ParseUser newHolloutUser = new ParseUser();
+        newHolloutUser.setUsername(firebaseUser.getUid());
+        newHolloutUser.setPassword(firebaseUser.getUid());
         if (firebaseUser.getDisplayName() != null) {
-            newUser.put(AppConstants.USER_DISPLAY_NAME, firebaseUser.getDisplayName().toLowerCase());
+            newHolloutUser.put(AppConstants.APP_USER_DISPLAY_NAME, firebaseUser.getDisplayName().toLowerCase());
         }
         if (firebaseUser.getEmail() != null) {
-            newUser.setEmail(firebaseUser.getEmail());
+            newHolloutUser.setEmail(firebaseUser.getEmail());
         }
         if (firebaseUser.getPhotoUrl() != null) {
-            newUser.put(AppConstants.USER_PHOTO_URL, firebaseUser.getPhotoUrl().toString());
+            newHolloutUser.put(AppConstants.APP_USER_PROFILE_PHOTO_URL, firebaseUser.getPhotoUrl().toString());
         }
-        newUser.signUpInBackground(new SignUpCallback() {
+        newHolloutUser.put(AppConstants.PLAY_SOUND_ON_NEW_MESAGE_NOTIF, true);
+        newHolloutUser.put(AppConstants.WAKE_PHONE_ON_NOTIFICATION, true);
+        newHolloutUser.put(AppConstants.SHOW_MESSAGE_TICKER, true);
+        newHolloutUser.put(AppConstants.VIBRATE_ON_NEW_NOTIFICATION, true);
+        newHolloutUser.put(AppConstants.MESSAGES_TEXT_SIZE, getString(R.string.text_size_default));
+        newHolloutUser.put(AppConstants.SAVE_TO_GALLERY, true);
+        newHolloutUser.put(AppConstants.APP_USER_LAST_SEEN, System.currentTimeMillis());
+        newHolloutUser.put(AppConstants.LAST_SEEN_VISIBILITY_PREF, getString(R.string.anyone));
+        newHolloutUser.put(AppConstants.LOCATION_VISIBILITY_PREF, getString(R.string.anyone));
+        newHolloutUser.put(AppConstants.APP_USER_ONLINE_STATUS, AppConstants.ONLINE);
+        newHolloutUser.put(AppConstants.AGE_VISIBILITY_PREF, getString(R.string.visible_to_only_me));
+        newHolloutUser.put(AppConstants.APP_USER_GENDER, AppConstants.UNKNOWN);
+        newHolloutUser.put(AppConstants.APP_USER_AGE, AppConstants.UNKNOWN);
+        newHolloutUser.put(AppConstants.USER_PROFILE_PHOTO_UPLOAD_TIME, System.currentTimeMillis());
+        newHolloutUser.signUpInBackground(new SignUpCallback() {
             @Override
             public void done(ParseException e) {
                 UiUtils.dismissProgressDialog();

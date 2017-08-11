@@ -105,8 +105,8 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             ParseUser user = ParseUser.getCurrentUser();
             if (user != null) {
-                viewHolderHeader.userName.setText(user.getString(AppConstants.USER_DISPLAY_NAME));
-                String userProfilePhotoUrl = user.getString(AppConstants.USER_PHOTO_URL);
+                viewHolderHeader.userName.setText(user.getString(AppConstants.APP_USER_DISPLAY_NAME));
+                String userProfilePhotoUrl = user.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                 if (userProfilePhotoUrl != null) {
                     viewHolderHeader.signedInUserImageView.setBorderColor(Color.WHITE);
                     viewHolderHeader.signedInUserImageView.setBorderWidth(5);
