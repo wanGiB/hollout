@@ -43,6 +43,7 @@
             android:gravity="center_horizontal"
             android:text="@string/no_people"
             android:textColor="@color/grey500"
+            android:textSize="17sp"
             app:textStyle="regular" />
 
         <android.support.v7.widget.CardView
@@ -52,7 +53,7 @@
             android:layout_marginTop="10dp"
             app:cardCornerRadius="10dp"
             app:cardElevation="10dp"
-            app:cardBackgroundColor="@color/colorPrimaryDark">
+            app:cardBackgroundColor="@color/colorPrimary">
 
             <com.wan.hollout.ui.widgets.HolloutTextView
                 android:layout_width="wrap_content"

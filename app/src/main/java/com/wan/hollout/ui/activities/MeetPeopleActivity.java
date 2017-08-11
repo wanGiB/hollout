@@ -115,6 +115,15 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
 
         });
 
+        searchTextView.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                searchTextView.setCursorVisible(true);
+            }
+
+        });
+
         searchTextView.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -127,6 +136,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 if (StringUtils.isEmpty(charSequence.toString().trim())) {
                     fetchPeople(null, 0);
                 } else {
+                    searchTextView.setCursorVisible(false);
                     fetchPeople(charSequence.toString().trim(), 0);
                 }
             }
