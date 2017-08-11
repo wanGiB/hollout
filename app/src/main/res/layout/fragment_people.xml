@@ -1,135 +1,79 @@
-<?xml version="1.0" encoding="utf-8"?>
 <ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/content_flipper"
+    android:id="@+id/people_content_flipper"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#dddddd">
+    tools:galleryActivity="com.app.hollout.ui.fragments.PeopleFragment">
 
-    <com.skyfishjy.library.RippleBackground
-        android:id="@+id/ripple_background"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        app:rb_color="#eeeeee"
-        app:rb_duration="3000"
-        app:rb_radius="32dp"
-        app:rb_rippleAmount="6"
-        app:rb_scale="6">
-
-        <ImageView
-            android:id="@+id/centerImage"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_centerInParent="true"
-            android:src="@drawable/web_hi_res_512"
-            tools:ignore="ContentDescription" />
-
-        <com.wan.hollout.ui.widgets.CircleImageView
-            android:id="@+id/first_person"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_above="@id/centerImage"
-            android:layout_marginBottom="32dp"
-            android:layout_marginEnd="6dp"
-            android:layout_marginRight="6dp"
-            android:layout_toLeftOf="@id/centerImage"
-            android:layout_toStartOf="@id/centerImage"
-            android:src="@drawable/authentication_background_image"
-            android:visibility="invisible"
-            app:border_color="@android:color/white"
-            app:border_width="3dp" />
-
-        <com.wan.hollout.ui.widgets.CircleImageView
-            android:id="@+id/second_person"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_above="@id/centerImage"
-            android:layout_marginBottom="32dp"
-            android:layout_marginLeft="6dp"
-            android:layout_marginStart="6dp"
-            android:layout_toEndOf="@id/centerImage"
-            android:layout_toRightOf="@id/centerImage"
-            android:src="@drawable/authentication_background_image"
-            android:visibility="invisible"
-            app:border_color="@android:color/white"
-            app:border_width="3dp" />
-
-        <com.wan.hollout.ui.widgets.CircleImageView
-            android:id="@+id/third_person"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_below="@id/centerImage"
-            android:layout_marginLeft="6dp"
-            android:layout_marginStart="6dp"
-            android:layout_marginTop="6dp"
-            android:layout_toEndOf="@id/centerImage"
-            android:layout_toRightOf="@id/centerImage"
-            android:src="@drawable/authentication_background_image"
-            android:visibility="invisible"
-            app:border_color="@android:color/white"
-            app:border_width="3dp" />
-
-        <com.wan.hollout.ui.widgets.CircleImageView
-            android:id="@+id/fourth_person"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_below="@id/centerImage"
-            android:layout_marginEnd="6dp"
-            android:layout_marginRight="6dp"
-            android:layout_marginTop="6dp"
-            android:layout_toLeftOf="@id/centerImage"
-            android:layout_toStartOf="@id/centerImage"
-            android:src="@drawable/authentication_background_image"
-            android:visibility="invisible"
-            app:border_color="@android:color/white"
-            app:border_width="3dp" />
-
-    </com.skyfishjy.library.RippleBackground>
+    <com.pnikosis.materialishprogress.ProgressWheel
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:progressIndeterminate="true"
+        app:barColor="@color/ease_gray"
+        app:rimColor="@color/white"
+        android:layout_gravity="center" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white"
+        android:id="@+id/no_feed_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/sub_container"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/friends_placeholder"
+            tools:ignore="ContentDescription" />
 
         <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/error_message"
+            android:id="@+id/no_hollout_users_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingEnd="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingStart="16dp"
-            android:textColor="@color/dark_gray"
-            android:textSize="18sp"
-            app:textStyle="medium" />
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="20dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center_horizontal"
+            android:text="@string/no_people"
+            android:textColor="@color/grey500"
+            app:textStyle="regular" />
 
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/retry"
-            android:layout_width="wrap_content"
+        <android.support.v7.widget.CardView
+            android:id="@+id/card_meet_people"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:background="@color/colorBlue"
-            android:paddingBottom="5dp"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:paddingTop="5dp"
-            android:text="@string/retry"
-            android:textColor="@color/white"
-            app:textStyle="medium" />
+            android:layout_marginTop="10dp"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="10dp"
+            app:cardBackgroundColor="@color/colorPrimaryDark">
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/meet_people_textview"
+                android:gravity="center"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp"
+                android:text="@string/meet_people"
+                android:textColor="@color/white" />
+
+        </android.support.v7.widget.CardView>
 
     </LinearLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/people_recycler_view"

@@ -118,5 +118,8 @@
     <string name="today">today</string>
     <string name="yesterday">yesterday</string>
     <string name="upload_new_photo_first">You need to upload at least a profile photo before you can start a chat</string>
+    <string name="no_people">No hollout user of shared interests/profession is close to you now, but we\'ll keep checking</string>
     <string name="profile">Profile</string>
+    <string name="review_network">Review Data</string>
+    <string name="people_unavailable">Currently unable to load people of shared interests, but we\'ll keep checking.</string>
 </resources>
