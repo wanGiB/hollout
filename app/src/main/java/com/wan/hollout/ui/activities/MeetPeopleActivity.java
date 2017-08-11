@@ -268,6 +268,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             if (signedInUserInterests != null) {
                 if (signedInUserInterests.contains(name)) {
                     if (!selectedPeopleToMeet.contains(parseObject)) {
+                        parseObject.put(AppConstants.SELECTED, true);
                         selectedPeopleToMeet.add(parseObject);
                         selectedPeopleToMeetAdapter.notifyItemInserted(selectedPeopleToMeet.size() - 1);
                     }
@@ -372,6 +373,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                         if (!selectedPeopleToMeet.contains(parseObject)) {
                             selectedPeopleToMeet.add(parseObject);
                             selectedPeopleToMeetAdapter.notifyDataSetChanged();
+                            selectedPeopleToMeetRecyclerView.smoothScrollToPosition(selectedPeopleToMeet.size() - 1);
                         }
                     }
                 }
