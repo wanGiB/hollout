@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.wan.hollout">
-    
+
     <!-- Accessing camera hardware -->
     <uses-feature
         android:name="android.hardware.camera"
@@ -114,7 +114,7 @@
         <activity
             android:name=".ui.activities.MeetPeopleActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
-            android:label="@string/people"
+            android:label="@string/chats"
             android:theme="@style/AppTheme.FullScreen.Light"
             android:windowSoftInputMode="stateHidden" />
 

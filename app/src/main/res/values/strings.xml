@@ -66,8 +66,8 @@
     <string name="choose_an_account_to_continue_with">Choose an account to continue with</string>
     <string name="options">Options</string>
     <string name="empty" />
-    <string name="feed">Feed</string>
     <string name="people">People</string>
+    <string name="chats">Chats</string>
     <string name="search">Search</string>
     <string name="hollout_bot">Hollout Bot</string>
     <string name="retry">RETRY</string>
