@@ -113,13 +113,27 @@
             android:layout_below="@+id/tap_people"
             android:background="@color/light_gray" />
 
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/selected_people_frame"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/upper_divider"
             android:background="@color/white"
+            android:orientation="vertical"
             android:padding="8dp">
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/selected"
+                android:textColor="@color/dark_grey"
+                app:textStyle="medium" />
+
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="1dp"-->
+                <!--android:layout_below="@+id/tap_people"-->
+                <!--android:background="@color/light_gray" />-->
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/selected_people_recycler_view"
@@ -127,7 +141,7 @@
                 android:layout_height="wrap_content"
                 android:background="@color/white" />
 
-        </FrameLayout>
+        </LinearLayout>
 
         <View
             android:id="@+id/bottom_view"
@@ -160,8 +174,8 @@
                 android:background="@color/white" />
 
             <com.wan.hollout.ui.widgets.HolloutTextView
-                android:layout_width="wrap_content"
                 android:id="@+id/no_result_found_view"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:gravity="center_horizontal"
@@ -173,7 +187,8 @@
                 android:paddingTop="16dp"
                 android:text="@string/no_result_found_for_kind_search"
                 android:textColor="@color/base_gray"
-                android:textSize="15sp" />
+                android:textSize="15sp"
+                android:visibility="gone" />
 
         </FrameLayout>
 

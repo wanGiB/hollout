@@ -7,6 +7,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -19,6 +21,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.layoutmanagers.chipslayoutmanager.ChipsLayoutManager;
@@ -102,6 +105,26 @@ public class PeopleILikeToMeetActivity extends AppCompatActivity implements View
                 }
             }
         });
+        searchTextView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (StringUtils.isEmpty(charSequence.toString().trim())) {
+                    fetchPeople(null, 0);
+                } else {
+                    fetchPeople(charSequence.toString().trim(), 0);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
     @SuppressLint("InflateParams")
@@ -171,26 +194,42 @@ public class PeopleILikeToMeetActivity extends AppCompatActivity implements View
                         if (!objects.isEmpty()) {
                             UiUtils.toggleFlipperState(contentFlipper, 2);
                             loadPeople(objects, skip);
+                        } else {
+                            tryShowNoResultFound(searchString);
                         }
+                    } else {
+                        tryShowNoResultFound(searchString);
                     }
                 } else {
-                    if (potentialPeopleToMeet.isEmpty()) {
-                        UiUtils.toggleFlipperState(contentFlipper, 1);
-                        String errorMessage = e.getMessage();
-                        if (StringUtils.isNotEmpty(errorMessage)) {
-                            if (!errorMessage.contains("i/o")) {
-                                errorMessageView.setText(errorMessage);
+                    if (searchString == null) {
+                        if (potentialPeopleToMeet.isEmpty()) {
+                            UiUtils.toggleFlipperState(contentFlipper, 1);
+                            String errorMessage = e.getMessage();
+                            if (StringUtils.isNotEmpty(errorMessage)) {
+                                if (!errorMessage.contains("i/o")) {
+                                    errorMessageView.setText(errorMessage);
+                                } else {
+                                    errorMessageView.setText(getString(R.string.screwed_data_error_message));
+                                }
                             } else {
                                 errorMessageView.setText(getString(R.string.screwed_data_error_message));
                             }
-                        } else {
-                            errorMessageView.setText(getString(R.string.screwed_data_error_message));
                         }
+                    } else {
+                        tryShowNoResultFound(searchString);
                     }
                 }
                 UiUtils.showView(potentialPeopleToMeetFooterView, false);
             }
         });
+    }
+
+    private void tryShowNoResultFound(String searchString) {
+        if (searchString != null) {
+            UiUtils.toggleFlipperState(contentFlipper, 2);
+            UiUtils.showView(potentialPeopleToMeetRecyclerView, false);
+            UiUtils.showView(noResultFoundView, true);
+        }
     }
 
     private void loadPeople(List<ParseObject> objects, int skip) {
@@ -246,14 +285,26 @@ public class PeopleILikeToMeetActivity extends AppCompatActivity implements View
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.close_activity:
-                Intent callerIntent = new Intent();
-                setResult(RESULT_OK, callerIntent);
-                finish();
+                sendBackResultToCaller();
                 break;
             case R.id.action_empty_btn:
                 searchTextView.setText("");
                 break;
+            case R.id.done_with_selection:
+                signedInUser.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        sendBackResultToCaller();
+                    }
+                });
+                break;
         }
+    }
+
+    private void sendBackResultToCaller() {
+        Intent callerIntent = new Intent();
+        setResult(RESULT_OK, callerIntent);
+        finish();
     }
 
 }

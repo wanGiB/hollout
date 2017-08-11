@@ -9,4 +9,5 @@ public class RequestCodes {
     public static final int AUTH_REQUEST_CODE = 0x1;
     public static final int SEND_AND_RECEIVE_SMS_PERMISSION_CODE = 0x7;
 
+    public static final int MEET_PEOPLE_REQUEST_CODE = 0x8;
 }

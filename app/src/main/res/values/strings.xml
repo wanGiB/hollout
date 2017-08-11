@@ -103,4 +103,5 @@
     <string name="meet_people">Meet People</string>
     <string name="tap_all_kinds_of_people_you_like_to_meet">Tap all kinds of people you like to meet around you</string>
     <string name="no_result_found_for_kind_search">Sorry, no result found</string>
+    <string name="selected">SELECTED</string>
 </resources>

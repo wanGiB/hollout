@@ -37,6 +37,7 @@ import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -278,12 +279,10 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                             if (e == null) {
                                 if (!HolloutPreferences.isUserWelcomed()) {
                                     Intent peopleILikeToMeetIntent = new Intent(AboutUserActivity.this, PeopleILikeToMeetActivity.class);
-                                    startActivity(peopleILikeToMeetIntent);
+                                    startActivityForResult(peopleILikeToMeetIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
                                     finish();
                                 } else {
-                                    Intent mainIntent = new Intent(AboutUserActivity.this, MainActivity.class);
-                                    startActivity(mainIntent);
-                                    finish();
+                                    launchMainActivity();
                                 }
                             } else {
                                 UiUtils.showSafeToast("Error completing operation. Please try again.");
@@ -297,6 +296,12 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
         });
 
+    }
+
+    private void launchMainActivity() {
+        Intent mainIntent = new Intent(AboutUserActivity.this, MainActivity.class);
+        startActivity(mainIntent);
+        finish();
     }
 
     private void buildInterests(List<String> interests, String interestTag) {
@@ -361,6 +366,14 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                 }
             }
         };
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE && resultCode == RESULT_OK) {
+            launchMainActivity();
+        }
     }
 
     private void onKeyboardHidden() {
