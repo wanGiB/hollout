@@ -122,4 +122,10 @@
     <string name="profile">Profile</string>
     <string name="review_network">Review Data</string>
     <string name="people_unavailable">Currently unable to load people of shared interests, but we\'ll keep checking.</string>
+    <string name="gender">Gender</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="age">Age</string>
+    <string name="_16">16</string>
+    <string name="yrs">Yrs</string>
 </resources>

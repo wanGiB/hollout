@@ -158,7 +158,7 @@ public class PeopleFragment extends Fragment {
     @SuppressLint("InflateParams")
     private void initBasicViews() {
         footerView = getActivity().getLayoutInflater().inflate(R.layout.loading_footer, null);
-        UiUtils.setUpRefreshColorSchemes(getActivity(),swipeRefreshLayout);
+        UiUtils.setUpRefreshColorSchemes(getActivity(), swipeRefreshLayout);
         peopleAdapter = new PeopleAdapter(getActivity(), people);
 
         HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(peopleAdapter);
@@ -334,10 +334,16 @@ public class PeopleFragment extends Fragment {
                     }
                 } else if (o instanceof String) {
                     String action = (String) o;
-                    if (action.equals(AppConstants.DISABLE_NESTED_SCROLLING)) {
-                        peopleRecyclerView.setNestedScrollingEnabled(false);
-                    } else if (action.equals(AppConstants.ENABLE_NESTED_SCROLLING)) {
-                        peopleRecyclerView.setNestedScrollingEnabled(true);
+                    switch (action) {
+                        case AppConstants.DISABLE_NESTED_SCROLLING:
+                            peopleRecyclerView.setNestedScrollingEnabled(false);
+                            break;
+                        case AppConstants.ENABLE_NESTED_SCROLLING:
+                            peopleRecyclerView.setNestedScrollingEnabled(true);
+                            break;
+                        case AppConstants.REFRESH_PEOPLE:
+                            fetchPeople();
+                            break;
                     }
                 }
             }

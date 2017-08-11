@@ -48,6 +48,10 @@ public class SplashActivity extends AppCompatActivity {
             List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
             if (aboutUser != null) {
                 if (!aboutUser.isEmpty()) {
+                    String userAge = parseUser.getString(AppConstants.APP_USER_GENDER);
+                    if (userAge.equals(AppConstants.UNKNOWN)) {
+
+                    }
                     launchMainActivity();
                 } else {
                     launchAboutActivity();

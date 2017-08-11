@@ -23,6 +23,7 @@ import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
 import com.wan.hollout.ui.fragments.DrawerFragment;
 import com.wan.hollout.ui.fragments.MainFragment;
+import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.RequestCodes;
@@ -134,11 +135,16 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         return super.onOptionsItemSelected(item);
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        getSupportFragmentManager().findFragmentById(R.id.fragment_container).onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE) {
+            if (resultCode==RESULT_OK){
+                EventBus.getDefault().post(AppConstants.REFRESH_PEOPLE);
+            }
+        } else {
+            getSupportFragmentManager().findFragmentById(R.id.fragment_container).onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     private void attemptLogOut() {

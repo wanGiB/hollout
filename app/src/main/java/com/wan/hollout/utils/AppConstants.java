@@ -96,6 +96,7 @@ public class AppConstants {
     public static final String APP_USERS = "hollout_app_users";
     public static final String DISABLE_NESTED_SCROLLING = "disable_nested_scrolling";
     public static final String ENABLE_NESTED_SCROLLING = "enable_nested_scrolling";
+    public static final String REFRESH_PEOPLE = "refresh_people";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
