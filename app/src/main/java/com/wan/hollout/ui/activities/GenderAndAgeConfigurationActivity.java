@@ -13,8 +13,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioGroup;
@@ -24,8 +22,6 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
-import com.wan.hollout.animations.BounceInterpolator;
-import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
@@ -151,7 +147,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
     }
 
     private void setupTermsAndConditionsView() {
-        acceptLicenseCheck.setText(UiUtils.fromHtml("By continuing, you accept our <a href=https://www.google.com>Terms, Conditions and Privacy Policy</a>"));
+        acceptLicenseCheck.setText(UiUtils.fromHtml("By continuing, you accept our <a href=https://www.google.com>Terms and Conditions</a>"));
         acceptLicenseCheck.setMovementMethod(LinkMovementMethod.getInstance());
         acceptLicenseCheck.setClickable(true);
     }
