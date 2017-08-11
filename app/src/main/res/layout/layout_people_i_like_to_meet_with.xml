@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <com.pnikosis.materialishprogress.ProgressWheel
@@ -81,6 +82,10 @@
                 android:layout_weight="1"
                 android:gravity="center_horizontal"
                 android:padding="12dp"
+                android:paddingLeft="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingRight="16dp"
                 android:text="@string/meet_people"
                 android:textColor="@color/text_black"
                 android:textSize="20sp" />
@@ -105,7 +110,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/top_panel"
             android:layout_centerHorizontal="true"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:gravity="center_horizontal"
             android:layout_gravity="center_horizontal"
+            android:paddingEnd="16dp"
+            android:paddingStart="16dp"
             android:paddingBottom="8dp"
             android:text="@string/tap_all_kinds_of_people_you_like_to_meet"
             android:textSize="16sp" />
@@ -124,6 +134,8 @@
             android:layout_below="@+id/upper_divider"
             android:background="@color/white"
             android:orientation="vertical"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:padding="8dp">
 
             <com.wan.hollout.ui.widgets.HolloutTextView
@@ -132,12 +144,6 @@
                 android:text="@string/selected"
                 android:textColor="@color/dark_grey"
                 app:textStyle="medium" />
-
-            <!--<View-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="1dp"-->
-            <!--android:layout_below="@+id/tap_people"-->
-            <!--android:background="@color/light_gray" />-->
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/selected_people_recycler_view"
@@ -175,6 +181,7 @@
                 android:id="@+id/people_to_meet_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingTop="15dp"
                 android:background="@color/white" />
 
             <com.wan.hollout.ui.widgets.HolloutTextView

@@ -16,6 +16,7 @@ import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.BounceInterpolator;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.eventbuses.SelectedPerson;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
@@ -24,6 +25,7 @@ import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 import java.util.Locale;
@@ -142,6 +144,7 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             selectedPeopleToMeet.add(personName);
                             parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
                             personObject.put(AppConstants.SELECTED, true);
+                            EventBus.getDefault().post(new SelectedPerson(personObject));
                         } else {
                             if (selectedPeopleToMeet.contains(personName)) {
                                 selections.put(personName.hashCode(), false);

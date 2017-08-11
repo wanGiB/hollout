@@ -61,7 +61,7 @@ public class AppConstants {
     public static final String NAME = "name";
     public static final String SELECTED = "selected";
     public static final String PEOPLE_TO_MEET_HOST_TYPE_SELECTED = "selected_people_to_meet";
-    public static final String PEOPLE_TO_MEET_HOST_TYPE_POTENTIAL = "selected_people_to_meet";
+    public static final String PEOPLE_TO_MEET_HOST_TYPE_POTENTIAL = "people_to_meet_host_type_potential";
 
     public static final int ENTITY_TYPE_CLOSEBY = 0;
 
