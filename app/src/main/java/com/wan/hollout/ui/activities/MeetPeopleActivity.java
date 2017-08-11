@@ -28,6 +28,7 @@ import com.wan.hollout.layoutmanagers.chipslayoutmanager.ChipsLayoutManager;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -294,6 +295,8 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 signedInUser.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
+                        List<String> userInterests = ParseUser.getCurrentUser().getList(AppConstants.INTERESTS);
+                        HolloutUtils.updateCurrentParseInstallation(userInterests, null);
                         sendBackResultToCaller();
                     }
                 });

@@ -42,6 +42,7 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
@@ -75,6 +76,7 @@ public class UiUtils {
     private static String TAG = "UiUtils";
 
     private static ApplicationLoader mContext = ApplicationLoader.getInstance();
+
     public static void showSafeToast(final String toastMessage) {
         runOnMain(new Runnable() {
             @Override
@@ -627,6 +629,21 @@ public class UiUtils {
         startChatView.setOnClickListener(onClickListener);
         viewProfileView.setOnClickListener(onClickListener);
         photoView.setOnClickListener(onClickListener);
+    }
+
+    public static void snackMessage(String message, View anchorView, boolean shortDuration, String actionMessage, final DoneCallback<Object> actionCallback) {
+        if (anchorView != null) {
+            Snackbar snackbar = Snackbar.make(anchorView, message, actionMessage != null ? Snackbar.LENGTH_INDEFINITE : (shortDuration ? Snackbar.LENGTH_SHORT : Snackbar.LENGTH_LONG));
+            if (actionCallback != null) {
+                snackbar.setAction(actionMessage, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        actionCallback.done(null, null);
+                    }
+                });
+            }
+            snackbar.show();
+        }
     }
 
 }

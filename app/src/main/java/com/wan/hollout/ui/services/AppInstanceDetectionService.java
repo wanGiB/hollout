@@ -19,6 +19,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.wan.hollout.components.ApplicationLoader;
@@ -53,6 +54,7 @@ public class AppInstanceDetectionService extends Service implements
     private String TAG = AppInstanceDetectionService.class.getSimpleName();
 
     private ParseUser signedInUser;
+
     private AppStateManager appStateManager;
 
     private AppStateManager.Listener myListener = new AppStateManager.Listener() {
@@ -200,6 +202,8 @@ public class AppInstanceDetectionService extends Service implements
     public void onConnected(@Nullable Bundle bundle) {
         if (HolloutPreferences.canAccessLocation()) {
             processLocation(null);
+        } else {
+            EventBus.getDefault().post(AppConstants.PLEASE_REQUEST_LOCATION_ACCESSS);
         }
     }
 
@@ -225,7 +229,11 @@ public class AppInstanceDetectionService extends Service implements
     @Override
     public void onLocationChanged(Location location) {
         HolloutLogger.d(TAG, "Changed Location = " + location.toString());
-        processLocation(location);
+        if (HolloutPreferences.canAccessLocation()) {
+            processLocation(location);
+        } else {
+            EventBus.getDefault().post(AppConstants.PLEASE_REQUEST_LOCATION_ACCESSS);
+        }
     }
 
     private void updateSignedInUserProps() {
@@ -234,10 +242,19 @@ public class AppInstanceDetectionService extends Service implements
                 @Override
                 public void done(ParseException e) {
                     if (e == null) {
+                        ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
+                        if (parseInstallation != null) {
+                            try {
+                                parseInstallation.put(AppConstants.APP_USER_GEO_POINT, ParseUser.getCurrentUser().getParseGeoPoint(AppConstants.APP_USER_GEO_POINT));
+                                parseInstallation.saveInBackground();
+                            } catch (NullPointerException ignored) {
+                            }
+                        }
                         EventBus.getDefault().post(new ConnectivityChangedAction(true));
                     }
                 }
             });
         }
     }
+
 }

@@ -24,6 +24,7 @@ import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.wan.hollout.R;
@@ -381,6 +382,42 @@ public class HolloutUtils {
             r = r.substring(0, r.length() - 2) + r.substring(r.length() - 1);
         }
         return r;
+    }
+
+    public static void updateCurrentParseInstallation(List<String> newChannelProps, List<String> removableChannelProps) {
+        ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
+        parseInstallation.put(AppConstants.APP_USER_ID,ParseUser.getCurrentUser().getObjectId());
+        List<String> existingChannels = parseInstallation.getList("channels");
+        checkAndUpdateChannels(newChannelProps, removableChannelProps, parseInstallation, existingChannels);
+        parseInstallation.saveInBackground();
+    }
+
+    private static void checkAndUpdateChannels(List<String> newChannelProps, List<String> removableChannelProps,
+                                               ParseInstallation parseInstallation,
+                                               List<String> existingChannels) {
+        if (existingChannels != null) {
+            if (removableChannelProps != null) {
+                for (String removableChannelItem : removableChannelProps) {
+                    if (existingChannels.contains(removableChannelItem)) {
+                        existingChannels.remove(removableChannelItem);
+                    }
+                }
+            }
+            for (String newChannelItem : newChannelProps) {
+                if (!existingChannels.contains(newChannelItem)) {
+                    existingChannels.add(newChannelItem);
+                }
+            }
+            parseInstallation.put("channels", existingChannels);
+        } else {
+            List<String> newChannels = new ArrayList<>();
+            for (String newChannelItem : newChannelProps) {
+                if (!newChannels.contains(newChannelItem)) {
+                    newChannels.add(newChannelItem);
+                }
+            }
+            parseInstallation.put("channels", newChannels);
+        }
     }
 
 }

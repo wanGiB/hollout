@@ -16,6 +16,7 @@ import com.parse.ParseLiveQueryClient;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
+import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.HolloutLogger;
 
@@ -56,6 +57,12 @@ public class ApplicationLoader extends Application {
         Fabric.with(this, new Crashlytics());
         FlowManager.init(this);
         configureThemes();
+        startAppInstanceDetector();
+    }
+
+    private void startAppInstanceDetector() {
+        Intent serviceIntent = new Intent(this, AppInstanceDetectionService.class);
+        startService(serviceIntent);
     }
 
     private void initParse() {
@@ -115,7 +122,7 @@ public class ApplicationLoader extends Application {
     }
 
     private void configureThemes() {
-        
+
         if (!ATE.config(this, "light_theme").isConfigured()) {
             ATE.config(this, "light_theme")
                     .activityTheme(R.style.AppThemeLight)

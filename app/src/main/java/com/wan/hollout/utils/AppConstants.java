@@ -89,7 +89,7 @@ public class AppConstants {
     public static final String APP_USER_CHAT_STATES = "app_user_chat_states";
     public static final String APP_USER_ADDITIONAL_USER_PHOTOS = "app_user_additional_photos";
     public static final String EXTRA_TITLE = "extra_title";
-    public static final String USER_ID = "user_id";
+    public static final String APP_USER_ID = "user_id";
     public static final String EXTRA_PICTURES = "pictures";
     public static final String USER_PROPERTIES = "user_properties";
     public static final String APP_USER_CHATS = "app_user_chats";
@@ -97,6 +97,7 @@ public class AppConstants {
     public static final String DISABLE_NESTED_SCROLLING = "disable_nested_scrolling";
     public static final String ENABLE_NESTED_SCROLLING = "enable_nested_scrolling";
     public static final String REFRESH_PEOPLE = "refresh_people";
+    public static final String PLEASE_REQUEST_LOCATION_ACCESSS = "request_location_access";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

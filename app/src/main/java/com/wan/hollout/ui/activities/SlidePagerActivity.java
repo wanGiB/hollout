@@ -42,7 +42,7 @@ public class SlidePagerActivity extends AppCompatActivity {
         SlidePagerAdapter pagerAdapter = new SlidePagerAdapter(getSupportFragmentManager());
         if (getIntent() == null) return;
         String title = getIntent().getStringExtra(AppConstants.EXTRA_TITLE);
-        String userId = getIntent().getStringExtra(AppConstants.USER_ID);
+        String userId = getIntent().getStringExtra(AppConstants.APP_USER_ID);
         ParseObject signedInUser =  ParseUser.getCurrentUser();
         if (signedInUser != null) {
             if (signedInUser.getObjectId().equals(userId)) {
