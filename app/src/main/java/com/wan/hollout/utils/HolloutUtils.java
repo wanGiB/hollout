@@ -22,12 +22,16 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.models.HolloutObject;
+
+import net.alhazmy13.mediapicker.Image.ImagePicker;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -284,22 +288,21 @@ public class HolloutUtils {
         signedInUserObject.saveInBackground();
     }
 
-//    public static String convertAdditionalPhotosToString(List<Object> additionalPhotosOfUser) {
-//        Type listType = new TypeToken<List<String>>() {
-//        }.getType();
-//        return new Gson().toJson(additionalPhotosOfUser, listType);
-//    }
-//
-//    public static List<String> extractAdditionalPhotosFromString(String string) {
-//        if (StringUtils.isNotEmpty(string)) {
-//            Type listType = new TypeToken<List<String>>() {
-//            }.getType();
-//
-//            return new Gson().fromJson(string, listType);
-//        } else {
-//            return null;
-//        }
-//    }
+    public static String convertAdditionalPhotosToString(List<Object> additionalPhotosOfUser) {
+        Type listType = new TypeToken<List<String>>() {
+        }.getType();
+        return new Gson().toJson(additionalPhotosOfUser, listType);
+    }
+
+    public static List<String> extractAdditionalPhotosFromString(String string) {
+        if (StringUtils.isNotEmpty(string)) {
+            Type listType = new TypeToken<List<String>>() {
+            }.getType();
+            return new Gson().fromJson(string, listType);
+        } else {
+            return null;
+        }
+    }
 
     public static ArrayList<String> getAllOfAUserPhotos(String profilePhoto, List<String> additionalPhotos) {
         ArrayList<String> resultantPhotos = new ArrayList<>();
@@ -338,16 +341,16 @@ public class HolloutUtils {
         return a == b || (a != null && a.equals(b));
     }
 
-//    public static void startImagePicker(Activity activity) {
-//        new ImagePicker.Builder(activity)
-//                .mode(ImagePicker.Mode.CAMERA_AND_GALLERY)
-//                .compressLevel(ImagePicker.ComperesLevel.NONE)
-//                .directory(ImagePicker.Directory.DEFAULT)
-//                .extension(ImagePicker.Extension.PNG)
-//                .allowMultipleImages(false)
-//                .enableDebuggingMode(true)
-//                .build();
-//    }
+    public static void startImagePicker(Activity activity) {
+        new ImagePicker.Builder(activity)
+                .mode(ImagePicker.Mode.CAMERA_AND_GALLERY)
+                .compressLevel(ImagePicker.ComperesLevel.NONE)
+                .directory(ImagePicker.Directory.DEFAULT)
+                .extension(ImagePicker.Extension.PNG)
+                .allowMultipleImages(false)
+                .enableDebuggingMode(true)
+                .build();
+    }
 
     public static String getEncodedString(String string) {
         return string;
@@ -368,14 +371,14 @@ public class HolloutUtils {
         return bitmap;
     }
 
-    private static String[] suffix = new String[]{"","k", "m", "b", "t"};
+    private static String[] suffix = new String[]{"", "k", "m", "b", "t"};
     private static int MAX_LENGTH = 4;
 
     public static String format(double number) {
         String r = new DecimalFormat("##0E0").format(number);
         r = r.replaceAll("E[0-9]", suffix[Character.getNumericValue(r.charAt(r.length() - 1)) / 3]);
-        while(r.length() > MAX_LENGTH || r.matches("[0-9]+\\.[a-z]")){
-            r = r.substring(0, r.length()-2) + r.substring(r.length() - 1);
+        while (r.length() > MAX_LENGTH || r.matches("[0-9]+\\.[a-z]")) {
+            r = r.substring(0, r.length() - 2) + r.substring(r.length() - 1);
         }
         return r;
     }

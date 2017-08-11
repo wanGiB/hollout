@@ -120,6 +120,7 @@ dependencies {
     compile 'com.parse:parse-livequery-android:1.0.4'
     compile 'com.parse:parse-android:1.15.8'
     compile 'net.alhazmy13.MediaPicker:libary:2.2.5'
+    compile 'com.google.code.gson:gson:2.8.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

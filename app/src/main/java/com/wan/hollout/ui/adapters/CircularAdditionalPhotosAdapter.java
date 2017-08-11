@@ -11,6 +11,8 @@ import android.widget.ImageView;
 
 import com.parse.ParseUser;
 import com.wan.hollout.R;
+import com.wan.hollout.ui.activities.SlidePagerActivity;
+import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +32,7 @@ public class CircularAdditionalPhotosAdapter extends RecyclerView.Adapter<Recycl
     private LayoutInflater layoutInflater;
     private Activity activity;
     private List<String> photos;
-    public String username;
+    private String username;
 
     public CircularAdditionalPhotosAdapter(Activity activity, List<String> photos, String username) {
         this.activity = activity;
@@ -60,7 +62,7 @@ public class CircularAdditionalPhotosAdapter extends RecyclerView.Adapter<Recycl
                         public void onClick(View v) {
                             UiUtils.blinkView(v);
                             Intent mProfilePhotoViewIntent = new Intent(activity, SlidePagerActivity.class);
-                            mProfilePhotoViewIntent.putExtra(HolloutConstants.EXTRA_TITLE, username);
+                            mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_TITLE, username);
                             ArrayList<String> photoExtras = new ArrayList<>();
                             photoExtras.add(0, photo);
                             for (String photoItem : photos) {
@@ -68,9 +70,8 @@ public class CircularAdditionalPhotosAdapter extends RecyclerView.Adapter<Recycl
                                     photoExtras.add(photoItem);
                                 }
                             }
-                            mProfilePhotoViewIntent.putStringArrayListExtra(HolloutConstants.EXTRA_PICTURES, photoExtras);
+                            mProfilePhotoViewIntent.putStringArrayListExtra(AppConstants.EXTRA_PICTURES, photoExtras);
                             activity.startActivity(mProfilePhotoViewIntent);
-
                         }
                     });
                 }

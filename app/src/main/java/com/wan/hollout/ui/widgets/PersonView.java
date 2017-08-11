@@ -22,6 +22,8 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
+import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutUtils;

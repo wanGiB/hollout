@@ -129,7 +129,7 @@
                         android:layout_marginStart="8dp"
                         android:text="@string/chat"
                         android:textColor="@color/white"
-                        app:fontName="Lato-Regular.ttf"
+                        app:textStyle="regular"
                         tools:ignore="RtlHardcoded" />
 
                 </LinearLayout>
@@ -156,7 +156,7 @@
                     android:padding="5dp"
                     android:text="@string/full_info"
                     android:textColor="@color/white"
-                    app:fontName="Lato-Regular.ttf"
+                    app:textStyle="regular"
                     tools:ignore="RelativeOverlap,RtlHardcoded" />
 
             </RelativeLayout>

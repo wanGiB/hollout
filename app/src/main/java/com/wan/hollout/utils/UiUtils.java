@@ -602,7 +602,7 @@ public class UiUtils {
                                     new View.OnClickListener() {
                                         @Override
                                         public void onClick(View v) {
-//                                            HolloutUtils.startImagePicker(activity);
+                                            HolloutUtils.startImagePicker(activity);
                                         }
                                     }).show();
                         }

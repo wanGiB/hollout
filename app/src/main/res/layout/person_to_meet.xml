@@ -171,7 +171,7 @@
                 android:paddingRight="16dp"
                 android:textColor="@color/message"
                 android:textSize="@dimen/msg_text_secondary"
-                app:fontName="Roboto-Regular.ttf" />
+                app:textStyle="regular" />
 
             <TextView
                 android:id="@+id/distance_to_user"
