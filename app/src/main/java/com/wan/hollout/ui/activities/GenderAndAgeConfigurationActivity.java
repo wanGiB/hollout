@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.activities;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
@@ -62,6 +64,12 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
     @BindView(R.id.accept_app_license)
     CheckBox acceptLicenseCheck;
 
+    @BindView(R.id.male)
+    RadioButton maleRadioButton;
+
+    @BindView(R.id.female)
+    RadioButton femaleRadioButton;
+
     private ParseUser signedInUser;
 
     public String selectedGenderType = null;
@@ -96,10 +104,16 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 if (checkedId == R.id.male) {
                     selectedGenderType = getString(R.string.male);
+                    maleRadioButton.setTextColor(Color.WHITE);
+                    femaleRadioButton.setTextColor(Color.BLACK);
                 } else {
                     selectedGenderType = getString(R.string.female);
+                    femaleRadioButton.setTextColor(Color.WHITE);
+                    maleRadioButton.setTextColor(Color.BLACK);
                 }
+
                 signedInUser.put(AppConstants.APP_USER_GENDER, selectedGenderType);
+
             }
 
         });
@@ -130,9 +144,11 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
                         Snackbar.make(ageBox, "Your age please", Snackbar.LENGTH_LONG).show();
                         return;
                     }
+                    UiUtils.showProgressDialog(GenderAndAgeConfigurationActivity.this,"Please wait...");
                     signedInUser.saveInBackground(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
+                            UiUtils.dismissProgressDialog();
                             if (e == null) {
                                 navigateBackToCaller();
                             } else {
