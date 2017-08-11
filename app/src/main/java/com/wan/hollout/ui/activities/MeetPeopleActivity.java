@@ -208,13 +208,17 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                     if (objects != null) {
                         if (!objects.isEmpty()) {
                             UiUtils.toggleFlipperState(contentFlipper, 2);
-                            UiUtils.showView(potentialPeopleToMeetRecyclerView,true);
+                            UiUtils.showView(potentialPeopleToMeetRecyclerView, true);
                             loadPeople(objects, skip, searchString);
                         } else {
-                            tryShowNoResultFound(searchString);
+                            if (skip == 0) {
+                                tryShowNoResultFound(searchString);
+                            }
                         }
                     } else {
-                        tryShowNoResultFound(searchString);
+                        if (skip == 0) {
+                            tryShowNoResultFound(searchString);
+                        }
                     }
                 } else {
                     if (searchString == null) {
@@ -232,7 +236,9 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                             }
                         }
                     } else {
-                        tryShowNoResultFound(searchString);
+                        if (skip == 0) {
+                            tryShowNoResultFound(searchString);
+                        }
                     }
                 }
                 UiUtils.showView(potentialPeopleToMeetFooterView, false);
