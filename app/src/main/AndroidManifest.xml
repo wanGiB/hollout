@@ -72,7 +72,7 @@
             android:windowSoftInputMode="stateHidden" />
 
         <activity
-            android:name=".ui.activities.PeopleILikeToMeetActivity"
+            android:name=".ui.activities.MeetPeopleActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/people"
             android:theme="@style/AppTheme.FullScreen.Light"
@@ -82,6 +82,13 @@
             android:name=".ui.activities.ChatActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/chat"
+            android:theme="@style/AppTheme.FullScreen.Light"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".ui.activities.GenderAndAgeConfigurationActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
+            android:label="@string/you_are"
             android:theme="@style/AppTheme.FullScreen.Light"
             android:windowSoftInputMode="stateHidden" />
 

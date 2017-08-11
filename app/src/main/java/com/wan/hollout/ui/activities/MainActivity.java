@@ -23,7 +23,6 @@ import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
 import com.wan.hollout.ui.fragments.DrawerFragment;
 import com.wan.hollout.ui.fragments.MainFragment;
-import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.RequestCodes;
@@ -183,7 +182,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         if (drawerItemCategory.getId() == DrawerFragment.LOG_OUT) {
             attemptLogOut();
         } else if (drawerItemCategory.getId() == DrawerFragment.MEET_PEOPLE) {
-            Intent meetPeopleIntent = new Intent(MainActivity.this, PeopleILikeToMeetActivity.class);
+            Intent meetPeopleIntent = new Intent(MainActivity.this, MeetPeopleActivity.class);
             startActivityForResult(meetPeopleIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
         }
     }

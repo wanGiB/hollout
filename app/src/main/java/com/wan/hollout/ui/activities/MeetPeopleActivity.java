@@ -42,7 +42,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
-public class PeopleILikeToMeetActivity extends AppCompatActivity implements View.OnClickListener {
+public class MeetPeopleActivity extends AppCompatActivity implements View.OnClickListener {
 
     @BindView(R.id.content_flipper)
     ViewFlipper contentFlipper;

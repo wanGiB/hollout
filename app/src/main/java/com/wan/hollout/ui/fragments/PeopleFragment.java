@@ -27,7 +27,7 @@ import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
-import com.wan.hollout.ui.activities.PeopleILikeToMeetActivity;
+import com.wan.hollout.ui.activities.MeetPeopleActivity;
 import com.wan.hollout.ui.adapters.PeopleAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
 import com.wan.hollout.ui.widgets.HolloutTextView;
@@ -201,7 +201,7 @@ public class PeopleFragment extends Fragment {
                     Intent dataSourceIntent = new Intent(Settings.ACTION_WIFI_SETTINGS);
                     startActivity(dataSourceIntent);
                 } else {
-                    Intent interestsIntent = new Intent(getActivity(), PeopleILikeToMeetActivity.class);
+                    Intent interestsIntent = new Intent(getActivity(), MeetPeopleActivity.class);
                     startActivity(interestsIntent);
                 }
             }

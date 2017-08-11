@@ -49,8 +49,8 @@ public class SplashActivity extends AppCompatActivity {
             if (aboutUser != null) {
                 if (!aboutUser.isEmpty()) {
                     String userAge = parseUser.getString(AppConstants.APP_USER_GENDER);
-                    if (userAge.equals(AppConstants.UNKNOWN)) {
-
+                    String userGender = parseUser.getString(AppConstants.APP_USER_GENDER);
+                    if (userAge.equals(AppConstants.UNKNOWN) || userGender.equals(AppConstants.UNKNOWN)) {
                     }
                     launchMainActivity();
                 } else {
@@ -100,7 +100,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void launchAboutActivity() {
-        Intent aboutActivityIntent = new Intent(SplashActivity.this, PeopleILikeToMeetActivity.class);
+        Intent aboutActivityIntent = new Intent(SplashActivity.this, MeetPeopleActivity.class);
         startActivity(aboutActivityIntent);
         finish();
     }

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -98,6 +99,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
         isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.about_user_layout);
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         signedInUser = ParseUser.getCurrentUser();
@@ -278,7 +280,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                             UiUtils.dismissProgressDialog();
                             if (e == null) {
                                 if (!HolloutPreferences.isUserWelcomed()) {
-                                    Intent peopleILikeToMeetIntent = new Intent(AboutUserActivity.this, PeopleILikeToMeetActivity.class);
+                                    Intent peopleILikeToMeetIntent = new Intent(AboutUserActivity.this, MeetPeopleActivity.class);
                                     startActivityForResult(peopleILikeToMeetIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
                                     finish();
                                 } else {
