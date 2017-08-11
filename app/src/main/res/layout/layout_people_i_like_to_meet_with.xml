@@ -60,6 +60,7 @@
         <LinearLayout
             android:id="@+id/top_panel"
             android:layout_width="match_parent"
+            android:layout_marginTop="10dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
@@ -87,6 +88,7 @@
                 android:paddingRight="16dp"
                 android:paddingStart="16dp"
                 android:text="@string/meet_people"
+                app:textStyle="medium"
                 android:textColor="@color/text_black"
                 android:textSize="20sp" />
 
@@ -177,6 +179,8 @@
             android:id="@+id/people_to_meet_frame"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:layout_above="@+id/bottom_bar"
             android:layout_below="@+id/bottom_view">
 

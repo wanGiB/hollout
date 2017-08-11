@@ -96,12 +96,12 @@
     <string name="accountant">E.g Accountant, Pets Lover</string>
     <string name="continue_">Continue </string>
     <string name="about_you_please">About You Please</string>
-    <string name="describe_yourself">Please, more about you using only KEYWORS---E.g Pharmacist</string>
+    <string name="describe_yourself">Please, more about you using only KEYWORDS---E.g Pharmacist</string>
     <string name="about_you">About You</string>
     <string name="tap_kinds_of_people_">Tap all kinds of people you like to meet</string>
     <string name="search_here">Search here</string>
     <string name="meet_people">Meet People</string>
-    <string name="tap_all_kinds_of_people_you_like_to_meet">Tap all kinds of people you like to meet around you</string>
+    <string name="tap_all_kinds_of_people_you_like_to_meet">Tap all kinds of people you like to meet in your current location</string>
     <string name="no_result_found_for_kind_search">Sorry, no result found</string>
     <string name="selected">SELECTED</string>
     <string name="anyone">Anyone</string>
