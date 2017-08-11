@@ -292,16 +292,14 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public void onDrawersPeopleOfSharedInterestsSelected() {
-
+        Intent meetPeopleIntent = new Intent(MainActivity.this, MeetPeopleActivity.class);
+        startActivityForResult(meetPeopleIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
     }
 
     @Override
     public void onDrawerItemCategorySelected(DrawerItemCategory drawerItemCategory) {
         if (drawerItemCategory.getId() == DrawerFragment.LOG_OUT) {
             attemptLogOut();
-        } else if (drawerItemCategory.getId() == DrawerFragment.MEET_PEOPLE) {
-            Intent meetPeopleIntent = new Intent(MainActivity.this, MeetPeopleActivity.class);
-            startActivityForResult(meetPeopleIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
         }
     }
 

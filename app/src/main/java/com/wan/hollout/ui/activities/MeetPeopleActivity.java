@@ -208,6 +208,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                     if (objects != null) {
                         if (!objects.isEmpty()) {
                             UiUtils.toggleFlipperState(contentFlipper, 2);
+                            UiUtils.showView(potentialPeopleToMeetRecyclerView,true);
                             loadPeople(objects, skip, searchString);
                         } else {
                             tryShowNoResultFound(searchString);
@@ -257,10 +258,12 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             String name = parseObject.getString(AppConstants.NAME);
             if (signedInUserInterests != null) {
                 if (signedInUserInterests.contains(name)) {
-                    if (!selectedPeopleToMeet.contains(parseObject) && searchString == null) {
-                        parseObject.put(AppConstants.SELECTED, true);
-                        selectedPeopleToMeet.add(parseObject);
-                        selectedPeopleToMeetAdapter.notifyItemInserted(selectedPeopleToMeet.size() - 1);
+                    if (!selectedPeopleToMeet.contains(parseObject)) {
+                        if (searchString == null) {
+                            parseObject.put(AppConstants.SELECTED, true);
+                            selectedPeopleToMeet.add(parseObject);
+                            selectedPeopleToMeetAdapter.notifyItemInserted(selectedPeopleToMeet.size() - 1);
+                        }
                     }
                 } else {
                     if (!potentialPeopleToMeet.contains(parseObject)) {
