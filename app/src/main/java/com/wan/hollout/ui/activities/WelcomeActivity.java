@@ -49,6 +49,7 @@ import com.wan.hollout.ui.widgets.ShimmerFrameLayout;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.TypingSimulationConstants;
 import com.wan.hollout.utils.UiUtils;
 
@@ -171,7 +172,13 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             List<String> aboutUser = currentUser.getList(AppConstants.ABOUT_USER);
             if (aboutUser != null) {
                 if (!aboutUser.isEmpty()) {
-                    navigateToMainActivity();
+                    String userAge = currentUser.getString(AppConstants.APP_USER_GENDER);
+                    String userGender = currentUser.getString(AppConstants.APP_USER_GENDER);
+                    if (userAge.equals(AppConstants.UNKNOWN) || userGender.equals(AppConstants.UNKNOWN)) {
+                        launchGenderAndAgeActivity();
+                    } else {
+                        navigateToMainActivity();
+                    }
                 } else {
                     navigateToAboutActivity();
                 }
@@ -179,6 +186,11 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                 navigateToAboutActivity();
             }
         }
+    }
+
+    private void launchGenderAndAgeActivity() {
+        Intent genderAndAgeIntent = new Intent(WelcomeActivity.this, GenderAndAgeConfigurationActivity.class);
+        startActivityForResult(genderAndAgeIntent, RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER);
     }
 
     private void navigateToAboutActivity() {
@@ -447,6 +459,8 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             } else {
                 mShouldResolve = false;
             }
+        } else if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
+            finishUp();
         } else {
             mCallbackManager.onActivityResult(requestCode, resultCode, data);
         }
