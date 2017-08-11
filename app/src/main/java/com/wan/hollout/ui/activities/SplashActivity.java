@@ -14,6 +14,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,8 +52,10 @@ public class SplashActivity extends AppCompatActivity {
                     String userAge = parseUser.getString(AppConstants.APP_USER_GENDER);
                     String userGender = parseUser.getString(AppConstants.APP_USER_GENDER);
                     if (userAge.equals(AppConstants.UNKNOWN) || userGender.equals(AppConstants.UNKNOWN)) {
+                        launchGenderAndAgeActivity();
+                    } else {
+                        launchMainActivity();
                     }
-                    launchMainActivity();
                 } else {
                     launchAboutActivity();
                 }
@@ -69,6 +72,7 @@ public class SplashActivity extends AppCompatActivity {
             }
         }
     }
+
 
     private void loginUser(final String username, final String password) {
         UiUtils.showProgressDialog(SplashActivity.this, "Refreshing your session. Please wait...");
@@ -97,6 +101,19 @@ public class SplashActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER && resultCode == RESULT_OK) {
+            finishAct();
+        }
+    }
+
+    private void launchGenderAndAgeActivity() {
+        Intent genderAndAgeIntent = new Intent(SplashActivity.this, GenderAndAgeConfigurationActivity.class);
+        startActivityForResult(genderAndAgeIntent, RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER);
     }
 
     private void launchAboutActivity() {

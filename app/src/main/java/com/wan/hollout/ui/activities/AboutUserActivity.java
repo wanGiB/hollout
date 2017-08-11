@@ -280,9 +280,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                             UiUtils.dismissProgressDialog();
                             if (e == null) {
                                 if (!HolloutPreferences.isUserWelcomed()) {
-                                    Intent peopleILikeToMeetIntent = new Intent(AboutUserActivity.this, MeetPeopleActivity.class);
-                                    startActivityForResult(peopleILikeToMeetIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
-                                    finish();
+                                    launchGenderAndBirthDayActivity();
                                 } else {
                                     launchMainActivity();
                                 }
@@ -298,6 +296,11 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
         });
 
+    }
+
+    private void launchGenderAndBirthDayActivity() {
+        Intent genderAndBirthDayIntent = new Intent(AboutUserActivity.this, GenderAndAgeConfigurationActivity.class);
+        startActivityForResult(genderAndBirthDayIntent, RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER);
     }
 
     private void launchMainActivity() {
@@ -373,9 +376,21 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE && resultCode == RESULT_OK) {
-            launchMainActivity();
+        if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
+            if (resultCode == RESULT_OK) {
+                if (!HolloutPreferences.isUserWelcomed()) {
+                    launchPeopleToMeet();
+                } else {
+                    launchMainActivity();
+                }
+            }
         }
+    }
+
+    private void launchPeopleToMeet() {
+        Intent meetPeopleIntent = new Intent(AboutUserActivity.this, MeetPeopleActivity.class);
+        startActivity(meetPeopleIntent);
+        finish();
     }
 
     private void onKeyboardHidden() {

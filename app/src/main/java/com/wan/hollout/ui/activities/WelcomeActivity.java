@@ -124,7 +124,6 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         setContentView(R.layout.activity_welcome);
         ButterKnife.bind(this);
         checkAndRegEventBus();
-        initClickListeners();
         initGoogleApiStuffs();
         firebaseAuth = FirebaseAuth.getInstance();
         addAuthStateListener = new FirebaseAuth.AuthStateListener() {
@@ -360,10 +359,6 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         String currentlyTypedWord = sentences[index];
         TypingSimulationConstants.CURRENTLY_TYPED_WORD = currentlyTypedWord;
         typingTextView.animateText(currentlyTypedWord);
-    }
-
-    private void initClickListeners() {
-
     }
 
     @Override
