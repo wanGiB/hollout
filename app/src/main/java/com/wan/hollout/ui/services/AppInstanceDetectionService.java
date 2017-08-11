@@ -245,7 +245,10 @@ public class AppInstanceDetectionService extends Service implements
                         ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
                         if (parseInstallation != null) {
                             try {
-                                parseInstallation.put(AppConstants.APP_USER_GEO_POINT, ParseUser.getCurrentUser().getParseGeoPoint(AppConstants.APP_USER_GEO_POINT));
+                                ParseGeoPoint parseGeoPoint = ParseUser.getCurrentUser().getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+                                if (parseGeoPoint != null) {
+                                    parseInstallation.put(AppConstants.APP_USER_GEO_POINT, parseGeoPoint);
+                                }
                                 parseInstallation.saveInBackground();
                             } catch (NullPointerException ignored) {
                             }

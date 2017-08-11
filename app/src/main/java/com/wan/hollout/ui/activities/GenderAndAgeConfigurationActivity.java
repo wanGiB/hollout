@@ -66,8 +66,6 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
     @BindView(R.id.accept_app_license)
     CheckBox acceptLicenseCheck;
 
-    private Animation bounceAnimation;
-
     private ParseUser signedInUser;
 
     public String selectedGenderType = null;
@@ -91,8 +89,6 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("You are ");
         }
-
-        initBounceAnimation();
 
         if (signedInUser != null) {
             offloadUserDetails();
@@ -119,7 +115,6 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
             public void onClick(View view) {
                 if (acceptLicenseCheck.getVisibility() == View.GONE) {
                     acceptLicenseCheck.setVisibility(View.VISIBLE);
-                    acceptLicenseCheck.startAnimation(bounceAnimation);
                 } else {
                     if (!acceptLicenseCheck.isChecked()) {
                         Snackbar.make(acceptLicenseCheck, "You must accept the license", Snackbar.LENGTH_LONG).show();
@@ -167,19 +162,13 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
         finish();
     }
 
-    private void initBounceAnimation() {
-        bounceAnimation = AnimationUtils.loadAnimation(ApplicationLoader.getInstance(), R.anim.bounce);
-        BounceInterpolator bounceInterpolator = new BounceInterpolator(0.2, 20);
-        bounceAnimation.setInterpolator(bounceInterpolator);
-    }
-
     private void offloadUserDetails() {
         String userPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         if (StringUtils.isNotEmpty(userPhotoUrl)) {
             UiUtils.loadImage(this, userPhotoUrl, userPhotoView);
         }
         String userAge = signedInUser.getString(AppConstants.APP_USER_AGE);
-        if (StringUtils.isNotEmpty(userAge)) {
+        if (StringUtils.isNotEmpty(userAge) && !userAge.equals(AppConstants.UNKNOWN)) {
             ageBox.setText(userAge);
         }
         String userGender = signedInUser.getString(AppConstants.APP_USER_GENDER);

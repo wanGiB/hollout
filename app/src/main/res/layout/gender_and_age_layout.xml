@@ -14,8 +14,8 @@
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
         android:background="@color/white"
-        android:clipToPadding="false"
         android:clipChildren="false"
+        android:clipToPadding="false"
         android:overScrollMode="always">
 
         <LinearLayout
@@ -23,9 +23,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:animateLayoutChanges="true"
-            android:gravity="center"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:gravity="center"
             android:orientation="vertical">
 
             <com.wan.hollout.ui.widgets.CircleImageView
@@ -125,16 +125,16 @@
 
             <CheckBox
                 android:id="@+id/accept_app_license"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_marginTop="20dp"
                 android:paddingLeft="16dp"
                 android:paddingStart="16dp"
-                android:textColor="@color/white"
+                android:textColor="@color/text_black"
                 android:textColorLink="@color/colorAccent"
                 android:textSize="16sp"
-                android:visibility="gone"
+                android:visibility="visible"
                 tools:ignore="RtlHardcoded,RtlSymmetry" />
 
         </LinearLayout>
