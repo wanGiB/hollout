@@ -375,8 +375,8 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                                 if (position != -1) {
                                     selectedPeopleToMeet.remove(parseObject);
                                     selectedPeopleToMeetAdapter.notifyItemRemoved(position);
-                                    selectedPeopleToMeetRecyclerView.smoothScrollToPosition(position);
                                     selectedPeopleToMeetAdapter.notifyDataSetChanged();
+                                    selectedPeopleToMeetRecyclerView.smoothScrollToPosition(position);
                                 }
                             }
                         }
