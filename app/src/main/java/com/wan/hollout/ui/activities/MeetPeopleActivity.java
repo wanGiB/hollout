@@ -202,8 +202,10 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 if (!potentialPeopleToMeet.isEmpty() && StringUtils.isEmpty(searchTextView.getText().toString().trim())) {
                     UiUtils.toggleFlipperState(contentFlipper,2);
                     UiUtils.showView(potentialPeopleToMeetRecyclerView, true);
+                    UiUtils.showView(potentialPeopleToMeetFooterView,true);
                     fetchPeople(potentialPeopleToMeet.size());
                 } else if (!potentialPeopleToMeet.isEmpty() && StringUtils.isNotEmpty(searchTextView.getText().toString().trim())) {
+                    UiUtils.showView(potentialPeopleToMeetFooterView,true);
                     filterPeople(searchTextView.getText().toString().trim(), potentialPeopleToMeet.size());
                 }
             }
