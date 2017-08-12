@@ -278,7 +278,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 selectedPeopleToMeetAdapter.notifyDataSetChanged();
             } else {
                 selectedPeopleToMeetAdapter.notifyItemInserted(selectedPeopleToMeet.size() - 1);
-                potentialPeopleToMeetAdapter.notifyDataSetChanged();
+                selectedPeopleToMeetAdapter.notifyDataSetChanged();
             }
         } catch (IllegalStateException ignored) {
 
