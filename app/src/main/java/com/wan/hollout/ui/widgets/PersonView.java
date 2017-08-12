@@ -30,6 +30,7 @@ import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -166,13 +167,13 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
 
     public void loadParseUser() {
         if (person != null) {
-            String userName = person.getUsername();
+            String userName = person.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String userProfilePhoto = person.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             ParseGeoPoint userGeoPoint = person.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
             if (StringUtils.isNotEmpty(userName)) {
-                usernameEntryView.setText(StringUtils.capitalize(userName));
+                usernameEntryView.setText(WordUtils.capitalize(userName));
                 // displaying the first letter of From in icon text
-                iconText.setText(StringUtils.capitalize(userName.substring(0, 1)));
+                iconText.setText(WordUtils.capitalize(userName.substring(0, 1)));
             }
             // display profile image
             applyProfilePicture(userProfilePhoto);
