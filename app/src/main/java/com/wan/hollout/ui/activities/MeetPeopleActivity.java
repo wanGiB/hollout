@@ -244,7 +244,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             public void done(final List<ParseObject> objects, final ParseException e) {
                 if (objects != null && !objects.isEmpty()) {
                     UiUtils.toggleFlipperState(contentFlipper, 2);
-                    loadNewPeopleToMeetAdapter(objects);
+                    loadNewPeopleToMeetAdapter(objects,skip);
                 }
                 checkListIsEmpty();
                 UiUtils.showView(potentialPeopleToMeetFooterView, false);
@@ -266,12 +266,8 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             public void done(final List<ParseObject> objects, final ParseException e) {
                 if (e == null) {
                     if (objects != null && !objects.isEmpty()) {
-                        if (skip == 0) {
-                            potentialPeopleToMeet.clear();
-                            potentialPeopleToMeetAdapter.notifyDataSetChanged();
-                        }
                         UiUtils.toggleFlipperState(contentFlipper, 2);
-                        loadNewPeopleToMeetAdapter(objects);
+                        loadNewPeopleToMeetAdapter(objects,skip);
                     } else {
                         if (skip == 0) {
                             potentialPeopleToMeet.clear();
@@ -293,7 +289,11 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         UiUtils.showView(noResultFoundView, potentialPeopleToMeet.isEmpty());
     }
 
-    private void loadNewPeopleToMeetAdapter(List<ParseObject> displayableList) {
+    private void loadNewPeopleToMeetAdapter(List<ParseObject> displayableList,int skip) {
+        if (skip == 0) {
+            potentialPeopleToMeet.clear();
+            potentialPeopleToMeetAdapter.notifyDataSetChanged();
+        }
         if (!displayableList.isEmpty()) {
             for (ParseObject parseObject : displayableList) {
                 if (!potentialPeopleToMeet.contains(parseObject)) {
