@@ -79,6 +79,9 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
     @BindView(R.id.no_result_found_view)
     HolloutTextView noResultFoundView;
 
+    @BindView(R.id.selected_header_text)
+    HolloutTextView selectedHeaderTextView;
+
     private PeopleToMeetAdapter potentialPeopleToMeetAdapter, selectedPeopleToMeetAdapter;
 
     private ChipsLayoutManager potentialPeopleToMeetLayoutManager;
@@ -147,9 +150,11 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             List<String> userInterests = signedInUser.getList(AppConstants.INTERESTS);
             if (userInterests != null) {
                 if (!userInterests.isEmpty()) {
+                    selectedHeaderTextView.setText(UiUtils.fromHtml("SELECTED (<font color=#3EB890>" + userInterests.size() + "</font>)"));
                     for (String interest : userInterests) {
                         ParseObject interestsObject = new ParseObject(AppConstants.INTERESTS);
                         interestsObject.put(AppConstants.NAME, interest);
+                        interestsObject.put(AppConstants.SELECTED, true);
                         if (!selectedPeopleToMeet.contains(interestsObject)) {
                             selectedPeopleToMeet.add(interestsObject);
                         }
