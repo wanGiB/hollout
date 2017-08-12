@@ -83,6 +83,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     private ParseUser signedInUser;
 
     private String NO_QUALIFIER_TIP = "Do not use the <b>I,a,am,an</b> prefixes. Use only keywords.<br/><br/><b>Example: Fashion Designer.</b> and not <b>A fashion Designer</b>";
+    private String NO_WORK_PLACE = "Nope! Do not include where you work or school.";
 
     private Vibrator vibrator;
     private Animation shakeAnimation;
@@ -214,6 +215,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String textInOccupationField = moreAboutUserField.getText().toString().trim();
+                String validText = textInOccupationField;
                 if (StringUtils.isNotEmpty(textInOccupationField)) {
                     if (!textInOccupationField.contains(",")) {
                         if (!StringUtils.equalsIgnoreCase(textInOccupationField, lastSelection.get())) {
@@ -221,6 +223,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                         }
                     } else {
                         String lastStringInOccupationField = StringUtils.substringAfterLast(textInOccupationField, ",");
+                        validText = lastStringInOccupationField;
                         if (!StringUtils.equalsIgnoreCase(lastStringInOccupationField, lastSelection.get())) {
                             suggestOccupation(lastStringInOccupationField);
                         }
@@ -236,7 +239,11 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                         || StringUtils.startsWith(textInOccupationField, "A ")
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "An ")
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "The ")) {
-                    vibrateDevice();
+                    vibrateDevice(NO_QUALIFIER_TIP);
+                } else if (StringUtils.containsIgnoreCase(textInOccupationField, " at ")
+                        || StringUtils.containsIgnoreCase(textInOccupationField, " in ") ||
+                        StringUtils.containsIgnoreCase(textInOccupationField, " with ")) {
+                    vibrateDevice(NO_WORK_PLACE + " <b>" + validText + "</b> is just fine");
                 } else {
                     reasonForInterestsView.setTextColor(ContextCompat.getColor(AboutUserActivity.this, R.color.light_grey));
                     UiUtils.showView(reasonForInterestsView, false);
@@ -326,12 +333,12 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
         return getString(R.string.about_you_please);
     }
 
-    private void vibrateDevice() {
+    private void vibrateDevice(String s) {
         vibrator.vibrate(100);
         moreAboutUserField.startAnimation(shakeAnimation);
         UiUtils.showView(reasonForInterestsView, true);
         reasonForInterestsView.setTextColor(ContextCompat.getColor(AboutUserActivity.this, R.color.dark_gray));
-        reasonForInterestsView.setText(UiUtils.fromHtml(NO_QUALIFIER_TIP));
+        reasonForInterestsView.setText(UiUtils.fromHtml(s));
     }
 
     @Override
@@ -383,14 +390,14 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                     launchMainActivity();
                 }
             }
-        }else if (requestCode==RequestCodes.MEET_PEOPLE_REQUEST_CODE){
+        } else if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE) {
             launchMainActivity();
         }
     }
 
     private void launchPeopleToMeet() {
         Intent meetPeopleIntent = new Intent(AboutUserActivity.this, MeetPeopleActivity.class);
-        startActivityForResult(meetPeopleIntent,RequestCodes.MEET_PEOPLE_REQUEST_CODE);
+        startActivityForResult(meetPeopleIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
     }
 
     private void onKeyboardHidden() {

@@ -124,7 +124,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void launchAboutActivity() {
-        Intent aboutActivityIntent = new Intent(SplashActivity.this, MeetPeopleActivity.class);
+        Intent aboutActivityIntent = new Intent(SplashActivity.this, AboutUserActivity.class);
         startActivity(aboutActivityIntent);
         finish();
     }
