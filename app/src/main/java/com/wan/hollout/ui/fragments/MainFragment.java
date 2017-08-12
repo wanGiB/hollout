@@ -42,24 +42,18 @@ public class MainFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         View rootView = inflater.inflate(
                 R.layout.fragment_main, container, false);
-
         ButterKnife.bind(this, rootView);
-
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-
         final ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
-
         if (ab != null) {
             ab.setHomeAsUpIndicator(R.drawable.ic_menu);
             ab.setDisplayHomeAsUpEnabled(true);
         }
-
         if (viewPager != null) {
             Adapter adapter = setupViewPagerAdapter(viewPager);
-            viewPager.setOffscreenPageLimit(2);
+            viewPager.setOffscreenPageLimit(3);
             tabLayout.setSelectedTabIndicatorHeight(6);
             tabLayout.setupWithViewPager(viewPager);
             setupTabs(adapter);
@@ -91,6 +85,7 @@ public class MainFragment extends Fragment {
         Adapter adapter = new Adapter(getActivity(), getChildFragmentManager());
         adapter.addFragment(new PeopleFragment(), this.getString(R.string.people));
         adapter.addFragment(new ChatsFragment(), this.getString(R.string.chats));
+        adapter.addFragment(new NotificationsFragment(), this.getString(R.string.notifications));
         viewPager.setAdapter(adapter);
         return adapter;
     }
