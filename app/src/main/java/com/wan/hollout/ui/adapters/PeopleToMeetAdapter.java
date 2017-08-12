@@ -136,6 +136,7 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             }
                             peopleToMeetAdapter.notifyItemRemoved(position);
                             parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
+                            EventBus.getDefault().post(new SelectedPerson(personObject, false));
                         }
                     } else {
                         if (!selectedPeopleToMeet.contains(personName)) {
