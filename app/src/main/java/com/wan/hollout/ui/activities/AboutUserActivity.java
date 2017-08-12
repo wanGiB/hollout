@@ -27,6 +27,7 @@ import android.widget.ImageView;
 
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.parse.FindCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -44,6 +45,7 @@ import com.wan.hollout.utils.UiUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import bolts.Capture;
@@ -233,6 +235,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                     UiUtils.showView(reasonForInterestsView, true);
                     UiUtils.showView(reasonForInterestsView, false);
                 }
+                String strippable = null;
                 if (StringUtils.startsWithIgnoreCase(textInOccupationField, "Am a")
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "I am a")
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "I am ")
@@ -240,14 +243,24 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "An ")
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "The ")) {
                     vibrateDevice(NO_QUALIFIER_TIP);
-                } else if (StringUtils.containsIgnoreCase(textInOccupationField, " at ")
-                        || StringUtils.containsIgnoreCase(textInOccupationField, " in ") ||
-                        StringUtils.containsIgnoreCase(textInOccupationField, " with ")) {
-                    vibrateDevice(NO_WORK_PLACE + " <b>" + validText + "</b> is just fine");
+                    return;
                 } else {
-                    reasonForInterestsView.setTextColor(ContextCompat.getColor(AboutUserActivity.this, R.color.light_grey));
-                    UiUtils.showView(reasonForInterestsView, false);
+                    if (StringUtils.containsIgnoreCase(textInOccupationField, " at ")) {
+                        strippable = " at ";
+                    } else if (StringUtils.containsIgnoreCase(textInOccupationField, " in ")) {
+                        strippable = " in ";
+                    } else if (StringUtils.containsIgnoreCase(textInOccupationField, " with ")) {
+                        strippable = " with ";
+                    } else if (StringUtils.containsIgnoreCase(textInOccupationField, " of ")) {
+                        strippable = " of ";
+                    }
+                    if (strippable != null) {
+                        vibrateDevice(NO_WORK_PLACE + " <b>" + StringUtils.substringBefore(validText, strippable) + "</b> is just fine");
+                        return;
+                    }
                 }
+                reasonForInterestsView.setTextColor(ContextCompat.getColor(AboutUserActivity.this, R.color.light_grey));
+                UiUtils.showView(reasonForInterestsView, false);
             }
 
             @Override
@@ -284,14 +297,16 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
                         @Override
                         public void done(ParseException e) {
-                            UiUtils.dismissProgressDialog();
                             if (e == null) {
+                                checkAndPushInterests(Arrays.asList(moreAboutUserField.getText().toString().trim().split(",")));
+                                UiUtils.dismissProgressDialog();
                                 if (!HolloutPreferences.isUserWelcomed()) {
                                     launchGenderAndBirthDayActivity();
                                 } else {
                                     launchMainActivity();
                                 }
                             } else {
+                                UiUtils.dismissProgressDialog();
                                 UiUtils.showSafeToast("Error completing operation. Please try again.");
                             }
                         }
@@ -303,6 +318,23 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
         });
 
+    }
+
+    private void checkAndPushInterests(List<String> interests) {
+        for (final String s : interests) {
+            ParseQuery<ParseObject> parseObjectParseQuery = ParseQuery.getQuery(AppConstants.INTERESTS);
+            parseObjectParseQuery.whereEqualTo(AppConstants.NAME, s.trim().toLowerCase());
+            parseObjectParseQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(ParseObject object, ParseException e) {
+                    if (object == null) {
+                        ParseObject newObject = new ParseObject(AppConstants.INTERESTS);
+                        newObject.put(AppConstants.NAME, s.trim().toLowerCase());
+                        newObject.saveInBackground();
+                    }
+                }
+            });
+        }
     }
 
     private void launchGenderAndBirthDayActivity() {

@@ -130,7 +130,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
                         Snackbar.make(acceptLicenseCheck, "You must accept the terms and conditions", Snackbar.LENGTH_LONG).show();
                         return;
                     }
-                    if (selectedGenderType == null) {
+                    if (selectedGenderType.equals(AppConstants.UNKNOWN)) {
                         Snackbar.make(acceptLicenseCheck, "Your gender please", Snackbar.LENGTH_LONG).show();
                         return;
                     }
@@ -165,7 +165,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
     }
 
     private void setupTermsAndConditionsView() {
-        acceptLicenseCheck.setText(UiUtils.fromHtml("By continuing, you agree to our <a href=https://www.google.com>Terms and Conditions</a>"));
+        acceptLicenseCheck.setText(UiUtils.fromHtml("By continuing, you agree to our <a href=https://www.google.com>Privacy Policy</a>"));
         acceptLicenseCheck.setMovementMethod(LinkMovementMethod.getInstance());
         acceptLicenseCheck.setClickable(true);
     }
