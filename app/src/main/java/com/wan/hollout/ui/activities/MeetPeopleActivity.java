@@ -150,7 +150,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             List<String> userInterests = signedInUser.getList(AppConstants.INTERESTS);
             if (userInterests != null) {
                 if (!userInterests.isEmpty()) {
-                    selectedHeaderTextView.setText(UiUtils.fromHtml("SELECTED (<font color=#3EB890>" + userInterests.size() + "</font>)"));
+                    selectedHeaderTextView.setText(UiUtils.fromHtml("SELECTED (<font color=#E8A723>" + userInterests.size() + "</font>)"));
                     for (String interest : userInterests) {
                         ParseObject interestsObject = new ParseObject(AppConstants.INTERESTS);
                         interestsObject.put(AppConstants.NAME, interest);
@@ -439,6 +439,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                                 }
                             }
                         }
+                        selectedHeaderTextView.setText(UiUtils.fromHtml("SELECTED (<font color=#E8A723>" + selectedPeopleToMeet.size() + "</font>)"));
                     }
                 }
             }
