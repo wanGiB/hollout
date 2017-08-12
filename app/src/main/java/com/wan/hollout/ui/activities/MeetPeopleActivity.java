@@ -127,16 +127,16 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
                 if (StringUtils.isNotEmpty(searchTextView.getText().toString().trim())) {
                     filterPeople(searchTextView.getText().toString().trim(), 0);
                 } else {
                     fetchPeople(0);
                 }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
             }
 
         });

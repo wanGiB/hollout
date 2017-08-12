@@ -192,8 +192,8 @@ public class AppInstanceDetectionService extends Service implements
                 .addOnConnectionFailedListener(this)
                 .build();
         mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setInterval(60000);
+        mLocationRequest.setFastestInterval(60000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         googleApiClient.connect();
     }
