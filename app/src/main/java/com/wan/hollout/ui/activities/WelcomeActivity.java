@@ -139,7 +139,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                 }
             }
         };
-        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font> and <font color=#3EB890>Holla</font> people of shared interests and profession around you."));
+        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font> and <font color=#3EB890>Holla</font> people of shared interests and profession <font color=#70CADB>around</font> you."));
         continueWithFacebook.setOnClickListener(this);
         continueWithGoogle.setOnClickListener(this);
         initDividerBlinkingAnimation();
