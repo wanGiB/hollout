@@ -3,23 +3,33 @@ package com.wan.hollout.ui.activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.afollestad.appthemeengine.ATE;
+import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
@@ -28,10 +38,14 @@ import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
+import com.wan.hollout.ui.fragments.ChatsFragment;
 import com.wan.hollout.ui.fragments.DrawerFragment;
-import com.wan.hollout.ui.fragments.MainFragment;
+import com.wan.hollout.ui.fragments.NotificationsFragment;
+import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
+import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.PermissionsUtils;
@@ -41,6 +55,9 @@ import com.wan.hollout.utils.UiUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -55,18 +72,16 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     @BindView(R.id.drawer_layout)
     DrawerLayout drawer;
 
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+
+    @BindView(R.id.viewpager)
+    ViewPager viewPager;
+
+    @BindView(R.id.tabs)
+    TabLayout tabLayout;
+    
     private HolloutPermissions holloutPermissions;
-
-    /**
-     * Reference tied drawer menu, represented as fragment.
-     */
-    private Runnable homeRunnable = new Runnable() {
-        @Override
-        public void run() {
-            navigateToMainFragment();
-        }
-    };
-
     private DrawerFragment drawerFragment;
 
     @Override
@@ -76,8 +91,26 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        setSupportActionBar(toolbar);
+        final ActionBar ab = getSupportActionBar();
+        if (ab != null) {
+            ab.setHomeAsUpIndicator(R.drawable.ic_menu);
+            ab.setDisplayHomeAsUpEnabled(true);
+        }
+        if (viewPager != null) {
+            Adapter adapter = setupViewPagerAdapter(viewPager);
+            viewPager.setOffscreenPageLimit(3);
+            tabLayout.setSelectedTabIndicatorHeight(6);
+            tabLayout.setupWithViewPager(viewPager);
+            setupTabs(adapter);
+        }
+        if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
+            ATE.apply(this, "dark_theme");
+        } else {
+            ATE.apply(this, "light_theme");
+        }
+        viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
         initAndroidPermissions();
-        homeRunnable.run();
         drawerFragment = (DrawerFragment) getSupportFragmentManager().findFragmentById(R.id.main_navigation_drawer_fragment);
         drawerFragment.setUp(drawer, this);
         ParseUser signedInUser = ParseUser.getCurrentUser();
@@ -90,6 +123,30 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         checkAndRegEventBus();
     }
 
+    private Adapter setupViewPagerAdapter(ViewPager viewPager) {
+        Adapter adapter = new Adapter(this, getSupportFragmentManager());
+        adapter.addFragment(new PeopleFragment(), this.getString(R.string.people));
+        adapter.addFragment(new ChatsFragment(), this.getString(R.string.chats));
+        adapter.addFragment(new NotificationsFragment(), this.getString(R.string.notifications));
+        viewPager.setAdapter(adapter);
+        return adapter;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        String ateKey = HolloutPreferences.getATEKey();
+        ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
+    }
+
+    private void setupTabs(Adapter pagerAdapter) {
+        for (int i = 0; i < tabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = tabLayout.getTabAt(i);
+            if (tab != null) {
+                tab.setCustomView(pagerAdapter.getCustomTabView(i));
+            }
+        }
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -188,6 +245,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     @Override
     protected void onPause() {
         super.onPause();
+        HolloutPreferences.setStartPageIndex(viewPager.getCurrentItem());
         if (isFinishing())
             overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
     }
@@ -199,12 +257,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         if (drawerFragment != null) {
             drawerFragment.invalidateHeader();
         }
-    }
-
-    private void navigateToMainFragment() {
-        Fragment fragment = new MainFragment();
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment).commitAllowingStateLoss();
     }
 
     @Override
@@ -310,6 +362,50 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public void onAccountSelected() {
+
+    }
+
+    private static class Adapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragments = new ArrayList<>();
+        private final List<String> mFragmentTitles = new ArrayList<>();
+        private LayoutInflater layoutInflater;
+        private Context context;
+
+        Adapter(Context context, FragmentManager fm) {
+            super(fm);
+            this.context = context;
+            this.layoutInflater = LayoutInflater.from(context);
+        }
+
+        void addFragment(Fragment fragment, String title) {
+            mFragments.add(fragment);
+            mFragmentTitles.add(title);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return mFragments.get(position);
+        }
+
+        @Override
+        public int getCount() {
+            return mFragments.size();
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return mFragmentTitles.get(position);
+        }
+
+        View getCustomTabView(int pos) {
+            @SuppressWarnings("InflateParams")
+            View view = layoutInflater.inflate(R.layout.tab_custom_view, null);
+            TextView tabTitle = view.findViewById(R.id.tab_title);
+            Typeface typeface = FontUtils.selectTypeface(context, 1);
+            tabTitle.setTypeface(typeface);
+            tabTitle.setText(getPageTitle(pos));
+            return view;
+        }
 
     }
 

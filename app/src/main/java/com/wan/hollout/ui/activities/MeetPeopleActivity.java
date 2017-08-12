@@ -3,15 +3,20 @@ package com.wan.hollout.ui.activities;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
@@ -92,6 +97,10 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
 
     private ParseUser signedInUser;
 
+    private final long DELAY = 1000; // in ms
+
+    private Handler handler = new Handler();
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,21 +136,42 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (StringUtils.isNotEmpty(searchTextView.getText().toString().trim())) {
-                    filterPeople(searchTextView.getText().toString().trim(), 0);
-                } else {
-                    fetchPeople(0);
-                }
+
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (StringUtils.isNotEmpty(searchTextView.getText().toString().trim())) {
+                            filterPeople(searchTextView.getText().toString().trim(), 0);
+                        } else {
+                            fetchPeople(0);
+                        }
+                    }
+                }, DELAY);
             }
 
         });
 
         checkAndRegEventBus();
+
+        searchTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, @NonNull KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event.getAction() == KeyEvent.ACTION_DOWN &&
+                        event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    if (!event.isShiftPressed()) {
+                        // the user is done typing.
+                        filterPeople(searchTextView.getText().toString().trim(), 0);
+                        return true; // consume.
+                    }
+                }
+                return false; // pass on to other listeners.
+            }
+
+        });
 
     }
 
@@ -246,8 +276,8 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 if (objects != null && !objects.isEmpty()) {
                     UiUtils.toggleFlipperState(contentFlipper, 2);
                     loadNewPeopleToMeetAdapter(objects, skip);
-                }else{
-                    if (skip==0){
+                } else {
+                    if (skip == 0) {
                         potentialPeopleToMeet.clear();
                         potentialPeopleToMeetAdapter.notifyDataSetChanged();
                     }
