@@ -84,6 +84,9 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     @BindView(R.id.button_login_google)
     Button continueWithGoogle;
 
+    @BindView(R.id.app_intro_message)
+    HolloutTextView appIntroMessageView;
+
     /* Is there a ConnectionResult resolution in progress? */
     private boolean mIsResolving = false;
     /* Should we automatically resolve ConnectionResults when possible? */
@@ -102,19 +105,19 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     private int fieldIndex = 0;
 
     String[] sentences = {
-            "Engineers",
-            "Pharmacists",
-            "Fashion Designers",
-            "Wedding Planners",
-            "Medical Doctors",
-            "Physicists",
-            "Accountants",
-            "Biologists",
-            "Physicists",
-            "BioChemists",
-            "Developers",
-            "Bloggers",
-            "etc"
+            "Your Sport Team Fans",
+            "Pharmacists like you",
+            "Fashion Designers like you",
+            "Wedding Planners like you",
+            "Medical Doctors like you",
+            "Physicists like you",
+            "Accountants like you",
+            "Biologists like you",
+            "Physicists like you",
+            "Bio-chemists like you",
+            "Developers like you",
+            "Entrepreneurs like you",
+            "Any one like you!!!"
     };
 
     private String TAG = "WelcomeActivity";
@@ -136,6 +139,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                 }
             }
         };
+        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font> and <font color=#3EB890>Holla</font> people of shared interests and profession around you."));
         continueWithFacebook.setOnClickListener(this);
         continueWithGoogle.setOnClickListener(this);
         initDividerBlinkingAnimation();

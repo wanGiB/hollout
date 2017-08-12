@@ -318,7 +318,6 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
         }
     }
 
-
     public boolean canMoveFurther() {
         return StringUtils.isNotEmpty(moreAboutUserField.getText().toString().trim());
     }
@@ -384,13 +383,14 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                     launchMainActivity();
                 }
             }
+        }else if (requestCode==RequestCodes.MEET_PEOPLE_REQUEST_CODE){
+            launchMainActivity();
         }
     }
 
     private void launchPeopleToMeet() {
         Intent meetPeopleIntent = new Intent(AboutUserActivity.this, MeetPeopleActivity.class);
-        startActivity(meetPeopleIntent);
-        finish();
+        startActivityForResult(meetPeopleIntent,RequestCodes.MEET_PEOPLE_REQUEST_CODE);
     }
 
     private void onKeyboardHidden() {
