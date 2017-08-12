@@ -127,8 +127,8 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (StringUtils.isNotEmpty(StringUtils.strip(charSequence.toString().trim()))) {
-                    filterPeople(StringUtils.strip(charSequence.toString().trim()), 0);
+                if (StringUtils.isNotEmpty(searchTextView.getText().toString())) {
+                    filterPeople(StringUtils.strip(searchTextView.getText().toString().trim()), 0);
                 } else {
                     fetchPeople(0);
                 }

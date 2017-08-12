@@ -106,17 +106,11 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
 
     String[] sentences = {
             "Your Sport Team Fans",
-            "Pharmacists like you",
-            "Fashion Designers like you",
-            "Wedding Planners like you",
-            "Medical Doctors like you",
-            "Physicists like you",
-            "Accountants like you",
-            "Biologists like you",
-            "Physicists like you",
-            "Bio-chemists like you",
-            "Developers like you",
-            "Entrepreneurs like you",
+            "People in your field of study",
+            "People who share in your passion",
+            "People who share in your interests",
+            "People who share in your concerns",
+            "People people of like minds",
             "Any one like you!!!"
     };
 

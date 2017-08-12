@@ -14,7 +14,9 @@ public abstract class AbstractPositionIterator implements Iterator<Integer> {
     }
 
     public void move(@IntRange(from = 0) int pos) {
-        if (pos >= itemCount) throw new IllegalArgumentException("you can't move above of maxItemCount");
+        if (pos >= itemCount) {
+            pos = itemCount;
+        }
         if (pos < 0) throw new IllegalArgumentException("can't move to negative position");
         this.pos = pos;
     }
