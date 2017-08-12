@@ -31,6 +31,8 @@ import android.widget.TextView;
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -330,13 +332,19 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                FirebaseAuth.getInstance().signOut();
                 UiUtils.showProgressDialog(MainActivity.this, "Logging out...");
                 ParseUser.logOutInBackground(new LogOutCallback() {
                     @Override
                     public void done(ParseException e) {
+                        UiUtils.dismissProgressDialog();
                         HolloutPreferences.clearPersistedCredentials();
                         UiUtils.showSafeToast("You've being logged out");
                         invalidateDrawerMenuHeader();
+
+                        Intent splashIntent =new Intent(MainActivity.this,SplashActivity.class);
+                        startActivity(splashIntent);
+                        finish();
                     }
                 });
             }
