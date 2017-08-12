@@ -127,7 +127,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         Adapter adapter = new Adapter(this, getSupportFragmentManager());
         adapter.addFragment(new PeopleFragment(), this.getString(R.string.people));
         adapter.addFragment(new ChatsFragment(), this.getString(R.string.chats));
-        adapter.addFragment(new NotificationsFragment(), this.getString(R.string.notifications));
+        adapter.addFragment(new NotificationsFragment(), this.getString(R.string.notifs));
         viewPager.setAdapter(adapter);
         return adapter;
     }
@@ -135,6 +135,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     @Override
     public void onResume() {
         super.onResume();
+        checkAndRegEventBus();
         String ateKey = HolloutPreferences.getATEKey();
         ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
     }
@@ -180,6 +181,12 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     @Override
     protected void onStart() {
         super.onStart();
+        checkAndRegEventBus();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
         checkAndRegEventBus();
     }
 

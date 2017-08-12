@@ -129,7 +129,7 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 public void onClick(View v) {
                     itemView.startAnimation(bounceAnimation);
                     if (host.equals(AppConstants.PEOPLE_TO_MEET_HOST_TYPE_SELECTED)) {
-                        if (people.contains(personObject)) {
+                        if (people.contains(personObject) && people.size() != 1) {
                             people.remove(personObject);
                             if (selectedPeopleToMeet.contains(personName)) {
                                 selectedPeopleToMeet.remove(personName);
@@ -137,6 +137,8 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             peopleToMeetAdapter.notifyItemRemoved(position);
                             parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
                             EventBus.getDefault().post(new SelectedPerson(personObject, false));
+                        } else {
+                            UiUtils.showSafeToast("Sorry, you can't take this off. You need to have at least one interest");
                         }
                     } else {
                         if (!selectedPeopleToMeet.contains(personName)) {

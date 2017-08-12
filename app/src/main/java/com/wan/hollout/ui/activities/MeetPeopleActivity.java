@@ -3,7 +3,6 @@ package com.wan.hollout.ui.activities;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -97,10 +96,6 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
 
     private ParseUser signedInUser;
 
-    private final long DELAY = 1000; // in ms
-
-    private Handler handler = new Handler();
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,9 +108,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         setupSelectedPeopleToMeetAdapter();
         offloadUserInterestsIfAvailable();
         fetchPeople(0);
-
         retry.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 if (StringUtils.isNotEmpty(searchTextView.getText().toString().trim())) {
@@ -124,9 +117,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                     fetchPeople(0);
                 }
             }
-
         });
-
         searchTextView.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -136,21 +127,16 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                if (StringUtils.isNotEmpty(StringUtils.strip(charSequence.toString().trim()))) {
+                    filterPeople(StringUtils.strip(charSequence.toString().trim()), 0);
+                } else {
+                    fetchPeople(0);
+                }
             }
 
             @Override
             public void afterTextChanged(Editable editable) {
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (StringUtils.isNotEmpty(searchTextView.getText().toString().trim())) {
-                            filterPeople(searchTextView.getText().toString().trim(), 0);
-                        } else {
-                            fetchPeople(0);
-                        }
-                    }
-                }, DELAY);
+
             }
 
         });
@@ -162,17 +148,19 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             public boolean onEditorAction(TextView textView, int actionId, @NonNull KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event.getAction() == KeyEvent.ACTION_DOWN &&
                         event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                    if (!event.isShiftPressed()) {
-                        // the user is done typing.
-                        filterPeople(searchTextView.getText().toString().trim(), 0);
-                        return true; // consume.
+                    try {
+                        if (!event.isShiftPressed()) {
+                            // the user is done typing.
+                            filterPeople(searchTextView.getText().toString().trim(), 0);
+                            return true; // consume.
+                        }
+                    } catch (NullPointerException e) {
+                        return false;
                     }
                 }
                 return false; // pass on to other listeners.
             }
-
         });
-
     }
 
     private void offloadUserInterestsIfAvailable() {
@@ -229,14 +217,16 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         potentialPeopleToMeetRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(potentialPeopleToMeetLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
-                if (!potentialPeopleToMeet.isEmpty() && StringUtils.isEmpty(searchTextView.getText().toString().trim())) {
-                    UiUtils.toggleFlipperState(contentFlipper, 2);
-                    UiUtils.showView(potentialPeopleToMeetRecyclerView, true);
-                    UiUtils.showView(potentialPeopleToMeetFooterView, true);
-                    fetchPeople(potentialPeopleToMeet.size());
-                } else if (!potentialPeopleToMeet.isEmpty() && StringUtils.isNotEmpty(searchTextView.getText().toString().trim())) {
-                    UiUtils.showView(potentialPeopleToMeetFooterView, true);
-                    filterPeople(searchTextView.getText().toString().trim(), potentialPeopleToMeet.size());
+                if (potentialPeopleToMeet.size() >= 100) {
+                    if (StringUtils.isEmpty(searchTextView.getText().toString().trim())) {
+                        UiUtils.toggleFlipperState(contentFlipper, 2);
+                        UiUtils.showView(potentialPeopleToMeetRecyclerView, true);
+                        UiUtils.showView(potentialPeopleToMeetFooterView, true);
+                        fetchPeople(potentialPeopleToMeet.size());
+                    } else if (StringUtils.isNotEmpty(searchTextView.getText().toString().trim())) {
+                        UiUtils.showView(potentialPeopleToMeetFooterView, true);
+                        filterPeople(searchTextView.getText().toString().trim(), potentialPeopleToMeet.size());
+                    }
                 }
             }
         });
@@ -248,12 +238,13 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         if (skip != 0) {
             peopleSearch.setSkip(skip);
         }
+        peopleSearch.setLimit(100);
         peopleSearch.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(final List<ParseObject> objects, final ParseException e) {
                 if (objects != null && !objects.isEmpty()) {
                     UiUtils.toggleFlipperState(contentFlipper, 2);
-                    loadNewPeopleToMeetAdapter(objects, skip);
+                    loadNewPeopleToMeetAdapter(objects);
                 }
                 checkListIsEmpty();
                 UiUtils.showView(potentialPeopleToMeetFooterView, false);
@@ -262,30 +253,38 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
     }
 
     private void filterPeople(final String filterString, final int skip) {
-        final ParseQuery<ParseObject> peopleSearch = ParseQuery.getQuery(AppConstants.INTERESTS);
         potentialPeopleToMeetAdapter.setSearchedString(filterString);
-        peopleSearch.whereContains(AppConstants.NAME, StringUtils.stripEnd(filterString.trim().toLowerCase(), "s"));
-        peopleSearch.setLimit(100);
+        final ParseQuery<ParseObject> peopleSearch = ParseQuery.getQuery(AppConstants.INTERESTS);
+        peopleSearch.whereContains(AppConstants.NAME, StringUtils.stripEnd(StringUtils.strip(filterString.toLowerCase().trim()), "s"));
         if (skip != 0) {
             peopleSearch.setSkip(skip);
         }
+        peopleSearch.setLimit(100);
         peopleSearch.findInBackground(new FindCallback<ParseObject>() {
 
             @Override
             public void done(final List<ParseObject> objects, final ParseException e) {
-                if (objects != null && !objects.isEmpty()) {
-                    UiUtils.toggleFlipperState(contentFlipper, 2);
-                    loadNewPeopleToMeetAdapter(objects, skip);
-                } else {
-                    if (skip == 0) {
-                        potentialPeopleToMeet.clear();
-                        potentialPeopleToMeetAdapter.notifyDataSetChanged();
+                if (e == null) {
+                    if (objects != null && !objects.isEmpty()) {
+                        if (skip == 0) {
+                            potentialPeopleToMeet.clear();
+                            potentialPeopleToMeetAdapter.notifyDataSetChanged();
+                        }
+                        UiUtils.toggleFlipperState(contentFlipper, 2);
+                        loadNewPeopleToMeetAdapter(objects);
+                    } else {
+                        if (skip == 0) {
+                            potentialPeopleToMeet.clear();
+                            potentialPeopleToMeetAdapter.notifyDataSetChanged();
+                        }
                     }
                 }
                 checkListIsEmpty();
                 UiUtils.showView(potentialPeopleToMeetFooterView, false);
             }
+
         });
+
     }
 
     private void checkListIsEmpty() {
@@ -294,25 +293,19 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         UiUtils.showView(noResultFoundView, potentialPeopleToMeet.isEmpty());
     }
 
-    private void loadNewPeopleToMeetAdapter(List<ParseObject> displayableList, int skip) {
-        if (skip == 0) {
-            potentialPeopleToMeet.clear();
+    private void loadNewPeopleToMeetAdapter(List<ParseObject> displayableList) {
+        if (!displayableList.isEmpty()) {
+            for (ParseObject parseObject : displayableList) {
+                if (!potentialPeopleToMeet.contains(parseObject)) {
+                    potentialPeopleToMeet.add(parseObject);
+                }
+            }
+            potentialPeopleToMeetAdapter.notifyDataSetChanged();
         }
-        potentialPeopleToMeet.addAll(displayableList);
-        potentialPeopleToMeetAdapter.notifyDataSetChanged();
     }
 
     private void notifySelectedPeopleToMeetAdapter() {
-        try {
-            if (selectedPeopleToMeetAdapter.getItemCount() <= 2) {
-                selectedPeopleToMeetAdapter.notifyDataSetChanged();
-            } else {
-                selectedPeopleToMeetAdapter.notifyItemInserted(selectedPeopleToMeet.size() - 1);
-                selectedPeopleToMeetAdapter.notifyDataSetChanged();
-            }
-        } catch (IllegalStateException ignored) {
-
-        }
+        selectedPeopleToMeetAdapter.notifyDataSetChanged();
     }
 
     private void setupSelectedPeopleToMeetAdapter() {
@@ -376,10 +369,31 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         checkAndRegEventBus();
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        checkAndRegEventBus();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkAndRegEventBus();
+    }
+
     private void sendBackResultToCaller() {
         Intent callerIntent = new Intent();
         setResult(RESULT_OK, callerIntent);
         finish();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (StringUtils.isNotEmpty(searchTextView.getText().toString().trim())) {
+            searchTextView.setText("");
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @SuppressWarnings("unused")
@@ -403,10 +417,14 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                             if (selectedPeopleToMeet.contains(parseObject)) {
                                 int position = selectedPeopleToMeet.indexOf(parseObject);
                                 if (position != -1) {
-                                    selectedPeopleToMeet.remove(parseObject);
-                                    selectedPeopleToMeetAdapter.notifyItemRemoved(position);
-                                    selectedPeopleToMeetAdapter.notifyDataSetChanged();
-                                    selectedPeopleToMeetRecyclerView.smoothScrollToPosition(position);
+                                    if (selectedPeopleToMeet.size() == 1) {
+                                        UiUtils.showSafeToast("Sorry, you can't take this off. You need to have at least one interest");
+                                    } else {
+                                        selectedPeopleToMeet.remove(parseObject);
+                                        selectedPeopleToMeetAdapter.notifyItemRemoved(position);
+                                        selectedPeopleToMeetAdapter.notifyDataSetChanged();
+                                        selectedPeopleToMeetRecyclerView.smoothScrollToPosition(position);
+                                    }
                                 }
                             }
                         }

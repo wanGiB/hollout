@@ -120,7 +120,8 @@
             android:paddingRight="16dp"
             android:paddingStart="16dp"
             android:text="@string/tap_all_kinds_of_people_you_like_to_meet"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            app:textStyle="regular" />
 
         <View
             android:id="@+id/upper_divider"
@@ -189,8 +190,7 @@
                 android:id="@+id/people_to_meet_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/white"
-                android:paddingTop="15dp" />
+                android:background="@color/white" />
 
             <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/no_result_found_view"
