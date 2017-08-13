@@ -316,7 +316,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                                 }
                             } else {
                                 UiUtils.dismissProgressDialog();
-                                UiUtils.showSafeToast("Error completing operation. Please try again. "+e.getMessage());
+                                UiUtils.showSafeToast("Error completing operation. Please try again. ");
                             }
                         }
                     });
