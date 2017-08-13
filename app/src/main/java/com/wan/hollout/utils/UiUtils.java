@@ -547,6 +547,11 @@ public class UiUtils {
         imageView.setColorFilter(color);
     }
 
+    public static void showKeyboard(View trigger) {
+        InputMethodManager imm = (InputMethodManager) ApplicationLoader.getInstance().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(trigger, InputMethodManager.SHOW_FORCED);
+    }
+
     private static void refreshUserData(final ParseUser signedInUser, RecyclerView additionalPhotosRecyclerView, RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseUser parseUser, final Activity activity) {
             final String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         final String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);

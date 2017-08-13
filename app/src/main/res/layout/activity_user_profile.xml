@@ -256,7 +256,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="#9b00628F" />
+                        android:background="#9b000000" />
 
                     <com.wan.hollout.ui.widgets.HolloutTextView
                         android:id="@+id/feature_photos_instruction"

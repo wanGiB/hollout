@@ -187,6 +187,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         userDisplayNameView.setFocusableInTouchMode(true);
                         userDisplayNameView.setCursorVisible(true);
                         userDisplayNameView.setSelection(userDisplayNameView.getText().toString().trim().length());
+                        userDisplayNameView.requestFocus();
+                        UiUtils.showKeyboard(userDisplayNameView);
                         userDisplayNameView.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.blue_grey_thin_edit_text_bg));
                         UiUtils.showView(doneWithDisplayNameEdit, true);
                         doneWithDisplayNameEdit.setOnClickListener(new View.OnClickListener() {
@@ -241,9 +243,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, signedInUserCoverPhotoView);
                 }
             }
+
             fetchCommonalities(parseUser);
             fetchFeaturedPhotos(parseUser);
+
         }
+
     }
 
     private void configureAgeAndGender() {

@@ -140,6 +140,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         checkAndRegEventBus();
         String ateKey = HolloutPreferences.getATEKey();
         ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
+        invalidateDrawerMenuHeader();
     }
 
     private void setupTabs(Adapter pagerAdapter) {
