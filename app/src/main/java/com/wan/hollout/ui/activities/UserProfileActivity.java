@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -216,7 +215,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
             if (featuredPhotos == null || featuredPhotos.isEmpty()) {
                 featurePhotosInstruction.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.get_started_button_background));
-                featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(UiUtils.fromHtml("<b>" + signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME) + "</b>") + ", tap here to add some featured photos"));
+                featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + ", tap here to add some featured photos");
                 loadFeaturedPhotosPlaceHolder(parseUser);
             } else {
                 setupFeaturedPhotos(parseUser);
