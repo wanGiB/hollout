@@ -3,6 +3,8 @@ package com.wan.hollout.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -471,6 +473,17 @@ public class HolloutUtils {
         } else {
             doneCallback.done(probablePreviousUpload, null);
         }
+    }
+
+    public static String getAppVersionName() {
+        try {
+            PackageInfo packageInfo = ApplicationLoader.getInstance().getPackageManager()
+                    .getPackageInfo(ApplicationLoader.getInstance().getPackageName(), 0);
+            return packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            HolloutLogger.e(HolloutUtils.class.getSimpleName(), "Could not get package name: " + e);
+        }
+        return null;
     }
 
 }

@@ -3,9 +3,9 @@ package com.wan.hollout.ui.fragments;
 import android.os.Bundle;
 import android.preference.Preference;
 
-import com.app.hollout.R;
-import com.app.hollout.utils.HolloutUtils;
 import com.github.machinarius.preferencefragment.PreferenceFragment;
+import com.wan.hollout.R;
+import com.wan.hollout.utils.HolloutUtils;
 
 /**
  * * Created by Wan on 7/16/2016.

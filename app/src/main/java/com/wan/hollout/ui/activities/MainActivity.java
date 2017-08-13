@@ -374,12 +374,19 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         } else if (drawerItemCategory.getId() == DrawerFragment.YOUR_PROFILE) {
             launchUserProfile();
         } else if (drawerItemCategory.getId() == DrawerFragment.NOTIFICATION_SETTINGS) {
-            launchSettings();
+            launchSettings(AppConstants.NOTIFICATION_SETTINGS_FRAGMENT);
+        } else if (drawerItemCategory.getId() == DrawerFragment.CHATS_AND_CALLS_SETTINGS) {
+            launchSettings(AppConstants.CHATS_SETTINGS_FRAGMENT);
+        } else if (drawerItemCategory.getId() == DrawerFragment.ABOUT_AND_SUPPORT_SETTINGS) {
+            launchSettings(AppConstants.SUPPORT_SETTINGS_FRAGMENT);
+        } else if (drawerItemCategory.getId() == DrawerFragment.PRIVACY_SETTINGS) {
+            launchSettings(AppConstants.PRIVACY_AND_SECURITY_FRAGMENT);
         }
     }
 
-    private void launchSettings() {
-
+    private void launchSettings(String settingsFragmentName) {
+        Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
+        settingsIntent.putExtra(AppConstants.SETTINGS_FRAGMENT_NAME, settingsFragmentName);
     }
 
     @Override
