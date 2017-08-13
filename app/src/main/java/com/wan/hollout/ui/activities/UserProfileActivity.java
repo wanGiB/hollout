@@ -24,6 +24,7 @@ import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,14 +109,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 if (userLocation != null) {
-                    userLocationAndDistanceView.setText(userLocation + "," + distanceToUser);
+                    userLocationAndDistanceView.setText(userLocation + ", " + distanceToUser);
                 } else {
                     userLocationAndDistanceView.setText(distanceToUser + "KM from nearby kinds");
                 }
             } else {
                 if (UiUtils.canShowLocation(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
                     if (userLocation != null) {
-                        userLocationAndDistanceView.setText(userLocation + "," + distanceToUser);
+                        userLocationAndDistanceView.setText(userLocation + ", " + distanceToUser);
                     } else {
                         userLocationAndDistanceView.setText(distanceToUser + "KM from you");
                     }
@@ -125,12 +126,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             }
 
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
-                userDisplayNameView.setText(username + "," + userAge);
+                userDisplayNameView.setText(WordUtils.capitalize(username + ", " + userAge));
             } else {
                 if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
-                    userDisplayNameView.setText(username + "," + userAge);
+                    userDisplayNameView.setText(WordUtils.capitalize(username + ", " + userAge));
                 } else {
-                    userDisplayNameView.setText(username);
+                    userDisplayNameView.setText(WordUtils.capitalize(username));
                 }
             }
             String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
