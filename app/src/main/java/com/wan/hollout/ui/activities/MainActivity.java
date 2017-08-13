@@ -373,7 +373,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             attemptLogOut();
         } else if (drawerItemCategory.getId() == DrawerFragment.YOUR_PROFILE) {
             launchUserProfile();
-        } else if (drawerItemCategory.getId() == DrawerFragment.HELP_AND_SETTINGS) {
+        } else if (drawerItemCategory.getId() == DrawerFragment.NOTIFICATION_SETTINGS) {
             launchSettings();
         }
     }

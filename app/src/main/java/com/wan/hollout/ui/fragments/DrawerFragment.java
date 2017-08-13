@@ -36,9 +36,11 @@ public class DrawerFragment extends Fragment {
 
     public static final int MEET_PEOPLE = 0x1;
     public static final int YOUR_PROFILE = 0x2;
-    public static final int HELP_AND_SETTINGS = 0x5;
-    public static final int THEME = 0x6;
-    public static final int LOG_OUT = 0x7;
+    public static final int NOTIFICATION_SETTINGS = 0x5;
+    public static final int CHATS_AND_CALLS_SETTINGS = 0x6;
+    public static final int PRIVACY_SETTINGS = 0x7;
+    public static final int ABOUT_AND_SUPPORT_SETTINGS = 0x8;
+    public static final int LOG_OUT = 0x9;
 
     /**
      * Indicates that menu is currently loading.
@@ -197,8 +199,10 @@ public class DrawerFragment extends Fragment {
         drawerRetryBtn.setVisibility(View.GONE);
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(MEET_PEOPLE, MEET_PEOPLE, getString(R.string.meet_people)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(YOUR_PROFILE, YOUR_PROFILE, getString(R.string.your_profile)));
-        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(HELP_AND_SETTINGS, HELP_AND_SETTINGS, getString(R.string.help_and_settings)));
-        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(THEME, THEME, getString(R.string.theme)));
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(NOTIFICATION_SETTINGS, NOTIFICATION_SETTINGS, getString(R.string.notification_settings)));
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(CHATS_AND_CALLS_SETTINGS, CHATS_AND_CALLS_SETTINGS, getString(R.string.chats_and_calls_settings)));
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(PRIVACY_SETTINGS, PRIVACY_SETTINGS, getString(R.string.privacy_settings)));
+        drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(ABOUT_AND_SUPPORT_SETTINGS, ABOUT_AND_SUPPORT_SETTINGS, getString(R.string.support_and_about_settings)));
         drawerRecyclerAdapter.addDrawerItem(new DrawerItemCategory(LOG_OUT, LOG_OUT, getString(R.string.log_out)));
         drawerRecyclerAdapter.notifyDataSetChanged();
         drawerLoading = false;

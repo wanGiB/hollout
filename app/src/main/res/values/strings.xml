@@ -142,5 +142,9 @@
     <string name="last_seen_visibility_contract_msg">If you don\'t want other users to see your last seen. You won\'t see theirs as well</string>
     <string name="status_visibility_contract_msg">If you don\'t want others to see your status. You won\'t see theirs as well.</string>
     <string name="age_visibility_contract_msg">If you don\'t want other users to see your age. You won\'t see theirs too</string>
+    <string name="notification_settings">Notification Settings</string>
+    <string name="chats_and_calls_settings"><![CDATA[Chats & Calls Settings]]></string>
+    <string name="privacy_settings">Privacy Settings</string>
+    <string name="support_and_about_settings">Support Settings</string>
 
 </resources>

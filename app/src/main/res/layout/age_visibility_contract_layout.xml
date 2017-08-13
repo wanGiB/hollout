@@ -18,6 +18,6 @@
         android:text="@string/age_visibility_contract_msg"
         android:textColor="@color/hollout_material_grey_600"
         android:textSize="16sp"
-        app:fontName="Lato-Regular.ttf" />
+        app:textStyle="medium"/>
 
 </LinearLayout>
