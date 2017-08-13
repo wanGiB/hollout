@@ -204,6 +204,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                             UiUtils.showView(doneWithDisplayNameEdit, false);
                                             userDisplayNameView.setCursorVisible(false);
                                             userDisplayNameView.setBackground(new ColorDrawable(ContextCompat.getColor(UserProfileActivity.this, android.R.color.transparent)));
+                                            UiUtils.dismissKeyboard(userDisplayNameView);
                                             UiUtils.showSafeToast("Success!");
                                         } else {
                                             UiUtils.showSafeToast("Error updating display name. Please review your data connection");
