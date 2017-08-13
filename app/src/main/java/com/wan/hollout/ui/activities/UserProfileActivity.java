@@ -335,6 +335,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         profilePhotoOptionsBuilder.create().show();
                     }
                 });
+
                 signedInUserCoverPhotoView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
