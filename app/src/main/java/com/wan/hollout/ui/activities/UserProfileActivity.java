@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
@@ -25,6 +26,7 @@ import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.RandomUtils;
@@ -78,6 +80,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @BindView(R.id.featured_photos_place_holder_image)
     ImageView featuredPhotosPlaceHolderImageView;
+
+    @BindView(R.id.edit_about_you)
+    HolloutTextView editAboutYou;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -198,6 +203,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void fetchFeaturedPhotos(ParseUser parseUser) {
         ParseUser signedInUser = ParseUser.getCurrentUser();
         List<String> featuredPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
@@ -230,8 +236,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     }
 
-    private void fetchCommonalities(ParseUser parseUser) {
-        ParseUser signedInUser = ParseUser.getCurrentUser();
+    private void fetchCommonalities(final ParseUser parseUser) {
+        final ParseUser signedInUser = ParseUser.getCurrentUser();
         if (signedInUser != null) {
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
@@ -260,11 +266,32 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 public void onClick(View view) {
                     if (aboutUserRecyclerView.getVisibility() != View.VISIBLE) {
                         aboutUserRecyclerView.setVisibility(View.VISIBLE);
+                        if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+                            editAboutYou.setVisibility(View.VISIBLE);
+                        }
                     } else {
                         aboutUserRecyclerView.setVisibility(View.GONE);
+                        UiUtils.showView(editAboutYou, false);
                     }
+                    editAboutYou.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent editAboutYouIntent = new Intent(UserProfileActivity.this, AboutUserActivity.class);
+                            startActivityForResult(editAboutYouIntent, RequestCodes.UPDATE_ABOUT_YOU);
+                        }
+                    });
                 }
             });
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode==RequestCodes.UPDATE_ABOUT_YOU){
+            if (resultCode==RESULT_OK){
+                offloadIntent();
+            }
         }
     }
 

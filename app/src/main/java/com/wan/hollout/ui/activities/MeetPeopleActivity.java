@@ -163,6 +163,13 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         });
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing())
+            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+    }
+
     private void offloadUserInterestsIfAvailable() {
         if (signedInUser != null) {
             List<String> userInterests = signedInUser.getList(AppConstants.INTERESTS);

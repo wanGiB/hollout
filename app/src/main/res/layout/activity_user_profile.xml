@@ -119,7 +119,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/about_user"
-                    android:background="@color/light_gray"
+                    android:background="@color/whitesmoke"
                     android:paddingEnd="10dp"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
@@ -127,10 +127,33 @@
                     android:visibility="gone" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/edit_about_you"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@+id/about_user_recycler_view"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginRight="10dp"
+                    android:background="@drawable/get_started_button_background"
+                    android:clickable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:paddingBottom="5dp"
+                    android:paddingEnd="14dp"
+                    android:paddingLeft="14dp"
+                    android:paddingRight="14dp"
+                    android:paddingStart="14dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/edit"
+                    android:visibility="gone"
+                    android:textSize="10sp"
+                    tools:ignore="SmallSp" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/user_location_and_distance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/about_user_recycler_view"
+                    android:layout_below="@id/edit_about_you"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="20dp"
                     android:textColor="@color/ease_gray"
