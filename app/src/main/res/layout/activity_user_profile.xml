@@ -248,10 +248,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="0.1dp"
                     android:layout_below="@+id/featured_photos_header"
-                    android:layout_marginEnd="10dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginStart="10dp"
                     android:background="@color/ease_gray" />
 
                 <FrameLayout
@@ -259,6 +255,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_below="@+id/divider"
+                    android:background="@color/lighter_blue"
                     android:paddingBottom="45dp">
 
                     <android.support.v7.widget.RecyclerView

@@ -157,7 +157,7 @@
         <activity
             android:name=".ui.activities.SlidePagerActivity"
             android:configChanges="orientation|screenLayout|screenSize"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            android:theme="@style/AppTheme.FullScreen.Light" />
 
         <activity
             android:name=".ui.activities.SettingsActivity"

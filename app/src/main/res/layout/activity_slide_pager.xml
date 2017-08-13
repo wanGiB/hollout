@@ -1,56 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.wan.hollout.ui.widgets.ScrimInsetsFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/parent_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/transluscent_black"
-    android:fitsSystemWindows="true">
+    android:layout_height="wrap_content"
+    tools:context="com.wan.hollout.ui.activities.WelcomeActivity">
 
-    <FrameLayout
-        android:id="@+id/sub_parent_view"
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/parent_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true">
+        android:background="@color/transluscent_black">
 
-        <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
+        <FrameLayout
+            android:id="@+id/sub_parent_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true" />
+            android:layout_height="match_parent">
 
-        <com.wan.hollout.ui.widgets.PageIndicator
-            android:id="@+id/indicator"
+            <android.support.v4.view.ViewPager
+                android:id="@+id/pager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fitsSystemWindows="true" />
+
+            <com.wan.hollout.ui.widgets.PageIndicator
+                android:id="@+id/indicator"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="20dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginStart="20dp"
+                android:gravity="bottom|center_horizontal"
+                app:indicator_spacing="5dp"
+                app:indicator_type="fraction"
+                tools:ignore="RtlHardcoded" />
+
+        </FrameLayout>
+
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbarlayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="20dp"
-            android:layout_marginLeft="20dp"
-            android:layout_marginStart="20dp"
-            android:gravity="bottom|center_horizontal"
-            app:indicator_spacing="5dp"
-            app:indicator_type="fraction"
-            tools:ignore="RtlHardcoded" />
+            android:layout_height="wrap_content"
+            android:background="@color/transluscent_black"
+            android:layout_marginTop="25dp"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:elevation="1dp">
 
-    </FrameLayout>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:titleTextAppearance="@style/TextAppearance.AppCompat.Large"
+                app:titleTextColor="@android:color/white" />
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbarlayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/transluscent_black"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:elevation="1dp">
+        </android.support.design.widget.AppBarLayout>
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:titleTextAppearance="@style/TextAppearance.AppCompat.Large"
-            app:titleTextColor="@android:color/white" />
+    </android.support.design.widget.CoordinatorLayout>
 
-    </android.support.design.widget.AppBarLayout>
-
-
-</android.support.design.widget.CoordinatorLayout>
+</com.wan.hollout.ui.widgets.ScrimInsetsFrameLayout>

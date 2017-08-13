@@ -195,7 +195,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             } else {
                 if (UiUtils.canShowLocation(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
                     if (userLocation != null) {
-                        userLocationAndDistanceView.setText(userLocation + ", " + distanceToUser);
+                        userLocationAndDistanceView.setText(userLocation + ", " + distanceToUser + "KM from you");
                     } else {
                         userLocationAndDistanceView.setText(distanceToUser + "KM from you");
                     }
@@ -403,6 +403,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
 
         HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(featuredPhotosRectangleAdapter);
+        featuredPhotosRecyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
         featuredPhotosRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
 
         ParseUser signedInUser = ParseUser.getCurrentUser();
