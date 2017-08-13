@@ -63,7 +63,7 @@
                         android:paddingStart="20dp"
                         android:textColor="@color/white"
                         android:focusable="false"
-                        android:textSize="25sp"
+                        android:textSize="26sp"
                         app:textStyle="medium"
                         tools:ignore="RtlSymmetry" />
 
@@ -107,8 +107,8 @@
 
             <com.wan.hollout.ui.widgets.CircleImageView
                 android:id="@+id/user_gender"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_marginLeft="0dp"
                 android:layout_marginStart="40dp"
                 android:layout_alignEnd="@id/user_profile_photo_view"
@@ -150,15 +150,16 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="13dp"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:paddingEnd="12dp"
+                    android:paddingEnd="20dp"
                     android:paddingLeft="22dp"
-                    android:paddingRight="22dp"
+                    android:paddingRight="20dp"
                     android:paddingStart="22dp"
+                    android:textColor="@color/text_dark"
                     android:textSize="25sp"
                     app:textStyle="medium" />
 
@@ -204,7 +205,9 @@
                     android:layout_below="@id/edit_about_you"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="20dp"
+                    android:drawablePadding="3dp"
                     android:textColor="@color/ease_gray"
+                    android:gravity="center_vertical"
                     android:textSize="15sp"
                     app:textStyle="medium" />
 
@@ -222,7 +225,7 @@
                     android:paddingStart="20dp"
                     android:paddingTop="16dp"
                     android:text="@string/hey_there_holla_me_on_hollout"
-                    android:textSize="16sp"
+                    android:textSize="17sp"
                     app:textStyle="medium" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView

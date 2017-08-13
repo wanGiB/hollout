@@ -195,6 +195,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
 
+            UiUtils.attachDrawableToTextView(UserProfileActivity.this,userLocationAndDistanceView,R.drawable.ic_location_on, UiUtils.DrawableDirection.LEFT);
+
             userDisplayNameView.setText(WordUtils.capitalize(username));
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 userDisplayNameView.setOnClickListener(new View.OnClickListener() {
