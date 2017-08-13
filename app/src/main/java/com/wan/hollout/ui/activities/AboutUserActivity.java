@@ -280,21 +280,21 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                 if (canMoveFurther()) {
 
                     List<String> existingInterests = signedInUser.getList(AppConstants.INTERESTS);
-                    List<String> occupations = new ArrayList<>();
+                    List<String> aboutUserList = new ArrayList<>();
                     List<String> interests = existingInterests != null ? existingInterests : new ArrayList<String>();
                     String enteredInterests = moreAboutUserField.getText().toString().trim();
 
-                    buildInterests(occupations, enteredInterests);
+                    buildInterests(aboutUserList, enteredInterests);
 
                     //Save occupations and move further
-                    for (String occupation : occupations) {
+                    for (String occupation : aboutUserList) {
                         if (!interests.contains(occupation)) {
                             interests.add(occupation);
                         }
                     }
 
                     signedInUser.put(AppConstants.INTERESTS, interests);
-                    signedInUser.put(AppConstants.ABOUT_USER, enteredInterests);
+                    signedInUser.put(AppConstants.ABOUT_USER, aboutUserList);
                     UiUtils.showProgressDialog(AboutUserActivity.this, "Please wait...");
                     signedInUser.saveInBackground(new SaveCallback() {
 
@@ -316,7 +316,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                                 }
                             } else {
                                 UiUtils.dismissProgressDialog();
-                                UiUtils.showSafeToast("Error completing operation. Please try again.");
+                                UiUtils.showSafeToast("Error completing operation. Please try again. "+e.getMessage());
                             }
                         }
                     });
