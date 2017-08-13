@@ -102,6 +102,22 @@
                 app:border_color="@color/white"
                 app:border_width="3dp" />
 
+            <com.wan.hollout.ui.widgets.CircleImageView
+                android:id="@+id/user_gender"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginLeft="0dp"
+                android:layout_marginStart="40dp"
+                android:layout_alignEnd="@id/avatar"
+                android:layout_alignRight="@id/avatar"
+                android:layout_marginTop="282dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:visibility="gone"
+                android:src="@drawable/authentication_background_image"
+                app:border_color="@color/white"
+                app:border_width="2dp" />
+
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/start_chat_view"
                 android:layout_width="wrap_content"

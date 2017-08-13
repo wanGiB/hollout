@@ -123,6 +123,7 @@ dependencies {
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
     compile 'com.github.florent37:diagonallayout:1.0.7'
     compile 'com.flaviofaria:kenburnsview:1.0.7'
+    compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

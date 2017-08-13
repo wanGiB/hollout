@@ -2,6 +2,7 @@ package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.flaviofaria.kenburnsview.KenBurnsView;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -93,7 +96,15 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.done_with_display_name_edit)
     ImageView doneWithDisplayNameEdit;
 
+    @BindView(R.id.user_gender)
+    CircleImageView userGenderView;
+
     private ParseUser parseUser;
+
+    private ColorGenerator generator = ColorGenerator.MATERIAL;
+
+    private int color = 0;
+    private TextDrawable.IBuilder builder = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -178,6 +189,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     userLocationAndDistanceView.setText(distanceToUser + "KM from you");
                 }
             }
+
             userDisplayNameView.setText(WordUtils.capitalize(username));
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 userDisplayNameView.setOnClickListener(new View.OnClickListener() {
@@ -232,10 +244,36 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
 
+            String userGender = parseUser.getString(AppConstants.APP_USER_GENDER);
+            if (!userGender.equals(AppConstants.UNKNOWN)) {
+                UiUtils.showView(userGenderView,true);
+                String firstChar = userGender.charAt(0) + "";
+                color = generator.getRandomColor();
+                builder = TextDrawable.builder()
+                        .beginConfig()
+                        .endConfig()
+                        .round();
+                TextDrawable colouredDrawable = builder.build(firstChar, color);
+                Bitmap textBitmap = HolloutUtils.convertDrawableToBitmap(colouredDrawable);
+                userGenderView.setImageBitmap(textBitmap);
+            }else{
+                UiUtils.showView(userGenderView,false);
+            }
+
+            if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+                userGenderView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        configureAgeAndGender();
+                    }
+                });
+            }
+
             String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
                 UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, userAvatarView);
             }
+
             String userCoverPhoto = parseUser.getString(AppConstants.APP_USER_COVER_PHOTO);
             if (StringUtils.isNotEmpty(userCoverPhoto)) {
                 UiUtils.loadImage(UserProfileActivity.this, userCoverPhoto, signedInUserCoverPhotoView);
@@ -298,10 +336,10 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutSignedInUser != null) {
                     aboutUserTextView.setText(WordUtils.capitalize(aboutSignedInUser.get(0)));
-                    UiUtils.showView(startChatView,false);
+                    UiUtils.showView(startChatView, false);
                 }
             } else {
-                UiUtils.showView(startChatView,true);
+                UiUtils.showView(startChatView, true);
                 startChatView.setImageResource(R.drawable.chat_tab);
                 List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
@@ -345,7 +383,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RequestCodes.UPDATE_ABOUT_YOU) {
+        if (requestCode == RequestCodes.UPDATE_ABOUT_YOU || requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
             if (resultCode == RESULT_OK) {
                 if (parseUser != null) {
                     loadUserDetails();
