@@ -47,6 +47,8 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:layout_marginBottom="80dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
                     android:paddingBottom="20dp"
                     android:paddingEnd="16dp"
                     android:paddingLeft="20dp"
@@ -90,7 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/diagonalLayout"
-                android:orientation="horizontal">
+                android:animateLayoutChanges="true">
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/about_user"
@@ -108,11 +110,23 @@
                     android:textSize="25sp"
                     app:textStyle="medium" />
 
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/about_user_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/about_user"
+                    android:background="@color/ease_gray"
+                    android:paddingEnd="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingStart="10dp"
+                    android:visibility="gone" />
+
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/user_location_and_distance"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/about_user"
+                    android:layout_below="@id/about_user_recycler_view"
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="20dp"
                     android:textColor="@color/ease_gray"
@@ -207,6 +221,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:background="@android:color/transparent"
+            android:drawablePadding="3dp"
             android:text="@string/online_status"
             android:textColor="@color/white"
             android:textSize="14sp"

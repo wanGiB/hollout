@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -65,6 +66,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.user_location_and_distance)
     HolloutTextView userLocationAndDistanceView;
 
+    @BindView(R.id.about_user_recycler_view)
+    RecyclerView aboutUserRecyclerView;
+
     private ParseUser parseUser;
 
     @Override
@@ -85,6 +89,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         parseUser = getIntent().getExtras().getParcelable(AppConstants.USER_PROPERTIES);
         if (parseUser != null) {
             loadUserProfile(parseUser);
+
         }
     }
 
