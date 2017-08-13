@@ -80,6 +80,8 @@
                     <ImageView
                         android:id="@+id/done_with_display_name_edit"
                         android:layout_width="25dp"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
                         android:layout_height="25dp"
                         android:layout_gravity="center_vertical"
                         android:src="@drawable/ic_done_white_24dp"
