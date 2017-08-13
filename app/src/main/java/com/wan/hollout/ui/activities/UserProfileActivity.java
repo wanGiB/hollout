@@ -173,7 +173,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     @SuppressLint("SetTextI18n")
-    private void loadUserProfile(ParseUser parseUser) {
+    private void loadUserProfile(final ParseUser parseUser) {
         final ParseUser signedInUser = ParseUser.getCurrentUser();
         if (signedInUser != null) {
             String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
@@ -314,6 +314,21 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                                 setCurrentUploadAction(UPLOAD_ACTION_TYPE_PROFILE_PHOTO);
                                                 HolloutUtils.startImagePicker(UserProfileActivity.this);
                                                 break;
+                                            case 1:
+                                                String signedInUserProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+                                                List<String> allPhotos = new ArrayList<>();
+                                                if (StringUtils.isNotEmpty(signedInUserProfilePhotoUrl)) {
+                                                    List<String> featuredPhotos = signedInUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
+                                                    String coverPhotoUrl = signedInUser.getString(AppConstants.APP_USER_COVER_PHOTO);
+                                                    if (StringUtils.isNotEmpty(coverPhotoUrl)) {
+                                                        allPhotos.add(coverPhotoUrl);
+                                                    }
+                                                    if (featuredPhotos != null && !featuredPhotos.isEmpty()) {
+                                                        allPhotos.addAll(featuredPhotos);
+                                                    }
+                                                    openPhotoViewActivity(signedInUserProfilePhotoUrl, allPhotos, parseUser);
+                                                }
+                                                break;
                                         }
                                     }
                                 });
@@ -331,6 +346,21 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                     case 0:
                                         setCurrentUploadAction(UPLOAD_ACTION_TYPE_COVER_PHOTO);
                                         HolloutUtils.startImagePicker(UserProfileActivity.this);
+                                        break;
+                                    case 1:
+                                        String coverPhotoUrl = signedInUser.getString(AppConstants.APP_USER_COVER_PHOTO);
+                                        List<String> allPhotos = new ArrayList<>();
+                                        if (StringUtils.isNotEmpty(coverPhotoUrl)) {
+                                            String signedInUserProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+                                            List<String> featuredPhotos = signedInUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
+                                            if (StringUtils.isNotEmpty(signedInUserProfilePhotoUrl)) {
+                                                allPhotos.add(signedInUserProfilePhotoUrl);
+                                            }
+                                            if (featuredPhotos != null && !featuredPhotos.isEmpty()) {
+                                                allPhotos.addAll(featuredPhotos);
+                                            }
+                                            openPhotoViewActivity(coverPhotoUrl, allPhotos, parseUser);
+                                        }
                                         break;
                                 }
                             }
@@ -594,6 +624,20 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
         }
+    }
+
+    private void openPhotoViewActivity(String photo, List<String> photos, ParseUser parseUser) {
+        Intent mProfilePhotoViewIntent = new Intent(UserProfileActivity.this, SlidePagerActivity.class);
+        mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_TITLE, parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
+        ArrayList<String> photoExtras = new ArrayList<>();
+        photoExtras.add(0, photo);
+        for (String photoItem : photos) {
+            if (!photoExtras.contains(photoItem) && !photoItem.equals(photo)) {
+                photoExtras.add(photoItem);
+            }
+        }
+        mProfilePhotoViewIntent.putStringArrayListExtra(AppConstants.EXTRA_PICTURES, photoExtras);
+        startActivity(mProfilePhotoViewIntent);
     }
 
     private void handleUserOnlineStatus(ParseUser parseUser) {
