@@ -242,7 +242,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutSignedInUser != null) {
-                    aboutUserTextView.setText(WordUtils.capitalize(TextUtils.join(",", aboutSignedInUser)));
+                    aboutUserTextView.setText(WordUtils.capitalize(aboutSignedInUser.get(0)));
                     startChatOrEditProfileView.setImageResource(R.drawable.ic_mode_edit_white_24dp);
                 }
             } else {
@@ -277,6 +277,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         @Override
                         public void onClick(View view) {
                             Intent editAboutYouIntent = new Intent(UserProfileActivity.this, AboutUserActivity.class);
+                            editAboutYouIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN,false);
                             startActivityForResult(editAboutYouIntent, RequestCodes.UPDATE_ABOUT_YOU);
                         }
                     });

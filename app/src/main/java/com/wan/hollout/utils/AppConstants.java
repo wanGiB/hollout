@@ -99,6 +99,7 @@ public class AppConstants {
     public static final String REFRESH_PEOPLE = "refresh_people";
     public static final String PLEASE_REQUEST_LOCATION_ACCESSS = "request_location_access";
     public static final String APP_USER_COVER_PHOTO = "app_user_cover_photo_url";
+    public static final java.lang.String CAN_LAUNCH_MAIN = "can_launch_main";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

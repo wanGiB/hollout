@@ -97,6 +97,8 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     private InterestsSuggestionAdapter interestsSuggestionAdapter;
     private Capture<String> lastSelection = new Capture<>();
 
+    private boolean canLaunchMain = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
@@ -110,6 +112,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("About You");
         }
+        canLaunchMain = getIntent().getExtras().getBoolean(AppConstants.CAN_LAUNCH_MAIN, false);
         loadSignedInUserPhoto();
         initVibrator();
         initShakeAnimation();
@@ -291,7 +294,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                     }
 
                     signedInUser.put(AppConstants.INTERESTS, interests);
-                    signedInUser.put(AppConstants.ABOUT_USER, interests);
+                    signedInUser.put(AppConstants.ABOUT_USER, enteredInterests);
                     UiUtils.showProgressDialog(AboutUserActivity.this, "Please wait...");
                     signedInUser.saveInBackground(new SaveCallback() {
 
@@ -303,7 +306,13 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                                 if (!HolloutPreferences.isUserWelcomed()) {
                                     launchGenderAndBirthDayActivity();
                                 } else {
-                                    launchMainActivity();
+                                    if (canLaunchMain) {
+                                        launchMainActivity();
+                                    } else {
+                                        Intent callerIntent = new Intent();
+                                        setResult(RESULT_OK, callerIntent);
+                                        finish();
+                                    }
                                 }
                             } else {
                                 UiUtils.dismissProgressDialog();

@@ -102,11 +102,11 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
+                    android:layout_marginTop="16dp"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:ellipsize="end"
                     android:maxLines="2"
-                    android:maxWidth="350dp"
                     android:paddingEnd="12dp"
                     android:paddingLeft="22dp"
                     android:paddingRight="22dp"
@@ -145,8 +145,8 @@
                     android:paddingStart="14dp"
                     android:paddingTop="5dp"
                     android:text="@string/edit"
-                    android:visibility="gone"
                     android:textSize="10sp"
+                    android:visibility="gone"
                     tools:ignore="SmallSp" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
