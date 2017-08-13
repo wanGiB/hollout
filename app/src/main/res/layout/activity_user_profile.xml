@@ -213,7 +213,10 @@
                         android:layout_gravity="center"
                         android:gravity="center"
                         android:padding="10dp"
-                        android:text="This user doesn't have any featured photos"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
                         android:textColor="@color/whitesmoke"
                         android:textSize="16sp"
                         app:textStyle="light" />

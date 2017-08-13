@@ -18,7 +18,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -371,6 +370,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onDrawerItemCategorySelected(DrawerItemCategory drawerItemCategory) {
         if (drawerItemCategory.getId() == DrawerFragment.LOG_OUT) {
             attemptLogOut();
+        }else if (drawerItemCategory.getId()==DrawerFragment.YOUR_PROFILE){
+            launchUserProfile();
         }
     }
 
@@ -381,6 +382,10 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public void onAccountSelected() {
+        launchUserProfile();
+    }
+
+    private void launchUserProfile() {
         Intent signedInUserIntent = new Intent(MainActivity.this, UserProfileActivity.class);
         if (ParseUser.getCurrentUser() != null) {
             signedInUserIntent.putExtra(AppConstants.USER_PROPERTIES, ParseUser.getCurrentUser());
