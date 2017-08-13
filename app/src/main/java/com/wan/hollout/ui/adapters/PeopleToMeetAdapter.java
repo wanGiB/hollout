@@ -113,10 +113,10 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         private void setPeopleName(Context context, String searchedString, String careerName) {
             if (org.apache.commons.lang3.StringUtils.isNotEmpty(searchedString)) {
-                chipItemView.setText(UiUtils.highlightTextIfNecessary(searchedString, WordUtils.capitalize(getPluralForm(careerName)),
+                chipItemView.setText(UiUtils.highlightTextIfNecessary(searchedString, WordUtils.capitalize(getPluralForm(context, careerName)),
                         ContextCompat.getColor(context, R.color.hollout_color_three)));
             } else {
-                chipItemView.setText(WordUtils.capitalize(getPluralForm(careerName).toLowerCase(Locale.getDefault())));
+                chipItemView.setText(WordUtils.capitalize(getPluralForm(context, careerName).toLowerCase(Locale.getDefault())));
             }
         }
 
@@ -124,7 +124,7 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final ParseUser parseUser = ParseUser.getCurrentUser();
             final String personName = personObject.getString(AppConstants.NAME);
             final List<String> selectedPeopleToMeet = parseUser.getList(AppConstants.INTERESTS);
-            if (!(context instanceof UserProfileActivity)){
+            if (!(context instanceof UserProfileActivity)) {
                 itemView.setOnClickListener(new View.OnClickListener() {
 
                     @Override
@@ -182,16 +182,20 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     }
 
-    private static String getPluralForm(String careerName) {
-        String pluralizedOccupation;
-        if (StringUtils.endsWithIgnoreCase(careerName.toLowerCase(), "man")) {
-            pluralizedOccupation = StringUtils.replace(careerName.toLowerCase(), "man", "men");
-        } else if (StringUtils.endsWithIgnoreCase(careerName.toLowerCase(), "s")) {
-            pluralizedOccupation = careerName;
+    private static String getPluralForm(Context context, String careerName) {
+        if (context instanceof UserProfileActivity) {
+            return careerName;
         } else {
-            pluralizedOccupation = StringUtils.capitalize(careerName.toLowerCase()) + "s";
+            String pluralizedOccupation;
+            if (StringUtils.endsWithIgnoreCase(careerName.toLowerCase(), "man")) {
+                pluralizedOccupation = StringUtils.replace(careerName.toLowerCase(), "man", "men");
+            } else if (StringUtils.endsWithIgnoreCase(careerName.toLowerCase(), "s")) {
+                pluralizedOccupation = careerName;
+            } else {
+                pluralizedOccupation = StringUtils.capitalize(careerName.toLowerCase()) + "s";
+            }
+            return pluralizedOccupation;
         }
-        return pluralizedOccupation;
     }
 
 }

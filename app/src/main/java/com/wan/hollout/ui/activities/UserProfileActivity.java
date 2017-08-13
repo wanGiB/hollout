@@ -164,14 +164,23 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             }
 
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
-                userDisplayNameView.setText(WordUtils.capitalize(username + ", " + userAge));
-            } else {
-                if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
+                if (!userAge.equals(AppConstants.UNKNOWN)) {
                     userDisplayNameView.setText(WordUtils.capitalize(username + ", " + userAge));
                 } else {
                     userDisplayNameView.setText(WordUtils.capitalize(username));
                 }
+            } else {
+                if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
+                    if (!userAge.equals(AppConstants.UNKNOWN)) {
+                        userDisplayNameView.setText(WordUtils.capitalize(username + ", " + userAge));
+                    } else {
+                        userDisplayNameView.setText(WordUtils.capitalize(username));
+                    }
+                } else {
+                    userDisplayNameView.setText(WordUtils.capitalize(username));
+                }
             }
+
             String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
                 UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, userAvatarView);
@@ -195,7 +204,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
             if (featuredPhotos == null || featuredPhotos.isEmpty()) {
                 featurePhotosInstruction.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.get_started_button_background));
-                featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + ", tap here to add some featured photos");
+                featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(UiUtils.fromHtml("<b>" + signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME) + "</b>") + ", tap here to add some featured photos"));
                 loadFeaturedPhotosPlaceHolder(parseUser);
             } else {
                 setupFeaturedPhotos(parseUser);
@@ -227,7 +236,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutSignedInUser != null) {
-                    aboutUserTextView.setText(TextUtils.join(",", aboutSignedInUser));
+                    aboutUserTextView.setText(WordUtils.capitalize(TextUtils.join(",", aboutSignedInUser)));
                     startChatOrEditProfileView.setImageResource(R.drawable.ic_mode_edit_white_24dp);
                 }
             } else {
