@@ -50,8 +50,10 @@ import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.adapters.CircularAdditionalPhotosAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
+import com.wan.hollout.ui.widgets.SweetAlertDialog;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -60,7 +62,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
-import cn.pedant.SweetAlert.SweetAlertDialog;
 
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.indexOfIgnoreCase;
@@ -547,7 +548,7 @@ public class UiUtils {
     }
 
     private static void refreshUserData(final ParseUser signedInUser, RecyclerView additionalPhotosRecyclerView, RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseUser parseUser, final Activity activity) {
-        final String username = parseUser.getUsername();
+            final String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         final String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         Long userLastSeenAt = parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
         if (HolloutUtils.isNetWorkConnected(ApplicationLoader.getInstance())
@@ -560,7 +561,7 @@ public class UiUtils {
             onlineStatusView.setText(getLastSeen(userLastSeenAt));
         }
         if (StringUtils.isNotEmpty(username)) {
-            usernameView.setText(StringUtils.capitalize(username));
+            usernameView.setText(WordUtils.capitalize(username));
         }
         final List<String> userPhotos = new ArrayList<>();
         if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {

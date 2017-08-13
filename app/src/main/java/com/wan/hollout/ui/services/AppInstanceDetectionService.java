@@ -23,7 +23,6 @@ import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppStateManager;
 import com.wan.hollout.utils.HolloutLogger;
@@ -253,7 +252,6 @@ public class AppInstanceDetectionService extends Service implements
                             } catch (NullPointerException ignored) {
                             }
                         }
-                        EventBus.getDefault().post(new ConnectivityChangedAction(true));
                     }
                 }
             });

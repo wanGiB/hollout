@@ -37,7 +37,6 @@ public class BaseActivity extends ATEActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
         final IntentFilter filter = new IntentFilter();
 
     }

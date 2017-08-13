@@ -202,13 +202,13 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
                 UiUtils.setTextOnView(distanceToUserView, " ");
             }
 
-            List<String> userOccupations = person.getList(AppConstants.ABOUT_USER);
-            List<String> signedInUserOccupations = signedInUser.getList(AppConstants.ABOUT_USER);
-            if (userOccupations != null && signedInUserOccupations != null) {
+            List<String> aboutUser = person.getList(AppConstants.ABOUT_USER);
+            List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
+            if (aboutUser != null && aboutSignedInUser != null) {
                 try {
-                    List<String> common = new ArrayList<>(userOccupations);
-                    common.retainAll(signedInUserOccupations);
-                    String firstInterest = !common.isEmpty() ? common.get(0) : userOccupations.get(0);
+                    List<String> common = new ArrayList<>(aboutUser);
+                    common.retainAll(aboutSignedInUser);
+                    String firstInterest = !common.isEmpty() ? common.get(0) : aboutUser.get(0);
                     aboutPerson.setText(StringUtils.capitalize(firstInterest));
                 } catch (NullPointerException ignored) {
 

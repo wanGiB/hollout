@@ -20,7 +20,7 @@
             android:layout_height="match_parent"
             android:fitsSystemWindows="true" />
 
-        <com.app.hollout.ui.widgets.PageIndicator
+        <com.wan.hollout.ui.widgets.PageIndicator
             android:id="@+id/indicator"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

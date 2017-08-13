@@ -83,12 +83,25 @@ public class PeopleFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        signedInUser = ParseUser.getCurrentUser();
+        initSignedInUser();
+    }
+
+    private void initSignedInUser() {
+        if (signedInUser == null) {
+            signedInUser = ParseUser.getCurrentUser();
+        }
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        checkAndRegEventBus();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initSignedInUser();
         checkAndRegEventBus();
     }
 
@@ -128,6 +141,7 @@ public class PeopleFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        initSignedInUser();
         if (getActivity() != null) {
             initBasicViews();
         }
@@ -146,7 +160,7 @@ public class PeopleFragment extends Fragment {
         localUsersQuery.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> objects, ParseException e) {
-                if (objects != null) {
+                if (objects != null && !objects.isEmpty()) {
                     loadAdapter(objects);
                     UiUtils.toggleFlipperState(peopleContentFlipper, 2);
                 }
@@ -184,7 +198,7 @@ public class PeopleFragment extends Fragment {
 
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
-                if (!people.isEmpty()) {
+                if (!people.isEmpty() && people.size() >= 100) {
                     UiUtils.showView(footerView, true);
                     fetchPeopleOfCommonInterestsFromNetwork(people.size());
                 }
@@ -241,7 +255,7 @@ public class PeopleFragment extends Fragment {
                     if (signedInUserGeoPoint != null) {
                         peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 1000.0);
                     }
-                    peopleQuery.setLimit(30);
+                    peopleQuery.setLimit(100);
                     if (skip != 0) {
                         peopleQuery.setSkip(skip);
                     }
@@ -265,7 +279,6 @@ public class PeopleFragment extends Fragment {
                                 } else {
                                     displayFetchErrorMessage(false);
                                 }
-                                UiUtils.showSafeToast(e.getMessage());
                             }
                             if (!people.isEmpty()) {
                                 UiUtils.toggleFlipperState(peopleContentFlipper, 2);
@@ -304,18 +317,14 @@ public class PeopleFragment extends Fragment {
     }
 
     private void displayFetchErrorMessage(boolean networkError) {
-        if (people.isEmpty()) {
-            if (getActivity() != null) {
-                if (signedInUser != null) {
-                    UiUtils.toggleFlipperState(peopleContentFlipper, 1);
-                    if (networkError) {
-                        noHolloutTextView.setText(getString(R.string.screwed_data_error_message));
-                        meetPeopleTextView.setText(getString(R.string.review_network));
-                    } else {
-                        noHolloutTextView.setText(getString(R.string.people_unavailable));
-                        meetPeopleTextView.setText(getString(R.string.meet_people));
-                    }
-                }
+        if (people.isEmpty() && getActivity() != null && signedInUser != null) {
+            UiUtils.toggleFlipperState(peopleContentFlipper, 1);
+            if (networkError) {
+                noHolloutTextView.setText(getString(R.string.screwed_data_error_message));
+                meetPeopleTextView.setText(getString(R.string.review_network));
+            } else {
+                noHolloutTextView.setText(getString(R.string.people_unavailable));
+                meetPeopleTextView.setText(getString(R.string.meet_more_people));
             }
         }
     }

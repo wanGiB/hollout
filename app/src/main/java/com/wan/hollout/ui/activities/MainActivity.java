@@ -32,9 +32,9 @@ import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
@@ -120,7 +120,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             if (signedInUser != null) {
                 UiUtils.showSafeToast("Welcome, " + signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
             }
-            HolloutPreferences.setUserWelcomed();
+            HolloutPreferences.setUserWelcomed(true);
         }
         checkAndRegEventBus();
     }
@@ -337,11 +337,13 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 ParseUser.logOutInBackground(new LogOutCallback() {
                     @Override
                     public void done(ParseException e) {
+                        HolloutPreferences.setUserWelcomed(false);
                         UiUtils.dismissProgressDialog();
                         HolloutPreferences.clearPersistedCredentials();
                         UiUtils.showSafeToast("You've being logged out");
                         invalidateDrawerMenuHeader();
 
+                        ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
                         Intent splashIntent =new Intent(MainActivity.this,SplashActivity.class);
                         startActivity(splashIntent);
                         finish();

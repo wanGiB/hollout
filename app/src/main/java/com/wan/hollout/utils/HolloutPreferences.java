@@ -66,8 +66,8 @@ public class HolloutPreferences {
         return getHolloutPreferences().getInt(postId + "_", 0);
     }
 
-    public static void setUserWelcomed() {
-        getHolloutPreferences().edit().putBoolean(AppConstants.USER_WELCOMED, true).commit();
+    public static void setUserWelcomed(boolean value) {
+        getHolloutPreferences().edit().putBoolean(AppConstants.USER_WELCOMED, value).commit();
     }
 
     public static boolean isUserWelcomed() {
