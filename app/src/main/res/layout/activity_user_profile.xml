@@ -41,22 +41,51 @@
                     android:layout_height="match_parent"
                     android:background="#6b000000" />
 
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:id="@+id/user_display_name"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:layout_marginBottom="80dp"
-                    android:ellipsize="end"
-                    android:maxLines="2"
-                    android:paddingBottom="20dp"
-                    android:paddingEnd="16dp"
-                    android:paddingLeft="20dp"
-                    android:paddingRight="16dp"
-                    android:paddingStart="20dp"
-                    android:textColor="@color/white"
-                    android:textSize="25sp"
-                    app:textStyle="medium" />
+                    android:orientation="horizontal"
+                    android:paddingBottom="20dp">
+
+                    <com.wan.hollout.ui.widgets.HolloutEditText
+                        android:id="@+id/user_display_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:color/transparent"
+                        android:cursorVisible="false"
+                        android:ellipsize="end"
+                        android:inputType="text"
+                        android:maxLines="2"
+                        android:paddingEnd="16dp"
+                        android:paddingLeft="20dp"
+                        android:paddingRight="16dp"
+                        android:focusableInTouchMode="false"
+                        android:paddingStart="20dp"
+                        android:textColor="@color/white"
+                        android:focusable="false"
+                        android:textSize="25sp"
+                        app:textStyle="medium" />
+
+                    <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/age_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="25sp"
+                        app:textStyle="medium" />
+
+                    <ImageView
+                        android:id="@+id/done_with_display_name_edit"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center_vertical"
+                        android:src="@drawable/ic_done_white_24dp"
+                        android:visibility="gone"
+                        tools:ignore="ContentDescription" />
+
+                </LinearLayout>
 
             </com.github.florent37.diagonallayout.DiagonalLayout>
 
@@ -74,7 +103,7 @@
                 app:border_width="3dp" />
 
             <android.support.design.widget.FloatingActionButton
-                android:id="@+id/start_chat_or_edit_profile"
+                android:id="@+id/start_chat_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"

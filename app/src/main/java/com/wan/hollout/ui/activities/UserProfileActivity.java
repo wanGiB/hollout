@@ -2,6 +2,7 @@ package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
@@ -15,13 +16,16 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.flaviofaria.kenburnsview.KenBurnsView;
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
 import com.wan.hollout.ui.widgets.CircleImageView;
+import com.wan.hollout.ui.widgets.HolloutEditText;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutUtils;
@@ -57,7 +61,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     KenBurnsView signedInUserCoverPhotoView;
 
     @BindView(R.id.user_display_name)
-    HolloutTextView userDisplayNameView;
+    HolloutEditText userDisplayNameView;
 
     @BindView(R.id.avatar)
     CircleImageView userAvatarView;
@@ -65,8 +69,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.about_user)
     HolloutTextView aboutUserTextView;
 
-    @BindView(R.id.start_chat_or_edit_profile)
-    FloatingActionButton startChatOrEditProfileView;
+    @BindView(R.id.start_chat_view)
+    FloatingActionButton startChatView;
 
     @BindView(R.id.user_location_and_distance)
     HolloutTextView userLocationAndDistanceView;
@@ -82,6 +86,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @BindView(R.id.edit_about_you)
     HolloutTextView editAboutYou;
+
+    @BindView(R.id.age_view)
+    HolloutTextView ageView;
+
+    @BindView(R.id.done_with_display_name_edit)
+    ImageView doneWithDisplayNameEdit;
 
     private ParseUser parseUser;
 
@@ -138,7 +148,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @SuppressLint("SetTextI18n")
     private void loadUserProfile(ParseUser parseUser) {
-        ParseUser signedInUser = ParseUser.getCurrentUser();
+        final ParseUser signedInUser = ParseUser.getCurrentUser();
         if (signedInUser != null) {
             String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String userAge = parseUser.getString(AppConstants.APP_USER_AGE);
@@ -157,7 +167,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 if (userLocation != null) {
-                    userLocationAndDistanceView.setText(userLocation + ", " + distanceToUser);
+                    userLocationAndDistanceView.setText(userLocation);
                 } else {
                     userLocationAndDistanceView.setText(distanceToUser + "KM from nearby kinds");
                 }
@@ -173,21 +183,53 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
 
+            userDisplayNameView.setText(WordUtils.capitalize(username));
+
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+                userDisplayNameView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        userDisplayNameView.setFocusable(true);
+                        userDisplayNameView.setFocusableInTouchMode(true);
+                        userDisplayNameView.setCursorVisible(true);
+                        userDisplayNameView.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.blue_grey_thin_edit_text_bg));
+                        UiUtils.showView(doneWithDisplayNameEdit, true);
+                        doneWithDisplayNameEdit.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                UiUtils.showProgressDialog(UserProfileActivity.this, "Updating display name...");
+                                signedInUser.put(AppConstants.APP_USER_DISPLAY_NAME, userDisplayNameView.getText().toString().trim());
+                                signedInUser.saveInBackground(new SaveCallback() {
+                                    @Override
+                                    public void done(ParseException e) {
+                                        UiUtils.dismissProgressDialog();
+                                        if (e == null) {
+                                            UiUtils.showView(doneWithDisplayNameEdit, false);
+                                            userDisplayNameView.setBackground(new ColorDrawable(ContextCompat.getColor(UserProfileActivity.this, android.R.color.transparent)));
+                                            UiUtils.showSafeToast("Success!");
+                                        } else {
+                                            UiUtils.showSafeToast("Error updating display name. Please review your data connection");
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
                 if (!userAge.equals(AppConstants.UNKNOWN)) {
-                    userDisplayNameView.setText(WordUtils.capitalize(username + ", " + userAge));
-                } else {
-                    userDisplayNameView.setText(WordUtils.capitalize(username));
+                    ageView.setText(WordUtils.capitalize(", " + userAge));
+                    ageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            configureAgeAndGender();
+                        }
+                    });
                 }
             } else {
                 if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
                     if (!userAge.equals(AppConstants.UNKNOWN)) {
-                        userDisplayNameView.setText(WordUtils.capitalize(username + ", " + userAge));
-                    } else {
-                        userDisplayNameView.setText(WordUtils.capitalize(username));
+                        userDisplayNameView.setText(WordUtils.capitalize(", " + userAge));
                     }
-                } else {
-                    userDisplayNameView.setText(WordUtils.capitalize(username));
                 }
             }
 
@@ -206,6 +248,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             fetchCommonalities(parseUser);
             fetchFeaturedPhotos(parseUser);
         }
+    }
+
+    private void configureAgeAndGender() {
+        Intent genderAndAgeIntent = new Intent(UserProfileActivity.this, GenderAndAgeConfigurationActivity.class);
+        genderAndAgeIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, false);
+        startActivityForResult(genderAndAgeIntent, RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER);
     }
 
     @SuppressLint("SetTextI18n")
@@ -248,10 +296,11 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutSignedInUser != null) {
                     aboutUserTextView.setText(WordUtils.capitalize(aboutSignedInUser.get(0)));
-                    startChatOrEditProfileView.setImageResource(R.drawable.ic_mode_edit_white_24dp);
+                    UiUtils.showView(startChatView,false);
                 }
             } else {
-                startChatOrEditProfileView.setImageResource(R.drawable.chat_tab);
+                UiUtils.showView(startChatView,true);
+                startChatView.setImageResource(R.drawable.chat_tab);
                 List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutUser != null && aboutSignedInUser != null) {
@@ -282,7 +331,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         @Override
                         public void onClick(View view) {
                             Intent editAboutYouIntent = new Intent(UserProfileActivity.this, AboutUserActivity.class);
-                            editAboutYouIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN,false);
+                            editAboutYouIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, false);
                             startActivityForResult(editAboutYouIntent, RequestCodes.UPDATE_ABOUT_YOU);
                         }
                     });
@@ -294,9 +343,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode==RequestCodes.UPDATE_ABOUT_YOU){
-            if (resultCode==RESULT_OK){
-                if(parseUser!=null){
+        if (requestCode == RequestCodes.UPDATE_ABOUT_YOU) {
+            if (resultCode == RESULT_OK) {
+                if (parseUser != null) {
                     loadUserDetails();
                 }
             }
@@ -332,6 +381,15 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             case R.id.go_back:
                 onBackPressed();
                 break;
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (aboutUserRecyclerView.getVisibility() == View.VISIBLE) {
+            aboutUserTextView.performClick();
+        } else {
+            super.onBackPressed();
         }
     }
 
