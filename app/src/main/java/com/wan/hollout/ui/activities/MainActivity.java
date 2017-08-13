@@ -387,6 +387,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     private void launchSettings(String settingsFragmentName) {
         Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
         settingsIntent.putExtra(AppConstants.SETTINGS_FRAGMENT_NAME, settingsFragmentName);
+        startActivity(settingsIntent);
     }
 
     @Override
