@@ -371,9 +371,15 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onDrawerItemCategorySelected(DrawerItemCategory drawerItemCategory) {
         if (drawerItemCategory.getId() == DrawerFragment.LOG_OUT) {
             attemptLogOut();
-        }else if (drawerItemCategory.getId()==DrawerFragment.YOUR_PROFILE){
+        } else if (drawerItemCategory.getId() == DrawerFragment.YOUR_PROFILE) {
             launchUserProfile();
+        } else if (drawerItemCategory.getId() == DrawerFragment.HELP_AND_SETTINGS) {
+            launchSettings();
         }
+    }
+
+    private void launchSettings() {
+
     }
 
     @Override

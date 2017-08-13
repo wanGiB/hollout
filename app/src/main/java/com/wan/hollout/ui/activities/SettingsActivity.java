@@ -3,15 +3,19 @@ package com.wan.hollout.ui.activities;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 
+import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.fragments.ChatSettingsFragment;
 import com.wan.hollout.ui.fragments.NotificationSettingsFragment;
 import com.wan.hollout.ui.fragments.PrivacySettingsFragment;
 import com.wan.hollout.ui.fragments.SupportSettings;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.HolloutPreferences;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -20,14 +24,18 @@ import butterknife.ButterKnife;
  * * Created by Wan on 7/16/2016.
  */
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements ATEActivityThemeCustomizer {
 
     @BindView(R.id.toolbar)
     public Toolbar toolbar;
 
+    private boolean isDarkTheme;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.settings);
         ButterKnife.bind(this);
 
@@ -57,6 +65,21 @@ public class SettingsActivity extends AppCompatActivity {
                     break;
             }
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchItem.setVisible(false);
+        MenuItem settingsActionItem = menu.findItem(R.id.action_settings);
+        settingsActionItem.setVisible(false);
+        supportInvalidateOptionsMenu();
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public int getActivityTheme() {
+        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }
 
     @Override
