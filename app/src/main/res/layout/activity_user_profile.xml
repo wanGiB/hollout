@@ -5,98 +5,179 @@
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#eaeaea">
+    android:background="@color/white">
 
-    <com.github.florent37.diagonallayout.DiagonalLayout
-        android:id="@+id/diagonalLayout"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:paddingBottom="16dp"
-        app:diagonal_angle="10"
-        app:diagonal_direction="left"
-        app:diagonal_position="bottom"
-        app:elevation="10dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:fitsSystemWindows="true">
 
-        <com.flaviofaria.kenburnsview.KenBurnsView
-            android:id="@+id/signed_in_user_cover_image_view"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/authentication_background_image" />
+            android:layout_height="wrap_content">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#5b000000" />
+            <com.github.florent37.diagonallayout.DiagonalLayout
+                android:id="@+id/diagonalLayout"
+                android:layout_width="match_parent"
+                android:layout_height="350dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:paddingBottom="16dp"
+                app:diagonal_angle="10"
+                app:diagonal_direction="left"
+                app:diagonal_position="bottom"
+                app:elevation="10dp">
 
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/user_display_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:layout_marginBottom="50dp"
-            android:paddingEnd="16dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="16dp"
-            android:paddingStart="20dp"
-            android:textColor="@color/white"
-            android:textSize="25sp"
-            app:textStyle="medium" />
+                <com.flaviofaria.kenburnsview.KenBurnsView
+                    android:id="@+id/signed_in_user_cover_image_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/authentication_background_image" />
 
-    </com.github.florent37.diagonallayout.DiagonalLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#5b000000" />
 
-    <com.wan.hollout.ui.widgets.CircleImageView
-        android:id="@+id/avatar"
-        android:layout_width="90dp"
-        android:layout_height="90dp"
-        android:layout_marginLeft="40dp"
-        android:layout_marginStart="40dp"
-        android:layout_marginTop="280dp"
-        android:src="@drawable/authentication_background_image"
-        app:border_color="@color/white"
-        app:border_width="3dp" />
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/user_display_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="50dp"
+                    android:paddingEnd="16dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="16dp"
+                    android:paddingStart="20dp"
+                    android:textColor="@color/white"
+                    android:textSize="25sp"
+                    app:textStyle="medium" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/start_chat_or_edit_profile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginEnd="25dp"
-        android:layout_marginRight="25dp"
-        android:layout_marginTop="250dp"
-        android:src="@drawable/chat_tab"
-        app:backgroundTint="@color/colorPrimary"
-        app:fabSize="normal"
-        app:rippleColor="@color/colorPrimaryDark"
-        tools:ignore="RelativeOverlap" />
+            </com.github.florent37.diagonallayout.DiagonalLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/diagonalLayout"
-        android:orientation="horizontal">
+            <com.wan.hollout.ui.widgets.CircleImageView
+                android:id="@+id/avatar"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                android:layout_marginLeft="40dp"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="280dp"
+                android:src="@drawable/authentication_background_image"
+                app:border_color="@color/white"
+                app:border_width="3dp" />
 
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/about_user"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:maxWidth="350dp"
-            android:paddingEnd="16dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="16dp"
-            android:paddingStart="20dp"
-            android:textSize="25sp"
-            app:textStyle="medium" />
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/start_chat_or_edit_profile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginEnd="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_marginTop="250dp"
+                android:src="@drawable/chat_tab"
+                app:backgroundTint="@color/colorPrimary"
+                app:fabSize="normal"
+                app:rippleColor="@color/colorPrimaryDark"
+                tools:ignore="RelativeOverlap" />
 
-    </RelativeLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/diagonalLayout"
+                android:orientation="horizontal">
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/about_user"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:maxWidth="350dp"
+                    android:paddingEnd="16dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="16dp"
+                    android:paddingStart="20dp"
+                    android:textSize="25sp"
+                    app:textStyle="medium" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/user_location_and_distance"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/about_user"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@color/dark_grey"
+                    android:textSize="16sp"
+                    app:textStyle="medium" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/user_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/user_location_and_distance"
+                    android:layout_centerHorizontal="true"
+                    android:gravity="center_horizontal"
+                    android:paddingBottom="10dp"
+                    android:paddingEnd="20dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingStart="20dp"
+                    android:paddingTop="10dp"
+                    android:text="@string/hey_there_holla_me_on_hollout"
+                    android:textSize="16sp"
+                    app:textStyle="medium" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/featured_photos_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/user_status"
+                    android:paddingEnd="16dp"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="20dp"
+                    android:paddingStart="16dp"
+                    android:paddingTop="16dp"
+                    android:text="FEATURED_PHOTOS"
+                    android:textSize="16sp"
+                    app:textStyle="medium" />
+
+                <View
+                    android:id="@+id/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.1dp"
+                    android:layout_below="@+id/featured_photos_header"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@color/ease_gray" />
+
+                <FrameLayout
+                    android:id="@+id/featured_photos_frame"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/divider">
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/featured_photos_recycler_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp" />
+
+                </FrameLayout>
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </ScrollView>
 
     <RelativeLayout
         android:id="@+id/appbar"

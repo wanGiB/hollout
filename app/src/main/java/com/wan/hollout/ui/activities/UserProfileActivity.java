@@ -1,7 +1,8 @@
 package com.wan.hollout.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.support.v4.text.TextUtilsCompat;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.text.TextUtils;
@@ -11,14 +12,17 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.flaviofaria.kenburnsview.KenBurnsView;
-import com.parse.Parse;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 import com.wan.hollout.R;
+import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -26,6 +30,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.wan.hollout.utils.UiUtils.attachDrawableToTextView;
+import static com.wan.hollout.utils.UiUtils.removeAllDrawablesFromTextView;
 
 /**
  * @author Wan Clem
@@ -51,6 +58,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.about_user)
     HolloutTextView aboutUserTextView;
 
+    @BindView(R.id.start_chat_or_edit_profile)
+    FloatingActionButton startChatOrEditProfileView;
+
+    @BindView(R.id.user_location_and_distance)
+    HolloutTextView userLocationAndDistanceView;
+
     private ParseUser parseUser;
 
     @Override
@@ -74,24 +87,66 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void loadUserProfile(ParseUser parseUser) {
-        String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-        if (StringUtils.isNotEmpty(username)) {
-            userDisplayNameView.setText(username);
-        }
-        String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-        if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
-            UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, userAvatarView);
-        }
-        String userCoverPhoto = parseUser.getString(AppConstants.APP_USER_COVER_PHOTO);
-        if (StringUtils.isNotEmpty(userCoverPhoto)) {
-            UiUtils.loadImage(UserProfileActivity.this, userCoverPhoto, signedInUserCoverPhotoView);
-        } else {
-            if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
-                UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, signedInUserCoverPhotoView);
+        ParseUser signedInUser = ParseUser.getCurrentUser();
+        if (signedInUser != null) {
+            String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+            String userAge = parseUser.getString(AppConstants.APP_USER_AGE);
+            String userLocation = HolloutUtils.resolveToBestLocation(parseUser);
+
+            ParseGeoPoint userGeoPoint = parseUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+            ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+
+            String distanceToUser = String.valueOf(RandomUtils.nextDouble(0, 10));
+
+            if (signedInUserGeoPoint != null && userGeoPoint != null) {
+                double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
+                String value = HolloutUtils.formatDistance(distanceInKills);
+                distanceToUser = value + "KM";
             }
+
+            if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+                if (userLocation != null) {
+                    userLocationAndDistanceView.setText(userLocation + "," + distanceToUser);
+                } else {
+                    userLocationAndDistanceView.setText(distanceToUser + "KM from nearby kinds");
+                }
+            } else {
+                if (UiUtils.canShowLocation(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
+                    if (userLocation != null) {
+                        userLocationAndDistanceView.setText(userLocation + "," + distanceToUser);
+                    } else {
+                        userLocationAndDistanceView.setText(distanceToUser + "KM from you");
+                    }
+                } else {
+                    userLocationAndDistanceView.setText(distanceToUser + "KM from you");
+                }
+            }
+
+            if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+                userDisplayNameView.setText(username + "," + userAge);
+            } else {
+                if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
+                    userDisplayNameView.setText(username + "," + userAge);
+                } else {
+                    userDisplayNameView.setText(username);
+                }
+            }
+            String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
+                UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, userAvatarView);
+            }
+            String userCoverPhoto = parseUser.getString(AppConstants.APP_USER_COVER_PHOTO);
+            if (StringUtils.isNotEmpty(userCoverPhoto)) {
+                UiUtils.loadImage(UserProfileActivity.this, userCoverPhoto, signedInUserCoverPhotoView);
+            } else {
+                if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
+                    UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, signedInUserCoverPhotoView);
+                }
+            }
+            fetchCommonalities(parseUser);
         }
-        fetchCommonalities(parseUser);
     }
 
     private void fetchCommonalities(ParseUser parseUser) {
@@ -101,8 +156,10 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutSignedInUser != null) {
                     aboutUserTextView.setText(TextUtils.join(",", aboutSignedInUser));
+                    startChatOrEditProfileView.setImageResource(R.drawable.ic_mode_edit_white_24dp);
                 }
             } else {
+                startChatOrEditProfileView.setImageResource(R.drawable.chat_tab);
                 List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutUser != null && aboutSignedInUser != null) {
@@ -116,6 +173,20 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     }
                 }
             }
+            handleUserOnlineStatus(parseUser);
+        }
+    }
+
+    private void handleUserOnlineStatus(ParseUser parseUser) {
+        Long userLastSeenAt = parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
+        if (HolloutUtils.isNetWorkConnected(ApplicationLoader.getInstance())
+                && parseUser.getString(AppConstants.APP_USER_ONLINE_STATUS).
+                equals(AppConstants.ONLINE)) {
+            attachDrawableToTextView(ApplicationLoader.getInstance(), onlineStatusView, R.drawable.ic_online, UiUtils.DrawableDirection.LEFT);
+            onlineStatusView.setText(getString(R.string.online));
+        } else {
+            removeAllDrawablesFromTextView(onlineStatusView);
+            onlineStatusView.setText(UiUtils.getLastSeen(userLastSeenAt));
         }
     }
 
