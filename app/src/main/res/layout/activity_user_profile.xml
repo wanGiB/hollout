@@ -92,7 +92,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/diagonalLayout"
-                android:animateLayoutChanges="true">
+                android:animateLayoutChanges="true"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/about_user"
@@ -100,6 +102,8 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_alignParentRight="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
                     android:ellipsize="end"
                     android:maxLines="2"
                     android:maxWidth="350dp"
@@ -179,14 +183,40 @@
                 <FrameLayout
                     android:id="@+id/featured_photos_frame"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/divider">
+                    android:layout_height="200dp"
+                    android:layout_below="@+id/divider"
+                    android:paddingBottom="45dp">
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/featured_photos_recycler_view"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp" />
+
+                    <ImageView
+                        android:id="@+id/featured_photos_place_holder_image"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/authentication_background_image"
+                        tools:ignore="ContentDescription" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#9b000000" />
+
+                    <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/feature_photos_instruction"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:text="This user doesn't have any featured photos"
+                        android:textColor="@color/whitesmoke"
+                        android:textSize="16sp"
+                        app:textStyle="light" />
 
                 </FrameLayout>
 

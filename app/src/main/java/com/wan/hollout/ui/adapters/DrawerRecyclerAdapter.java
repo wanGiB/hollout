@@ -24,6 +24,9 @@ import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +83,7 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             DrawerItemCategory drawerItemCategory = getDrawerItem(position);
             viewHolderItemCategory.bindContent(drawerItemCategory);
-            viewHolderItemCategory.itemText.setText(drawerItemCategory.getName());
+            viewHolderItemCategory.itemText.setText(WordUtils.capitalize(drawerItemCategory.getName()));
             if (position == 1) {
                 viewHolderItemCategory.itemText.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
                 viewHolderItemCategory.divider.setVisibility(View.VISIBLE);
@@ -105,12 +108,20 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
             ParseUser user = ParseUser.getCurrentUser();
             if (user != null) {
-                viewHolderHeader.userName.setText(user.getString(AppConstants.APP_USER_DISPLAY_NAME));
+                viewHolderHeader.userName.setText(WordUtils.capitalize(user.getString(AppConstants.APP_USER_DISPLAY_NAME)));
                 String userProfilePhotoUrl = user.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                 if (userProfilePhotoUrl != null) {
                     viewHolderHeader.signedInUserImageView.setBorderColor(Color.WHITE);
                     viewHolderHeader.signedInUserImageView.setBorderWidth(5);
                     UiUtils.loadImage((Activity) context, userProfilePhotoUrl, viewHolderHeader.signedInUserImageView);
+                }
+                String userCoverPhotoUrl = user.getString(AppConstants.APP_USER_COVER_PHOTO);
+                if (StringUtils.isNotEmpty(userCoverPhotoUrl)) {
+                    UiUtils.loadImage((Activity) context, userCoverPhotoUrl, viewHolderHeader.signedInUserCoverPhotoImageView);
+                } else {
+                    if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
+                        UiUtils.loadImage((Activity) context, userProfilePhotoUrl, viewHolderHeader.signedInUserCoverPhotoImageView);
+                    }
                 }
             } else {
                 viewHolderHeader.userName.setText(context.getString(R.string.not_logged_in));
@@ -246,6 +257,9 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         @BindView(R.id.signed_in_user_name)
         TextView userName;
+
+        @BindView(R.id.signed_in_user_cover_image_view)
+        ImageView signedInUserCoverPhotoImageView;
 
         public ViewHolderHeader(View headerView, final DrawerRecyclerInterface drawerRecyclerInterface) {
             super(headerView);

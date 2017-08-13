@@ -571,7 +571,7 @@ public class UiUtils {
             loadImage(activity, userProfilePhotoUrl, photoView);
         }
 
-        List<String> userAdditionalPhotos = parseUser.getList(AppConstants.APP_USER_ADDITIONAL_USER_PHOTOS);
+        List<String> userAdditionalPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
         if (userAdditionalPhotos != null) {
             if (!userPhotos.containsAll(userAdditionalPhotos)) {
                 userPhotos.addAll(userAdditionalPhotos);

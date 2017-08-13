@@ -17,6 +17,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.animations.BounceInterpolator;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.SelectedPerson;
+import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
@@ -123,46 +124,47 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final ParseUser parseUser = ParseUser.getCurrentUser();
             final String personName = personObject.getString(AppConstants.NAME);
             final List<String> selectedPeopleToMeet = parseUser.getList(AppConstants.INTERESTS);
-            itemView.setOnClickListener(new View.OnClickListener() {
+            if (!(context instanceof UserProfileActivity)){
+                itemView.setOnClickListener(new View.OnClickListener() {
 
-                @Override
-                public void onClick(View v) {
-                    itemView.startAnimation(bounceAnimation);
-                    if (host.equals(AppConstants.PEOPLE_TO_MEET_HOST_TYPE_SELECTED)) {
-                        if (people.contains(personObject) && people.size() != 1) {
-                            people.remove(personObject);
-                            if (selectedPeopleToMeet.contains(personName)) {
-                                selectedPeopleToMeet.remove(personName);
-                            }
-                            peopleToMeetAdapter.notifyItemRemoved(position);
-                            parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
-                            EventBus.getDefault().post(new SelectedPerson(personObject, false));
-                        } else {
-                            UiUtils.showSafeToast("Sorry, you can't take this off. You need to have at least one interest");
-                        }
-                    } else {
-                        if (!selectedPeopleToMeet.contains(personName)) {
-                            HolloutUtils.bangSound(context, true, R.raw.tipjar_send);
-                            selections.put(personName.hashCode(), true);
-                            selectedPeopleToMeet.add(personName);
-                            parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
-                            personObject.put(AppConstants.SELECTED, true);
-                            EventBus.getDefault().post(new SelectedPerson(personObject, true));
-                        } else {
-                            if (selectedPeopleToMeet.contains(personName)) {
-                                selections.put(personName.hashCode(), false);
-                                selectedPeopleToMeet.remove(personName);
+                    @Override
+                    public void onClick(View v) {
+                        itemView.startAnimation(bounceAnimation);
+                        if (host.equals(AppConstants.PEOPLE_TO_MEET_HOST_TYPE_SELECTED)) {
+                            if (people.contains(personObject) && people.size() != 1) {
+                                people.remove(personObject);
+                                if (selectedPeopleToMeet.contains(personName)) {
+                                    selectedPeopleToMeet.remove(personName);
+                                }
+                                peopleToMeetAdapter.notifyItemRemoved(position);
                                 parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
-                                personObject.put(AppConstants.SELECTED, false);
                                 EventBus.getDefault().post(new SelectedPerson(personObject, false));
+                            } else {
+                                UiUtils.showSafeToast("Sorry, you can't take this off. You need to have at least one interest");
                             }
+                        } else {
+                            if (!selectedPeopleToMeet.contains(personName)) {
+                                HolloutUtils.bangSound(context, true, R.raw.tipjar_send);
+                                selections.put(personName.hashCode(), true);
+                                selectedPeopleToMeet.add(personName);
+                                parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
+                                personObject.put(AppConstants.SELECTED, true);
+                                EventBus.getDefault().post(new SelectedPerson(personObject, true));
+                            } else {
+                                if (selectedPeopleToMeet.contains(personName)) {
+                                    selections.put(personName.hashCode(), false);
+                                    selectedPeopleToMeet.remove(personName);
+                                    parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);
+                                    personObject.put(AppConstants.SELECTED, false);
+                                    EventBus.getDefault().post(new SelectedPerson(personObject, false));
+                                }
+                            }
+                            refreshViewState(context, personName);
                         }
-                        refreshViewState(context, personName);
                     }
-                }
 
-            });
-
+                });
+            }
         }
 
         private void setChipBackground(Drawable background) {

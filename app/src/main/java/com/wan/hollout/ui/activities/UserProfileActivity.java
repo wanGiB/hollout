@@ -3,8 +3,10 @@ package com.wan.hollout.ui.activities;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -14,9 +16,11 @@ import android.widget.ImageView;
 
 import com.flaviofaria.kenburnsview.KenBurnsView;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
@@ -69,7 +73,11 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.about_user_recycler_view)
     RecyclerView aboutUserRecyclerView;
 
-    private ParseUser parseUser;
+    @BindView(R.id.feature_photos_instruction)
+    HolloutTextView featurePhotosInstruction;
+
+    @BindView(R.id.featured_photos_place_holder_image)
+    ImageView featuredPhotosPlaceHolderImageView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -86,11 +94,36 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void offloadIntent() {
-        parseUser = getIntent().getExtras().getParcelable(AppConstants.USER_PROPERTIES);
+        ParseUser parseUser = getIntent().getExtras().getParcelable(AppConstants.USER_PROPERTIES);
         if (parseUser != null) {
             loadUserProfile(parseUser);
-
+            offloadUserAboutsIfAvailable(parseUser);
         }
+    }
+
+    private void offloadUserAboutsIfAvailable(ParseUser parseUser) {
+        List<ParseObject> aboutUserList = new ArrayList<>();
+        List<String> userAboutList = parseUser.getList(AppConstants.ABOUT_USER);
+        if (userAboutList != null) {
+            if (!userAboutList.isEmpty()) {
+                for (String interest : userAboutList) {
+                    ParseObject interestsObject = new ParseObject(AppConstants.INTERESTS);
+                    interestsObject.put(AppConstants.NAME, interest.toLowerCase());
+                    interestsObject.put(AppConstants.SELECTED, true);
+                    if (!aboutUserList.contains(interestsObject)) {
+                        aboutUserList.add(interestsObject);
+                    }
+                }
+            }
+        }
+        setupUserAboutAdapter(aboutUserList);
+    }
+
+    private void setupUserAboutAdapter(List<ParseObject> parseObjects) {
+        PeopleToMeetAdapter peopleToMeetAdapter = new PeopleToMeetAdapter(this, parseObjects, AppConstants.PEOPLE_TO_MEET_HOST_TYPE_SELECTED);
+        LinearLayoutManager horizontalLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        aboutUserRecyclerView.setLayoutManager(horizontalLinearLayoutManager);
+        aboutUserRecyclerView.setAdapter(peopleToMeetAdapter);
     }
 
     @SuppressLint("SetTextI18n")
@@ -152,7 +185,40 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
             fetchCommonalities(parseUser);
+            fetchFeaturedPhotos(parseUser);
         }
+    }
+
+    private void fetchFeaturedPhotos(ParseUser parseUser) {
+        ParseUser signedInUser = ParseUser.getCurrentUser();
+        List<String> featuredPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
+        if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+            if (featuredPhotos == null || featuredPhotos.isEmpty()) {
+                featurePhotosInstruction.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.get_started_button_background));
+                featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + ", tap here to add some featured photos");
+                loadFeaturedPhotosPlaceHolder(parseUser);
+            } else {
+                setupFeaturedPhotos(parseUser);
+            }
+        } else {
+            if (featuredPhotos == null || featuredPhotos.isEmpty()) {
+                featurePhotosInstruction.setText("" + WordUtils.capitalize(parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + " doesn't have any featured photos yet");
+                loadFeaturedPhotosPlaceHolder(parseUser);
+            } else {
+                setupFeaturedPhotos(parseUser);
+            }
+        }
+    }
+
+    private void loadFeaturedPhotosPlaceHolder(ParseUser parseUser) {
+        String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+        if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
+            UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, featuredPhotosPlaceHolderImageView);
+        }
+    }
+
+    private void setupFeaturedPhotos(ParseUser parseUser) {
+
     }
 
     private void fetchCommonalities(ParseUser parseUser) {
@@ -180,6 +246,16 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
             handleUserOnlineStatus(parseUser);
+            aboutUserTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (aboutUserRecyclerView.getVisibility() != View.VISIBLE) {
+                        aboutUserRecyclerView.setVisibility(View.VISIBLE);
+                    } else {
+                        aboutUserRecyclerView.setVisibility(View.GONE);
+                    }
+                }
+            });
         }
     }
 

@@ -18,6 +18,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -82,7 +83,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @BindView(R.id.tabs)
     TabLayout tabLayout;
-    
+
     private HolloutPermissions holloutPermissions;
     private DrawerFragment drawerFragment;
 
@@ -150,6 +151,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -344,7 +346,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                         invalidateDrawerMenuHeader();
 
                         ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
-                        Intent splashIntent =new Intent(MainActivity.this,SplashActivity.class);
+                        Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
                         startActivity(splashIntent);
                         finish();
                     }
@@ -379,7 +381,11 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public void onAccountSelected() {
-
+        Intent signedInUserIntent = new Intent(MainActivity.this, UserProfileActivity.class);
+        if (ParseUser.getCurrentUser() != null) {
+            signedInUserIntent.putExtra(AppConstants.USER_PROPERTIES, ParseUser.getCurrentUser());
+            startActivity(signedInUserIntent);
+        }
     }
 
     private static class Adapter extends FragmentPagerAdapter {
