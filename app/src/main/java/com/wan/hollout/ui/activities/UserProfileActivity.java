@@ -184,8 +184,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             String distanceToUser = String.valueOf(RandomUtils.nextDouble(0, 10));
             if (signedInUserGeoPoint != null && userGeoPoint != null) {
                 double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
-                String value = HolloutUtils.formatDistance(distanceInKills);
-                distanceToUser = value + "KM";
+                distanceToUser = HolloutUtils.formatDistance(distanceInKills);
             }
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 if (userLocation != null) {

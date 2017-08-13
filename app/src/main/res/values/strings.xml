@@ -38,7 +38,7 @@
     <string name="sms_permission">Allow Hollout to send and receive one time SMS</string>
     <string name="storage_permission">Allow Hollout to access your storage</string>
     <string name="read_sms_permission">Allow Hollout to send and receive one time SMS</string>
-    <string name="location_permission">Kindly allow access to your location. Without this, you can\'t see products and services around.</string>
+    <string name="location_permission">To enjoy the main feature of hollout (People Discovery), please turn on your location.</string>
     <string name="phone_state_permisssion">Allow Hollout to read your phone state.</string>
     <string name="phone_call_permission">Allow Hollout to make a one time phone call</string>
     <string name="phone_camera_permission">Allow Hollout to access your camera</string>

@@ -2,7 +2,6 @@ package com.wan.hollout.ui.activities;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -24,7 +23,7 @@ import butterknife.ButterKnife;
  * * Created by Wan on 7/16/2016.
  */
 
-public class SettingsActivity extends AppCompatActivity implements ATEActivityThemeCustomizer {
+public class SettingsActivity extends BaseActivity implements ATEActivityThemeCustomizer {
 
     @BindView(R.id.toolbar)
     public Toolbar toolbar;
@@ -32,7 +31,7 @@ public class SettingsActivity extends AppCompatActivity implements ATEActivityTh
     private boolean isDarkTheme;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
