@@ -2,6 +2,8 @@ package com.wan.hollout.utils;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 /**
  * @author Wan Clem
@@ -27,6 +29,10 @@ public class FirebaseUtils {
 
     public static DatabaseReference getViewsReference(String postId) {
         return getRootRef().child(AppConstants.FEED_VIEWS + "/" + postId);
+    }
+
+    public static StorageReference getFirebaseStorageReference() {
+        return FirebaseStorage.getInstance().getReferenceFromUrl(AppConstants.HOLLOUT_FILES_BUCKET);
     }
 
 }

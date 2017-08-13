@@ -1,12 +1,14 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,7 +19,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
-import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.flaviofaria.kenburnsview.KenBurnsView;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -25,6 +26,7 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
 import com.wan.hollout.ui.widgets.CircleImageView;
@@ -34,6 +36,8 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
+
+import net.alhazmy13.mediapicker.Image.ImagePicker;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +56,13 @@ import static com.wan.hollout.utils.UiUtils.removeAllDrawablesFromTextView;
  * @author Wan Clem
  */
 
+@SuppressWarnings("unchecked")
 public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private static final int UPLOAD_ACTION_TYPE_PROFILE_PHOTO = 0x10;
+    private static final int UPLOAD_ACTION_TYPE_COVER_PHOTO = 0x20;
+
+    private int currentUploadAction;
 
     @BindView(R.id.go_back)
     ImageView goBack;
@@ -66,8 +76,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.user_display_name)
     HolloutEditText userDisplayNameView;
 
-    @BindView(R.id.avatar)
-    CircleImageView userAvatarView;
+    @BindView(R.id.user_profile_photo_view)
+    CircleImageView userProfilePhotoView;
 
     @BindView(R.id.about_user)
     HolloutTextView aboutUserTextView;
@@ -100,11 +110,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     CircleImageView userGenderView;
 
     private ParseUser parseUser;
-
-    private ColorGenerator generator = ColorGenerator.MATERIAL;
-
-    private int color = 0;
-    private TextDrawable.IBuilder builder = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -246,18 +251,18 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
             String userGender = parseUser.getString(AppConstants.APP_USER_GENDER);
             if (!userGender.equals(AppConstants.UNKNOWN)) {
-                UiUtils.showView(userGenderView,true);
+                UiUtils.showView(userGenderView, true);
                 String firstChar = userGender.charAt(0) + "";
-                color = generator.getRandomColor();
-                builder = TextDrawable.builder()
+                int color = ContextCompat.getColor(UserProfileActivity.this, R.color.colorPrimary);
+                TextDrawable.IBuilder builder = TextDrawable.builder()
                         .beginConfig()
                         .endConfig()
                         .round();
                 TextDrawable colouredDrawable = builder.build(firstChar, color);
                 Bitmap textBitmap = HolloutUtils.convertDrawableToBitmap(colouredDrawable);
                 userGenderView.setImageBitmap(textBitmap);
-            }else{
-                UiUtils.showView(userGenderView,false);
+            } else {
+                UiUtils.showView(userGenderView, false);
             }
 
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
@@ -271,7 +276,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
             String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
-                UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, userAvatarView);
+                UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, userProfilePhotoView);
             }
 
             String userCoverPhoto = parseUser.getString(AppConstants.APP_USER_COVER_PHOTO);
@@ -286,8 +291,47 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             fetchCommonalities(parseUser);
             fetchFeaturedPhotos(parseUser);
 
+            if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+                userProfilePhotoView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder profilePhotoOptionsBuilder = new AlertDialog.Builder(UserProfileActivity.this);
+                        profilePhotoOptionsBuilder.setItems(new CharSequence[]{"Upload New Profile Photo", "View Photo"},
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int which) {
+                                        dialogInterface.dismiss();
+                                        switch (which) {
+                                            case 0:
+                                                setCurrentUploadAction(UPLOAD_ACTION_TYPE_PROFILE_PHOTO);
+                                                HolloutUtils.startImagePicker(UserProfileActivity.this);
+                                                break;
+                                        }
+                                    }
+                                });
+                        profilePhotoOptionsBuilder.create().show();
+                    }
+                });
+                signedInUserCoverPhotoView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder coverPhotoOptionsBuilder = new AlertDialog.Builder(UserProfileActivity.this);
+                        coverPhotoOptionsBuilder.setItems(new CharSequence[]{"Upload New Cover Photo", "View Cover Photo"}, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int which) {
+                                switch (which) {
+                                    case 0:
+                                        setCurrentUploadAction(UPLOAD_ACTION_TYPE_COVER_PHOTO);
+                                        HolloutUtils.startImagePicker(UserProfileActivity.this);
+                                        break;
+                                }
+                            }
+                        });
+                        coverPhotoOptionsBuilder.create().show();
+                    }
+                });
+            }
         }
-
     }
 
     private void configureAgeAndGender() {
@@ -389,6 +433,58 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     loadUserDetails();
                 }
             }
+        } else if (requestCode == ImagePicker.IMAGE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
+            List<String> mPaths = (List<String>) data.getSerializableExtra(ImagePicker.EXTRA_IMAGE_PATH);
+            if (mPaths != null && !mPaths.isEmpty()) {
+                String pickedPhotoFilePath = mPaths.get(0);
+                if (pickedPhotoFilePath != null) {
+                    int currentAction = getCurrentUploadAction();
+                    if (currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
+                        UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Profile Photo");
+                    } else if (currentAction == UPLOAD_ACTION_TYPE_COVER_PHOTO) {
+                        UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Cover Photo");
+                    }
+                    HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
+                        @Override
+                        public void done(final String result, final Exception e) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (e == null && result != null) {
+                                        ParseUser signedInUser = ParseUser.getCurrentUser();
+                                        if (signedInUser != null) {
+                                            signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.APP_USER_PROFILE_PHOTO_URL : AppConstants.APP_USER_COVER_PHOTO, result);
+                                            signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.USER_PROFILE_PHOTO_UPLOAD_TIME : AppConstants.USER_COVER_PHOTO_UPLOAD_TIME, System.currentTimeMillis());
+                                            signedInUser.saveInBackground(new SaveCallback() {
+                                                @Override
+                                                public void done(ParseException e) {
+                                                    UiUtils.dismissProgressDialog();
+                                                    if (e == null) {
+                                                        UiUtils.showSafeToast("Upload Success");
+                                                        if (parseUser != null) {
+                                                            loadUserDetails();
+                                                        }
+                                                    } else {
+                                                        UiUtils.showSafeToast("An error occurred while updating photo please try again");
+                                                    }
+                                                }
+                                            });
+                                        } else {
+                                            UiUtils.showSafeToast("An error occurred while updating photo.Invalid session");
+                                            Intent splashIntent = new Intent(UserProfileActivity.this, SplashActivity.class);
+                                            startActivity(splashIntent);
+                                            finish();
+                                        }
+                                    } else {
+                                        UiUtils.dismissProgressDialog();
+                                        UiUtils.showSafeToast("An error occurred while updating photo. Please try again.");
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -438,6 +534,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         super.onPause();
         if (isFinishing())
             overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+    }
+
+    public void setCurrentUploadAction(int currentUploadAction) {
+        this.currentUploadAction = currentUploadAction;
+    }
+
+    public int getCurrentUploadAction() {
+        return currentUploadAction;
     }
 
 }

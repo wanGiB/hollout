@@ -100,6 +100,9 @@ public class AppConstants {
     public static final String PLEASE_REQUEST_LOCATION_ACCESSS = "request_location_access";
     public static final String APP_USER_COVER_PHOTO = "app_user_cover_photo_url";
     public static final java.lang.String CAN_LAUNCH_MAIN = "can_launch_main";
+    public static final String HOLLOUT_FILES_BUCKET = "gs://hollout-825b4.appspot.com";
+    public static final String PHOTO_DIRECTORY = "Photos";
+    public static final String USER_COVER_PHOTO_UPLOAD_TIME = "app_user_cover_photo_upload_time";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

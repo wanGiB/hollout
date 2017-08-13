@@ -13,7 +13,9 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
@@ -22,6 +24,11 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.parse.ParseInstallation;
@@ -38,6 +45,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -417,6 +425,51 @@ public class HolloutUtils {
                 }
             }
             parseInstallation.put("channels", newChannels);
+        }
+    }
+
+    public static String getHashedString(String plainString) {
+        if (isNotEmpty(plainString)) {
+            return Base64.encodeToString(plainString.getBytes(), Base64.DEFAULT);
+        } else {
+            return Base64.encodeToString("Default".getBytes(), Base64.DEFAULT);
+        }
+    }
+
+    public static void uploadFileAsync(final String filePath, String directory, final DoneCallback<String> doneCallback) {
+        final String hashedPhotoPath = getHashedString(filePath);
+        String probablePreviousUpload = HolloutPreferences.getAPreviousUploadFromPreference(hashedPhotoPath);
+        //There was no previous upload...Let's upload the file
+        if (probablePreviousUpload.equals(hashedPhotoPath)) {
+            Uri uri = Uri.fromFile(new File(filePath));
+            StorageReference storageReference = FirebaseUtils.getFirebaseStorageReference().child(directory).child(uri.getLastPathSegment());
+            storageReference.putFile(uri.normalizeScheme())
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @SuppressWarnings("unused")
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                            double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                        }
+                    })
+                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            if (taskSnapshot.getDownloadUrl() != null) {
+                                String returnedFileUrl = taskSnapshot.getDownloadUrl().toString();
+                                HolloutLogger.e(TAG, "Completed Upload of file = " + filePath + " with upload url = " + returnedFileUrl);
+                                HolloutPreferences.persistUploadedFile(hashedPhotoPath, returnedFileUrl);
+                                doneCallback.done(returnedFileUrl, null);
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    HolloutLogger.e(TAG, "An error occurred while uploading file. Error message = " + e.getMessage());
+                    doneCallback.done(null, e);
+                }
+            });
+        } else {
+            doneCallback.done(probablePreviousUpload, null);
         }
     }
 
