@@ -84,6 +84,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.edit_about_you)
     HolloutTextView editAboutYou;
 
+    private ParseUser parseUser;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,7 +101,11 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void offloadIntent() {
-        ParseUser parseUser = getIntent().getExtras().getParcelable(AppConstants.USER_PROPERTIES);
+        parseUser = getIntent().getExtras().getParcelable(AppConstants.USER_PROPERTIES);
+        loadUserDetails();
+    }
+
+    private void loadUserDetails() {
         if (parseUser != null) {
             loadUserProfile(parseUser);
             offloadUserAboutsIfAvailable(parseUser);
@@ -291,7 +297,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode==RequestCodes.UPDATE_ABOUT_YOU){
             if (resultCode==RESULT_OK){
-                offloadIntent();
+                if(parseUser!=null){
+                    loadUserDetails();
+                }
             }
         }
     }
