@@ -229,10 +229,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                     public void done(ParseException e) {
                                         UiUtils.dismissProgressDialog();
                                         if (e == null) {
-                                            UiUtils.showView(doneWithDisplayNameEdit, false);
-                                            userDisplayNameView.setCursorVisible(false);
-                                            userDisplayNameView.setBackground(new ColorDrawable(ContextCompat.getColor(UserProfileActivity.this, android.R.color.transparent)));
-                                            UiUtils.dismissKeyboard(userDisplayNameView);
+                                            dismissEditComponents();
                                             UiUtils.showSafeToast("Success!");
                                         } else {
                                             UiUtils.showSafeToast("Error updating display name. Please review your data connection");
@@ -345,6 +342,13 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
+    private void dismissEditComponents() {
+        UiUtils.showView(doneWithDisplayNameEdit, false);
+        userDisplayNameView.setCursorVisible(false);
+        userDisplayNameView.setBackground(new ColorDrawable(ContextCompat.getColor(UserProfileActivity.this, android.R.color.transparent)));
+        UiUtils.dismissKeyboard(userDisplayNameView);
+    }
+
     private void configureAgeAndGender() {
         Intent genderAndAgeIntent = new Intent(UserProfileActivity.this, GenderAndAgeConfigurationActivity.class);
         genderAndAgeIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, false);
@@ -400,10 +404,10 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
         FeaturedPhotosRectangleAdapter featuredPhotosRectangleAdapter = new FeaturedPhotosRectangleAdapter(this,
                 featuredPhotos,
-                parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
+                parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME), parseUser.getObjectId());
 
         HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(featuredPhotosRectangleAdapter);
-        featuredPhotosRecyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
+        featuredPhotosRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         featuredPhotosRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
 
         ParseUser signedInUser = ParseUser.getCurrentUser();
@@ -628,6 +632,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     public void onBackPressed() {
         if (aboutUserRecyclerView.getVisibility() == View.VISIBLE) {
             aboutUserTextView.performClick();
+        } else if (doneWithDisplayNameEdit.getVisibility() == View.VISIBLE) {
+            dismissEditComponents();
         } else {
             super.onBackPressed();
         }
