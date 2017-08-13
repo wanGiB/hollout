@@ -56,7 +56,7 @@
                         android:background="@android:color/transparent"
                         android:cursorVisible="false"
                         android:ellipsize="end"
-                        android:inputType="text"
+                        android:inputType="text|textNoSuggestions"
                         android:maxLines="2"
                         android:paddingEnd="16dp"
                         android:paddingLeft="20dp"
@@ -256,7 +256,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="#9b000000" />
+                        android:background="#9b00628F" />
 
                     <com.wan.hollout.ui.widgets.HolloutTextView
                         android:id="@+id/feature_photos_instruction"

@@ -153,18 +153,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String userAge = parseUser.getString(AppConstants.APP_USER_AGE);
             String userLocation = HolloutUtils.resolveToBestLocation(parseUser);
-
             ParseGeoPoint userGeoPoint = parseUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
             ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
-
             String distanceToUser = String.valueOf(RandomUtils.nextDouble(0, 10));
-
             if (signedInUserGeoPoint != null && userGeoPoint != null) {
                 double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
                 String value = HolloutUtils.formatDistance(distanceInKills);
                 distanceToUser = value + "KM";
             }
-
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 if (userLocation != null) {
                     userLocationAndDistanceView.setText(userLocation);
@@ -182,9 +178,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     userLocationAndDistanceView.setText(distanceToUser + "KM from you");
                 }
             }
-
             userDisplayNameView.setText(WordUtils.capitalize(username));
-
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
                 userDisplayNameView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -192,6 +186,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         userDisplayNameView.setFocusable(true);
                         userDisplayNameView.setFocusableInTouchMode(true);
                         userDisplayNameView.setCursorVisible(true);
+                        userDisplayNameView.setSelection(userDisplayNameView.getText().toString().trim().length());
                         userDisplayNameView.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.blue_grey_thin_edit_text_bg));
                         UiUtils.showView(doneWithDisplayNameEdit, true);
                         doneWithDisplayNameEdit.setOnClickListener(new View.OnClickListener() {
@@ -205,6 +200,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                         UiUtils.dismissProgressDialog();
                                         if (e == null) {
                                             UiUtils.showView(doneWithDisplayNameEdit, false);
+                                            userDisplayNameView.setCursorVisible(false);
                                             userDisplayNameView.setBackground(new ColorDrawable(ContextCompat.getColor(UserProfileActivity.this, android.R.color.transparent)));
                                             UiUtils.showSafeToast("Success!");
                                         } else {
