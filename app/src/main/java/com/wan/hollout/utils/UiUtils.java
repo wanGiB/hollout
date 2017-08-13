@@ -47,7 +47,7 @@ import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
-import com.wan.hollout.ui.adapters.CircularAdditionalPhotosAdapter;
+import com.wan.hollout.ui.adapters.FeaturedPhotosCircleAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 import com.wan.hollout.ui.widgets.SweetAlertDialog;
@@ -583,12 +583,12 @@ public class UiUtils {
             }
         }
 
-        CircularAdditionalPhotosAdapter circularAdditionalPhotosAdapter = new
-                CircularAdditionalPhotosAdapter(activity, userPhotos, parseUser.getUsername());
+        FeaturedPhotosCircleAdapter featuredPhotosCircleAdapter = new
+                FeaturedPhotosCircleAdapter(activity, userPhotos, parseUser.getUsername());
 
         LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         additionalPhotosRecyclerView.setLayoutManager(horizontalLayoutManager);
-        additionalPhotosRecyclerView.setAdapter(circularAdditionalPhotosAdapter);
+        additionalPhotosRecyclerView.setAdapter(featuredPhotosCircleAdapter);
 
         tintImageView(photoView, ContextCompat.getColor(activity, R.color.image_tint));
 

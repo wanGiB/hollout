@@ -20,6 +20,8 @@ import android.widget.ImageView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.flaviofaria.kenburnsview.KenBurnsView;
+import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
+import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -28,6 +30,7 @@ import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.ui.adapters.FeaturedPhotosRectangleAdapter;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutEditText;
@@ -61,6 +64,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     private static final int UPLOAD_ACTION_TYPE_PROFILE_PHOTO = 0x10;
     private static final int UPLOAD_ACTION_TYPE_COVER_PHOTO = 0x20;
+    private static final int UPLOAD_ACTION_TYPE_FEATURED_PHOTO = 0x30;
 
     private int currentUploadAction;
 
@@ -108,6 +112,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @BindView(R.id.user_gender)
     CircleImageView userGenderView;
+
+    @BindView(R.id.featured_photos_recycler_view)
+    RecyclerView featuredPhotosRecyclerView;
+
+    @BindView(R.id.featured_photos_dim_view)
+    View featuredPhotosDimView;
 
     private ParseUser parseUser;
 
@@ -195,7 +205,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
 
-            UiUtils.attachDrawableToTextView(UserProfileActivity.this,userLocationAndDistanceView,R.drawable.ic_location_on, UiUtils.DrawableDirection.LEFT);
+            UiUtils.attachDrawableToTextView(UserProfileActivity.this, userLocationAndDistanceView, R.drawable.ic_location_on, UiUtils.DrawableDirection.LEFT);
 
             userDisplayNameView.setText(WordUtils.capitalize(username));
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
@@ -351,6 +361,18 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 featurePhotosInstruction.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.get_started_button_background));
                 featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + ", tap here to add some featured photos");
                 loadFeaturedPhotosPlaceHolder(parseUser);
+                featurePhotosInstruction.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        addNewFeaturedPhoto();
+                    }
+                });
+                featuredPhotosPlaceHolderImageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        featurePhotosInstruction.performClick();
+                    }
+                });
             } else {
                 setupFeaturedPhotos(parseUser);
             }
@@ -372,7 +394,35 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void setupFeaturedPhotos(ParseUser parseUser) {
+        UiUtils.showView(featuredPhotosDimView, false);
+        UiUtils.showView(featurePhotosInstruction, false);
+        UiUtils.showView(featuredPhotosPlaceHolderImageView, false);
+        List<String> featuredPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
 
+        FeaturedPhotosRectangleAdapter featuredPhotosRectangleAdapter = new FeaturedPhotosRectangleAdapter(this,
+                featuredPhotos,
+                parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
+
+        HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(featuredPhotosRectangleAdapter);
+        featuredPhotosRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
+
+        ParseUser signedInUser = ParseUser.getCurrentUser();
+        if (signedInUser != null && signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+            @SuppressLint("InflateParams")
+            View footerView = getLayoutInflater().inflate(R.layout.add_more_featured_photo_view, null);
+            RecyclerViewUtils.setFooterView(featuredPhotosRecyclerView, footerView);
+            footerView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    addNewFeaturedPhoto();
+                }
+            });
+        }
+    }
+
+    private void addNewFeaturedPhoto() {
+        setCurrentUploadAction(UPLOAD_ACTION_TYPE_FEATURED_PHOTO);
+        HolloutUtils.startImagePicker(this);
     }
 
     private void fetchCommonalities(final ParseUser parseUser) {
@@ -441,50 +491,102 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 String pickedPhotoFilePath = mPaths.get(0);
                 if (pickedPhotoFilePath != null) {
                     int currentAction = getCurrentUploadAction();
-                    if (currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
-                        UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Profile Photo");
-                    } else if (currentAction == UPLOAD_ACTION_TYPE_COVER_PHOTO) {
-                        UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Cover Photo");
-                    }
-                    HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
-                        @Override
-                        public void done(final String result, final Exception e) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (e == null && result != null) {
-                                        ParseUser signedInUser = ParseUser.getCurrentUser();
-                                        if (signedInUser != null) {
-                                            signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.APP_USER_PROFILE_PHOTO_URL : AppConstants.APP_USER_COVER_PHOTO, result);
-                                            signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.USER_PROFILE_PHOTO_UPLOAD_TIME : AppConstants.USER_COVER_PHOTO_UPLOAD_TIME, System.currentTimeMillis());
-                                            signedInUser.saveInBackground(new SaveCallback() {
-                                                @Override
-                                                public void done(ParseException e) {
-                                                    UiUtils.dismissProgressDialog();
-                                                    if (e == null) {
-                                                        UiUtils.showSafeToast("Upload Success");
-                                                        if (parseUser != null) {
-                                                            loadUserDetails();
-                                                        }
-                                                    } else {
-                                                        UiUtils.showSafeToast("An error occurred while updating photo please try again");
-                                                    }
-                                                }
-                                            });
-                                        } else {
-                                            UiUtils.showSafeToast("An error occurred while updating photo.Invalid session");
-                                            Intent splashIntent = new Intent(UserProfileActivity.this, SplashActivity.class);
-                                            startActivity(splashIntent);
-                                            finish();
-                                        }
-                                    } else {
-                                        UiUtils.dismissProgressDialog();
-                                        UiUtils.showSafeToast("An error occurred while updating photo. Please try again.");
-                                    }
-                                }
-                            });
+                    if (currentAction == UPLOAD_ACTION_TYPE_COVER_PHOTO || currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
+                        if (currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
+                            UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Profile Photo");
+                        } else {
+                            UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Cover Photo");
                         }
-                    });
+                        HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
+                            @Override
+                            public void done(final String result, final Exception e) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (e == null && result != null) {
+                                            ParseUser signedInUser = ParseUser.getCurrentUser();
+                                            if (signedInUser != null) {
+                                                signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.APP_USER_PROFILE_PHOTO_URL : AppConstants.APP_USER_COVER_PHOTO, result);
+                                                signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.USER_PROFILE_PHOTO_UPLOAD_TIME : AppConstants.USER_COVER_PHOTO_UPLOAD_TIME, System.currentTimeMillis());
+                                                signedInUser.saveInBackground(new SaveCallback() {
+                                                    @Override
+                                                    public void done(ParseException e) {
+                                                        UiUtils.dismissProgressDialog();
+                                                        if (e == null) {
+                                                            UiUtils.showSafeToast("Upload Success");
+                                                            if (parseUser != null) {
+                                                                loadUserDetails();
+                                                            }
+                                                        } else {
+                                                            UiUtils.showSafeToast("An error occurred while updating photo please try again");
+                                                        }
+                                                    }
+                                                });
+                                            } else {
+                                                UiUtils.showSafeToast("An error occurred while updating photo.Invalid session");
+                                                Intent splashIntent = new Intent(UserProfileActivity.this, SplashActivity.class);
+                                                startActivity(splashIntent);
+                                                finish();
+                                            }
+                                        } else {
+                                            UiUtils.dismissProgressDialog();
+                                            UiUtils.showSafeToast("An error occurred while updating photo. Please try again.");
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        UiUtils.showProgressDialog(UserProfileActivity.this, "Adding Feature Photo");
+                        HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
+                            @Override
+                            public void done(final String result, final Exception e) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (e == null && result != null) {
+                                            ParseUser signedInUser = ParseUser.getCurrentUser();
+                                            if (signedInUser != null) {
+                                                List<String> featuredPhotos = signedInUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
+                                                if (featuredPhotos != null) {
+                                                    if (!featuredPhotos.contains(result)) {
+                                                        featuredPhotos.add(result);
+                                                    }
+                                                } else {
+                                                    featuredPhotos = new ArrayList<>();
+                                                    featuredPhotos.add(result);
+                                                }
+                                                signedInUser.put(AppConstants.APP_USER_FEATURED_PHOTOS, featuredPhotos);
+                                                signedInUser.saveInBackground(new SaveCallback() {
+                                                    @Override
+                                                    public void done(ParseException e) {
+                                                        UiUtils.dismissProgressDialog();
+                                                        if (e == null) {
+                                                            UiUtils.showSafeToast("Photo featured successfully");
+                                                            if (parseUser != null) {
+                                                                loadUserDetails();
+                                                            }
+                                                        } else {
+                                                            UiUtils.showSafeToast("An error occurred while featuring photo please try again");
+                                                        }
+                                                    }
+                                                });
+                                            } else {
+                                                UiUtils.showSafeToast("An error occurred while featuring photo.Invalid session");
+                                                Intent splashIntent = new Intent(UserProfileActivity.this, SplashActivity.class);
+                                                startActivity(splashIntent);
+                                                finish();
+                                            }
+                                        } else {
+                                            UiUtils.dismissProgressDialog();
+                                            UiUtils.showSafeToast("An error occurred while updating photo. Please try again.");
+                                        }
+                                    }
+                                });
+                            }
+                        });
+
+                    }
                 }
             }
         }

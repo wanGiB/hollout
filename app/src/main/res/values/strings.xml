@@ -137,4 +137,10 @@
     <string name="online_status">Online Status</string>
     <string name="featured_photos">FEATURED PHOTOS</string>
     <string name="edit">EDIT</string>
+
+    <string name="location_visibility_contract">If you don\'t want other users to see your location. You won\'t see theirs as well.</string>
+    <string name="last_seen_visibility_contract_msg">If you don\'t want other users to see your last seen. You won\'t see theirs as well</string>
+    <string name="status_visibility_contract_msg">If you don\'t want others to see your status. You won\'t see theirs as well.</string>
+    <string name="age_visibility_contract_msg">If you don\'t want other users to see your age. You won\'t see theirs too</string>
+
 </resources>

@@ -27,14 +27,14 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
-public class CircularAdditionalPhotosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class FeaturedPhotosRectangleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private LayoutInflater layoutInflater;
     private Activity activity;
     private List<String> photos;
     private String username;
 
-    public CircularAdditionalPhotosAdapter(Activity activity, List<String> photos, String username) {
+    public FeaturedPhotosRectangleAdapter(Activity activity, List<String> photos, String username) {
         this.activity = activity;
         this.photos = photos;
         this.username = username;
@@ -43,15 +43,15 @@ public class CircularAdditionalPhotosAdapter extends RecyclerView.Adapter<Recycl
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View photoView = layoutInflater.inflate(R.layout.additional_photo_item_on_profile_view, parent, false);
-        return new PhotoItemHolder(photoView);
+        View photoView = layoutInflater.inflate(R.layout.rectangular_featured_photo_item, parent, false);
+        return new FeaturedPhotosRectangleAdapter.PhotoItemHolder(photoView);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
         final ParseUser signedInUserObject = ParseUser.getCurrentUser();
         if (signedInUserObject != null) {
-            final CircularAdditionalPhotosAdapter.PhotoItemHolder photoItemHolder = (PhotoItemHolder) holder;
+            final FeaturedPhotosRectangleAdapter.PhotoItemHolder photoItemHolder = (FeaturedPhotosRectangleAdapter.PhotoItemHolder) holder;
             final String photo = photos.get(position);
             if (StringUtils.isNotEmpty(photo)) {
                 if (photoItemHolder.userPhotoView != null) {
@@ -88,7 +88,7 @@ public class CircularAdditionalPhotosAdapter extends RecyclerView.Adapter<Recycl
     static class PhotoItemHolder extends RecyclerView.ViewHolder {
 
         @Nullable
-        @BindView(R.id.user_photo)
+        @BindView(R.id.featured_photo_item)
         ImageView userPhotoView;
 
         public PhotoItemHolder(View itemView) {

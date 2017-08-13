@@ -272,10 +272,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
+                        android:clickable="true"
+                        android:background="?attr/selectableItemBackground"
                         android:src="@drawable/authentication_background_image"
                         tools:ignore="ContentDescription" />
 
                     <View
+                        android:id="@+id/featured_photos_dim_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="#9b000000" />

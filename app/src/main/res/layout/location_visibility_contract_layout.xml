@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#e5e5e5"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <com.wan.hollout.ui.widgets.HolloutTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_horizontal"
+        android:lineSpacingMultiplier="1.18"
+        android:padding="10dp"
+        android:text="@string/location_visibility_contract"
+        android:textColor="@color/hollout_material_grey_600"
+        android:textSize="16sp"
+        app:fontName="Lato-Regular.ttf" />
+
+</LinearLayout>

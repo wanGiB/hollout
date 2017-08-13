@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.wan.hollout.ui.widgets.RoundedImageView
+        android:id="@+id/featured_photo_item"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        app:riv_border_color="@color/white"
+        app:riv_border_width="2dp" />
+
+</LinearLayout>

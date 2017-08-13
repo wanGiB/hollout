@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Notifications">
+
+    <PreferenceCategory android:title="Notifications">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="play_sound_on_new_message_notifications"
+            android:persistent="true"
+            android:summary="Play a sound when a new message is received"
+            android:title="Sound" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="wake_phone_on_notification"
+            android:persistent="true"
+            android:summary="Turn your screen on when you receive a new message"
+            android:title="Wake Phone" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="show_message_ticker"
+            android:persistent="true"
+            android:summary="Show snippets of new message in notification bar"
+            android:title="Show Message Ticker" />
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="vibrate_on_notification"
+            android:persistent="true"
+            android:summary="Vibrate when new messages are received"
+            android:title="Vibration" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

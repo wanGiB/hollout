@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="privacy_and_security_pref_screen">
+
+    <PreferenceCategory
+        android:key="location_settings_category"
+        android:title="Location settings">
+
+        <ListPreference
+            android:defaultValue="Anyone"
+            android:dialogTitle="Who sees my location"
+            android:entries="@array/location_values"
+            android:entryValues="@array/location_values"
+            android:key="who_sees_my_location"
+            android:summary="Anyone"
+            android:title="Who sees my location" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="age_settings_category"
+        android:title="Age Settings">
+
+        <ListPreference
+            android:defaultValue="Anyone"
+            android:dialogTitle="Who sees my age"
+            android:entries="@array/location_values"
+            android:entryValues="@array/location_values"
+            android:key="who_sees_my_age"
+            android:summary="Anyone"
+            android:title="Who sees my age" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="status_settings_category"
+        android:title="Status Settings">
+
+        <ListPreference
+            android:defaultValue="@string/anyone"
+            android:dialogTitle="Who sees my status"
+            android:entries="@array/status_settings"
+            android:entryValues="@array/status_settings"
+            android:key="who_sees_my_status"
+            android:summary="Anyone"
+            android:title="Who sees my status" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:key="presence_settings_category"
+        android:title="Presence settings">
+
+        <ListPreference
+            android:defaultValue="@string/anyone"
+            android:dialogTitle="Who sees my last seen"
+            android:entries="@array/last_seen_values"
+            android:entryValues="@array/last_seen_values"
+            android:key="who_sees_my_last_seen"
+            android:summary="Anyone"
+            android:title="Who sees my last seen" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

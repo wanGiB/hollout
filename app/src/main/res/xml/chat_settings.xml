@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Chat Settings">
+    
+    <PreferenceCategory android:title="Media Download">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="save_to_gallery"
+            android:title="Save to Gallery" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="Messages">
+
+        <ListPreference
+            android:key="messages_text_size_preference"
+            android:summary="14"
+            android:title="Messages Text Size" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
