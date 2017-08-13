@@ -2,65 +2,132 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rootLayout"
+    android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
-    android:fitsSystemWindows="true"
-    android:orientation="vertical">
+    android:background="#eaeaea">
 
-    <xyz.sahildave.arclayout.ArcLayout
-        android:id="@+id/arc_layout"
+    <com.github.florent37.diagonallayout.DiagonalLayout
+        android:id="@+id/diagonalLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:arc_cropCurve="cropConcave"
-        app:arc_height="48dp"
-        app:arc_position="top">
+        android:layout_height="350dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:paddingBottom="16dp"
+        app:diagonal_angle="10"
+        app:diagonal_direction="left"
+        app:diagonal_position="bottom"
+        app:elevation="10dp">
 
-        <com.wonderkiln.blurkit.BlurLayout
-            android:id="@+id/blurLayout"
+        <com.flaviofaria.kenburnsview.KenBurnsView
+            android:id="@+id/signed_in_user_cover_image_view"
             android:layout_width="match_parent"
-            android:layout_height="250dp">
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:src="@drawable/authentication_background_image" />
 
-            <ImageView
-                android:id="@+id/user_cover_photo_view"
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:scaleType="center"
-                android:src="@drawable/authentication_background_image"
-                tools:ignore="ContentDescription" />
-
-        </com.wonderkiln.blurkit.BlurLayout>
-
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/appbar"
+        <View
             android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#5b000000" />
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/user_display_name"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-            app:elevation="0dp">
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="50dp"
+            android:paddingEnd="16dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="16dp"
+            android:paddingStart="20dp"
+            android:textColor="@color/white"
+            android:textSize="25sp"
+            app:textStyle="medium" />
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@android:color/transparent"
-                app:theme="@style/ThemeOverlay.AppCompat"
-                app:titleTextColor="@color/white" />
-
-        </android.support.design.widget.AppBarLayout>
-
-
-    </xyz.sahildave.arclayout.ArcLayout>
+    </com.github.florent37.diagonallayout.DiagonalLayout>
 
     <com.wan.hollout.ui.widgets.CircleImageView
-        android:id="@+id/user_profile_photo_view"
+        android:id="@+id/avatar"
         android:layout_width="90dp"
         android:layout_height="90dp"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="bottom"
-        android:layout_marginTop="200dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="280dp"
         android:src="@drawable/authentication_background_image"
         app:border_color="@color/white"
-        app:border_width="2dp" />
+        app:border_width="3dp" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/start_chat_or_edit_profile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginEnd="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="250dp"
+        android:src="@drawable/chat_tab"
+        app:backgroundTint="@color/colorPrimary"
+        app:fabSize="normal"
+        app:rippleColor="@color/colorPrimaryDark"
+        tools:ignore="RelativeOverlap" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/diagonalLayout"
+        android:orientation="horizontal">
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/about_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:maxWidth="350dp"
+            android:paddingEnd="16dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="16dp"
+            android:paddingStart="20dp"
+            android:textSize="25sp"
+            app:textStyle="medium" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="25dp"
+        android:background="@android:color/transparent">
+
+        <ImageView
+            android:id="@+id/go_back"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:src="@drawable/ic_arrow_back_white_48dp"
+            tools:ignore="ContentDescription" />
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/online_status"
+            style="@style/Base.TextAppearance.Widget.AppCompat.Toolbar.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:background="@android:color/transparent"
+            android:text="@string/online_status"
+            android:textColor="@color/white"
+            app:textStyle="medium" />
+
+    </RelativeLayout>
 
 </RelativeLayout>

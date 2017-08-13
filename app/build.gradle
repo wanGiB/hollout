@@ -21,8 +21,6 @@ android {
         versionName "1.0"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
-        renderscriptTargetApi 24
-        renderscriptSupportModeEnabled true
     }
 
     signingConfigs {
@@ -123,8 +121,8 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.0'
     testCompile 'junit:junit:4.12'
     apt 'com.jakewharton:butterknife-compiler:8.4.0'
-    compile 'xyz.sahildave:arclayout:1.0.0'
-    compile 'com.wonderkiln:blurkit:1.0.0'
+    compile 'com.github.florent37:diagonallayout:1.0.7'
+    compile 'com.flaviofaria:kenburnsview:1.0.7'
 }
 
 apply plugin: 'com.google.gms.google-services'
