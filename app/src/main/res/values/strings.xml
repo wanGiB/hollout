@@ -146,5 +146,11 @@
     <string name="chats_and_calls_settings"><![CDATA[Chats & Calls Settings]]></string>
     <string name="privacy_settings">Privacy Settings</string>
     <string name="support_and_about_settings">Support Settings</string>
+    <string name="your_status">Your status</string>
+    <string name="share_plans_ideas_or_your_mood">Share plans, ideas or your mood</string>
+    <string name="status_would_be_very_visible_to_everyone">Your status would be visible to anyone on hollout that views your profile</string>
+    <string name="share_plans_or_your_mood">Share plans or your mood</string>
+    <string name="shared">Shared!</string>
+    <string name="set">Set</string>
 
 </resources>

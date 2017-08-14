@@ -119,6 +119,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.featured_photos_dim_view)
     View featuredPhotosDimView;
 
+    @BindView(R.id.user_status)
+    HolloutTextView userStatusTextView;
+
     private ParseUser parseUser;
 
     @Override
@@ -204,6 +207,20 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
 
+            String userStatus = parseUser.getString(AppConstants.APP_USER_STATUS);
+            if (StringUtils.isNotEmpty(userStatus)) {
+                userStatusTextView.setText(StringUtils.capitalize(userStatus));
+            }
+
+            if (parseUser.getObjectId().equals(signedInUser.getObjectId())){
+                userStatusTextView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent composeStatusIntent = new Intent(UserProfileActivity.this,ComposeStatusActivity.class);
+                        startActivity(composeStatusIntent);
+                    }
+                });
+            }
             UiUtils.attachDrawableToTextView(UserProfileActivity.this, userLocationAndDistanceView, R.drawable.ic_location_on, UiUtils.DrawableDirection.LEFT);
 
             userDisplayNameView.setText(WordUtils.capitalize(username));

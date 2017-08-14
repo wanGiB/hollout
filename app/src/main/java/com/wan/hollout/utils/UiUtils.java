@@ -48,6 +48,7 @@ import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.adapters.FeaturedPhotosCircleAdapter;
+import com.wan.hollout.ui.widgets.CircularProgressButton;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 import com.wan.hollout.ui.widgets.SweetAlertDialog;
@@ -652,4 +653,25 @@ public class UiUtils {
         }
     }
 
+    public static synchronized void morphRequestToSuccess(
+            final CircularProgressButton circularProgressButton) {
+        circularProgressButton.setProgress(100);
+        circularProgressButton.invalidate();
+    }
+
+    public static synchronized void morphRequestToProgress(
+            final CircularProgressButton circularProgressButton) {
+        circularProgressButton.setProgress(10);
+    }
+
+    private static synchronized void morphRequestToError(
+            final CircularProgressButton circularProgressButton) {
+        circularProgressButton.setProgress(-1);
+        circularProgressButton.invalidate();
+    }
+
+    public static synchronized void morphRequestToIdle(CircularProgressButton circularProgressButton) {
+        circularProgressButton.setProgress(0);
+        circularProgressButton.invalidate();
+    }
 }

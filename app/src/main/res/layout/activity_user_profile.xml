@@ -223,6 +223,8 @@
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp"
                     android:paddingStart="20dp"
+                    android:clickable="true"
+                    android:background="?attr/selectableItemBackground"
                     android:paddingTop="16dp"
                     android:text="@string/hey_there_holla_me_on_hollout"
                     android:textSize="17sp"
