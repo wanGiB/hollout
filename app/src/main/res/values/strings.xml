@@ -223,5 +223,5 @@
     <string name="no_photos">No photos</string>
     <string name="no_videos">No Videos</string>
     <string name="unknown">Unknown</string>
-
+<string name="conversation_activity__compose_description">Compose Message</string>
 </resources>

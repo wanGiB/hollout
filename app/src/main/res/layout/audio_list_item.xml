@@ -32,7 +32,7 @@
                 android:layout_marginRight="@dimen/audio_list_margin"
                 android:orientation="vertical">
 
-                <com.app.hollout.ui.widgets.RoundedImageView
+                <com.wan.hollout.ui.widgets.RoundedImageView
                     android:id="@+id/audio_icon"
                     android:layout_width="@dimen/audio_list_item_icon_size"
                     android:layout_height="@dimen/audio_list_item_icon_size"
@@ -84,7 +84,7 @@
                         android:textColor="@color/hollout_material_grey_800"
                         android:textSize="@dimen/capp_text_size_medium"
                         android:textStyle="bold"
-                        app:textStyle="medium"/>
+                        app:textStyle="medium" />
 
                     <com.wan.hollout.ui.widgets.HolloutTextView
                         android:id="@+id/audio_size"

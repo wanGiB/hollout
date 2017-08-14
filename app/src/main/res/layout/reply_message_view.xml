@@ -42,7 +42,6 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_margin="3dp"
-                    android:src="@drawable/sweet"
                     android:visibility="gone"
                     app:riv_corner_radius="2dp" />
 
@@ -72,7 +71,7 @@
                     android:id="@+id/reply_title"
                     android:textColor="@color/colorPrimary"
                     android:textSize="16sp"
-                    app:fontName="Roboto-Medium.ttf" />
+                    app:textStyle="medium" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/reply_subtitle"
@@ -81,7 +80,7 @@
                     android:maxLines="1"
                     android:text="Reply subtitle"
                     android:textColor="@color/hollout_material_grey_600"
-                    app:fontName="Roboto-Medium.ttf" />
+                    app:textStyle="medium" />
 
             </LinearLayout>
 

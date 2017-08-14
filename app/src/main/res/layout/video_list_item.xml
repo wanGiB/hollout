@@ -70,7 +70,7 @@
                         android:maxLines="1"
                         android:textColor="@color/white"
                         android:textSize="@dimen/video_list_icon_text_size"
-                        app:fontName="Roboto-Regular.ttf" />
+                        app:textStyle="regular" />
 
                 </LinearLayout>
 
@@ -97,7 +97,7 @@
                     android:maxLines="1"
                     android:textColor="@color/medium_grey"
                     android:textSize="@dimen/video_list_item_name_text_size"
-                    app:fontName="Roboto-Medium.ttf" />
+                    app:textStyle="medium" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/video_size"
@@ -107,7 +107,7 @@
                     android:maxLines="1"
                     android:textColor="@color/grey500"
                     android:textSize="@dimen/text_normal"
-                    app:fontName="Roboto-Regular.ttf" />
+                    app:textStyle="regular" />
 
             </LinearLayout>
 

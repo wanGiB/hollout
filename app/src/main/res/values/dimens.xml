@@ -86,5 +86,6 @@
     <dimen name="capp_text_size_medium">14.0dip</dimen>
     <dimen name="sdcard_phone_list_divider_padding">72.0dip</dimen>
     <dimen name="audio_list_margin">16.0dip</dimen>
+    <dimen name="audio_list_item_icon_size">40.0dip</dimen>
 
 </resources>

@@ -7,8 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.app.hollout.R;
-import com.app.hollout.utils.FontUtils;
+import com.wan.hollout.R;
+import com.wan.hollout.utils.FontUtils;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
         @SuppressWarnings("InflateParams")
         View view = appCompatActivity.getLayoutInflater().inflate(R.layout.tab_custom_view, null);
         TextView tabTitle = (TextView) view.findViewById(R.id.tab_title);
-        tabTitle.setTypeface(FontUtils.getTypeface(appCompatActivity, "Roboto-Bold.ttf"));
+        tabTitle.setTypeface(FontUtils.selectTypeface(appCompatActivity, 1));
         tabTitle.setText(getPageTitle(pos));
         return view;
     }

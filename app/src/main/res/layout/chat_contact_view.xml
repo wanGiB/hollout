@@ -16,7 +16,7 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="10dp"
         android:layout_marginStart="10dp"
-        android:src="@drawable/default_avatar"
+        android:src="@drawable/empty_profile"
         app:border_color="@color/white"
         app:border_width="1dp"
         tools:ignore="RtlHardcoded" />

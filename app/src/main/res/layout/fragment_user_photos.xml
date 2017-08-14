@@ -50,7 +50,7 @@
             android:text="@string/no_photos"
             android:textColor="@color/hollout_material_grey_800"
             android:textSize="15sp"
-            app:fontName="Fontello.ttf" />
+            app:textStyle="medium" />
 
     </LinearLayout>
 
