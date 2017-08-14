@@ -42,8 +42,35 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
+import com.wan.hollout.R;
+import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.emoji.EmojiDrawer;
+import com.wan.hollout.language.DynamicLanguage;
+import com.wan.hollout.ui.adapters.PickedMediaFilesAdapter;
+import com.wan.hollout.ui.services.ContactService;
+import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
+import com.wan.hollout.ui.widgets.ChatToolbar;
+import com.wan.hollout.ui.widgets.CircleImageView;
+import com.wan.hollout.ui.widgets.ComposeText;
+import com.wan.hollout.ui.widgets.HolloutTextView;
+import com.wan.hollout.ui.widgets.InputAwareLayout;
+import com.wan.hollout.ui.widgets.InputPanel;
 import com.wan.hollout.ui.widgets.KeyboardAwareLinearLayout;
+import com.wan.hollout.ui.widgets.LinkPreview;
+import com.wan.hollout.ui.widgets.RoundedImageView;
+import com.wan.hollout.ui.widgets.Stub;
+import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.FilePathFinder;
+import com.wan.hollout.utils.FileUtils;
+import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.HolloutPermissions;
+import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.HolloutVCFParser;
+import com.wan.hollout.utils.PermissionsUtils;
+import com.wan.hollout.utils.SafeLayoutManager;
+import com.wan.hollout.utils.UiUtils;
+import com.wan.hollout.utils.VCFContactData;
+import com.wan.hollout.utils.ViewUtil;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 import net.alhazmy13.mediapicker.Video.VideoPicker;
@@ -60,6 +87,14 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_CONTACT;
+import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_DOCUMENT;
+import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_GIF;
+import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_IMAGE;
+import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_LOCATION;
+import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_VIDEO;
+import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
 
 
 @SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal"})
@@ -125,7 +160,7 @@ public class ChatActivity extends BaseActivity implements
     RelativeLayout linkPreview;
 
     @BindView(R.id.og_view)
-    OpenGraphView openGraphView;
+    LinkPreview openGraphView;
 
     @BindView(R.id.single_media_frame)
     FrameLayout singleMediaFrame;
@@ -199,11 +234,11 @@ public class ChatActivity extends BaseActivity implements
         initBasicComponents();
 
         signedInUser = ParseUser.getCurrentUser();
-        privateChatRecipient = intentExtras.getParcelable(HolloutConstants.USER_PROPERTIES);
+        privateChatRecipient = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
 
         //Init toolbar with private chat
         if (privateChatRecipient != null) {
-            chatToolbar.initView(recipientOrGroupId, HolloutConstants.RECIPIENT_TYPE_INDIVIDUAL);
+            chatToolbar.initView(recipientOrGroupId, AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
             recipientOrGroupId = privateChatRecipient.getObjectId();
             setupPrivateChatRecipient(privateChatRecipient);
         } else {
@@ -242,7 +277,7 @@ public class ChatActivity extends BaseActivity implements
 
     private void resetRecorderAndStartRecording() {
         mediaRecorder = new MediaRecorder();
-        recorderAudioCaptureFilePath = HolloutUtils.getOutputMediaFile(HolloutConstants.CAPTURE_MEDIA_TYPE_AUDIO);
+        recorderAudioCaptureFilePath = HolloutUtils.getOutputMediaFile(AppConstants.CAPTURE_MEDIA_TYPE_AUDIO);
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(
                 MediaRecorder.OutputFormat.THREE_GPP);
@@ -263,12 +298,12 @@ public class ChatActivity extends BaseActivity implements
             mediaRecorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
                 @Override
                 public void onInfo(MediaRecorder mr, int what, int extra) {
-                    HolloutLog.d("MediaRecordInfo", " What:" + what + ",Extra:" + extra);
+                    HolloutLogger.d("MediaRecordInfo", " What:" + what + ",Extra:" + extra);
                 }
             });
             recordingInProgress = true;
         } catch (Exception e) {
-            HolloutLog.d("MediaRecordInfo", e.getMessage());
+            HolloutLogger.d("MediaRecordInfo", e.getMessage());
         }
     }
 
@@ -315,7 +350,7 @@ public class ChatActivity extends BaseActivity implements
 
         @Override
         public void onClick(int type) {
-            HolloutLog.d("AttachmentTypeSelector", "ClickedAttachmentType = " + type);
+            HolloutLogger.d("AttachmentTypeSelector", "ClickedAttachmentType = " + type);
             handleClickedAttachmentType(type);
         }
 
@@ -327,7 +362,7 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void handleClickedAttachmentType(int type) {
-        HolloutLog.d("ChatActivity", "Selected: " + type);
+        HolloutLogger.d("ChatActivity", "Selected: " + type);
         switch (type) {
             case ADD_IMAGE:
                 openCameraToTakePhoto();
@@ -438,10 +473,9 @@ public class ChatActivity extends BaseActivity implements
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             ArrayList<String> linksInMessage = UiUtils.pullLinks(s.toString());
             if (!linksInMessage.isEmpty()) {
-                openGraphView.bindActivity(ChatActivity.this);
                 String firstUrl = linksInMessage.get(0);
                 UiUtils.showView(linkPreview, true);
-                openGraphView.loadFrom(firstUrl);
+                openGraphView.setData(firstUrl);
             } else {
                 UiUtils.showView(linkPreview, false);
             }
@@ -523,17 +557,17 @@ public class ChatActivity extends BaseActivity implements
     public void iterateThroughPickedMediaAndSendEach() {
         for (HolloutFile holloutFile : pickedMediaFiles) {
             switch (holloutFile.getFileType()) {
-                case HolloutConstants.FILE_TYPE_PHOTO:
+                case AppConstants.FILE_TYPE_PHOTO:
                     sendImageMessage(holloutFile.getLocalFilePath(), composeText.getText().toString().trim());
                     break;
-                case HolloutConstants.FILE_TYPE_AUDIO:
+                case AppConstants.FILE_TYPE_AUDIO:
                     //Send file message with file type audio
                     HashMap<String, String> moreMessageProps = new HashMap<>();
-                    moreMessageProps.put(HolloutConstants.FILE_TYPE, HolloutConstants.FILE_TYPE_AUDIO);
-                    moreMessageProps.put(HolloutConstants.AUDIO_DURATION, String.valueOf(HolloutUtils.getVideoDuration(holloutFile.getLocalFilePath())));
+                    moreMessageProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_AUDIO);
+                    moreMessageProps.put(AppConstants.AUDIO_DURATION, String.valueOf(HolloutUtils.getVideoDuration(holloutFile.getLocalFilePath())));
                     sendFileMessage(holloutFile.getLocalFilePath(), moreMessageProps);
                     break;
-                case HolloutConstants.FILE_TYPE_VIDEO:
+                case AppConstants.FILE_TYPE_VIDEO:
                     sendVideoMessage(holloutFile.getLocalFilePath(), holloutFile.getLocalFilePath(), (int) (new File(holloutFile.getLocalFilePath()).length() / 1000),
                             composeText.getText().toString().trim());
                     break;
@@ -598,19 +632,19 @@ public class ChatActivity extends BaseActivity implements
 //            replyIconView.setImageResource(R.drawable.msg_status_location);
 //        } else if (emMessage.getType() == EMMessage.Type.FILE) {
 //            try {
-//                String fileType = emMessage.getStringAttribute(HolloutConstants.FILE_TYPE);
+//                String fileType = emMessage.getStringAttribute(AppConstants.FILE_TYPE);
 //                switch (fileType) {
-//                    case HolloutConstants.FILE_TYPE_CONTACT:
+//                    case AppConstants.FILE_TYPE_CONTACT:
 //                        messageBody = getString(R.string.contact);
 //                        UiUtils.showView(replyIconView, true);
 //                        replyIconView.setImageResource(R.drawable.msg_contact);
 //                        break;
-//                    case HolloutConstants.FILE_TYPE_DOCUMENT:
+//                    case AppConstants.FILE_TYPE_DOCUMENT:
 //                        messageBody = getString(R.string.document);
 //                        UiUtils.showView(replyIconView, true);
 //                        replyIconView.setImageResource(R.drawable.icon_file_doc_grey_mini);
 //                        break;
-//                    case HolloutConstants.FILE_TYPE_AUDIO:
+//                    case AppConstants.FILE_TYPE_AUDIO:
 //                        messageBody = getString(R.string.audio);
 //                        UiUtils.showView(replyIconView, true);
 //                        replyIconView.setImageResource(R.drawable.msg_status_audio);
@@ -626,7 +660,7 @@ public class ChatActivity extends BaseActivity implements
 //        }
 //
 //        try {
-//            String senderName = emMessage.getStringAttribute(HolloutConstants.MESSAGE_SENDER_NAME);
+//            String senderName = emMessage.getStringAttribute(AppConstants.MESSAGE_SENDER_NAME);
 //            if (emMessage.direct() == EMMessage.Direct.SEND) {
 //                replyMessageTitleView.setText(getString(R.string.me));
 //            } else {
@@ -658,8 +692,8 @@ public class ChatActivity extends BaseActivity implements
                 break;
             case R.id.view_shared_media:
 //                Intent mSharedMediaIntent = new Intent(ChatActivity.this, SharedMediaActivity.class);
-//                mSharedMediaIntent.putExtra(HolloutConstants.CONVERSATION_ID, mConversation.conversationId());
-//                mSharedMediaIntent.putExtra(HolloutConstants.CONVERSATION_NAME, chatToolbar.getConversationName());
+//                mSharedMediaIntent.putExtra(AppConstants.CONVERSATION_ID, mConversation.conversationId());
+//                mSharedMediaIntent.putExtra(AppConstants.CONVERSATION_NAME, chatToolbar.getConversationName());
 //                startActivity(mSharedMediaIntent);
                 break;
         }
@@ -674,7 +708,7 @@ public class ChatActivity extends BaseActivity implements
 //                .getConversation(recipientOrGroupId, UiUtils.getConversationType(chatType),
 //                        true);
 //
-//        chatType = getIntent().getIntExtra(HolloutConstants.EXTRA_CHAT_TYPE, CHATTYPE_SINGLE);
+//        chatType = getIntent().getIntExtra(AppConstants.EXTRA_CHAT_TYPE, CHATTYPE_SINGLE);
 //
 //        //get the mConversation
 //        mConversation = EMClient.getInstance()
@@ -702,7 +736,7 @@ public class ChatActivity extends BaseActivity implements
 //
 //    }
 
-    private void setupPrivateChatRecipient(ParseObject result) {
+    private void setupPrivateChatRecipient(ParseUser result) {
         if (StringUtils.isNotEmpty(recipientOrGroupId)) {
             if (chatToolbar != null) {
                 chatToolbar.refreshToolbar(result);
@@ -752,7 +786,7 @@ public class ChatActivity extends BaseActivity implements
         if (HolloutUtils.hasMarshmallow()) {
             if (PermissionsUtils.checkSelfPermissionForAudioRecording(this)) {
                 holloutPermissions.requestAudio();
-                setLastPermissionInitiationAction(HolloutConstants.REQUEST_AUDIO_ACCESS_FOR_RECORDING);
+                setLastPermissionInitiationAction(AppConstants.REQUEST_AUDIO_ACCESS_FOR_RECORDING);
             } else {
                 startRecorder();
             }
@@ -933,11 +967,11 @@ public class ChatActivity extends BaseActivity implements
 //        chatInputView.onBackPressed();
 //    }
     private void removeAnyPendingChatRequestFromThisRecipient() {
-        String signedInUserId = signedInUser.getString(HolloutConstants.USER_ID);
-        ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(HolloutConstants.HOLLOUT_FEED);
-        pendingChatQuery.whereEqualTo(HolloutConstants.FEED_CREATOR_ID, recipientOrGroupId);
-        pendingChatQuery.whereEqualTo(HolloutConstants.FEED_TYPE, HolloutConstants.FEED_TYPE_CHAT_REQUEST);
-        pendingChatQuery.whereEqualTo(HolloutConstants.FEED_RECIPIENT, signedInUserId);
+        String signedInUserId = signedInUser.getString(AppConstants.APP_USER_ID);
+        ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, recipientOrGroupId);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT, signedInUserId);
         pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(ParseObject object, ParseException e) {
@@ -962,7 +996,7 @@ public class ChatActivity extends BaseActivity implements
         if (HolloutUtils.hasMarshmallow()) {
             if (PermissionsUtils.checkSelfForStoragePermission(this)) {
                 holloutPermissions.requestStoragePermissions();
-                setLastPermissionInitiationAction(HolloutConstants.REQUEST_STORAGE_ACCESS_FOR_GALLERY);
+                setLastPermissionInitiationAction(AppConstants.REQUEST_STORAGE_ACCESS_FOR_GALLERY);
             } else {
                 openGallery();
             }
@@ -981,15 +1015,15 @@ public class ChatActivity extends BaseActivity implements
 
     public void openGallery() {
         Intent mGalleryIntent = new Intent(ChatActivity.this, GalleryActivity.class);
-        mGalleryIntent.putExtra(HolloutConstants.RECIPIENT_NAME, getRecipientName());
-        startActivityForResult(mGalleryIntent, HolloutConstants.REQUEST_CODE_PICK_FROM_GALLERY);
+        mGalleryIntent.putExtra(AppConstants.RECIPIENT_NAME, getRecipientName());
+        startActivityForResult(mGalleryIntent, AppConstants.REQUEST_CODE_PICK_FROM_GALLERY);
     }
 
     public void checkAccessToDocumentAndOpenDocuments() {
         if (HolloutUtils.hasMarshmallow()) {
             if (PermissionsUtils.checkSelfForStoragePermission(this)) {
                 holloutPermissions.requestStoragePermissions();
-                setLastPermissionInitiationAction(HolloutConstants.REQUEST_STORAGE_ACCESS_FOR_DOCUMENTS);
+                setLastPermissionInitiationAction(AppConstants.REQUEST_STORAGE_ACCESS_FOR_DOCUMENTS);
             } else {
                 openDocuments();
             }
@@ -1055,7 +1089,7 @@ public class ChatActivity extends BaseActivity implements
     @SuppressLint("CommitPrefEdits")
     public void previewSinglePickedFile(String fileType, final String pickedFilePath) {
 
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putString(HolloutConstants.LAST_FILE_CAPTION, null).clear().commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putString(AppConstants.LAST_FILE_CAPTION, null).clear().commit();
 
         final HolloutFile pickedHolloutFile = new HolloutFile();
         pickedHolloutFile.setLocalFilePath(pickedFilePath);
@@ -1072,12 +1106,12 @@ public class ChatActivity extends BaseActivity implements
             UiUtils.showView(cancelPickedSingleMedia, true);
 
             switch (fileType) {
-                case HolloutConstants.FILE_TYPE_PHOTO:
+                case AppConstants.FILE_TYPE_PHOTO:
                     UiUtils.loadImage(this, pickedFilePath, singleMediaViewer);
                     UiUtils.showView(playSingleMediaIfVideo, false);
                     UiUtils.showView(mediaLengthView, false);
                     break;
-                case HolloutConstants.FILE_TYPE_VIDEO:
+                case AppConstants.FILE_TYPE_VIDEO:
                     if (Build.VERSION.SDK_INT >= 17) {
                         if (!this.isDestroyed()) {
                             Glide.with(this).load(pickedFilePath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(singleMediaViewer);
@@ -1115,10 +1149,10 @@ public class ChatActivity extends BaseActivity implements
                 @Override
                 public void onClick(View view) {
 
-                    if (pickedHolloutFile.getFileType().equals(HolloutConstants.FILE_TYPE_PHOTO)) {
+                    if (pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_PHOTO)) {
                         UiUtils.previewSelectedFile(ChatActivity.this, pickedHolloutFile);
-                    } else if (pickedHolloutFile.getFileType().equals(HolloutConstants.FILE_TYPE_VIDEO)
-                            || pickedHolloutFile.getFileType().equals(HolloutConstants.FILE_TYPE_AUDIO)) {
+                    } else if (pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_VIDEO)
+                            || pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_AUDIO)) {
 //                        com.hyphenate.util.FileUtils.openFile(new File(pickedHolloutFile.getLocalFilePath()), ChatActivity.this);
                     }
 
@@ -1177,18 +1211,18 @@ public class ChatActivity extends BaseActivity implements
                 if (!mPaths.isEmpty()) {
                     String pickedPhotoPath = mPaths.get(0);
                     if (StringUtils.isNotEmpty(pickedPhotoPath)) {
-                        previewSinglePickedFile(HolloutConstants.FILE_TYPE_PHOTO, pickedPhotoPath);
+                        previewSinglePickedFile(AppConstants.FILE_TYPE_PHOTO, pickedPhotoPath);
                     }
                 }
             }
         } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
             String mPath = data.getStringExtra(VideoPicker.EXTRA_VIDEO_PATH);
             if (StringUtils.isNotEmpty(mPath)) {
-                previewSinglePickedFile(HolloutConstants.FILE_TYPE_VIDEO, mPath);
+                previewSinglePickedFile(AppConstants.FILE_TYPE_VIDEO, mPath);
             }
             //Your Code
-        } else if (requestCode == HolloutConstants.REQUEST_CODE_PICK_FROM_GALLERY && resultCode == RESULT_OK) {
-            ArrayList<HolloutFile> galleryResults = data.getParcelableArrayListExtra(HolloutConstants.GALLERY_RESULTS);
+        } else if (requestCode == AppConstants.REQUEST_CODE_PICK_FROM_GALLERY && resultCode == RESULT_OK) {
+            ArrayList<HolloutFile> galleryResults = data.getParcelableArrayListExtra(AppConstants.GALLERY_RESULTS);
             if (galleryResults != null) {
                 if (!galleryResults.isEmpty()) {
                     if (galleryResults.size() == 1) {
@@ -1218,7 +1252,7 @@ public class ChatActivity extends BaseActivity implements
 
                     HolloutFile contactFile = new HolloutFile();
                     contactFile.setLocalFilePath(vCradFile.getPath());
-                    contactFile.setLocalFilePath(HolloutConstants.FILE_TYPE_CONTACT);
+                    contactFile.setLocalFilePath(AppConstants.FILE_TYPE_CONTACT);
 
                     String filePath = FilePathFinder.getPath(ChatActivity.this, Uri.fromFile(vCradFile));
 
@@ -1236,14 +1270,14 @@ public class ChatActivity extends BaseActivity implements
 
                     HashMap<String, String> contactProps = new HashMap<>();
 
-                    contactProps.put(HolloutConstants.FILE_TYPE, HolloutConstants.FILE_TYPE_CONTACT);
+                    contactProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_CONTACT);
 
                     if (StringUtils.isNotEmpty(contactName)) {
-                        contactProps.put(HolloutConstants.CONTACT_NAME, contactName);
+                        contactProps.put(AppConstants.CONTACT_NAME, contactName);
                     }
 
                     if (StringUtils.isNotEmpty(contactPhoneNumber)) {
-                        contactProps.put(HolloutConstants.CONTACT_NUMBER, contactPhoneNumber);
+                        contactProps.put(AppConstants.CONTACT_NUMBER, contactPhoneNumber);
                     }
 
                     sendFileMessage(filePath, contactProps);
@@ -1325,8 +1359,8 @@ public class ChatActivity extends BaseActivity implements
                     if (!HolloutUtils.isValidDocument(fileMime)) {
                         UiUtils.showSafeToast("Not a valid document");
                     } else {
-                        moreMessageProps.put(HolloutConstants.FILE_TYPE, HolloutConstants.FILE_TYPE_DOCUMENT);
-                        moreMessageProps.put(HolloutConstants.FILE_MIME_TYPE, fileMime);
+                        moreMessageProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_DOCUMENT);
+                        moreMessageProps.put(AppConstants.FILE_MIME_TYPE, fileMime);
                         sendFileMessage(filePath, moreMessageProps);
                     }
 
@@ -1348,9 +1382,9 @@ public class ChatActivity extends BaseActivity implements
             public void run() {
                 if (o instanceof String) {
                     String s = (String) o;
-                    if (s.equals(HolloutConstants.REPLY_MESSAGE)) {
+                    if (s.equals(AppConstants.REPLY_MESSAGE)) {
                         snackInMessageReplyView(messageReplyView);
-                    } else if (s.equals(HolloutConstants.HIDE_MESSAGE_REPLY_VIEW)) {
+                    } else if (s.equals(AppConstants.HIDE_MESSAGE_REPLY_VIEW)) {
                         snackOutMessageReplyView(messageReplyView);
                     }
                 }
@@ -1361,9 +1395,9 @@ public class ChatActivity extends BaseActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == PermissionsUtils.REQUEST_STORAGE && holloutPermissions.verifyPermissions(grantResults)) {
-            if (getLastPermissionInitiationAction().equals(HolloutConstants.REQUEST_STORAGE_ACCESS_FOR_GALLERY)) {
+            if (getLastPermissionInitiationAction().equals(AppConstants.REQUEST_STORAGE_ACCESS_FOR_GALLERY)) {
                 openGallery();
-            } else if (getLastPermissionInitiationAction().equals(HolloutConstants.REQUEST_STORAGE_ACCESS_FOR_DOCUMENTS)) {
+            } else if (getLastPermissionInitiationAction().equals(AppConstants.REQUEST_STORAGE_ACCESS_FOR_DOCUMENTS)) {
                 openDocuments();
             }
         } else if (requestCode == PermissionsUtils.REQUEST_CONTACT && holloutPermissions.verifyPermissions(grantResults)) {
@@ -1402,11 +1436,11 @@ public class ChatActivity extends BaseActivity implements
     protected void sendImageMessage(String imagePath, String caption) {
 //        EMMessage message = EMMessage.createImageSendMessage(imagePath, false, recipientOrGroupId);
 //        if (StringUtils.isNotEmpty(caption)) {
-//            PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).edit().putString(HolloutConstants.LAST_FILE_CAPTION, caption).clear().commit();
-//            message.setAttribute(HolloutConstants.FILE_CAPTION, caption);
+//            PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).edit().putString(AppConstants.LAST_FILE_CAPTION, caption).clear().commit();
+//            message.setAttribute(AppConstants.FILE_CAPTION, caption);
 //        } else {
-//            String lastFileCaption = PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).getString(HolloutConstants.LAST_FILE_CAPTION, "Photo");
-//            message.setAttribute(HolloutConstants.FILE_CAPTION, lastFileCaption);
+//            String lastFileCaption = PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).getString(AppConstants.LAST_FILE_CAPTION, "Photo");
+//            message.setAttribute(AppConstants.FILE_CAPTION, lastFileCaption);
 //        }
 //        sendMessage(message);
     }
@@ -1423,11 +1457,11 @@ public class ChatActivity extends BaseActivity implements
 //        EMMessage message =
 //                EMMessage.createVideoSendMessage(videoPath, thumbPath, videoLength, recipientOrGroupId);
 //        if (StringUtils.isNotEmpty(caption)) {
-//            PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).edit().putString(HolloutConstants.LAST_FILE_CAPTION, caption).clear().commit();
-//            message.setAttribute(HolloutConstants.FILE_CAPTION, caption);
+//            PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).edit().putString(AppConstants.LAST_FILE_CAPTION, caption).clear().commit();
+//            message.setAttribute(AppConstants.FILE_CAPTION, caption);
 //        } else {
-//            String lastFileCaption = PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).getString(HolloutConstants.LAST_FILE_CAPTION, "Video");
-//            message.setAttribute(HolloutConstants.FILE_CAPTION, lastFileCaption);
+//            String lastFileCaption = PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).getString(AppConstants.LAST_FILE_CAPTION, "Video");
+//            message.setAttribute(AppConstants.FILE_CAPTION, lastFileCaption);
 //        }
 //        sendMessage(message);
     }
@@ -1453,18 +1487,18 @@ public class ChatActivity extends BaseActivity implements
 //
 //        if (messageReplyView.getVisibility() == View.VISIBLE) {
 //            //Set attribute on message
-//            message.setAttribute(HolloutConstants.REPLY_TO_A_MESSAGE, true);
-//            message.setAttribute(HolloutConstants.ID_OF_REPLIED_MESSAGE, messageToReplyTo.getMsgId());
+//            message.setAttribute(AppConstants.REPLY_TO_A_MESSAGE, true);
+//            message.setAttribute(AppConstants.ID_OF_REPLIED_MESSAGE, messageToReplyTo.getMsgId());
 //        }
 //
 //        if (chatType == CHATTYPE_GROUP) {
 //            message.setChatType(EMMessage.ChatType.GroupChat);
-//        } else if (chatType == HolloutConstants.CHATTYPE_CHATROOM) {
+//        } else if (chatType == AppConstants.CHATTYPE_CHATROOM) {
 //            message.setChatType(EMMessage.ChatType.ChatRoom);
 //        }
 //
-//        message.setAttribute(HolloutConstants.MESSAGE_SENDER_NAME, signedInUserObject.getString(HolloutConstants.HOLLOUT_USER_FULL_NAME));
-//        message.setAttribute(HolloutConstants.MESSAGE_SENDER_PROFILE_PHOTO_URL, signedInUserObject.getString(HolloutConstants.HOLLOUT_USER_PROFILE_PHOTO_URL));
+//        message.setAttribute(AppConstants.MESSAGE_SENDER_NAME, signedInUserObject.getString(AppConstants.HOLLOUT_USER_FULL_NAME));
+//        message.setAttribute(AppConstants.MESSAGE_SENDER_PROFILE_PHOTO_URL, signedInUserObject.getString(AppConstants.HOLLOUT_USER_PROFILE_PHOTO_URL));
 //
 //        //send message
 //        EMClient.getInstance().chatManager().sendMessage(message);

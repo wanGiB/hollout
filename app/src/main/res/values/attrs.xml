@@ -280,6 +280,13 @@
     <attr name="conversation_number_picker_text_color_selected" format="reference|color" />
     <attr name="conversation_item_sent_text_secondary_color" format="reference|color" />
 
+    <attr name="conversation_item_bubble_background" format="reference|color" />
+    <attr name="conversation_item_header_background" format="reference" />
+    <attr name="conversation_sent_card_background" format="reference|color" />
+    <attr name="conversation_group_member_name" format="reference|color" />
+    <attr name="conversation_received_card_background" format="reference|color" />
+    <attr name="conversation_item_received_text_primary_color" format="reference|color" />
+
     <declare-styleable name="DotLoader">
         <attr name="dot_radius" format="dimension" />
         <attr name="color_array" format="reference" />

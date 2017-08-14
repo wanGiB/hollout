@@ -22,6 +22,8 @@ import android.widget.TextView;
 import com.wan.hollout.R;
 import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.emoji.EmojiToggle;
+import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.ViewUtil;
 
 import java.util.concurrent.TimeUnit;
@@ -80,7 +82,7 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
 
         recordingStartedAnimationTimer = ViewUtil.findById(this, R.id.recording_started_animating_image);
 
-        if (HolloutUtils.isSystemEmojiPreferred(getContext())) {
+        if (HolloutPreferences.isSystemEmojiPreferred()) {
             emojiToggle.setVisibility(View.GONE);
         } else {
             emojiToggle.setVisibility(View.VISIBLE);

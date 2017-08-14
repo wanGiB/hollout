@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -18,7 +20,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -30,9 +34,11 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -49,8 +55,11 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
+import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.emoji.concurrent.ListenableFuture;
+import com.wan.hollout.emoji.concurrent.SettableFuture;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
@@ -67,7 +76,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import butterknife.ButterKnife;
 
@@ -561,7 +573,7 @@ public class UiUtils {
     }
 
     private static void refreshUserData(final ParseUser signedInUser, RecyclerView additionalPhotosRecyclerView, RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseUser parseUser, final Activity activity) {
-            final String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+        final String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         final String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         Long userLastSeenAt = parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
         if (HolloutUtils.isNetWorkConnected(ApplicationLoader.getInstance())
@@ -777,6 +789,110 @@ public class UiUtils {
         } catch (InterruptedException ie) {
             throw new AssertionError(ie);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static ListenableFuture<Boolean> animateOut(final @NonNull View view, final @NonNull Animation animation, final int visibility) {
+        final SettableFuture future = new SettableFuture();
+        if (view.getVisibility() == visibility) {
+            future.set(true);
+        } else {
+            view.clearAnimation();
+            animation.reset();
+            animation.setStartTime(0);
+            animation.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    view.setVisibility(visibility);
+                    future.set(true);
+                }
+            });
+            view.startAnimation(animation);
+        }
+        return future;
+    }
+
+    public static void animateIn(final @NonNull View view, final @NonNull Animation animation) {
+        if (view.getVisibility() == View.VISIBLE) return;
+
+        view.clearAnimation();
+        animation.reset();
+        animation.setStartTime(0);
+        view.setVisibility(View.VISIBLE);
+        view.startAnimation(animation);
+    }
+
+    private static Animation getAlphaAnimation(float from, float to, int duration) {
+        final Animation anim = new AlphaAnimation(from, to);
+        anim.setInterpolator(new FastOutSlowInInterpolator());
+        anim.setDuration(duration);
+        return anim;
+    }
+
+    public static void previewSelectedFile(Activity activity, HolloutFile holloutFile) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        RoundedImageView previewImageView = new RoundedImageView(activity);
+        previewImageView.setCornerRadius(5);
+
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(700,
+                700);
+
+        previewImageView.setLayoutParams(layoutParams);
+        previewImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        UiUtils.loadImage(activity, holloutFile.getLocalFilePath(), previewImageView);
+        builder.setView(previewImageView);
+        builder.create().show();
+    }
+
+    public static void loadMusicPreview(Activity activity, ImageView audioIcon, Uri uri) {
+        if (Build.VERSION.SDK_INT >= 17) {
+            if (!activity.isDestroyed()) {
+                Glide.with(activity).load(uri).error(R.drawable.x_ic_folde_music).placeholder(R.drawable.x_ic_folde_music).crossFade().into(audioIcon);
+                audioIcon.invalidate();
+            }
+        } else {
+            Glide.with(activity).load(uri).error(R.drawable.x_ic_folde_music).placeholder(R.drawable.x_ic_folde_music).crossFade().into(audioIcon);
+            audioIcon.invalidate();
+        }
+    }
+
+    public static void bangSound(Context context, int soundId) {
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, soundId);
+        mediaPlayer.start(); // no need to call prepare(); create() does that for you
+    }
+
+    public static String getTimeString(long millis) {
+        int minutes = (int) ((millis % (1000 * 60 * 60)) / (1000 * 60));
+        int seconds = (int) (((millis % (1000 * 60 * 60)) % (1000 * 60)) / 1000);
+        return String.format(Locale.getDefault(), "%02d", minutes) +
+                ":" +
+                String.format(Locale.getDefault(), "%02d", seconds);
+    }
+
+    //Pull all links from the body for easy retrieval
+    @SuppressWarnings("unchecked")
+    public static ArrayList pullLinks(String text) {
+        ArrayList<String> links = new ArrayList<>();
+        String regex = "\\(?\\b(http://|https://|www[.])[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(text);
+        while (m.find()) {
+            String urlStr = m.group();
+            if (urlStr.startsWith("(") && urlStr.endsWith(")")) {
+                urlStr = urlStr.substring(1, urlStr.length() - 1);
+            }
+            links.add(urlStr);
+        }
+        return links;
     }
 
 }

@@ -11,8 +11,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 
-import com.app.hollout.R;
-import com.app.hollout.utils.UiUtils;
+import com.wan.hollout.R;
+import com.wan.hollout.utils.UiUtils;
 
 public class AnimatingToggle extends FrameLayout {
 

@@ -1,5 +1,6 @@
 package com.wan.hollout.utils;
 
+import android.provider.MediaStore;
 import android.util.SparseBooleanArray;
 
 import java.text.SimpleDateFormat;
@@ -10,6 +11,48 @@ import java.util.Locale;
  */
 
 public class AppConstants {
+
+    public static final String TARGET_COUNTRY = "feed_target_country";
+    public static final String INIT_TITLE = "init_title";
+    public static final String PEOPLE_TO_SHARE_WITH_HAS_CHANGED = "people_to_share_with_has_changed";
+    public static final String INIT_POSITION = "init_position";
+
+    public static final String FILE_MIME_TYPE = "file_mime_type";
+    public static final String REPLY_MESSAGE = "reply_message";
+    public static final String HIDE_MESSAGE_REPLY_VIEW = "HIDE_MESSAGE_REPLY_VIEW";
+
+    public static final String CONTACT_NAME = "contact_name";
+    public static final String CONTACT_NUMBER = "contact_number";
+
+    public static final String REQUEST_STORAGE_ACCESS_FOR_GALLERY = "RequestStoragePermissionsForGalleryAccess";
+    public static final String REQUEST_STORAGE_ACCESS_FOR_DOCUMENTS = "RequestStoragePermissionsForDocumentAccess";
+    public static final String REQUEST_AUDIO_ACCESS_FOR_RECORDING = "RequestStoragePermissionsForAudioAccess";
+    public static final String FILE_TYPE_DOCUMENT = "FileTypeDocument";
+    public static final String FILE_TYPE_CONTACT = "FileTypeContact";
+    public static final String FILE_TYPE_LOCATION = "FileTypeLocation";
+
+    public static final String HOLLOUT_FEED = "Feed";
+    public static final String FEED_CREATOR_ID = "feed_creator_id";
+    public static final String FEED_TYPE = "feed_type";
+    public static final String FEED_BODY = "feed_body";
+    public static final String FEED_CREATOR = "feed_creator";
+    public static final String FEED_TYPE_CHAT_REQUEST = "feed_type_chat_request";
+    public static final String FEED_RECIPIENT = "feed_recipient";
+    public static final String RECIPIENT_NAME = "com.app.hollout.RECIPIENT_NAME";
+    public static final String LAST_FILE_CAPTION = "last_file_caption";
+
+    public static final String FILE_TYPE = "CustomFileType";
+    public static final String AUDIO_DURATION = "audio_duration";
+
+    public static final int CAPTURE_MEDIA_TYPE_IMAGE = 1;
+    public static final int CAPTURE_MEDIA_TYPE_VIDEO = 2;
+    public static final int CAPTURE_MEDIA_TYPE_AUDIO = 3;
+
+    private static final String HOLLOUT_FOLDER_PATH = "Hollout";
+    public static final String HOLLOUT_MEDIA_PATH = HOLLOUT_FOLDER_PATH + "/" + "Media";
+
+    public static final int RECIPIENT_TYPE_INDIVIDUAL = 0;
+    public static final int RECIPIENT_TYPE_GROUP = 1;
 
     public static final String APP_USER_DISPLAY_NAME = "app_user_display_name";
     public static final String APP_USER_PROFILE_PHOTO_URL = "app_user_profile_photo_url";
@@ -130,5 +173,30 @@ public class AppConstants {
     public static final String LANGUAGE_PREF = "pref_language";
     public static final String ENTER_SENDS_PREF = "pref_enter_sends";
 
+    public static final String FILE_TYPE_VIDEO = "FileTypeVideo";
+    public static final String FILE_TYPE_PHOTO = "FileTypePhoto";
+    public static final String FILE_TYPE_AUDIO = "FileTypeAudio";
+    public static final int REQUEST_CODE_PICK_FROM_GALLERY = 10;
+    public static final String GALLERY_RESULTS = "EXTRA_GALLERY_RESULTS";
+    public static final String PICKED_MEDIA_FILES_EMPTY_NOW = "PickedMediaFilesEmptyNow";
+
+    public static final String[] projectionPhotos = {
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.BUCKET_ID,
+            MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+            MediaStore.Images.Media.DATA,
+            MediaStore.Images.Media.DATE_TAKEN,
+            MediaStore.Images.Media.ORIENTATION
+    };
+    public static final String[] projectionVideo = {
+            MediaStore.Video.Media._ID,
+            MediaStore.Video.Media.BUCKET_ID,
+            MediaStore.Video.Media.BUCKET_DISPLAY_NAME,
+            MediaStore.Video.Media.DATA,
+            MediaStore.Video.Media.DATE_TAKEN,
+            MediaStore.Video.Media.TITLE,
+            MediaStore.Video.Media.SIZE,
+            MediaStore.Video.Media.DURATION
+    };
 }
 

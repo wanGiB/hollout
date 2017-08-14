@@ -182,6 +182,9 @@
     <string name="audio">Audio</string>
     <string name="document">Document</string>
 
+    <string name="internal_storage">Internal storage</string>
+    <string name="unable_to_get_locatio">Oops! Unable to get location</string>
+
     <string name="conversation_activity__emoji_toggle_description">Toggle emoji keyboard</string>
     <string name="conversation_activity__quick_attachment_drawer_toggle_camera_description">Toggle attachment drawer</string>
     <string name="conversation_activity__quick_attachment_drawer_record_and_send_audio_description">Record and send audio attachment</string>
@@ -192,4 +195,31 @@
 
     <string name="compose_message">Compose message</string>
 
+    <string name="say_hi"><![CDATA[Break the silence, say hi ]]></string>
+    <string name="conversation_fragment__scroll_to_the_bottom_content_description">Scroll to the bottom</string>
+    <string name="search_messages">Search messages</string>
+    <string name="view_shared_media">View shared media</string>
+    <string name="block_user">Block user</string>
+    <string name="view_profile_info">View Profile</string>
+    <string name="call">Call</string>
+    <string name="delete_conversation">Delete conversation</string>
+
+    <string name="cant_find_pictures">"Can't find pictures"</string>
+    <string name="File_does_not_exist">File does not exist</string>
+    <string name="file_greater_than_max">The file can not be larger than 10MB</string>
+    <string name="Is_download_voice_click_later">Downloading the voice message, click later</string>
+    <string name="send_failure_please">Send failure, please test whether the server connection</string>
+    <string name="record_no_permission">Recording without permission</string>
+    <string name="record_recording_time_is_too_short">The recording time is too short</string>
+    <string name="record_need_sdcard_support">Send voice need sdcard support</string>
+    <string name="record_tap_to_record">Tap and hold to record</string>
+    <string name="record_move_up_to_cancel">Release to send, swipe up to cancel</string>
+    <string name="record_release_to_cancel">Release to cancel</string>
+    <string name="record_recoding_fail">The recording failure, please try again！</string>
+    <string name="nice_to_meet_you">Hi, nice to meet you.</string>
+    <string name="cancel_text">CANCEL</string>
+    <string name="send_text">SEND</string>
+    <string name="no_music">No music</string>
+    <string name="no_photos">No photos</string>
+    <string name="no_videos">No Videos</string>
 </resources>

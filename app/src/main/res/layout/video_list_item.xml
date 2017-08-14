@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="@dimen/video_list_item_height"
+    android:addStatesFromChildren="false"
+    android:descendantFocusability="blocksDescendants"
+    android:layoutDirection="locale"
+    android:orientation="vertical"
+    android:textDirection="locale"
+    tools:ignore="UnusedAttribute">
+
+    <LinearLayout
+        android:id="@id/ll_music_item"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/video_list_item_height"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@id/thumb"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="@dimen/video_list_item_margin_left"
+                android:layout_marginLeft="@dimen/video_list_item_margin_left"
+                android:layout_marginRight="@dimen/video_list_item_margin_right"
+                android:layout_marginStart="@dimen/video_list_item_margin_left"
+                android:orientation="vertical">
+
+                <com.wan.hollout.ui.widgets.RoundedImageView
+                    android:id="@+id/random_video_frame"
+                    android:layout_width="@dimen/video_list_icon_width"
+                    android:layout_height="@dimen/video_list_icon_height"
+                    android:layout_gravity="center"
+                    android:scaleType="fitXY"
+                    app:riv_border_color="@color/white"
+                    app:riv_border_width="1dp"
+                    app:riv_corner_radius="2dp" />
+
+                <LinearLayout
+                    android:id="@+id/video_indicator"
+                    android:layout_width="@dimen/video_list_icon_width"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginBottom="12.0dip"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/x_bg_videos_camera"
+                        tools:ignore="ContentDescription" />
+
+                    <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/video_duration_item"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|center"
+                        android:layout_marginEnd="@dimen/video_list_icon_tv_margin_right"
+                        android:layout_marginRight="@dimen/video_list_icon_tv_margin_right"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/video_list_icon_text_size"
+                        app:fontName="Roboto-Regular.ttf" />
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:id="@+id/video_parent_view"
+                android:layout_width="0.0dip"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1.0"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:gravity="start"
+                android:orientation="vertical"
+                android:paddingBottom="16.0dip"
+                android:paddingTop="16.0dip">
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/video_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:textColor="@color/medium_grey"
+                    android:textSize="@dimen/video_list_item_name_text_size"
+                    app:fontName="Roboto-Medium.ttf" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/video_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:textColor="@color/grey500"
+                    android:textSize="@dimen/text_normal"
+                    app:fontName="Roboto-Regular.ttf" />
+
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/video_check"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/audio_list_item_height"
+                android:layout_marginEnd="16dp"
+                android:layout_marginRight="16dp"
+                android:addStatesFromChildren="true"
+                android:button="@drawable/x_btn_check_normal"
+                android:clickable="true"
+                android:duplicateParentState="false" />
+
+        </LinearLayout>
+
+        <include
+            layout="@layout/video_list_divider_padding"
+            android:visibility="visible" />
+
+    </LinearLayout>
+    
+</FrameLayout>

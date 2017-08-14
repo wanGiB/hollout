@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/image_item_layout"
+    android:layout_width="112dip"
+    android:layout_height="112dip"
+    android:layout_margin="2dp">
+
+    <com.wan.hollout.ui.widgets.RoundedImageView
+        android:id="@+id/image_icon_item"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:scaleType="centerCrop"
+        android:src="@drawable/x_ic_blank_picture"
+        app:riv_border_color="@color/white"
+        app:riv_border_width="1dp"
+        app:riv_corner_radius="1dp"
+        tools:ignore="ContentDescription" />
+
+    <CheckBox
+        android:id="@+id/image_click_item"
+        android:layout_width="35.0dip"
+        android:layout_height="35.0dip"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:button="@drawable/x_btn_check_normal"
+        android:scaleType="center"
+        tools:ignore="ContentDescription,RtlHardcoded,RtlSymmetry" />
+
+</RelativeLayout>

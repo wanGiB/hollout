@@ -70,4 +70,16 @@
 
     <dimen name="keyboard_height">230dip</dimen>
 
+    <dimen name="video_list_divider_margin_left">96.0dip</dimen>
+    <dimen name="video_list_icon_height">48.0dip</dimen>
+    <dimen name="video_list_icon_text_size">12sp</dimen>
+    <dimen name="video_list_icon_tv_margin_right">4.0dip</dimen>
+    <dimen name="video_list_icon_width">64.0dip</dimen>
+    <dimen name="video_list_item_height">72.0dip</dimen>
+    <dimen name="video_list_item_margin_left">16.0dip</dimen>
+    <dimen name="video_list_item_margin_right">16.0dip</dimen>
+    <dimen name="video_list_item_name_text_size">16.0dip</dimen>
+    <dimen name="text_normal">14.0dip</dimen>
+    <dimen name="audio_list_item_height">72.0dip</dimen>
+
 </resources>

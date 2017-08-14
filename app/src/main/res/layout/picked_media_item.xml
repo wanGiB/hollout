@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_margin="8dp"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/single_media_frame"
+        android:layout_width="150dp"
+        android:layout_height="150dp">
+
+        <com.wan.hollout.ui.widgets.RoundedImageView
+            android:id="@+id/single_media_viewer"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/x_ic_blank_picture"
+            app:riv_border_color="@color/white"
+            app:riv_border_width="3dp"
+            app:riv_corner_radius="2dp" />
+
+        <ImageView
+            android:id="@+id/play_single_media_if_video"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            app:srcCompat="@drawable/ic_play_circle_filled_black_24dp"
+            tools:ignore="ContentDescription" />
+
+        <com.wan.hollout.ui.widgets.CircleImageView
+            android:id="@+id/cancel_picked_media"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|top"
+            android:src="@drawable/ic_action_cancel"
+            app:border_color="@color/white"
+            app:border_width="4dp"
+            tools:ignore="ContentDescription" />
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/media_length_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:padding="8dp"
+            android:text="00:10"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+</LinearLayout>
