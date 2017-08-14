@@ -56,7 +56,7 @@
                 android:paddingBottom="16.0dip"
                 android:paddingTop="16.0dip">
 
-                <com.app.hollout.ui.widgets.HolloutTextView
+                <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/audio_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
                     android:maxLines="1"
                     android:textColor="@color/black"
                     android:textSize="@dimen/capp_text_size_large"
-                    app:fontName="Roboto-Medium.ttf" />
+                    app:textStyle="medium" />
 
                 <LinearLayout
                     android:id="@+id/container"
@@ -73,7 +73,7 @@
                     android:layout_gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <com.app.hollout.ui.widgets.HolloutTextView
+                    <com.wan.hollout.ui.widgets.HolloutTextView
                         android:id="@+id/audio_album"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
@@ -84,9 +84,9 @@
                         android:textColor="@color/hollout_material_grey_800"
                         android:textSize="@dimen/capp_text_size_medium"
                         android:textStyle="bold"
-                        app:fontName="Roboto-Medium.ttf" />
+                        app:textStyle="medium"/>
 
-                    <com.app.hollout.ui.widgets.HolloutTextView
+                    <com.wan.hollout.ui.widgets.HolloutTextView
                         android:id="@+id/audio_size"
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
@@ -95,7 +95,7 @@
                         android:textColor="@color/hollout_material_grey_600"
                         android:textSize="@dimen/capp_text_size_medium"
                         android:textStyle="bold"
-                        app:fontName="Roboto-Regular.ttf" />
+                        app:textStyle="regular" />
 
                 </LinearLayout>
 

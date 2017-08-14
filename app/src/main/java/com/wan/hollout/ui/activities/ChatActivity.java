@@ -17,6 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -33,6 +34,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.afollestad.appthemeengine.ATE;
+import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
@@ -64,6 +67,7 @@ import com.wan.hollout.utils.FilePathFinder;
 import com.wan.hollout.utils.FileUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
+import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.HolloutVCFParser;
 import com.wan.hollout.utils.PermissionsUtils;
@@ -98,9 +102,11 @@ import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
 
 
 @SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal"})
-public class ChatActivity extends BaseActivity implements
+public class ChatActivity extends BaseActivity implements ATEActivityThemeCustomizer,
         KeyboardAwareLinearLayout.OnKeyboardShownListener,
         ActivityCompat.OnRequestPermissionsResultCallback, InputPanel.Listener, View.OnClickListener {
+
+    private boolean isDarkTheme;
 
     private static final int REQUEST_CODE_PICK_FILE = 9;
 
@@ -224,7 +230,9 @@ public class ChatActivity extends BaseActivity implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_chat);
         dynamicLanguage.onCreate(this);
         ButterKnife.bind(this);
@@ -677,11 +685,13 @@ public class ChatActivity extends BaseActivity implements
 //        }
 //
 //    }
+//
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.chat_options_menu, menu);
-        return super.onCreateOptionsMenu(menu);
+        ATE.applyMenu(this, getATEKey(), menu);
+        return true;
     }
 
     @Override
@@ -1524,6 +1534,11 @@ public class ChatActivity extends BaseActivity implements
     public void resendMessage(/*EMMessage message*/) {
 //        message.setStatus(EMMessage.Status.CREATE);
 //        EMClient.getInstance().chatManager().sendMessage(message);
+    }
+
+    @Override
+    public int getActivityTheme() {
+        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }
 
 }

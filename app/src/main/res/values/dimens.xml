@@ -81,5 +81,10 @@
     <dimen name="video_list_item_name_text_size">16.0dip</dimen>
     <dimen name="text_normal">14.0dip</dimen>
     <dimen name="audio_list_item_height">72.0dip</dimen>
+    <dimen name="capp_new_file_badge_size">20.0dip</dimen>
+    <dimen name="capp_text_size_large">16.0dip</dimen>
+    <dimen name="capp_text_size_medium">14.0dip</dimen>
+    <dimen name="sdcard_phone_list_divider_padding">72.0dip</dimen>
+    <dimen name="audio_list_margin">16.0dip</dimen>
 
 </resources>

@@ -222,4 +222,6 @@
     <string name="no_music">No music</string>
     <string name="no_photos">No photos</string>
     <string name="no_videos">No Videos</string>
+    <string name="unknown">Unknown</string>
+
 </resources>
