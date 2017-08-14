@@ -105,11 +105,10 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.FullScreen.Light" />
 
-
         <activity
             android:name=".ui.activities.GalleryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
-            android:label="@string/app_name"
+            android:label="@string/gallery"
             android:theme="@style/AppTheme.FullScreen.Light" />
 
         <activity
@@ -164,8 +163,6 @@
                     tools:ignore="BatteryLife" />
             </intent-filter>
         </receiver>
-
-        <activity android:name=".ui.activities.CommentsActivity" />
 
         <activity
             android:name=".ui.activities.SlidePagerActivity"

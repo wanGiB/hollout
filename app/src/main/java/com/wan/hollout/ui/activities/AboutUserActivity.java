@@ -121,6 +121,13 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing())
+            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+    }
+
+    @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchItem.setVisible(false);

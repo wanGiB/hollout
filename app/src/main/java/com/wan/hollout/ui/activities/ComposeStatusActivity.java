@@ -164,7 +164,8 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
+        if (isFinishing())
+            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
     }
 
 }

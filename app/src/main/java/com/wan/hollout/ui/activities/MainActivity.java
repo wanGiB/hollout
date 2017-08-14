@@ -68,7 +68,9 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer, DrawerFragment.FragmentDrawerListener, ActivityCompat.OnRequestPermissionsResultCallback {
+public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer,
+        DrawerFragment.FragmentDrawerListener,
+        ActivityCompat.OnRequestPermissionsResultCallback {
 
     private boolean isDarkTheme;
 
@@ -122,6 +124,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         initAndroidPermissions();
         drawerFragment = (DrawerFragment) getSupportFragmentManager().findFragmentById(R.id.main_navigation_drawer_fragment);
         drawerFragment.setUp(drawer, this);
+
         ParseUser signedInUser = ParseUser.getCurrentUser();
         if (!HolloutPreferences.isUserWelcomed()) {
             if (signedInUser != null) {
@@ -129,8 +132,11 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
             HolloutPreferences.setUserWelcomed(true);
         }
+
         checkAndRegEventBus();
+
         materialSearchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+
             @Override
             public void onSearchViewShown() {
                 EventBus.getDefault().post(AppConstants.DISABLE_NESTED_SCROLLING);
@@ -142,7 +148,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 EventBus.getDefault().post(AppConstants.ENABLE_NESTED_SCROLLING);
                 UiUtils.showView(tabLayout, true);
             }
+
         });
+
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
             @Override
@@ -167,7 +175,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             public void onPageScrollStateChanged(int state) {
 
             }
+
         });
+
     }
 
     private Adapter setupViewPagerAdapter(ViewPager viewPager) {

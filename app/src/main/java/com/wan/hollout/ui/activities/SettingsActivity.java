@@ -77,6 +77,13 @@ public class SettingsActivity extends BaseActivity implements ATEActivityThemeCu
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing())
+            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+    }
+
+    @Override
     public int getActivityTheme() {
         return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }

@@ -105,6 +105,13 @@ public class SlidePagerActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing())
+            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             toggleActionBar();

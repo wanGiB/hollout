@@ -9,7 +9,7 @@
     android:background="@drawable/background_hd"
     android:orientation="vertical">
 
-    <com.app.hollout.ui.chats.widgets.ChatToolbar
+    <com.wan.hollout.ui.widgets.ChatToolbar
         android:id="@+id/chat_tool_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -352,6 +352,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         startTypingAnimation(0);
     }
 
+
     private void initDividerBlinkingAnimation() {
         Animation blinkingAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
         blinkingAnimation.setRepeatMode(Animation.REVERSE);
@@ -530,6 +531,9 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             shimmerFrameLayout.stopShimmerAnimation();
         }
         checkAndUnRegEventBus();
+        if (isFinishing()) {
+            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+        }
         super.onPause();
     }
 

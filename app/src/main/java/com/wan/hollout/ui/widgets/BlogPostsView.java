@@ -3,7 +3,6 @@ package com.wan.hollout.ui.widgets;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.os.Vibrator;
@@ -36,9 +35,6 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.BounceInterpolator;
-import com.wan.hollout.callbacks.DoneCallback;
-import com.wan.hollout.ui.activities.CommentsActivity;
-import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.adapters.ReactionsAdapter;
 import com.wan.hollout.ui.adapters.RemoteReactionsAdapter;
 import com.wan.hollout.utils.AppConstants;
@@ -272,7 +268,6 @@ public class BlogPostsView extends FrameLayout {
 //                                }
 //                            });
                         } else {
-                            launchCommentActivity(context, postId, blogId);
                         }
                         break;
                 }
@@ -341,13 +336,6 @@ public class BlogPostsView extends FrameLayout {
                 likeFeed(postId, "Like.json");
             }
         }
-    }
-
-    private void launchCommentActivity(Activity context, String postId, String blogId) {
-        Intent commentIntent = new Intent(context, CommentsActivity.class);
-        commentIntent.putExtra(AppConstants.POST_ID, postId);
-        commentIntent.putExtra(AppConstants.BLOG_ID, blogId);
-        context.startActivity(commentIntent);
     }
 
     private int getPostHashCode(String postId) {

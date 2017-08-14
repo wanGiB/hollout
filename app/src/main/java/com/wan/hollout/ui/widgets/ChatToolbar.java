@@ -156,7 +156,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     public void refreshToolbar(ParseUser recipientUser) {
         this.recipientObject = recipientUser;
-        String username = recipientUser.getString(AppConstants.APP_USER_NAME);
+        String username = recipientUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         String profilePhotoUrl = recipientUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
 
         if (StringUtils.isNotEmpty(username)) {

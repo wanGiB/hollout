@@ -8,7 +8,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -16,8 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.RelativeLayout;
 
-
 import com.afollestad.appthemeengine.ATE;
+import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
@@ -27,6 +26,7 @@ import com.wan.hollout.ui.fragments.UserPhotosFragment;
 import com.wan.hollout.ui.fragments.UserVideosFragment;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
+import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutPreferences;
 
@@ -47,10 +47,10 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
     @BindView(R.id.toolbar)
     public Toolbar toolbar;
 
-    @BindView(R.id.galleryPager)
+    @BindView(R.id.viewpager)
     ViewPager galleryPager;
 
-    @BindView(R.id.galeryTabs)
+    @BindView(R.id.tabs)
     TabLayout galleryTabsLayout;
 
     @BindView(R.id.search_view)
@@ -83,7 +83,6 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
 
     private int initPosition;
     private String initTitle;
-
 
     //When a user is sending out files to another user  it is either images,videos and music files are sent out separately and not together.Let's keep track of the last received file type using this
     public String lastReceivedFileType = null;
@@ -140,19 +139,22 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
             }
         }
 
+        galleryTabsLayout.setSelectedTabIndicatorHeight(6);
+        pagerAdapter = new MainViewPagerAdapter(this, getSupportFragmentManager(), fragments, titles);
+
+        if (galleryPager != null) {
+            setupViewPager(galleryPager);
+            setupTabs();
+        }
+
         if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
         } else {
             ATE.apply(this, "light_theme");
         }
-        
-        galleryTabsLayout.setSelectedTabIndicatorHeight(6);
-        pagerAdapter = new MainViewPagerAdapter(this, getSupportFragmentManager(), fragments, titles);
-        setupViewPager(galleryPager);
-
-        setupTabs();
 
         searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+
             @Override
             public void onSearchViewShown() {
                 new Handler().postDelayed(new Runnable() {
@@ -192,33 +194,35 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
         galleryPager.addOnPageChangeListener(this);
 
         sendSelectedItemsFab.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
-
                 if (!selectedFiles.isEmpty()) {
                     Intent mCallerIntent = new Intent();
                     mCallerIntent.putParcelableArrayListExtra(AppConstants.GALLERY_RESULTS, selectedFiles);
                     setResult(RESULT_OK, mCallerIntent);
                     finish();
                 }
-
             }
         });
 
         cancelSelections.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 finish();
             }
-
         });
 
         if (selectedFiles.isEmpty()) {
             sendSelectedItemsFab.hide();
         }
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        String ateKey = HolloutPreferences.getATEKey();
+        ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
     }
 
     @Override
@@ -261,6 +265,13 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
     private void setupViewPager(ViewPager viewPager) {
         viewPager.setAdapter(pagerAdapter);
         viewPager.setOffscreenPageLimit(3);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing())
+            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
     }
 
     @Override
@@ -405,7 +416,6 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
         }
 
     }
-
 
     @Override
     protected void onStop() {
