@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/launch_user_profile"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    tools:ignore="RtlHardcoded">
+
+    <com.wan.hollout.ui.widgets.CircleImageView
+        android:id="@+id/contact_photo"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:src="@drawable/default_avatar"
+        app:border_color="@color/white"
+        app:border_width="1dp"
+        tools:ignore="RtlHardcoded" />
+
+    <LinearLayout
+        android:id="@+id/contact_detail_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_toEndOf="@id/contact_photo"
+        android:layout_toRightOf="@id/contact_photo"
+        android:orientation="vertical"
+        android:paddingBottom="2.0dip"
+        android:paddingLeft="4.0dip"
+        android:paddingTop="0.0dip"
+        tools:ignore="RtlHardcoded,RtlSymmetry">
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/contact_name"
+            style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="0.6"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:text="Name View"
+            android:textColor="@color/text_black"
+            android:textSize="18sp"
+            app:textStyle="medium" />
+
+        <LinearLayout
+            android:id="@+id/contact_subtitle_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true"
+            android:orientation="horizontal"
+            android:paddingRight="15dip">
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/contact_subtitle"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:maxLines="1"
+                android:text="Subtitle"
+                android:textColor="@color/text_black"
+                android:textSize="12sp"
+                app:textStyle="medium" />
+
+            <com.wan.hollout.ui.widgets.dotloader.DotLoader
+                android:id="@+id/typing_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="15dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="8dp"
+                android:visibility="gone"
+                app:color_array="@array/dot_colors"
+                app:dot_radius="4dp"
+                app:number_of_dots="3" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

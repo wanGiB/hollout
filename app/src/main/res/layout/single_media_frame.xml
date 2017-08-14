@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/single_media_frame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.wan.hollout.ui.widgets.RoundedImageView
+        android:id="@+id/single_media_viewer"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:riv_corner_radius="2dp" />
+
+    <ImageView
+        android:id="@+id/play_single_media_if_video"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_play_circle_filled_white_48dp"
+        android:visibility="gone"
+        tools:ignore="ContentDescription" />
+
+    <com.wan.hollout.ui.widgets.CircleImageView
+        android:id="@+id/cancel_picked_single_media"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="end|top"
+        android:src="@drawable/ic_cancel_accent"
+        android:visibility="gone"
+        app:border_color="@color/white"
+        app:border_width="4dp"
+        tools:ignore="ContentDescription" />
+
+    <com.wan.hollout.ui.widgets.HolloutTextView
+        android:id="@+id/media_length_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:padding="8dp"
+        android:text="00:10"
+        android:textColor="@color/white"
+        android:visibility="gone" />
+
+</FrameLayout>

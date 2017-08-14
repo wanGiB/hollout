@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.wan.hollout.ui.widgets.InputAwareLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@drawable/background_hd"
+    android:orientation="vertical">
+
+    <com.app.hollout.ui.chats.widgets.ChatToolbar
+        android:id="@+id/chat_tool_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="3dp" />
+
+    <LinearLayout
+        android:id="@+id/conversation_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/background_hd"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/fragment_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <com.app.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/messages_empty_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/say_hi"
+                android:textColor="@color/list_item_secondary_text"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/scroll_date_header"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal|top"
+                android:layout_marginTop="3dp"
+                android:background="?conversation_item_header_background"
+                android:gravity="center"
+                android:paddingBottom="3dp"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"
+                android:paddingTop="3dp"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:visibility="gone"
+                tools:text="March 1, 2015" />
+
+            <FrameLayout
+                android:id="@+id/scroll_to_bottom_frame"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="30dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:visibility="gone"
+                tools:ignore="RtlHardcoded">
+
+                <ImageView
+                    android:id="@+id/scroll_to_bottom_button"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    android:contentDescription="@string/conversation_fragment__scroll_to_the_bottom_content_description"
+                    android:padding="5dp"
+                    android:src="@drawable/pagedown"
+                    tools:ignore="RtlHardcoded" />
+
+                <TextView
+                    android:id="@+id/unread_message_indicator"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="start|top"
+                    android:background="@drawable/badge_selected"
+                    android:gravity="center"
+                    android:textColor="@color/white"
+                    android:textSize="9sp"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    tools:ignore="SmallSp" />
+
+            </FrameLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/chats_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:cacheColorHint="?conversation_background"
+                android:scrollbars="vertical" />
+
+        </FrameLayout>
+
+        <include layout="@layout/conversation_input_panel" />
+
+        <ViewStub
+            android:id="@+id/emoji_drawer_stub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inflatedId="@+id/emoji_drawer"
+            android:layout="@layout/conversation_activity_emojidrawer_stub" />
+
+    </LinearLayout>
+
+</com.wan.hollout.ui.widgets.InputAwareLayout>

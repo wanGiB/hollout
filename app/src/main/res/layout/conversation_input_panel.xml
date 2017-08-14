@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ImageView
+        android:id="@+id/bb_bottom_bar_shadow"
+        android:layout_width="match_parent"
+        android:layout_height="4dp"
+        android:src="@drawable/bb_bottom_bar_top_shadow"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:background="?android:windowBackground"
+        android:clickable="false"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/parent_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/link_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <com.wan.hollout.ui.widgets.LinkPreview
+                    android:id="@+id/og_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="96dp" />
+
+            </RelativeLayout>
+
+            <include layout="@layout/reply_message_view" />
+
+            <FrameLayout
+                android:id="@+id/sub_parent_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <include layout="@layout/single_media_frame" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/multiple_media_files_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <com.wan.hollout.ui.widgets.InputPanel
+            android:id="@+id/bottom_panel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <com.wan.hollout.ui.widgets.AnimatingToggle
+                android:id="@+id/compose_or_record_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1"
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:id="@+id/compose_bubble"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <com.wan.hollout.emoji.EmojiToggle
+                        android:id="@+id/emoji_toggle"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"
+                        android:background="@drawable/touch_highlight_background"
+                        android:contentDescription="@string/conversation_activity__emoji_toggle_description"
+                        tools:ignore="RtlHardcoded" />
+
+                    <com.wan.hollout.ui.widgets.ComposeText
+                        android:id="@+id/embedded_text_editor"
+                        style="@style/ComposeEditText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:hint="@string/compose_message"
+                        android:minHeight="37dp"
+                        android:nextFocusForward="@+id/send_button"
+                        android:nextFocusRight="@+id/send_button"
+                        tools:ignore="RtlHardcoded">
+
+                        <requestFocus />
+
+                    </com.wan.hollout.ui.widgets.ComposeText>
+
+                    <ImageButton
+                        android:id="@+id/attach_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:contentDescription="@string/conversation_activity__quick_attachment_drawer_toggle_camera_description"
+                        android:paddingBottom="4dp"
+                        android:paddingEnd="20dp"
+                        android:paddingRight="20dp"
+                        android:paddingStart="12dp"
+                        android:paddingLeft="12dp"
+                        android:rotation="-45"
+                        android:src="@drawable/ic_attachment_icon" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/recording_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/record_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginStart="20dp"
+                        android:ellipsize="none"
+                        android:maxLines="1"
+                        android:textColor="#61737b"
+                        android:textSize="20sp"
+                        android:visibility="gone"
+                        app:textStyle="medium"
+                        tools:ignore="RtlHardcoded"
+                        tools:visibility="visible" />
+
+                    <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/slide_to_cancel"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="1"
+                        android:drawableLeft="@drawable/ic_keyboard_arrow_left_grey600_24dp"
+                        android:drawableStart="@drawable/ic_keyboard_arrow_left_grey600_24dp"
+                        android:ellipsize="none"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingLeft="20dp"
+                        android:paddingStart="20dp"
+                        android:text="@string/conversation_input_panel__slide_to_cancel"
+                        android:textAllCaps="true"
+                        android:textColor="#61737b"
+                        android:textSize="12sp"
+                        app:textStyle="regular"
+                        tools:ignore="RtlHardcoded,RtlSymmetry" />
+
+                    <ImageView
+                        android:id="@+id/recording_started_animating_image"
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginRight="16dp"
+                        android:src="@drawable/rec"
+                        tools:ignore="ContentDescription,RtlHardcoded" />
+
+                </LinearLayout>
+
+            </com.wan.hollout.ui.widgets.AnimatingToggle>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/record_or_send_message_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="2dp"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:layout_marginStart="2dp"
+                android:contentDescription="@string/conversation_activity__quick_attachment_drawer_record_and_send_audio_description"
+                android:src="@drawable/send_inactive_icon"
+                app:backgroundTint="@color/grey_200"
+                app:elevation="2dp"
+                app:fabSize="mini"
+                app:useCompatPadding="false" />
+
+        </com.wan.hollout.ui.widgets.InputPanel>
+
+    </LinearLayout>
+
+    <include layout="@layout/footer_snack" />
+
+</merge>

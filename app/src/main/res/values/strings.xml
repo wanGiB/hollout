@@ -153,5 +153,43 @@
     <string name="shared">Shared!</string>
     <string name="set">Set</string>
     <string name="search_hint">Search People</string>
+    <string name="idle">Idle</string>
+    <string name="typing_">typing</string>
+    <string name="typing">typing…</string>
+
+    <!-- attachment_type_selector -->
+    <string name="attachment_type_selector__image">Image</string>
+    <string name="attachment_type_selector__image_description">Image</string>
+    <string name="attachment_type_selector__audio">Audio</string>
+    <string name="attachment_type_selector__audio_description">Audio</string>
+    <string name="attachment_type_selector__video">Video</string>
+    <string name="attachment_type_selector__video_description">Video</string>
+    <string name="attachment_type_selector__contact">Contact</string>
+    <string name="attachment_type_selector__contact_description">Contact</string>
+    <string name="attachment_type_selector__camera">Camera</string>
+    <string name="attachment_type_selector__camera_description">Camera</string>
+    <string name="attachment_type_selector__location">Location</string>
+    <string name="attachment_type_selector__location_description">Location</string>
+    <string name="attachment_type_selector__gif">GIF</string>
+    <string name="attachment_type_selector__gif_description">Gif</string>
+    <string name="attachment_type_selector__drawer_description">Toggle attachment drawer</string>
+    <string name="gallery">Gallery</string>
+    <string name="attachment_document">Document</string>
+
+    <string name="photo">Photo</string>
+    <string name="video">Video</string>
+    <string name="contact">Contact</string>
+    <string name="audio">Audio</string>
+    <string name="document">Document</string>
+
+    <string name="conversation_activity__emoji_toggle_description">Toggle emoji keyboard</string>
+    <string name="conversation_activity__quick_attachment_drawer_toggle_camera_description">Toggle attachment drawer</string>
+    <string name="conversation_activity__quick_attachment_drawer_record_and_send_audio_description">Record and send audio attachment</string>
+
+    <string name="conversation_input_panel__slide_to_cancel">TAP TO CANCEL</string>
+    <string name="ConversationActivity_add_attachment">Attach File</string>
+    <string name="conversation_activity__send">Send</string>
+
+    <string name="compose_message">Compose message</string>
 
 </resources>

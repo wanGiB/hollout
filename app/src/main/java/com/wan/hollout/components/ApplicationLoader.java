@@ -17,8 +17,10 @@ import com.raizlabs.android.dbflow.config.FlowManager;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
+import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.HolloutPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -58,6 +60,7 @@ public class ApplicationLoader extends Application {
         FlowManager.init(this);
         configureThemes();
         startAppInstanceDetector();
+        defaultSystemEmojiPref();
     }
 
     private void startAppInstanceDetector() {
@@ -165,6 +168,17 @@ public class ApplicationLoader extends Application {
                     .commit();
         }
 
+    }
+
+    private void defaultSystemEmojiPref() {
+        Thread thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                HolloutPreferences.defaultToSystemEmojis(AppConstants.SYSTEM_EMOJI_PREF, false);
+            }
+        };
+        thread.start();
     }
 
 }

@@ -11,6 +11,10 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="CircleColorImageView">
+        <attr name="circleColor" format="color" />
+    </declare-styleable>
+
     <declare-styleable name="RoundedImageView">
         <attr name="riv_corner_radius" format="dimension" />
         <attr name="riv_corner_radius_top_left" format="dimension" />
@@ -275,5 +279,17 @@
     <attr name="conversation_number_picker_text_color_normal" format="reference|color" />
     <attr name="conversation_number_picker_text_color_selected" format="reference|color" />
     <attr name="conversation_item_sent_text_secondary_color" format="reference|color" />
+
+    <declare-styleable name="DotLoader">
+        <attr name="dot_radius" format="dimension" />
+        <attr name="color_array" format="reference" />
+        <attr name="number_of_dots" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="SquareFrameLayout">
+        <attr name="square_height" format="boolean" />
+    </declare-styleable>
+
+    <attr name="attachment_type_selector_background" format="color" />
 
 </resources>

@@ -121,4 +121,9 @@ public class HolloutPreferences {
     public static String getLanguage(String languagePref, String zz) {
         return getHolloutPreferences().getString(languagePref,zz);
     }
+
+    public static void defaultToSystemEmojis(String systemEmojiPref, boolean b) {
+        getHolloutPreferences().edit().putBoolean(systemEmojiPref,b).commit();
+    }
+
 }

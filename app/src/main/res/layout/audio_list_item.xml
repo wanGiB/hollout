@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:id="@+id/ll_music_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/sub_parent_view"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/audio_list_item_height"
+            android:layout_gravity="center"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <FrameLayout
+                android:id="@+id/thumb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/audio_list_margin"
+                android:layout_marginRight="@dimen/audio_list_margin"
+                android:orientation="vertical">
+
+                <com.app.hollout.ui.widgets.RoundedImageView
+                    android:id="@+id/audio_icon"
+                    android:layout_width="@dimen/audio_list_item_icon_size"
+                    android:layout_height="@dimen/audio_list_item_icon_size"
+                    android:layout_gravity="center"
+                    android:src="@drawable/x_ic_folde_music"
+                    app:riv_corner_radius="2dp"
+                    tools:ignore="ContentDescription" />
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:id="@+id/audio_item_parent"
+                android:layout_width="0.0dip"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_weight="1.0"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingBottom="16.0dip"
+                android:paddingTop="16.0dip">
+
+                <com.app.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/audio_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/capp_text_size_large"
+                    app:fontName="Roboto-Medium.ttf" />
+
+                <LinearLayout
+                    android:id="@+id/container"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <com.app.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/audio_album"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.1"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="@string/unknown"
+                        android:textColor="@color/hollout_material_grey_800"
+                        android:textSize="@dimen/capp_text_size_medium"
+                        android:textStyle="bold"
+                        app:fontName="Roboto-Medium.ttf" />
+
+                    <com.app.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/audio_size"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.1"
+                        android:maxLines="1"
+                        android:textColor="@color/hollout_material_grey_600"
+                        android:textSize="@dimen/capp_text_size_medium"
+                        android:textStyle="bold"
+                        app:fontName="Roboto-Regular.ttf" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/audio_check"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/audio_list_item_height"
+                android:layout_weight="0.06"
+                android:button="@drawable/x_btn_check_normal"
+                android:clickable="true" />
+
+        </LinearLayout>
+
+        <include
+            layout="@layout/sdcard_phone_divider_padding"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+</FrameLayout>
