@@ -366,7 +366,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         coverPhotoOptionsBuilder.create().show();
                     }
                 });
-            }else{
+            } else {
                 userProfilePhotoView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -381,7 +381,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 });
             }
         }
-        scrollView.smoothScrollTo(0,0);
+        scrollView.smoothScrollTo(0, 0);
     }
 
     private void detailCoverPhoto(ParseUser parseUser) {
@@ -527,6 +527,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
                     }
                 }
+                startChatView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent chatIntent = new Intent(UserProfileActivity.this, ChatActivity.class);
+                        chatIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
+                        startActivity(chatIntent);
+                    }
+                });
             }
             handleUserOnlineStatus(parseUser);
             aboutUserTextView.setOnClickListener(new View.OnClickListener() {

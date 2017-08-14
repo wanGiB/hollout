@@ -249,6 +249,11 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         } else {
             //Init toolbar with group chat
         }
+        if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
+            ATE.apply(this, "dark_theme");
+        } else {
+            ATE.apply(this, "light_theme");
+        }
         initializeViews();
         setupAttachmentManager();
     }
