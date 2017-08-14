@@ -71,12 +71,10 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
             } else {
                 statusField.setText(getString(R.string.hey_there_holla_me_on_hollout));
             }
-
             if (StringUtils.isNotEmpty(signedInUserProfilePhotoUrl)) {
                 UiUtils.loadImage(ComposeStatusActivity.this, signedInUserProfilePhotoUrl, userPhotoView);
             }
         }
-
         statusField.addTextChangedListener(new TextWatcher() {
 
             @Override

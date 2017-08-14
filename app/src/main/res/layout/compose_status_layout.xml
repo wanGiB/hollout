@@ -76,7 +76,7 @@
                 app:met_primaryColor="@color/grey500"
                 app:met_textColor="@color/text_black"
                 app:met_underlineColor="@color/colorAccent"
-                app:met_textColorHint="@color/hollout_material_grey_400"
+                app:met_textColorHint="@color/grey500"
                 tools:ignore="RtlHardcoded" />
 
         </LinearLayout>
