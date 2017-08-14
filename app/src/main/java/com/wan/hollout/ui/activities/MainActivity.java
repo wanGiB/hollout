@@ -390,7 +390,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                     public void done(ParseException e) {
                         HolloutPreferences.setUserWelcomed(false);
                         HolloutPreferences.clearPersistedCredentials();
-                        UiUtils.showSafeToast("You've being logged out");
                         invalidateDrawerMenuHeader();
                         ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
                         AuthUtil.signOut(MainActivity.this).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -398,6 +397,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                             public void onComplete(@NonNull Task<Void> task) {
                                 UiUtils.dismissProgressDialog();
                                 if (task.isSuccessful()) {
+                                    UiUtils.showSafeToast("You've being logged out");
                                     Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
                                     startActivity(splashIntent);
                                     finish();

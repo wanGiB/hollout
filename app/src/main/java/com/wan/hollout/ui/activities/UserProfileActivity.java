@@ -188,7 +188,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             String userLocation = HolloutUtils.resolveToBestLocation(parseUser);
             ParseGeoPoint userGeoPoint = parseUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
             ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
-            String distanceToUser = String.valueOf(RandomUtils.nextDouble(0, 10));
+            String distanceToUser = String.valueOf(Math.rint(RandomUtils.nextDouble(0, 10)));
             if (signedInUserGeoPoint != null && userGeoPoint != null) {
                 double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
                 distanceToUser = HolloutUtils.formatDistance(distanceInKills);
@@ -201,7 +201,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             } else {
                 if (UiUtils.canShowLocation(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
-                    if (userLocation != null) {
+                    if (StringUtils.isNotEmpty(userLocation)) {
                         userLocationAndDistanceView.setText(userLocation + ", " + distanceToUser + "KM from you");
                     } else {
                         userLocationAndDistanceView.setText(distanceToUser + "KM from you");
