@@ -21,6 +21,7 @@
             <android.support.design.widget.AppBarLayout
                 android:id="@+id/appbar"
                 android:layout_width="match_parent"
+                android:animateLayoutChanges="true"
                 android:layout_height="wrap_content">
 
                 <android.support.v7.widget.Toolbar
@@ -28,6 +29,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     app:layout_scrollFlags="scroll|enterAlways" />
+
+                <com.wan.hollout.ui.widgets.MaterialSearchView
+                    android:id="@+id/search_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
                 <android.support.design.widget.TabLayout
                     android:id="@+id/tabs"
@@ -50,13 +56,6 @@
 
     </FrameLayout>
 
-    <!-- android:layout_gravity="start" tells DrawerLayout to treat
-     this as a sliding drawer on the left side for left-to-right
-     languages and on the right side for right-to-left languages.
-     The drawer is given a fixed width in dp and extends the full height of
-     the container. A solid background is used for contrast
-     with the content view. -->
-    <!-- Drawer width no more than 320dp-->
     <fragment
         android:id="@+id/main_navigation_drawer_fragment"
         android:name="com.wan.hollout.ui.fragments.DrawerFragment"
@@ -64,6 +63,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         app:layout="@layout/fragment_drawer"
-        tools:layout="@layout/fragment_drawer"/>
+        tools:layout="@layout/fragment_drawer" />
 
 </android.support.v4.widget.DrawerLayout>

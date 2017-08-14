@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatDelegate;
@@ -153,6 +154,8 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
                 public void done(ParseException e) {
                     if (e == null) {
                         UiUtils.morphRequestToSuccess(shareThoughtButton);
+                        Intent callerIntent = new Intent();
+                        setResult(RESULT_OK,callerIntent);
                         finish();
                     }
                 }

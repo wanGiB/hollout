@@ -212,12 +212,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 userStatusTextView.setText(StringUtils.capitalize(userStatus));
             }
 
-            if (parseUser.getObjectId().equals(signedInUser.getObjectId())){
+            if (parseUser.getObjectId().equals(signedInUser.getObjectId())) {
                 userStatusTextView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent composeStatusIntent = new Intent(UserProfileActivity.this,ComposeStatusActivity.class);
-                        startActivity(composeStatusIntent);
+                        Intent composeStatusIntent = new Intent(UserProfileActivity.this, ComposeStatusActivity.class);
+                        startActivityForResult(composeStatusIntent, RequestCodes.COMPOSE_STATUS);
                     }
                 });
             }
@@ -531,7 +531,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == RequestCodes.UPDATE_ABOUT_YOU || requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
+        if (requestCode == RequestCodes.UPDATE_ABOUT_YOU
+                || requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER
+                || requestCode == RequestCodes.COMPOSE_STATUS) {
             if (resultCode == RESULT_OK) {
                 if (parseUser != null) {
                     loadUserDetails();

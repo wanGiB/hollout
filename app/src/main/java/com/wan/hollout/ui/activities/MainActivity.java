@@ -45,6 +45,7 @@ import com.wan.hollout.ui.fragments.DrawerFragment;
 import com.wan.hollout.ui.fragments.NotificationsFragment;
 import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
+import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.FontUtils;
@@ -82,6 +83,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @BindView(R.id.tabs)
     TabLayout tabLayout;
+
+    @BindView(R.id.search_view)
+    MaterialSearchView materialSearchView;
 
     private HolloutPermissions holloutPermissions;
     private DrawerFragment drawerFragment;
@@ -123,6 +127,44 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             HolloutPreferences.setUserWelcomed(true);
         }
         checkAndRegEventBus();
+        materialSearchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+                EventBus.getDefault().post(AppConstants.DISABLE_NESTED_SCROLLING);
+                UiUtils.showView(tabLayout, false);
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+                EventBus.getDefault().post(AppConstants.ENABLE_NESTED_SCROLLING);
+                UiUtils.showView(tabLayout, true);
+            }
+        });
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                if (materialSearchView.isSearchOpen()) {
+                    if (position == 0) {
+                        materialSearchView.setHint("Search People");
+                    } else if (position == 1) {
+                        materialSearchView.setHint("Search your chats");
+                    } else {
+                        materialSearchView.closeSearch();
+                    }
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
     }
 
     private Adapter setupViewPagerAdapter(ViewPager viewPager) {
@@ -283,6 +325,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             drawer.closeDrawer(GravityCompat.START);
         } else if (AppConstants.ARE_REACTIONS_OPEN) {
             EventBus.getDefault().post(AppConstants.CLOSE_REACTIONS);
+        } else if (materialSearchView.isSearchOpen()) {
+            materialSearchView.closeSearch();
         } else {
             super.onBackPressed();
         }
@@ -293,6 +337,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         ATE.applyMenu(this, getATEKey(), menu);
+        MenuItem item = menu.findItem(R.id.action_search);
+        materialSearchView.setMenuItem(item);
         return true;
     }
 
