@@ -22,7 +22,8 @@
                 android:id="@+id/appbar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:animateLayoutChanges="true">
+                android:animateLayoutChanges="true"
+                android:background="@android:color/white">
 
                 <FrameLayout
                     android:id="@+id/toolbar_container"
@@ -34,6 +35,7 @@
                         android:id="@+id/toolbar"
                         android:layout_width="match_parent"
                         android:layout_height="?attr/actionBarSize"
+                        android:background="@android:color/white"
                         app:layout_scrollFlags="scroll|enterAlways" />
 
                     <com.wan.hollout.ui.widgets.MaterialSearchView

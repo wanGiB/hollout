@@ -592,7 +592,7 @@ public class UiUtils {
         }
 
         FeaturedPhotosCircleAdapter featuredPhotosCircleAdapter = new
-                FeaturedPhotosCircleAdapter(activity, userPhotos, parseUser.getUsername());
+                FeaturedPhotosCircleAdapter(activity, userPhotos, parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
 
         LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         additionalPhotosRecyclerView.setLayoutManager(horizontalLayoutManager);

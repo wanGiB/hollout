@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ScrollView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.flaviofaria.kenburnsview.KenBurnsView;
@@ -121,6 +122,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @BindView(R.id.user_status)
     HolloutTextView userStatusTextView;
+
+    @BindView(R.id.scroller)
+    ScrollView scrollView;
 
     private ParseUser parseUser;
 
@@ -332,19 +336,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                                 HolloutUtils.startImagePicker(UserProfileActivity.this);
                                                 break;
                                             case 1:
-                                                String signedInUserProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-                                                List<String> allPhotos = new ArrayList<>();
-                                                if (StringUtils.isNotEmpty(signedInUserProfilePhotoUrl)) {
-                                                    List<String> featuredPhotos = signedInUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
-                                                    String coverPhotoUrl = signedInUser.getString(AppConstants.APP_USER_COVER_PHOTO);
-                                                    if (StringUtils.isNotEmpty(coverPhotoUrl)) {
-                                                        allPhotos.add(coverPhotoUrl);
-                                                    }
-                                                    if (featuredPhotos != null && !featuredPhotos.isEmpty()) {
-                                                        allPhotos.addAll(featuredPhotos);
-                                                    }
-                                                    openPhotoViewActivity(signedInUserProfilePhotoUrl, allPhotos, parseUser);
-                                                }
+                                                detailProfilePhoto(parseUser);
                                                 break;
                                         }
                                     }
@@ -366,19 +358,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                         HolloutUtils.startImagePicker(UserProfileActivity.this);
                                         break;
                                     case 1:
-                                        String coverPhotoUrl = signedInUser.getString(AppConstants.APP_USER_COVER_PHOTO);
-                                        List<String> allPhotos = new ArrayList<>();
-                                        if (StringUtils.isNotEmpty(coverPhotoUrl)) {
-                                            String signedInUserProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-                                            List<String> featuredPhotos = signedInUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
-                                            if (StringUtils.isNotEmpty(signedInUserProfilePhotoUrl)) {
-                                                allPhotos.add(signedInUserProfilePhotoUrl);
-                                            }
-                                            if (featuredPhotos != null && !featuredPhotos.isEmpty()) {
-                                                allPhotos.addAll(featuredPhotos);
-                                            }
-                                            openPhotoViewActivity(coverPhotoUrl, allPhotos, parseUser);
-                                        }
+                                        detailCoverPhoto(parseUser);
                                         break;
                                 }
                             }
@@ -386,7 +366,53 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         coverPhotoOptionsBuilder.create().show();
                     }
                 });
+            }else{
+                userProfilePhotoView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        detailProfilePhoto(parseUser);
+                    }
+                });
+                signedInUserCoverPhotoView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        detailCoverPhoto(parseUser);
+                    }
+                });
             }
+        }
+        scrollView.smoothScrollTo(0,0);
+    }
+
+    private void detailCoverPhoto(ParseUser parseUser) {
+        String coverPhotoUrl = parseUser.getString(AppConstants.APP_USER_COVER_PHOTO);
+        List<String> allPhotos = new ArrayList<>();
+        if (StringUtils.isNotEmpty(coverPhotoUrl)) {
+            String signedInUserProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            List<String> featuredPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
+            if (StringUtils.isNotEmpty(signedInUserProfilePhotoUrl)) {
+                allPhotos.add(signedInUserProfilePhotoUrl);
+            }
+            if (featuredPhotos != null && !featuredPhotos.isEmpty()) {
+                allPhotos.addAll(featuredPhotos);
+            }
+            openPhotoViewActivity(coverPhotoUrl, allPhotos, parseUser);
+        }
+    }
+
+    private void detailProfilePhoto(ParseUser parseUser) {
+        String signedInUserProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+        List<String> allPhotos = new ArrayList<>();
+        if (StringUtils.isNotEmpty(signedInUserProfilePhotoUrl)) {
+            List<String> featuredPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
+            String coverPhotoUrl = parseUser.getString(AppConstants.APP_USER_COVER_PHOTO);
+            if (StringUtils.isNotEmpty(coverPhotoUrl)) {
+                allPhotos.add(coverPhotoUrl);
+            }
+            if (featuredPhotos != null && !featuredPhotos.isEmpty()) {
+                allPhotos.addAll(featuredPhotos);
+            }
+            openPhotoViewActivity(signedInUserProfilePhotoUrl, allPhotos, parseUser);
         }
     }
 
