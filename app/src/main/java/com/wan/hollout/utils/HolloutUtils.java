@@ -1,6 +1,8 @@
 package com.wan.hollout.utils;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -15,6 +17,8 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Base64;
@@ -63,6 +67,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
+import static com.wan.hollout.utils.AppConstants.LANGUAGE_PREF;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
@@ -93,9 +98,35 @@ public class HolloutUtils {
         return isTablet;
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    public static boolean isLowMemory(Context context) {
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && activityManager.isLowRamDevice()) ||
+                activityManager.getMemoryClass() <= 64;
+    }
+
+    public static boolean isMainThread() {
+        return Looper.myLooper() == Looper.getMainLooper();
+    }
+
+    public static void assertMainThread() {
+        if (!isMainThread()) {
+            throw new AssertionError("Main-thread assertion failed.");
+        }
+    }
+
     public static String stripDollar(String string) {
         return StringUtils.replace(string, "$", "USD");
     }
+
+    public static int clamp(int value, int min, int max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    public static float clamp(float value, float min, float max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
 
     public static void bangSound(Context context, boolean reduceSound, int soundId) {
         MediaPlayer mediaPlayer = MediaPlayer.create(context, soundId);
@@ -484,6 +515,10 @@ public class HolloutUtils {
             HolloutLogger.e(HolloutUtils.class.getSimpleName(), "Could not get package name: " + e);
         }
         return null;
+    }
+
+    public static String getLanguage(Context context) {
+        return HolloutPreferences.getLanguage(LANGUAGE_PREF, "zz");
     }
 
 }

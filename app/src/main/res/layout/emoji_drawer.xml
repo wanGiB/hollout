@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="?emoji_tab_strip_background"
+        android:orientation="horizontal">
+
+        <com.wan.hollout.ui.widgets.PagerSlidingTabStrip
+            android:id="@+id/tabs"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?emoji_tab_strip_background"
+            app:pstsIndicatorColor="?emoji_tab_indicator"
+            app:pstsIndicatorHeight="@dimen/emoji_drawer_indicator_height"
+            app:pstsShouldExpand="true"
+            app:pstsTabPaddingLeftRight="@dimen/emoji_drawer_left_right_padding"
+            app:pstsUnderlineColor="?emoji_tab_underline" />
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:background="?emoji_tab_seperator" />
+
+        <com.wan.hollout.ui.widgets.RepeatableImageKey
+            android:id="@+id/backspace"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="?emoji_tab_strip_background"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:src="@drawable/ic_backspace_grey600_24dp" />
+
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/emoji_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/hollout_material_grey_100"
+        android:visibility="visible" />
+
+</merge>

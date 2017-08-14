@@ -207,4 +207,73 @@
         <attr name="border_color" format="color" />
     </declare-styleable>
 
+    <declare-styleable name="PagerSlidingTabStrip">
+        <attr name="pstsIndicatorColor" format="color" />
+        <attr name="pstsUnderlineColor" format="color" />
+        <attr name="pstsDividerColor" format="color" />
+        <attr name="pstsDividerWidth" format="dimension" />
+        <attr name="pstsIndicatorHeight" format="dimension" />
+        <attr name="pstsUnderlineHeight" format="dimension" />
+        <attr name="pstsDividerPadding" format="dimension" />
+        <attr name="pstsTabPaddingLeftRight" format="dimension" />
+        <attr name="pstsScrollOffset" format="dimension" />
+        <attr name="pstsTabBackground" format="reference" />
+        <attr name="pstsShouldExpand" format="boolean" />
+        <attr name="pstsTextAllCaps" format="boolean" />
+        <attr name="pstsPaddingMiddle" format="boolean" />
+        <attr name="pstsTextColorSelected" format="color" />
+        <attr name="pstsTextAlpha" format="integer" />
+        <attr name="pstsTextStyle">
+            <flag name="normal" value="0x0" />
+            <flag name="bold" value="0x1" />
+            <flag name="italic" value="0x2" />
+        </attr>
+        <attr name="pstsTextSelectedStyle">
+            <flag name="normal" value="0x0" />
+            <flag name="bold" value="0x1" />
+            <flag name="italic" value="0x2" />
+        </attr>
+    </declare-styleable>
+
+    <attr name="emoji_tab_strip_background" format="color" />
+    <attr name="emoji_tab_indicator" format="color" />
+    <attr name="emoji_tab_underline" format="color" />
+    <attr name="emoji_tab_seperator" format="color" />
+    <attr name="emoji_background" format="color" />
+    <attr name="emoji_text_color" format="color" />
+
+    <attr name="emoji_category_recent" format="reference" />
+    <attr name="emoji_category_people" format="reference" />
+    <attr name="emoji_category_nature" format="reference" />
+    <attr name="emoji_category_foods" format="reference" />
+    <attr name="emoji_category_activity" format="reference" />
+    <attr name="emoji_category_places" format="reference" />
+    <attr name="emoji_category_objects" format="reference" />
+    <attr name="emoji_category_symbol" format="reference" />
+    <attr name="emoji_category_flags" format="reference" />
+    <attr name="emoji_category_emoticons" format="reference" />
+    <attr name="quick_camera_icon" format="reference" />
+    <attr name="quick_mic_icon" format="reference" />
+    <attr name="conversation_item_sent_text_primary_color" format="reference|color" />
+    <attr name="conversation_icon_attach_audio" format="reference" />
+    <attr name="conversation_icon_attach_video" format="reference" />
+
+    <attr name="conversation_background" format="reference|color" />
+    <attr name="conversation_editor_background" format="reference|color" />
+    <attr name="conversation_editor_text_color" format="reference|color" />
+    <attr name="conversation_transport_sms_indicator" format="reference" />
+    <attr name="conversation_transport_push_indicator" format="reference" />
+    <attr name="conversation_transport_popup_background" format="reference" />
+    <attr name="conversation_emoji_toggle" format="reference" />
+    <attr name="conversation_keyboard_toggle" format="reference" />
+    <attr name="conversation_attach_camera" format="reference" />
+    <attr name="conversation_attach_image" format="reference" />
+    <attr name="conversation_attach_video" format="reference" />
+    <attr name="conversation_attach_sound" format="reference" />
+    <attr name="conversation_attach_contact_info" format="reference" />
+    <attr name="conversation_attach" format="reference" />
+    <attr name="conversation_number_picker_text_color_normal" format="reference|color" />
+    <attr name="conversation_number_picker_text_color_selected" format="reference|color" />
+    <attr name="conversation_item_sent_text_secondary_color" format="reference|color" />
+
 </resources>

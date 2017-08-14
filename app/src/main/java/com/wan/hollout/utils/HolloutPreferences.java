@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 
 import com.wan.hollout.components.ApplicationLoader;
 
+import static com.wan.hollout.utils.AppConstants.SYSTEM_EMOJI_PREF;
+
 
 /**
  * @author Wan Clem
@@ -112,4 +114,11 @@ public class HolloutPreferences {
         editor.commit();
     }
 
+    public static boolean isSystemEmojiPreferred() {
+        return getHolloutPreferences().getBoolean(SYSTEM_EMOJI_PREF, false);
+    }
+
+    public static String getLanguage(String languagePref, String zz) {
+        return getHolloutPreferences().getString(languagePref,zz);
+    }
 }

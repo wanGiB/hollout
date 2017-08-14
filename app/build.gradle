@@ -124,6 +124,7 @@ dependencies {
     compile 'com.github.florent37:diagonallayout:1.0.7'
     compile 'com.flaviofaria:kenburnsview:1.0.7'
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

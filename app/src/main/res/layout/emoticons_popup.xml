@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?><!--Emoji Drawer-->
+<io.codetail.widget.RevealFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/emoticons_frame"
+    android:layout_width="match_parent"
+    android:visibility="gone"
+    android:layout_height="@dimen/keyboard_height"
+    android:padding="0dp">
+
+    <com.wan.hollout.emoji.EmojiDrawer
+        android:id="@+id/emoji_drawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:background="@color/white" />
+
+</io.codetail.widget.RevealFrameLayout>

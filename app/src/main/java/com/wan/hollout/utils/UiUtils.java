@@ -771,5 +771,12 @@ public class UiUtils {
         ViewCompat.animate(view).alpha(1f).setDuration(duration).setListener(vpListener);
     }
 
+    public static void wait(Object lock, long timeout) {
+        try {
+            lock.wait(timeout);
+        } catch (InterruptedException ie) {
+            throw new AssertionError(ie);
+        }
+    }
 
 }

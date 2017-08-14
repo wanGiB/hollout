@@ -14,6 +14,39 @@
     <dimen name="search_icon_padding">12dp</dimen>
     <dimen name="search_view_text_padding">65dp</dimen>
 
+    <dimen name="y_offset">72dp</dimen>
+    <dimen name="btn_size_show_pwd">18dp</dimen>
+    <dimen name="default_textsize">12sp</dimen>
+    <dimen name="material_chip_height">32dp</dimen>
+    <dimen name="min_horizontal_spacing">8dp</dimen>
+    <dimen name="vertical_spacing">8dp</dimen>
+    <dimen name="emoji_drawer_size">32sp</dimen>
+    <dimen name="min_keyboard_size">50dp</dimen>
+    <dimen name="default_custom_keyboard_size">220dp</dimen>
+    <dimen name="min_custom_keyboard_size">110dp</dimen>
+    <dimen name="min_custom_keyboard_top_margin">170dp</dimen>
+    <dimen name="emoji_drawer_item_padding">5dp</dimen>
+    <dimen name="emoji_drawer_indicator_height">1.5dp</dimen>
+    <dimen name="emoji_drawer_left_right_padding">5dp</dimen>
+    <dimen name="conversation_item_body_text_size">16sp</dimen>
+    <dimen name="conversation_item_date_text_size">12sp</dimen>
+    <dimen name="transport_selection_popup_width">200sp</dimen>
+    <dimen name="transport_selection_popup_xoff">2dp</dimen>
+    <dimen name="transport_selection_popup_yoff">2dp</dimen>
+    <dimen name="contact_photo_target_size">64dp</dimen>
+    <dimen name="contact_selection_photo_size">50dp</dimen>
+    <dimen name="thumbnail_max_size">230dp</dimen>
+    <dimen name="preference_fragment_padding_side">8dp</dimen>
+    <dimen name="conversation_activity_compose_padding">12dp</dimen>
+
+    <dimen name="message_bubble_end_padding">50dp</dimen>
+    <dimen name="message_bubble_corner_radius">4dp</dimen>
+    <dimen name="message_bubble_shadow_distance">1.5dp</dimen>
+    <dimen name="media_bubble_height">210dp</dimen>
+    <dimen name="media_bubble_border_width">3dp</dimen>
+    <dimen name="media_bubble_remove_button_size">24dp</dimen>
+    <dimen name="media_bubble_edit_button_size">24dp</dimen>
+
     <dimen name="padding_list_row">15dp</dimen>
     <dimen name="messages_padding_left">72dp</dimen>
     <dimen name="icon_width_height">45dp</dimen>
@@ -34,5 +67,7 @@
     <dimen name="cp_dialog_width">200dp</dimen>
     <dimen name="cp_dialog_height">300dp</dimen>
     <dimen name="cpb_stroke_width">4dp</dimen>
+
+    <dimen name="keyboard_height">230dip</dimen>
 
 </resources>

@@ -124,5 +124,9 @@ public class AppConstants {
 
     public static int ANIMATION_DURATION_MEDIUM = 400;
 
+    public static final String SYSTEM_EMOJI_PREF = "hollout_pref_system_emoji";
+
+    public static final String LANGUAGE_PREF = "pref_language";
+
 }
 
