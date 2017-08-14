@@ -286,6 +286,9 @@
     <attr name="conversation_group_member_name" format="reference|color" />
     <attr name="conversation_received_card_background" format="reference|color" />
     <attr name="conversation_item_received_text_primary_color" format="reference|color" />
+    <attr name="conversation_item_received_text_secondary_color" format="reference|color" />
+    <attr name="conversation_item_sent_indicator_text_background" format="reference" />
+    <attr name="conversation_item_sent_text_indicator_tab_color" format="reference|color" />
 
     <declare-styleable name="DotLoader">
         <attr name="dot_radius" format="dimension" />

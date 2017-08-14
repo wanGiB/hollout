@@ -207,7 +207,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private LinearLayoutManager linearLayoutManager;
     private ArrayList<String> unreadMessagesCount = new ArrayList<>();
 
-    public static String recipientOrGroupId;
+    public static String recipientId;
     private String lastExecutablePermissionAction;
 
     private ArrayList<HolloutFile> pickedMediaFiles = new ArrayList<>();
@@ -216,7 +216,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private ParseUser signedInUser;
 
     private String recipientName;
-    private ParseUser privateChatRecipient;
+    private ParseUser recipientProperties;
     protected FlowContentObserver flowContentObserver;
 
     private DynamicLanguage dynamicLanguage = new DynamicLanguage();
@@ -237,25 +237,20 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         dynamicLanguage.onCreate(this);
         ButterKnife.bind(this);
         setSupportActionBar(chatToolbar.getToolbar());
-
         Bundle intentExtras = getIntent().getExtras();
         initBasicComponents();
-
         signedInUser = ParseUser.getCurrentUser();
-        privateChatRecipient = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
-
+        recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
         //Init toolbar with private chat
-        if (privateChatRecipient != null) {
-            chatToolbar.initView(recipientOrGroupId, AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
-            recipientOrGroupId = privateChatRecipient.getObjectId();
-            setupPrivateChatRecipient(privateChatRecipient);
+        if (recipientProperties != null) {
+            chatToolbar.initView(recipientId, AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
+            recipientId = recipientProperties.getObjectId();
+            setupPrivateChatRecipient(recipientProperties);
         } else {
             //Init toolbar with group chat
         }
-
         initializeViews();
         setupAttachmentManager();
-
     }
 
     private void initBasicComponents() {
@@ -715,7 +710,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 //        //get the mConversation
 //        mConversation = EMClient.getInstance()
 //                .chatManager()
-//                .getConversation(recipientOrGroupId, UiUtils.getConversationType(chatType),
+//                .getConversation(recipientId, UiUtils.getConversationType(chatType),
 //                        true);
 //
 //        chatType = getIntent().getIntExtra(AppConstants.EXTRA_CHAT_TYPE, CHATTYPE_SINGLE);
@@ -723,7 +718,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 //        //get the mConversation
 //        mConversation = EMClient.getInstance()
 //                .chatManager()
-//                .getConversation(recipientOrGroupId, HolloutUtils.getConversationType(chatType),
+//                .getConversation(recipientId, HolloutUtils.getConversationType(chatType),
 //                        true);
 //
 //        // the number of messages loaded into mConversation is getChatOptions().getNumberOfMessagesLoaded
@@ -747,7 +742,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 //    }
 
     private void setupPrivateChatRecipient(ParseUser result) {
-        if (StringUtils.isNotEmpty(recipientOrGroupId)) {
+        if (StringUtils.isNotEmpty(recipientId)) {
             if (chatToolbar != null) {
                 chatToolbar.refreshToolbar(result);
             }
@@ -765,7 +760,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private void initMessageListView() {
 
 //        // init message list view
-//        mMessagesListView.init(recipientOrGroupId, chatType, newCustomChatRowProvider());
+//        mMessagesListView.init(recipientId, chatType, newCustomChatRowProvider());
 //        // show user nick in group chat
 //
 //        if (mConversation.isGroup()) {
@@ -979,7 +974,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private void removeAnyPendingChatRequestFromThisRecipient() {
         String signedInUserId = signedInUser.getString(AppConstants.APP_USER_ID);
         ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, recipientOrGroupId);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, recipientId);
         pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
         pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT, signedInUserId);
         pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
@@ -999,7 +994,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     public void sendChatStateMsg(final String chatState) {
-        HolloutUtils.sendChatState(chatState, recipientOrGroupId);
+        HolloutUtils.sendChatState(chatState, recipientId);
     }
 
     public void checkAccessToGalleryAndOpen() {
@@ -1432,19 +1427,19 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     protected void sendTextMessage(String content) {
 //        // create a message
-//        EMMessage message = EMMessage.createTxtSendMessage(content, recipientOrGroupId);
+//        EMMessage message = EMMessage.createTxtSendMessage(content, recipientId);
 //        // send message
 //        sendMessage(message);
     }
 
     protected void sendVoiceMessage(String filePath, int length) {
-//        EMMessage message = EMMessage.createVoiceSendMessage(filePath, length, recipientOrGroupId);
+//        EMMessage message = EMMessage.createVoiceSendMessage(filePath, length, recipientId);
 //        sendMessage(message);
     }
 
     @SuppressLint("CommitPrefEdits")
     protected void sendImageMessage(String imagePath, String caption) {
-//        EMMessage message = EMMessage.createImageSendMessage(imagePath, false, recipientOrGroupId);
+//        EMMessage message = EMMessage.createImageSendMessage(imagePath, false, recipientId);
 //        if (StringUtils.isNotEmpty(caption)) {
 //            PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).edit().putString(AppConstants.LAST_FILE_CAPTION, caption).clear().commit();
 //            message.setAttribute(AppConstants.FILE_CAPTION, caption);
@@ -1458,14 +1453,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     protected void sendLocationMessage(double latitude, double longitude, String locationAddress) {
 //        EMMessage message =
 //                EMMessage.createLocationSendMessage(latitude, longitude, locationAddress,
-//                        recipientOrGroupId);
+//                        recipientId);
 //        sendMessage(message);
     }
 
     @SuppressLint("CommitPrefEdits")
     protected void sendVideoMessage(String videoPath, String thumbPath, int videoLength, String caption) {
 //        EMMessage message =
-//                EMMessage.createVideoSendMessage(videoPath, thumbPath, videoLength, recipientOrGroupId);
+//                EMMessage.createVideoSendMessage(videoPath, thumbPath, videoLength, recipientId);
 //        if (StringUtils.isNotEmpty(caption)) {
 //            PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).edit().putString(AppConstants.LAST_FILE_CAPTION, caption).clear().commit();
 //            message.setAttribute(AppConstants.FILE_CAPTION, caption);
@@ -1477,7 +1472,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     protected void sendFileMessage(String filePath, HashMap<String, String> moreMessageProps) {
-//        EMMessage message = EMMessage.createFileSendMessage(filePath, recipientOrGroupId);
+//        EMMessage message = EMMessage.createFileSendMessage(filePath, recipientId);
 //        if (moreMessageProps != null) {
 //            for (String key : moreMessageProps.keySet()) {
 //                message.setAttribute(key, moreMessageProps.get(key));
@@ -1516,7 +1511,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 //        EventBus.getDefault().post(new SentMessageOrReceivedMessage(message, false));
 //
 //        sendChatStateMsg(getString(R.string.idle));
-//        DbUtils.attemptFriendship(recipientOrGroupId);
+//        DbUtils.attemptFriendship(recipientId);
 //
 //        if (messageReplyView.getVisibility() == View.VISIBLE) {
 //            snackOutMessageReplyView(messageReplyView);
