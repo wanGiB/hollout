@@ -122,14 +122,7 @@ public class AppConstants {
     public static SparseBooleanArray commentPositions = new SparseBooleanArray();
     public static SparseBooleanArray likesPositions = new SparseBooleanArray();
 
-    public static String SAMPLE_HTML = "<div class=\"separator\" style=\"clear: both; text-align: center;\">\n" +
-            "    <a href=\"http://alexis.lindaikejisblog.com/photos/shares/5987896c11298.png\" imageanchor=\"1\" style=\"margin-left: 1em; margin-right: 1em;\"><img border=\"0\" data-original-height=\"756\" data-original-width=\"800\" height=\"301\" src=\"https://alexis.lindaikejisblog.com/photos/shares/5987896c11298.png\" width=\"320\" />\n" +
-            "    </a>\n" +
-            "    <object class=\"BLOG_video_class\" contentid=\"bfbcbe5c2a9d002e\" height=\"266\" id=\"BLOG_video-bfbcbe5c2a9d002e\" width=\"320\"></object>\n" +
-            "    <iframe width=\"320\" height=\"266\" class=\"YOUTUBE-iframe-video\" data-thumbnail-src=\"https://i.ytimg.com/vi/tXfPKVFz4HQ/0.jpg\" src=\"https://www.youtube.com/embed/tXfPKVFz4HQ?feature=player_embedded\" frameborder=\"0\" allowfullscreen></iframe>\n" +
-            "</div>\n" +
-            "There are people who think she had some work done on her face ...What do you think? Lolz.";
+    public static int ANIMATION_DURATION_MEDIUM = 400;
 
-    public static String SAMPLE_URL_TO_QUERY_FOR_LABELS = "http://www.blogname.com/search/?q=label:Graphics|label:Identity|label:Brand]";
 }
 

@@ -32,10 +32,11 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.app.hollout.R;
-import com.app.hollout.utils.HolloutConstants;
-import com.app.hollout.utils.HolloutLog;
-import com.app.hollout.utils.UiUtils;
+
+import com.wan.hollout.R;
+import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.UiUtils;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -177,7 +178,7 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
             initSearchView();
 
             mSuggestionsListView.setVisibility(GONE);
-            setAnimationDuration(HolloutConstants.ANIMATION_DURATION_MEDIUM);
+            setAnimationDuration(AppConstants.ANIMATION_DURATION_MEDIUM);
         }
     }
 
@@ -365,7 +366,7 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
             f.setAccessible(true);
             f.set(mSearchSrcTextView, drawable);
         } catch (Exception ignored) {
-            HolloutLog.e("MaterialSearchView", ignored.toString());
+            HolloutLogger.e("MaterialSearchView", ignored.toString());
         }
     }
 

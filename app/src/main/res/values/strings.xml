@@ -152,5 +152,6 @@
     <string name="share_plans_or_your_mood">Share plans or your mood</string>
     <string name="shared">Shared!</string>
     <string name="set">Set</string>
+    <string name="search_hint">Search People</string>
 
 </resources>
