@@ -128,6 +128,7 @@ public class AppConstants {
     public static final String SYSTEM_EMOJI_PREF = "hollout_pref_system_emoji";
 
     public static final String LANGUAGE_PREF = "pref_language";
+    public static final String ENTER_SENDS_PREF = "pref_enter_sends";
 
 }
 

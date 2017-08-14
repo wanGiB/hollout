@@ -23,7 +23,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
 import com.wan.hollout.emoji.EmojiEditText;
-
+import com.wan.hollout.utils.HolloutPreferences;
 
 public class ComposeText extends EmojiEditText {
 
@@ -102,7 +102,7 @@ public class ComposeText extends EmojiEditText {
     public InputConnection onCreateInputConnection(EditorInfo editorInfo) {
         InputConnection inputConnection = super.onCreateInputConnection(editorInfo);
 
-        if (HolloutUtils.isEnterSendsEnabled(getContext())) {
+        if (HolloutPreferences.isEnterSendsEnabled()) {
             editorInfo.imeOptions &= ~EditorInfo.IME_FLAG_NO_ENTER_ACTION;
         }
 

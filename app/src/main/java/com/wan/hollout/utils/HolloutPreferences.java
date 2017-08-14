@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 
 import com.wan.hollout.components.ApplicationLoader;
 
+import static com.wan.hollout.utils.AppConstants.ENTER_SENDS_PREF;
 import static com.wan.hollout.utils.AppConstants.SYSTEM_EMOJI_PREF;
 
 
@@ -124,6 +125,10 @@ public class HolloutPreferences {
 
     public static void defaultToSystemEmojis(String systemEmojiPref, boolean b) {
         getHolloutPreferences().edit().putBoolean(systemEmojiPref,b).commit();
+    }
+
+    public static boolean isEnterSendsEnabled(){
+        return getHolloutPreferences().getBoolean(ENTER_SENDS_PREF,false);
     }
 
 }
