@@ -343,7 +343,7 @@ public class PeopleFragment extends Fragment {
 
         ParseQuery<ParseUser> categoryQuery = ParseUser.getQuery();
         List<String> elements = new ArrayList<>();
-        elements.add(searchString.toLowerCase());
+        elements.add(StringUtils.stripEnd(searchString.toLowerCase(), "s"));
 
         categoryQuery.whereContainsAll(AppConstants.ABOUT_USER, elements);
 
