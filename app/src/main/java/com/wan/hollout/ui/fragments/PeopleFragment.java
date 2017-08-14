@@ -342,7 +342,10 @@ public class PeopleFragment extends Fragment {
         parseUserParseQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
 
         ParseQuery<ParseUser> categoryQuery = ParseUser.getQuery();
-        categoryQuery.whereContains(AppConstants.ABOUT_USER, searchString.toLowerCase());
+        List<String> elements = new ArrayList<>();
+        elements.add(searchString.toLowerCase());
+
+        categoryQuery.whereContainsAll(AppConstants.ABOUT_USER, elements);
 
         List<ParseQuery<ParseUser>> queries = new ArrayList<>();
         queries.add(parseUserParseQuery);
@@ -353,6 +356,7 @@ public class PeopleFragment extends Fragment {
         if (skip != 0) {
             joinedQuery.setSkip(skip);
         }
+
         joinedQuery.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> objects, ParseException e) {
@@ -360,20 +364,17 @@ public class PeopleFragment extends Fragment {
                     if (objects != null && !objects.isEmpty()) {
                         if (skip == 0) {
                             people.clear();
-                        } else {
-                            for (ParseUser parseUser : objects) {
-                                if (!people.contains(parseUser)) {
-                                    people.add(parseUser);
-                                }
-                            }
-                            peopleAdapter.notifyDataSetChanged();
                         }
+                        for (ParseUser parseUser : objects) {
+                            if (!people.contains(parseUser)) {
+                                people.add(parseUser);
+                            }
+                        }
+                        peopleAdapter.notifyDataSetChanged();
                     }
                 }
             }
-
         });
-
     }
 
     @SuppressWarnings("unused")
