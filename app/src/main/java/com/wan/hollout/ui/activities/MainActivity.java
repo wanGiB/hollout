@@ -31,6 +31,8 @@ import android.widget.TextView;
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
@@ -48,6 +50,7 @@ import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
@@ -386,15 +389,24 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                     @Override
                     public void done(ParseException e) {
                         HolloutPreferences.setUserWelcomed(false);
-                        UiUtils.dismissProgressDialog();
                         HolloutPreferences.clearPersistedCredentials();
                         UiUtils.showSafeToast("You've being logged out");
                         invalidateDrawerMenuHeader();
-
                         ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
-                        Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
-                        startActivity(splashIntent);
-                        finish();
+                        AuthUtil.signOut(MainActivity.this).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                UiUtils.dismissProgressDialog();
+                                if (task.isSuccessful()) {
+                                    Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
+                                    startActivity(splashIntent);
+                                    finish();
+                                } else {
+                                    UiUtils.showSafeToast("Failed to sign out.Please try again");
+                                }
+                            }
+                        });
+
                     }
                 });
             }

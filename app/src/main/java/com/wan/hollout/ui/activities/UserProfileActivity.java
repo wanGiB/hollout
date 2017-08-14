@@ -273,7 +273,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             } else {
                 if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
                     if (!userAge.equals(AppConstants.UNKNOWN)) {
-                        userDisplayNameView.setText(WordUtils.capitalize(", " + userAge));
+                        ageView.setText(WordUtils.capitalize(", " + userAge));
                     }
                 }
             }
