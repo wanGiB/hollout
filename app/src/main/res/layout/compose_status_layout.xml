@@ -33,9 +33,9 @@
             android:layout_marginStart="25dp"
             android:layout_marginLeft="25dp"
             android:text="@string/share_plans_ideas_or_your_mood"
-            android:textColor="@color/gray65"
+            android:textColor="@color/grey500"
             android:textSize="15sp"
-            app:textStyle="regular" />
+            app:textStyle="medium" />
 
         <LinearLayout
             android:id="@+id/your_layout"
@@ -70,11 +70,11 @@
                 android:layout_marginRight="16dp"
                 android:hint="@string/share_plans_or_your_mood"
                 android:padding="10dp"
-                android:textColorHint="@color/gray27"
-                app:met_baseColor="@color/white"
+                android:textColorHint="@color/grey500"
+                app:met_baseColor="@color/grey500"
                 app:met_maxCharacters="140"
-                app:met_primaryColor="@color/whitesmoke"
-                app:met_textColor="@color/white"
+                app:met_primaryColor="@color/grey500"
+                app:met_textColor="@color/text_black"
                 app:met_underlineColor="@color/colorAccent"
                 app:met_textColorHint="@color/hollout_material_grey_400"
                 tools:ignore="RtlHardcoded" />
@@ -86,6 +86,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="27dp"
             android:layout_marginLeft="27dp"
+            app:textStyle="medium"
             android:layout_marginTop="20dp"
             android:text="@string/status_would_be_very_visible_to_everyone"
             android:textColor="@color/gray65"
@@ -103,7 +104,7 @@
         android:padding="16dp"
         android:textColor="@color/black"
         android:textSize="16sp"
-        app:cpb_selectorIdle="@color/white"
+        app:cpb_selectorIdle="@color/ease_gray"
         app:cpb_textComplete="@string/shared"
         app:cpb_textIdle="@string/set"
         app:elevation="10dp" />
