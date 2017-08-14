@@ -27,6 +27,7 @@ import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
+import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.ui.activities.MeetPeopleActivity;
 import com.wan.hollout.ui.adapters.PeopleAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
@@ -36,6 +37,7 @@ import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.SafeLayoutManager;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -45,7 +47,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -75,6 +76,8 @@ public class PeopleFragment extends Fragment {
     private ParseObject signedInUser;
 
     private View footerView;
+
+    public String searchString;
 
     public PeopleFragment() {
         // Required empty public constructor
@@ -200,7 +203,11 @@ public class PeopleFragment extends Fragment {
             public void onLoadMore(int page, int totalItemsCount) {
                 if (!people.isEmpty() && people.size() >= 100) {
                     UiUtils.showView(footerView, true);
-                    fetchPeopleOfCommonInterestsFromNetwork(people.size());
+                    if (StringUtils.isNotEmpty(searchString)) {
+                        searchPeople(people.size(), searchString);
+                    } else {
+                        fetchPeopleOfCommonInterestsFromNetwork(people.size());
+                    }
                 }
             }
 
@@ -329,6 +336,46 @@ public class PeopleFragment extends Fragment {
         }
     }
 
+    private void searchPeople(final int skip, String searchString) {
+        peopleAdapter.setSearchString(searchString);
+        ParseQuery<ParseUser> parseUserParseQuery = ParseUser.getQuery();
+        parseUserParseQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
+
+        ParseQuery<ParseUser> categoryQuery = ParseUser.getQuery();
+        categoryQuery.whereContains(AppConstants.ABOUT_USER, searchString.toLowerCase());
+
+        List<ParseQuery<ParseUser>> queries = new ArrayList<>();
+        queries.add(parseUserParseQuery);
+        queries.add(categoryQuery);
+
+        ParseQuery<ParseUser> joinedQuery = ParseQuery.or(queries);
+        joinedQuery.setLimit(100);
+        if (skip != 0) {
+            joinedQuery.setSkip(skip);
+        }
+        joinedQuery.findInBackground(new FindCallback<ParseUser>() {
+            @Override
+            public void done(List<ParseUser> objects, ParseException e) {
+                if (e == null) {
+                    if (objects != null && !objects.isEmpty()) {
+                        if (skip == 0) {
+                            people.clear();
+                        } else {
+                            for (ParseUser parseUser : objects) {
+                                if (!people.contains(parseUser)) {
+                                    people.add(parseUser);
+                                }
+                            }
+                            peopleAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+            }
+
+        });
+
+    }
+
     @SuppressWarnings("unused")
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
     public void onEventAsync(final Object o) {
@@ -355,7 +402,17 @@ public class PeopleFragment extends Fragment {
                         case AppConstants.REFRESH_PEOPLE:
                             fetchPeople();
                             break;
+                        case AppConstants.SEARCH_VIEW_CLOSED:
+                            peopleAdapter.setSearchString(null);
+                            searchString = null;
+                            fetchPeople();
+                            break;
                     }
+                } else if (o instanceof SearchPeopleEvent) {
+                    SearchPeopleEvent searchPeopleEvent = (SearchPeopleEvent) o;
+                    String queryString = searchPeopleEvent.getQueryString();
+                    searchString = queryString;
+                    searchPeople(0, queryString);
                 }
             }
         });

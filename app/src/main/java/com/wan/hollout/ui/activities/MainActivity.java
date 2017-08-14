@@ -42,6 +42,8 @@ import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
+import com.wan.hollout.eventbuses.SearchChatsEvent;
+import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.ui.fragments.ChatsFragment;
 import com.wan.hollout.ui.fragments.DrawerFragment;
 import com.wan.hollout.ui.fragments.NotificationsFragment;
@@ -147,6 +149,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             public void onSearchViewClosed() {
                 EventBus.getDefault().post(AppConstants.ENABLE_NESTED_SCROLLING);
                 UiUtils.showView(tabLayout, true);
+                EventBus.getDefault().post(AppConstants.SEARCH_VIEW_CLOSED);
             }
 
         });
@@ -166,6 +169,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                     } else if (position == 1) {
                         materialSearchView.setHint("Search your chats");
                     } else {
+                        materialSearchView.setHint("Search People");
                         materialSearchView.closeSearch();
                     }
                 }
@@ -178,6 +182,27 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
         });
 
+        materialSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (viewPager.getCurrentItem() == 0) {
+                    EventBus.getDefault().post(new SearchPeopleEvent(query));
+                } else if (viewPager.getCurrentItem() == 1) {
+                    EventBus.getDefault().post(new SearchChatsEvent(query));
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (viewPager.getCurrentItem() == 0) {
+                    EventBus.getDefault().post(new SearchPeopleEvent(newText));
+                } else if (viewPager.getCurrentItem() == 1) {
+                    EventBus.getDefault().post(new SearchChatsEvent(newText));
+                }
+                return true;
+            }
+        });
     }
 
     private Adapter setupViewPagerAdapter(ViewPager viewPager) {

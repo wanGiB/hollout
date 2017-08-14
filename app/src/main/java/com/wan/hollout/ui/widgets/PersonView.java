@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -88,6 +89,8 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
 
     private ParseQuery<ParseUser> userStateQuery;
 
+    private String searchString;
+
     public PersonView(Context context) {
         this(context, null);
     }
@@ -111,12 +114,13 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    public void bindData(Activity activity, ParseUser person) {
+    public void bindData(Activity activity, String searchString, ParseUser person) {
+        this.searchString = searchString;
         this.activity = activity;
         this.person = person;
         signedInUser = ParseUser.getCurrentUser();
         init();
-        loadParseUser();
+        loadParseUser(searchString);
     }
 
     private void applyProfilePicture(String profileUrl) {
@@ -165,13 +169,18 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
         return returnColor;
     }
 
-    public void loadParseUser() {
+    public void loadParseUser(String searchString) {
         if (person != null) {
             String userName = person.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String userProfilePhoto = person.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             ParseGeoPoint userGeoPoint = person.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
             if (StringUtils.isNotEmpty(userName)) {
-                usernameEntryView.setText(WordUtils.capitalize(userName));
+                if (StringUtils.isNotEmpty(searchString)) {
+                    usernameEntryView.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(userName),
+                            ContextCompat.getColor(activity, R.color.hollout_color_three)));
+                } else {
+                    usernameEntryView.setText(WordUtils.capitalize(userName));
+                }
                 // displaying the first letter of From in icon text
                 iconText.setText(WordUtils.capitalize(userName.substring(0, 1)));
             }
@@ -209,7 +218,12 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
                     List<String> common = new ArrayList<>(aboutUser);
                     common.retainAll(aboutSignedInUser);
                     String firstInterest = !common.isEmpty() ? common.get(0) : aboutUser.get(0);
-                    aboutPerson.setText(StringUtils.capitalize(firstInterest));
+                    if (StringUtils.isNotEmpty(searchString)) {
+                        aboutPerson.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(firstInterest),
+                                ContextCompat.getColor(activity, R.color.hollout_color_three)));
+                    } else {
+                        aboutPerson.setText(WordUtils.capitalize(firstInterest));
+                    }
                 } catch (NullPointerException ignored) {
 
                 }
@@ -276,7 +290,7 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
                         @Override
                         public void run() {
                             person = object;
-                            loadParseUser();
+                            loadParseUser(searchString);
                         }
                     });
                 }

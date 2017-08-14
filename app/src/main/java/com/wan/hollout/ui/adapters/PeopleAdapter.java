@@ -24,10 +24,20 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     private Activity activity;
     private LayoutInflater layoutInflater;
 
+    private String searchString;
+
     public PeopleAdapter(Activity activity, List<ParseUser> people) {
         this.activity = activity;
         this.people = people;
         this.layoutInflater = LayoutInflater.from(activity);
+    }
+
+    public void setSearchString(String searchString) {
+        this.searchString = searchString;
+    }
+
+    public String getSearchString() {
+        return searchString;
     }
 
     @Override
@@ -40,7 +50,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         final PersonHolder personHolder = (PersonHolder) holder;
         ParseUser parseUser = people.get(position);
-        personHolder.bindData(activity, parseUser);
+        personHolder.bindData(activity, getSearchString(), parseUser);
     }
 
     @Override
@@ -58,8 +68,8 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             ButterKnife.bind(this, itemView);
         }
 
-        void bindData(Activity activity, ParseUser parseUser) {
-            personView.bindData(activity, parseUser);
+        void bindData(Activity activity, String searchString, ParseUser parseUser) {
+            personView.bindData(activity, searchString, parseUser);
         }
 
     }
