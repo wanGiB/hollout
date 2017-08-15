@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.afollestad.appthemeengine.ATE;
@@ -57,7 +58,7 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
     MaterialSearchView searchView;
 
     @BindView(R.id.content_selected_footer_view)
-    RelativeLayout selectedItemsFooterView;
+    LinearLayout selectedItemsFooterView;
 
     @BindView(R.id.selected_item_count)
     HolloutTextView selectedItemCountView;
