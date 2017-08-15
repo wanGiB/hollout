@@ -152,6 +152,7 @@
                     <com.wan.hollout.ui.widgets.AudioView
                         android:id="@+id/audio_view"
                         android:layout_width="250dp"
+                        android:visibility="gone"
                         android:layout_height="wrap_content" />
 
                     <com.john.waveview.WaveView
