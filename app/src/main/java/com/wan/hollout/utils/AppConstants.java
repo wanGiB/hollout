@@ -220,5 +220,16 @@ public class AppConstants {
     public static final String BROADCAST_ACTION_GROUP = "com.hyphenate.action.group";
     public static final String BROADCAST_ACTION_APPLY = "com.hyphenate.action.apply";
 
+    /***
+     * // Opposite of 180
+     arrowRotation = 0;
+     // Opposite of arrowParams.addRule(ALIGN_PARENT_LEFT, TRUE);
+     arrowParams.addRule(ALIGN_PARENT_RIGHT, TRUE);
+     // Margin should stay same
+     arrowParams.setMargins(0, (int) arrowMargin, 0, (int) arrowMargin);
+     // Opposite of arrowParams.addRule(RIGHT_OF, containerLayout.getId());
+     containerParams.addRule(LEFT_OF, arrowImage.getId());
+     * ***/
+
 }
 

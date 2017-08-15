@@ -17,15 +17,20 @@
         android:animateLayoutChanges="true"
         android:orientation="vertical">
 
-        <android.support.v7.widget.CardView
+        <com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView
             android:id="@+id/message_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="3dp"
-            app:cardBackgroundColor="@color/green_100"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="3dp"
-            app:cardUseCompatPadding="false">
+            app:cmv_arrowGravity="start"
+            android:layout_marginStart="10dp"
+            android:layout_marginLeft="10dp"
+            app:cmv_arrowPosition="right"
+            app:cmv_backgroundColor="@color/whitesmoke"
+            app:cmv_backgroundColorPressed="@color/ease_gray"
+            app:cmv_cornerRadius="2dp"
+            app:cmv_contentPadding="4dp"
+            app:cmv_showArrow="true">
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -62,7 +67,8 @@
                         android:padding="10dp"
                         android:textColor="@color/white"
                         android:textSize="13sp"
-                        android:visibility="gone"
+                        android:visibility="visible"
+                        android:text="12KB"
                         app:textStyle="medium" />
 
                     <LinearLayout
@@ -70,43 +76,106 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:paddingEnd="16dp"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:paddingStart="16dp">
+                        android:paddingEnd="10dp"
+                        android:visibility="gone"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingStart="10dp">
 
                         <ImageView
+                            android:id="@+id/contact_icon"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:src="@drawable/attach_contact" />
+                            android:src="@drawable/attach_contact"
+                            tools:ignore="ContentDescription" />
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
                             android:layout_marginLeft="10dp"
                             android:layout_marginStart="10dp"
-                            android:layout_gravity="center_vertical"
                             android:orientation="vertical">
 
                             <com.wan.hollout.ui.widgets.HolloutTextView
+                                android:id="@+id/contact_name"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Wan Clem"
                                 android:textColor="@color/black"
                                 android:textSize="16sp"
-                                android:id="@+id/contact_name"
                                 app:textStyle="bold" />
 
                             <com.wan.hollout.ui.widgets.HolloutTextView
+                                android:id="@+id/contact_phone_numbers"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="07017905852"
                                 android:textColor="@color/grey_500"
-                                android:id="@+id/contact_phone_numbers"
                                 android:textSize="14sp"
                                 app:textStyle="medium" />
 
                         </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/document_data_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingEnd="10dp"
+                        android:visibility="gone"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingStart="10dp">
+
+                        <ImageView
+                            android:id="@+id/document_icon"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/attach_contact"
+                            tools:ignore="ContentDescription" />
+
+                        <com.wan.hollout.ui.widgets.HolloutTextView
+                            android:id="@+id/document_name_and_size"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="10dp"
+                            app:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/voice_data_layout"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingEnd="10dp"
+                        android:visibility="gone"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:paddingStart="10dp">
+
+                        <ImageView
+                            android:id="@+id/voice_icon"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:src="@drawable/attach_contact"
+                            tools:ignore="ContentDescription" />
+
+                        <com.wan.hollout.ui.widgets.HolloutTextView
+                            android:id="@+id/voice_name_and_size"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginStart="10dp"
+                            app:textStyle="bold" />
 
                     </LinearLayout>
 
@@ -116,12 +185,10 @@
                     android:id="@+id/message_body"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingBottom="5dp"
-                    android:paddingEnd="16dp"
-                    android:paddingLeft="16dp"
-                    android:paddingRight="16dp"
-                    android:paddingStart="16dp"
-                    android:paddingTop="5dp"
+                    android:paddingEnd="8dp"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp"
+                    android:paddingStart="8dp"
                     android:textColor="@color/text_black"
                     android:textSize="16sp"
                     android:visibility="gone"
@@ -129,13 +196,15 @@
 
             </LinearLayout>
 
-        </android.support.v7.widget.CardView>
+        </com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView>
 
         <com.wan.hollout.ui.widgets.HolloutTextView
             android:id="@+id/delivery_status_and_time_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
             android:text="Sent 12:45PM"
             android:textColor="@color/grey500"
             android:textSize="12sp"
