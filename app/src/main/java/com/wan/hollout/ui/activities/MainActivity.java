@@ -60,6 +60,7 @@ import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -130,7 +131,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         ParseUser signedInUser = ParseUser.getCurrentUser();
         if (!HolloutPreferences.isUserWelcomed()) {
             if (signedInUser != null) {
-                UiUtils.showSafeToast("Welcome, " + signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
+                UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)));
             }
             HolloutPreferences.setUserWelcomed(true);
         }
