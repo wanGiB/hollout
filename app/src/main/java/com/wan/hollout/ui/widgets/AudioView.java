@@ -31,7 +31,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-
 public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener {
 
     private static final String TAG = AudioView.class.getSimpleName();
@@ -48,7 +47,6 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
     private final
     @NonNull
     ImageView pauseButton;
-
     private final
     @NonNull
     SeekBar seekBar;
@@ -90,8 +88,6 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.playButton.setImageDrawable(context.getDrawable(R.drawable.play_icon));
             this.pauseButton.setImageDrawable(context.getDrawable(R.drawable.pause_icon));
-            this.playButton.setBackground(context.getDrawable(R.drawable.ic_circle_fill_white_48dp));
-            this.pauseButton.setBackground(context.getDrawable(R.drawable.ic_circle_fill_white_48dp));
         }
     }
 
