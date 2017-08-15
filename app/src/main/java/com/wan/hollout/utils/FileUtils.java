@@ -1,5 +1,6 @@
 package com.wan.hollout.utils;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -14,10 +15,17 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 
 
@@ -27,6 +35,7 @@ import java.util.Comparator;
  * @version 2013-12-11
  */
 public class FileUtils {
+
     private FileUtils() {
     } //private constructor to enforce Singleton pattern
 
@@ -527,5 +536,111 @@ public class FileUtils {
 
         return type;
     }
+
+    public static String[] fileTypes = new String[] { "apk", "avi", "bmp", "chm", "dll", "doc", "docx", "dos", "gif",
+            "html", "jpeg", "jpg", "movie", "mp3","dat", "mp4", "mpe", "mpeg", "mpg", "pdf", "png", "ppt", "pptx", "rar",
+            "txt", "wav", "wma", "wmv", "xls", "xlsx", "xml", "zip" };
+
+    public static File[] loadFiles(File directory){
+        File[] listFiles = directory.listFiles();
+        if(listFiles == null)
+            listFiles = new File[]{};
+
+        ArrayList<File> tempFolder = new ArrayList<File>();
+        ArrayList<File> tempFile = new ArrayList<File>();
+        for (File file : listFiles) {
+            if (file.isDirectory()) {
+                tempFolder.add(file);
+            } else if (file.isFile()) {
+                tempFile.add(file);
+            }
+        }
+        // sort list
+        Comparator<File> comparator = new MyComparator();
+        Collections.sort(tempFolder, comparator);
+        Collections.sort(tempFile, comparator);
+
+        File[] datas = new File[tempFolder.size() + tempFile.size()];
+        System.arraycopy(tempFolder.toArray(new File[tempFolder.size()]), 0, datas, 0, tempFolder.size());
+        System.arraycopy(tempFile.toArray(new File[tempFile.size()]), 0, datas, tempFolder.size(), tempFile.size());
+
+        return datas;
+    }
+
+    /**
+     * Determine the type of file
+     * @param f
+     * @return
+     */
+    public static String getMIMEType(File f) {
+        String type = "";
+        String fName = f.getName();
+
+        String end = fName.substring(fName.lastIndexOf(".") + 1, fName.length()).toLowerCase();
+        type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(end);
+        return type;
+    }
+
+    /**
+     * open file
+     * @param f
+     * @param context
+     */
+    public static void openFile(File f,Activity context) {
+        Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        /* get MimeType */
+        String type = FileUtils.getMIMEType(f);
+        /* set intent's file and MimeType */
+        intent.setDataAndType(Uri.fromFile(f), type);
+        try {
+            context.startActivity(intent);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(context, "Can't find proper app to open this file", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public static void openFile(Uri uri,String type,Activity context) {
+        Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        /* get MimeType */
+        /* set intent's file and MimeType */
+        intent.setDataAndType(uri, type);
+        try {
+            context.startActivity(intent);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            Toast.makeText(context, "Can't find proper app to open this file", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // custom comparator
+    public static class MyComparator implements Comparator<File> {
+        @Override
+        public int compare(File lhs, File rhs) {
+            return lhs.getName().compareTo(rhs.getName());
+        }
+
+    }
+
+
+    public static synchronized void saveObjectToFile(Object object,File toSaveFile) throws Exception{
+        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(toSaveFile));
+        out.writeObject(object);
+        out.flush();
+        out.close();
+
+    }
+
+    public static synchronized Object readObjectFromFile(File toReadFile) throws Exception{
+        ObjectInputStream in = new ObjectInputStream(new FileInputStream(toReadFile));
+        return in.readObject();
+    }
+
 
 }

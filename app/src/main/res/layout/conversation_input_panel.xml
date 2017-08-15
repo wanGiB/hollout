@@ -25,13 +25,13 @@
             android:orientation="vertical">
 
             <RelativeLayout
-                android:id="@+id/link_preview"
+                android:id="@+id/link_preview_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:visibility="gone">
 
                 <com.wan.hollout.ui.widgets.LinkPreview
-                    android:id="@+id/og_view"
+                    android:id="@+id/link_preview"
                     android:layout_width="match_parent"
                     android:layout_height="96dp" />
 
@@ -90,7 +90,8 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="5dp"
                         android:layout_marginStart="5dp"
-                        android:background="@drawable/touch_highlight_background"
+                        android:clickable="true"
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/conversation_activity__emoji_toggle_description"
                         tools:ignore="RtlHardcoded" />
 

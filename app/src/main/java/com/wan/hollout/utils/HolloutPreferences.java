@@ -135,4 +135,12 @@ public class HolloutPreferences {
         getHolloutPreferences().edit().putString(AppConstants.LAST_FILE_CAPTION, null).clear().commit();
     }
 
+    public static void setLastFileCaption(String fileCaption) {
+        getHolloutPreferences().edit().putString(AppConstants.LAST_FILE_CAPTION, fileCaption).clear().commit();
+    }
+
+    public static String getLastFileCaption() {
+        return getHolloutPreferences().getString(AppConstants.LAST_FILE_CAPTION, "Photo");
+    }
+
 }

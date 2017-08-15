@@ -163,10 +163,6 @@ public class AppConstants {
     public static final SimpleDateFormat DATE_FORMATTER_IN_YEARS = new SimpleDateFormat("yyyy", Locale.getDefault());
     public static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
 
-    public static SparseBooleanArray reactionsBackgroundPositions = new SparseBooleanArray();
-    public static SparseBooleanArray reactionsOpenPositions = new SparseBooleanArray();
-    public static SparseBooleanArray commentPositions = new SparseBooleanArray();
-    public static SparseBooleanArray likesPositions = new SparseBooleanArray();
 
     public static int ANIMATION_DURATION_MEDIUM = 400;
 
@@ -220,16 +216,19 @@ public class AppConstants {
     public static final String BROADCAST_ACTION_GROUP = "com.hyphenate.action.group";
     public static final String BROADCAST_ACTION_APPLY = "com.hyphenate.action.apply";
 
-    /***
-     * // Opposite of 180
-     arrowRotation = 0;
-     // Opposite of arrowParams.addRule(ALIGN_PARENT_LEFT, TRUE);
-     arrowParams.addRule(ALIGN_PARENT_RIGHT, TRUE);
-     // Margin should stay same
-     arrowParams.setMargins(0, (int) arrowMargin, 0, (int) arrowMargin);
-     // Opposite of arrowParams.addRule(RIGHT_OF, containerLayout.getId());
-     containerParams.addRule(LEFT_OF, arrowImage.getId());
-     * ***/
+
+    ///Message Properties
+    public static final String MESSAGE_DIRECTION = "message_direction";
+    public static final String MESSAGE_DIRECTION_INCOMING = "incoming";
+    public static final String MESSAGE_DIRECTION_OUTGOING = "outgoing";
+    public static final String MESSAGE_BODY = "message_body";
+
+
+    public static SparseBooleanArray reactionsBackgroundPositions = new SparseBooleanArray();
+    public static SparseBooleanArray reactionsOpenPositions = new SparseBooleanArray();
+    public static SparseBooleanArray commentPositions = new SparseBooleanArray();
+    public static SparseBooleanArray likesPositions = new SparseBooleanArray();
+    public static SparseBooleanArray messageBodyPositions = new SparseBooleanArray();
 
 }
 

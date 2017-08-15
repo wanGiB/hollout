@@ -15,7 +15,8 @@
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
         android:animateLayoutChanges="true"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
 
         <com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView
             android:id="@+id/message_container"
@@ -42,6 +43,12 @@
                 <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
+
+                    <com.wan.hollout.ui.widgets.LinkPreview
+                        android:id="@+id/link_preview"
+                        android:layout_width="200dp"
+                        android:visibility="gone"
+                        android:layout_height="wrap_content" />
 
                     <com.wan.hollout.ui.widgets.RoundedImageView
                         android:id="@+id/attached_photo_or_video_thumbnail"
@@ -83,7 +90,7 @@
                         android:paddingStart="10dp"
                         android:visibility="gone">
 
-                        <ImageView
+                        <com.wan.hollout.ui.widgets.CircleColorImageView
                             android:id="@+id/contact_icon"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
@@ -129,7 +136,7 @@
                         android:paddingStart="10dp"
                         android:visibility="gone">
 
-                        <ImageView
+                        <com.wan.hollout.ui.widgets.CircleColorImageView
                             android:id="@+id/document_icon"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
@@ -152,8 +159,8 @@
                     <com.wan.hollout.ui.widgets.AudioView
                         android:id="@+id/audio_view"
                         android:layout_width="250dp"
-                        android:visibility="gone"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:visibility="gone" />
 
                     <com.john.waveview.WaveView
                         android:id="@+id/photo_video_wave_view"

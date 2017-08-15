@@ -100,7 +100,7 @@ import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_VIDEO;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
 
 
-@SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal"})
+@SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal","unused"})
 public class ChatActivity extends BaseActivity implements ATEActivityThemeCustomizer,
         KeyboardAwareLinearLayout.OnKeyboardShownListener,
         ActivityCompat.OnRequestPermissionsResultCallback, InputPanel.Listener, View.OnClickListener {
@@ -112,7 +112,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private static final int REQUEST_CODE_CONTACT_SHARE = 15;
     private static final int PLACE_LOCATION_PICKER_REQUEST_CODE = 20;
 
-    protected static final int MESSAGE_TYPE_RECV_CALL = 1;
+    protected static final int MESSAGE_TYPE_RECEIVED_CALL = 1;
     protected static final int MESSAGE_TYPE_SENT_CALL = 2;
 
     private AttachmentTypeSelector attachmentTypeSelector;
@@ -161,11 +161,11 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     @BindView(R.id.footerAd)
     LinearLayout footerAd;
 
-    @BindView(R.id.link_preview)
-    RelativeLayout linkPreview;
+    @BindView(R.id.link_preview_layout)
+    RelativeLayout linkPreviewLayout;
 
-    @BindView(R.id.og_view)
-    LinkPreview openGraphView;
+    @BindView(R.id.link_preview)
+    LinkPreview linkPreview;
 
     @BindView(R.id.single_media_frame)
     FrameLayout singleMediaFrame;
@@ -193,9 +193,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @BindView(R.id.messages_empty_view)
     HolloutTextView messagesEmptyView;
-
-    @BindView(R.id.scroll_date_header)
-    TextView scrollDateHeader;
 
     @BindView(R.id.unread_message_indicator)
     TextView unreadMessagesIndicator;
@@ -320,14 +317,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             return;
         }
         if (!StringUtils.isNotEmpty(composeText.getText().toString().trim()) || !pickedMediaFiles.isEmpty()) {
-//            saveDraft();
-//            attachmentManager.clear();
             composeText.setText("");
         }
         setIntent(intent);
-//        if (chatFragment != null) {
-//            chatFragment.onNewIntent();
-//        }
     }
 
     @Override
@@ -431,8 +423,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (container.isInputOpen()) container.hideCurrentInput(composeText);
         else {
-            /*if (chatFragment.getList()!=null)
-            chatFragment.getList().stopScroll();*/
             super.onBackPressed();
         }
     }
@@ -481,10 +471,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             ArrayList<String> linksInMessage = UiUtils.pullLinks(s.toString());
             if (!linksInMessage.isEmpty()) {
                 String firstUrl = linksInMessage.get(0);
-                UiUtils.showView(linkPreview, true);
-                openGraphView.setData(firstUrl);
+                UiUtils.showView(linkPreviewLayout, true);
+                linkPreview.setData(firstUrl);
             } else {
-                UiUtils.showView(linkPreview, false);
+                UiUtils.showView(linkPreviewLayout, false);
             }
         }
 
@@ -494,13 +484,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
 
     }
-
-//    @Override
-//    public void setMessageHint(String messageHint) {
-//        if (StringUtils.isNotEmpty(messageHint)) {
-//            composeText.setText(messageHint);
-//        }
-//    }
 
     private void displayInactiveSendButton() {
         sendOrRecordAudioButton.setImageResource(R.drawable.send_inactive_icon);
@@ -580,9 +563,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     break;
             }
         }
-
         hidePickedMedia();
-
     }
 
     private class AttachButtonListener implements View.OnClickListener {
@@ -598,93 +579,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     public void snackInMessageReplyView(View view) {
         UiUtils.showView(view, true);
-        //Populate views
-        populateMessageReplyViewWithMessage();
     }
-
-    private void populateMessageReplyViewWithMessage() {
-//        SparseBooleanArray selected = ((EaseMessageListAdapter) mMessagesListView.getAdapter()).getSelectedIds();
-//        //Loop all selected ids
-//        for (int i = (selected.size() - 1); i >= 0; i--) {
-//            if (selected.valueAt(i)) {
-//                //If current id is selected remove the item via key
-//                messageToReplyTo = mMessagesListView.getAllMessages().get(selected.keyAt(i));
-//                populateMessageToReply(messageToReplyTo);
-//            }
-//        }
-    }
-
-//    public void populateMessageToReply(EMMessage emMessage) {
-//        UiUtils.showView(replyIconView, false);
-//        UiUtils.showView(playReplyMessageIfVideo, false);
-//
-//        String messageBody = null;
-//        String fileUrl = null;
-//
-//        if (emMessage.getType() == EMMessage.Type.TXT) {
-//            EMTextMessageBody txtBody = (EMTextMessageBody) emMessage.getBody();
-//            messageBody = txtBody.getMessage();
-//        } else if (emMessage.getType() == EMMessage.Type.IMAGE) {
-//            EMImageMessageBody emImageMessageBody = (EMImageMessageBody) emMessage.getBody();
-//            messageBody = getString(R.string.photo);
-//            fileUrl = emImageMessageBody.getLocalUrl();
-//        } else if (emMessage.getType() == EMMessage.Type.VIDEO) {
-//            EMVideoMessageBody emVideoMessageBody = (EMVideoMessageBody) emMessage.getBody();
-//            fileUrl = emVideoMessageBody.getLocalUrl();
-//            messageBody = getString(R.string.video);
-//            UiUtils.showView(playReplyMessageIfVideo, true);
-//        } else if (emMessage.getType() == EMMessage.Type.LOCATION) {
-//            messageBody = getString(R.string.location);
-//            UiUtils.showView(replyIconView, true);
-//            replyIconView.setImageResource(R.drawable.msg_status_location);
-//        } else if (emMessage.getType() == EMMessage.Type.FILE) {
-//            try {
-//                String fileType = emMessage.getStringAttribute(AppConstants.FILE_TYPE);
-//                switch (fileType) {
-//                    case AppConstants.FILE_TYPE_CONTACT:
-//                        messageBody = getString(R.string.contact);
-//                        UiUtils.showView(replyIconView, true);
-//                        replyIconView.setImageResource(R.drawable.msg_contact);
-//                        break;
-//                    case AppConstants.FILE_TYPE_DOCUMENT:
-//                        messageBody = getString(R.string.document);
-//                        UiUtils.showView(replyIconView, true);
-//                        replyIconView.setImageResource(R.drawable.icon_file_doc_grey_mini);
-//                        break;
-//                    case AppConstants.FILE_TYPE_AUDIO:
-//                        messageBody = getString(R.string.audio);
-//                        UiUtils.showView(replyIconView, true);
-//                        replyIconView.setImageResource(R.drawable.msg_status_audio);
-//                        break;
-//                }
-//            } catch (HyphenateException e) {
-//                e.printStackTrace();
-//            }
-//        } else if (emMessage.getType() == EMMessage.Type.VOICE) {
-//            messageBody = getString(R.string.voice_note);
-//            UiUtils.showView(replyIconView, true);
-//            replyIconView.setImageResource(R.drawable.msg_status_mic_grey);
-//        }
-//
-//        try {
-//            String senderName = emMessage.getStringAttribute(AppConstants.MESSAGE_SENDER_NAME);
-//            if (emMessage.direct() == EMMessage.Direct.SEND) {
-//                replyMessageTitleView.setText(getString(R.string.me));
-//            } else {
-//                replyMessageTitleView.setText(StringUtils.capitalize(senderName));
-//            }
-//            replyMessageSubTitleView.setText(messageBody);
-//            if (StringUtils.isNotEmpty(fileUrl)) {
-//                UiUtils.showView(replyIconView, true);
-//                UiUtils.loadImage(ChatActivity.this, fileUrl, replyIconView);
-//            }
-//            UiUtils.showKeyboard(chatInputView.chatMessageBox);
-//        } catch (HyphenateException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-//
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -700,50 +595,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 chatToolbar.openUserOrGroupProfile();
                 break;
             case R.id.view_shared_media:
-//                Intent mSharedMediaIntent = new Intent(ChatActivity.this, SharedMediaActivity.class);
-//                mSharedMediaIntent.putExtra(AppConstants.CONVERSATION_ID, mConversation.conversationId());
-//                mSharedMediaIntent.putExtra(AppConstants.CONVERSATION_NAME, chatToolbar.getConversationName());
-//                startActivity(mSharedMediaIntent);
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
-
-//    private void initConversation() {
-//
-//        //get the mConversation
-//        mConversation = EMClient.getInstance()
-//                .chatManager()
-//                .getConversation(recipientId, UiUtils.getConversationType(chatType),
-//                        true);
-//
-//        chatType = getIntent().getIntExtra(AppConstants.EXTRA_CHAT_TYPE, CHATTYPE_SINGLE);
-//
-//        //get the mConversation
-//        mConversation = EMClient.getInstance()
-//                .chatManager()
-//                .getConversation(recipientId, HolloutUtils.getConversationType(chatType),
-//                        true);
-//
-//        // the number of messages loaded into mConversation is getChatOptions().getNumberOfMessagesLoaded
-//        // you can change this number
-//
-//        final List<EMMessage> msgs = mConversation.getAllMessages();
-//        int msgCount = msgs != null ? msgs.size() : 0;
-//
-//        if (msgCount < mConversation.getAllMsgCount() && msgCount < pageSize) {
-//            String msgId = null;
-//            if (msgs != null && msgs.size() > 0) {
-//                msgId = msgs.get(0).getMsgId();
-//            }
-//            mConversation.loadMoreMsgFromDB(msgId, pageSize - msgCount);
-//        }
-//
-//        if (msgs != null) {
-//            Collections.sort(msgs, emMessageComparator);
-//        }
-//
-//    }
 
     private void setupPrivateChatRecipient(ParseUser result) {
         if (StringUtils.isNotEmpty(recipientId)) {
@@ -759,35 +614,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     public String getRecipientName() {
         return recipientName;
-    }
-
-    private void initMessageListView() {
-
-//        // init message list view
-//        mMessagesListView.init(recipientId, chatType, newCustomChatRowProvider());
-//        // show user nick in group chat
-//
-//        if (mConversation.isGroup()) {
-//            mMessagesListView.setShowUserNick(true);
-//        }
-//
-//        mMessagesListView.setOnScrollListener(new MsgListScrollListener());
-//        mMessagesListView.setOnTouchListener(new View.OnTouchListener() {
-//
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                chatInputView.closeAllPanels();
-//                return false;
-//            }
-//
-//        });
-
-    }
-
-    boolean isFirstLoad = true;
-
-    public void refreshMessages() {
-
     }
 
     @Override
@@ -844,137 +670,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         EventBus.getDefault().unregister(this);
     }
 
-    /**
-     * message list on sroll listener
-     */
-//    private class MsgListScrollListener implements AbsListView.OnScrollListener {
-//
-//        @Override
-//        public void onScrollStateChanged(AbsListView view, int scrollState) {
-//
-//        }
-//
-//        @Override
-//        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
-//                             int totalItemCount) {
-//
-//            if (!((EaseMessageListAdapter) mMessagesListView.getAdapter()).isSelectedForScroll()) {
-//
-//                synchronized (mMessagesListView) {
-//                    if (firstVisibleItem == 0
-//                            && !isLoading
-//                            && haveMoreData
-//                            && mConversation.getAllMessages().size() != 0) {
-//                        isLoading = true;
-//
-//                        if (!isFirstLoad) mLoadingProgressBar.setVisibility(View.VISIBLE);
-//                        isFirstLoad = false;
-//                        final List<EMMessage> messages;
-//                        EMMessage firstMsg = mConversation.getAllMessages().get(0);
-//                        try {
-//                            // load more messages from db
-//                            messages = mConversation.loadMoreMsgFromDB(firstMsg.getMsgId(), pageSize);
-//                        } catch (Exception e1) {
-//                            mLoadingProgressBar.setVisibility(View.INVISIBLE);
-//                            return;
-//                        }
-//                        new Thread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                try {
-//                                    Thread.sleep(1000);
-//                                } catch (InterruptedException e) {
-//                                }
-//                                runOnUiThread(new Runnable() {
-//                                    @Override
-//                                    public void run() {
-//                                        if (messages.size() != 0) {
-//                                            if (messages.size() > 0) {
-//                                                mMessagesListView.refreshSeekTo(messages.size() - 1);
-//                                            }
-//                                            if (messages.size() != pageSize) haveMoreData = false;
-//                                        } else {
-//                                            haveMoreData = false;
-//                                        }
-//                                        mLoadingProgressBar.setVisibility(View.INVISIBLE);
-//                                        isLoading = false;
-//                                    }
-//                                });
-//                            }
-//                        }).start();
-//                    }
-//                }
-//
-//            }
-//        }
-//    }
-
-//
-//    private void initViews() {
-//
-//        initMessageListView();
-//
-//        chatInputView.initChatInputView(parentLayout);
-//
-//        chatInputView.setInputEventListener(new ChatInputView.InputEventListener() {
-//
-//            @Override
-//            public void sendTypingEvent() {
-//                sendChatStateMsg(getString(R.string.typing));
-//            }
-//
-//            @Override
-//            public void sendIdleEvent() {
-//                sendChatStateMsg(getString(R.string.idle));
-//            }
-//
-//            @Override
-//            public void sendVoiceMessage(String path, int seconds) {
-//                ChatActivity.this.sendVoiceMessage(path, seconds);
-//            }
-//
-//            @Override
-//            public void sendImageMessage(String localFilePath, String trim) {
-//                ChatActivity.this.sendImageMessage(localFilePath, trim);
-//            }
-//
-//            @Override
-//            public void sendFileMessage(String localFilePath, HashMap<String, String> moreMessageProps) {
-//                ChatActivity.this.sendFileMessage(localFilePath, moreMessageProps);
-//            }
-//
-//            @Override
-//            public void sendTextMessage(String trim) {
-//                ChatActivity.this.sendTextMessage(trim);
-//            }
-//
-//            @Override
-//            public void sendVideoMessage(String localFilePath, String localFilePath1, int i, String trim) {
-//                ChatActivity.this.sendVideoMessage(localFilePath, localFilePath1, i, trim);
-//            }
-//
-//        });
-//
-//        closeReplyMessageView.setOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-//                UiUtils.blinkView(ChatActivity.this, closeReplyMessageView);
-//                snackOutMessageReplyView(messageReplyView);
-//            }
-//
-//        });
-//
-//    }
-//
-//    public List<EMMessage> getMsgs() {
-//        return mMessagesListView.getAllMessages();
-//    }
-//
-//    @Override
-//    public void onBackPressed() {
-//        chatInputView.onBackPressed();
-//    }
     private void removeAnyPendingChatRequestFromThisRecipient() {
         String signedInUserId = signedInUser.getString(AppConstants.APP_USER_ID);
         ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
@@ -1073,9 +768,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     public void openDocuments() {
         final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        // The MIME data type filter
         intent.setType("*/*");
-        // Only return URIs that can be opened with ContentResolver
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(intent, REQUEST_CODE_PICK_FILE);
     }
@@ -1098,21 +791,16 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     @SuppressLint("CommitPrefEdits")
     public void previewSinglePickedFile(String fileType, final String pickedFilePath) {
         HolloutPreferences.setLastFileCaption();
-
         final HolloutFile pickedHolloutFile = new HolloutFile();
         pickedHolloutFile.setLocalFilePath(pickedFilePath);
         pickedHolloutFile.setFileType(fileType);
-
         if (!pickedMediaFiles.contains(pickedHolloutFile)) {
             pickedMediaFiles.add(pickedHolloutFile);
         }
-
         if (pickedMediaFiles.size() == 1) {
-
             UiUtils.showView(singleMediaFrame, true);
             UiUtils.showView(singleMediaViewer, true);
             UiUtils.showView(cancelPickedSingleMedia, true);
-
             switch (fileType) {
                 case AppConstants.FILE_TYPE_PHOTO:
                     UiUtils.loadImage(this, pickedFilePath, singleMediaViewer);
@@ -1157,7 +845,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         UiUtils.previewSelectedFile(ChatActivity.this, pickedHolloutFile);
                     } else if (pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_VIDEO)
                             || pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_AUDIO)) {
-//                        com.hyphenate.util.FileUtils.openFile(new File(pickedHolloutFile.getLocalFilePath()), ChatActivity.this);
+                        FileUtils.openFile(new File(pickedHolloutFile.getLocalFilePath()), ChatActivity.this);
                     }
                 }
             });
@@ -1299,9 +987,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @SuppressLint("Recycle")
     protected void sendFileByUri(Uri uri) {
-
         String filePath = null;
-
         if ("content".equalsIgnoreCase(uri.getScheme())) {
             String[] filePathColumn = {MediaStore.Images.Media.DATA};
             Cursor cursor;
@@ -1321,30 +1007,18 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         } else if ("file".equalsIgnoreCase(uri.getScheme())) {
             filePath = uri.getPath();
         }
-
         HashMap<String, String> moreMessageProps = new HashMap<>();
-
         File file;
-
         if (filePath != null) {
-
             file = new File(filePath);
-
             if (!file.exists()) {
-
                 UiUtils.showSafeToast(getString(R.string.File_does_not_exist));
-
             } else {
-
                 //limit the size < 10M
                 if (file.length() > 10 * 1024 * 1024) {
-
                     UiUtils.showSafeToast(getString(R.string.file_greater_than_max));
-
                 } else {
-
                     String fileMime = FileUtils.getMimeType(filePath);
-
                     if (!HolloutUtils.isValidDocument(fileMime)) {
                         UiUtils.showSafeToast("Not a valid document");
                     } else {
@@ -1352,15 +1026,11 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         moreMessageProps.put(AppConstants.FILE_MIME_TYPE, fileMime);
                         sendFileMessage(filePath, moreMessageProps);
                     }
-
                 }
-
             }
-
         } else {
             UiUtils.showSafeToast("Oops! error fetching file. Please ensure the file is in your sd card.");
         }
-
     }
 
     @SuppressWarnings("unused")
@@ -1410,59 +1080,33 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
 
     protected void sendTextMessage(String content) {
-//        // create a message
-//        EMMessage message = EMMessage.createTxtSendMessage(content, recipientId);
-//        // send message
-//        sendMessage(message);
+
     }
 
     protected void sendVoiceMessage(String filePath, int length) {
-//        EMMessage message = EMMessage.createVoiceSendMessage(filePath, length, recipientId);
-//        sendMessage(message);
+
     }
 
     @SuppressLint("CommitPrefEdits")
     protected void sendImageMessage(String imagePath, String caption) {
-//        EMMessage message = EMMessage.createImageSendMessage(imagePath, false, recipientId);
-//        if (StringUtils.isNotEmpty(caption)) {
-//            PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).edit().putString(AppConstants.LAST_FILE_CAPTION, caption).clear().commit();
-//            message.setAttribute(AppConstants.FILE_CAPTION, caption);
-//        } else {
-//            String lastFileCaption = PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).getString(AppConstants.LAST_FILE_CAPTION, "Photo");
-//            message.setAttribute(AppConstants.FILE_CAPTION, lastFileCaption);
-//        }
-//        sendMessage(message);
+        if (StringUtils.isNotEmpty(caption)) {
+           HolloutPreferences.setLastFileCaption(caption);
+        } else {
+            String lastFileCaption = HolloutPreferences.getLastFileCaption();
+        }
     }
 
     protected void sendLocationMessage(double latitude, double longitude, String locationAddress) {
-//        EMMessage message =
-//                EMMessage.createLocationSendMessage(latitude, longitude, locationAddress,
-//                        recipientId);
-//        sendMessage(message);
+
     }
 
     @SuppressLint("CommitPrefEdits")
     protected void sendVideoMessage(String videoPath, String thumbPath, int videoLength, String caption) {
-//        EMMessage message =
-//                EMMessage.createVideoSendMessage(videoPath, thumbPath, videoLength, recipientId);
-//        if (StringUtils.isNotEmpty(caption)) {
-//            PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).edit().putString(AppConstants.LAST_FILE_CAPTION, caption).clear().commit();
-//            message.setAttribute(AppConstants.FILE_CAPTION, caption);
-//        } else {
-//            String lastFileCaption = PreferenceManager.getDefaultSharedPreferences(ChatActivity.this).getString(AppConstants.LAST_FILE_CAPTION, "Video");
-//            message.setAttribute(AppConstants.FILE_CAPTION, lastFileCaption);
-//        }
-//        sendMessage(message);
+
     }
 
     protected void sendFileMessage(String filePath, HashMap<String, String> moreMessageProps) {
-//        EMMessage message = EMMessage.createFileSendMessage(filePath, recipientId);
-//        if (moreMessageProps != null) {
-//            for (String key : moreMessageProps.keySet()) {
-//                message.setAttribute(key, moreMessageProps.get(key));
-//            }
-//        }
-//        sendMessage(message);
+
     }
 
     /**
@@ -1470,36 +1114,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
      */
 
     protected void sendMessage(/*EMMessage message*/) {
-//        if (message == null) {
-//            return;
-//        }
-//
-//        if (messageReplyView.getVisibility() == View.VISIBLE) {
-//            //Set attribute on message
-//            message.setAttribute(AppConstants.REPLY_TO_A_MESSAGE, true);
-//            message.setAttribute(AppConstants.ID_OF_REPLIED_MESSAGE, messageToReplyTo.getMsgId());
-//        }
-//
-//        if (chatType == CHATTYPE_GROUP) {
-//            message.setChatType(EMMessage.ChatType.GroupChat);
-//        } else if (chatType == AppConstants.CHATTYPE_CHATROOM) {
-//            message.setChatType(EMMessage.ChatType.ChatRoom);
-//        }
-//
-//        message.setAttribute(AppConstants.MESSAGE_SENDER_NAME, signedInUserObject.getString(AppConstants.HOLLOUT_USER_FULL_NAME));
-//        message.setAttribute(AppConstants.MESSAGE_SENDER_PROFILE_PHOTO_URL, signedInUserObject.getString(AppConstants.HOLLOUT_USER_PROFILE_PHOTO_URL));
-//
-//        //send message
-//        EMClient.getInstance().chatManager().sendMessage(message);
-//        emptyComposeText();
-//        EventBus.getDefault().post(new SentMessageOrReceivedMessage(message, false));
-//
-//        sendChatStateMsg(getString(R.string.idle));
-//        DbUtils.attemptFriendship(recipientId);
-//
-//        if (messageReplyView.getVisibility() == View.VISIBLE) {
-//            snackOutMessageReplyView(messageReplyView);
-//        }
 
     }
 
@@ -1511,8 +1125,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @SuppressWarnings("unused")
     public void resendMessage(/*EMMessage message*/) {
-//        message.setStatus(EMMessage.Status.CREATE);
-//        EMClient.getInstance().chatManager().sendMessage(message);
+
     }
 
     @Override
