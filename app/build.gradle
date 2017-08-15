@@ -125,6 +125,7 @@ dependencies {
     compile 'com.flaviofaria:kenburnsview:1.0.7'
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
+    compile 'com.github.john990:WaveView:v0.9'
 }
 
 apply plugin: 'com.google.gms.google-services'

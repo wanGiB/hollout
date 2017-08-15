@@ -514,7 +514,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             } else {
                 UiUtils.showView(startChatView, true);
-                startChatView.setImageResource(R.drawable.chat_tab);
                 List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutUser != null && aboutSignedInUser != null) {

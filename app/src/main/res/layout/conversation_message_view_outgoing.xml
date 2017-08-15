@@ -50,7 +50,7 @@
                         android:padding="2dp"
                         android:scaleType="centerCrop"
                         android:src="@drawable/splash_background_image"
-                        android:visibility="gone" />
+                        android:visibility="visible" />
 
                     <ImageView
                         android:id="@+id/play_media_if_video_icon"
@@ -179,6 +179,18 @@
                             app:textStyle="bold" />
 
                     </LinearLayout>
+
+                    <com.john.waveview.WaveView
+                        android:id="@+id/wave_view"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:background="#7b000000"
+                        app:above_wave_color="@android:color/white"
+                        app:blow_wave_color="@android:color/white"
+                        app:progress="10"
+                        app:wave_height="little"
+                        app:wave_hz="normal"
+                        app:wave_length="middle" />
 
                 </FrameLayout>
 
