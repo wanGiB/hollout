@@ -740,8 +740,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing())
-            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+        if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
     }
 
     public void setCurrentUploadAction(int currentUploadAction) {

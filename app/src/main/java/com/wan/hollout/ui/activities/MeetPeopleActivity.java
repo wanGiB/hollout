@@ -166,8 +166,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing())
-            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+        if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
     }
 
     private void offloadUserInterestsIfAvailable() {
@@ -251,7 +250,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             public void done(final List<ParseObject> objects, final ParseException e) {
                 if (objects != null && !objects.isEmpty()) {
                     UiUtils.toggleFlipperState(contentFlipper, 2);
-                    loadNewPeopleToMeetAdapter(objects,skip);
+                    loadNewPeopleToMeetAdapter(objects, skip);
                 }
                 checkListIsEmpty();
                 UiUtils.showView(potentialPeopleToMeetFooterView, false);
@@ -274,7 +273,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 if (e == null) {
                     if (objects != null && !objects.isEmpty()) {
                         UiUtils.toggleFlipperState(contentFlipper, 2);
-                        loadNewPeopleToMeetAdapter(objects,skip);
+                        loadNewPeopleToMeetAdapter(objects, skip);
                     } else {
                         if (skip == 0) {
                             potentialPeopleToMeet.clear();
@@ -296,7 +295,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         UiUtils.showView(noResultFoundView, potentialPeopleToMeet.isEmpty());
     }
 
-    private void loadNewPeopleToMeetAdapter(List<ParseObject> displayableList,int skip) {
+    private void loadNewPeopleToMeetAdapter(List<ParseObject> displayableList, int skip) {
         if (skip == 0) {
             potentialPeopleToMeet.clear();
             potentialPeopleToMeetAdapter.notifyDataSetChanged();

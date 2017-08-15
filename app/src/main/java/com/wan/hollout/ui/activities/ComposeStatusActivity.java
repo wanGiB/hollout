@@ -153,7 +153,7 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
                     if (e == null) {
                         UiUtils.morphRequestToSuccess(shareThoughtButton);
                         Intent callerIntent = new Intent();
-                        setResult(RESULT_OK,callerIntent);
+                        setResult(RESULT_OK, callerIntent);
                         finish();
                     }
                 }
@@ -164,8 +164,7 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing())
-            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+        if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
     }
 
 }

@@ -92,7 +92,7 @@
                 tools:ignore="ContentDescription" />
 
             <com.wan.hollout.ui.widgets.CircleImageView
-                android:id="@+id/play_media_if_video"
+                android:id="@+id/play_media_if_video_icon"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_gravity="center"

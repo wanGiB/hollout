@@ -531,9 +531,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             shimmerFrameLayout.stopShimmerAnimation();
         }
         checkAndUnRegEventBus();
-        if (isFinishing()) {
-            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
-        }
+        if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
         super.onPause();
     }
 

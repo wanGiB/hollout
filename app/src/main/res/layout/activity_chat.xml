@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@drawable/background_hd"
+    android:background="@color/grey_300"
     android:orientation="vertical">
 
     <com.wan.hollout.ui.widgets.ChatToolbar
@@ -19,7 +19,6 @@
         android:id="@+id/conversation_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/background_hd"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="vertical">

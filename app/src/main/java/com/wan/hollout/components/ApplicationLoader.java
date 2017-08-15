@@ -11,8 +11,10 @@ import android.support.multidex.MultiDex;
 import com.afollestad.appthemeengine.ATE;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
+import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseLiveQueryClient;
+import com.parse.ParseLiveQueryClientCallbacks;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
@@ -82,6 +84,30 @@ public class ApplicationLoader extends Application {
                         .build());
                 try {
                     parseLiveQueryClient = ParseLiveQueryClient.Factory.getClient(new URI(AppKeys.SERVER_ENDPOINT));
+
+                    parseLiveQueryClient.registerListener(new ParseLiveQueryClientCallbacks() {
+
+                        @Override
+                        public void onLiveQueryClientConnected(ParseLiveQueryClient client) {
+                            HolloutLogger.d("ParseLiveQueryClient", "Client Connected");
+                        }
+
+                        @Override
+                        public void onLiveQueryClientDisconnected(ParseLiveQueryClient client, boolean userInitiated) {
+                            attemptLiveQueryReconnection();
+                        }
+
+                        @Override
+                        public void onLiveQueryError(ParseLiveQueryClient client, LiveQueryException reason) {
+                            attemptLiveQueryReconnection();
+                        }
+
+                        @Override
+                        public void onSocketError(ParseLiveQueryClient client, Throwable reason) {
+                            attemptLiveQueryReconnection();
+                        }
+
+                    });
                 } catch (URISyntaxException e) {
                     HolloutLogger.d("ParseLiveQueryClient", "Exception = " + e.getMessage());
                     e.printStackTrace();
@@ -89,6 +115,17 @@ public class ApplicationLoader extends Application {
             }
         };
         thread.start();
+    }
+
+    private void attemptLiveQueryReconnection() {
+        if (parseLiveQueryClient != null) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    parseLiveQueryClient.reconnect();
+                }
+            }).start();
+        }
     }
 
     public static synchronized ApplicationLoader getInstance() {

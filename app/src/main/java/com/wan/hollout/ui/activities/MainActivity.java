@@ -337,8 +337,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     protected void onPause() {
         super.onPause();
         HolloutPreferences.setStartPageIndex(viewPager.getCurrentItem());
-        if (isFinishing())
-            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+        if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
     }
 
     /**

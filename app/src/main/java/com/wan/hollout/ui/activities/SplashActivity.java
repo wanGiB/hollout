@@ -106,8 +106,7 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing())
-            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+        if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
     }
 
     @Override
@@ -115,14 +114,14 @@ public class SplashActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER && resultCode == RESULT_OK) {
             launchPeopleToMeetActivity();
-        }else if (requestCode==RequestCodes.MEET_PEOPLE_REQUEST_CODE){
+        } else if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE) {
             launchMainActivity();
         }
     }
 
-    private void launchPeopleToMeetActivity(){
-        Intent peopleToMeetActivityIntent = new Intent(SplashActivity.this,MeetPeopleActivity.class);
-        startActivityForResult(peopleToMeetActivityIntent,RequestCodes.MEET_PEOPLE_REQUEST_CODE);
+    private void launchPeopleToMeetActivity() {
+        Intent peopleToMeetActivityIntent = new Intent(SplashActivity.this, MeetPeopleActivity.class);
+        startActivityForResult(peopleToMeetActivityIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
     }
 
     private void launchGenderAndAgeActivity() {

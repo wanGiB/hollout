@@ -88,7 +88,7 @@ public class BlogPostsView extends FrameLayout {
     @BindView(R.id.feed_image_thumbnail)
     DynamicHeightImageView feedImageThumbnailView;
 
-    @BindView(R.id.play_media_if_video)
+    @BindView(R.id.play_media_if_video_icon)
     ImageView playMediaIfVideo;
 
     @BindView(R.id.feed_title)

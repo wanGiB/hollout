@@ -43,7 +43,7 @@ public class SlidePagerActivity extends AppCompatActivity {
         if (getIntent() == null) return;
         String title = getIntent().getStringExtra(AppConstants.EXTRA_TITLE);
         String userId = getIntent().getStringExtra(AppConstants.APP_USER_ID);
-        ParseObject signedInUser =  ParseUser.getCurrentUser();
+        ParseObject signedInUser = ParseUser.getCurrentUser();
         if (signedInUser != null) {
             if (signedInUser.getObjectId().equals(userId)) {
                 getSupportActionBar().setTitle("Me");
@@ -59,22 +59,22 @@ public class SlidePagerActivity extends AppCompatActivity {
             pagerAdapter.addAll(pics);
             pager.setAdapter(pagerAdapter);
             pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                                              @Override
-                                              public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-                                              }
+                }
 
-                                              @Override
-                                              public void onPageSelected(int position) {
+                @Override
+                public void onPageSelected(int position) {
 
-                                              }
+                }
 
-                                              @Override
-                                              public void onPageScrollStateChanged(int state) {
+                @Override
+                public void onPageScrollStateChanged(int state) {
 
-                                              }
+                }
 
-                                          });
+            });
 
             mPageIndicator = (PageIndicator) findViewById(R.id.indicator);
 
@@ -107,8 +107,7 @@ public class SlidePagerActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing())
-            overridePendingTransition(R.anim.slide_from_right, R.anim.fade_scale_out);
+        if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
     }
 
     @Override
