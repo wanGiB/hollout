@@ -49,7 +49,7 @@
 
     <dimen name="padding_list_row">15dp</dimen>
     <dimen name="messages_padding_left">72dp</dimen>
-    <dimen name="icon_width_height">45dp</dimen>
+    <dimen name="icon_width_height">50dp</dimen>
     <dimen name="msg_text_primary">18sp</dimen>
     <dimen name="msg_text_secondary">16sp</dimen>
     <dimen name="icon_star">25dp</dimen>

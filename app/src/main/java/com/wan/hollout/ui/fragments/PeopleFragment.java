@@ -194,7 +194,7 @@ public class PeopleFragment extends Fragment {
         peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
         peopleRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
-
+//        RecyclerViewUtils.setFooterView(peopleRecyclerView,footerView);
         UiUtils.showView(footerView, false);
 
         peopleRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -319,8 +319,8 @@ public class PeopleFragment extends Fragment {
                     people.add(parseUser);
                 }
             }
-            peopleAdapter.notifyDataSetChanged();
         }
+        peopleAdapter.notifyDataSetChanged();
     }
 
     private void displayFetchErrorMessage(boolean networkError) {

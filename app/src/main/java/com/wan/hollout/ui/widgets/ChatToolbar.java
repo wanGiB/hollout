@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
@@ -112,6 +113,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     public void setLastSeenText(final long userLastSeen) {
+        contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.text_black));
         final String fullLastSeenTExt = getLastSeen(userLastSeen);
         contactSubTitle.setText(fullLastSeenTExt);
         new Handler().postDelayed(new Runnable() {
@@ -173,13 +175,16 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             if (chatStateToSignedInUser != null) {
                 if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
                     contactSubTitle.setText(mContext.getString(R.string.online));
+                    contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
                     UiUtils.showView(typingIndicator, false);
                 } else if (chatStateToSignedInUser.contains(mContext.getString(R.string.typing)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
                     contactSubTitle.setText(StringUtils.strip(mContext.getString(R.string.typing_), "..."));
+                    contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
                     UiUtils.showView(typingIndicator, true);
                 } else {
                     if (userOnlineStatus.equals(AppConstants.ONLINE)) {
                         contactSubTitle.setText(mContext.getString(R.string.online));
+                        contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
                         UiUtils.showView(typingIndicator, false);
                     } else {
                         UiUtils.showView(typingIndicator, false);
@@ -189,6 +194,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             } else {
                 if (userOnlineStatus.equals(AppConstants.ONLINE)) {
                     contactSubTitle.setText(mContext.getString(R.string.online));
+                    contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
                     UiUtils.showView(typingIndicator, false);
                 } else {
                     UiUtils.showView(typingIndicator, false);
@@ -199,6 +205,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
             if (userOnlineStatus != null && userOnlineStatus.equals(AppConstants.ONLINE)) {
                 contactSubTitle.setText(mContext.getString(R.string.online));
+                contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
             } else {
                 setLastSeenText(userLastSeen);
             }

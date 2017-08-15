@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -1098,8 +1097,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @SuppressLint("CommitPrefEdits")
     public void previewSinglePickedFile(String fileType, final String pickedFilePath) {
-
-        PreferenceManager.getDefaultSharedPreferences(this).edit().putString(AppConstants.LAST_FILE_CAPTION, null).clear().commit();
+        HolloutPreferences.setLastFileCaption();
 
         final HolloutFile pickedHolloutFile = new HolloutFile();
         pickedHolloutFile.setLocalFilePath(pickedFilePath);
@@ -1129,9 +1127,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     } else {
                         Glide.with(this).load(pickedFilePath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(singleMediaViewer);
                     }
-
                     String fileMime = FileUtils.getMimeType(pickedFilePath);
-
                     if (HolloutUtils.isVideo(fileMime)) {
                         UiUtils.showView(playSingleMediaIfVideo, true);
                         UiUtils.showView(mediaLengthView, true);
@@ -1140,7 +1136,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             mediaLengthView.setText(videoLength);
                         }
                     }
-
                     break;
                 default:
                     UiUtils.showView(playSingleMediaIfVideo, true);
@@ -1158,57 +1153,41 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
                 @Override
                 public void onClick(View view) {
-
                     if (pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_PHOTO)) {
                         UiUtils.previewSelectedFile(ChatActivity.this, pickedHolloutFile);
                     } else if (pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_VIDEO)
                             || pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_AUDIO)) {
 //                        com.hyphenate.util.FileUtils.openFile(new File(pickedHolloutFile.getLocalFilePath()), ChatActivity.this);
                     }
-
                 }
-
             });
 
         } else {
-
             UiUtils.showView(singleMediaFrame, false);
             UiUtils.showView(singleMediaViewer, false);
             UiUtils.showView(cancelPickedSingleMedia, false);
             UiUtils.showView(multiplePickedMediaFilesRecyclerView, true);
             pickedMediaFilesAdapter.notifyDataSetChanged();
-
         }
-
         composeText.setHint("Add caption");
         displayActiveSendButton();
-
     }
 
     public void previewMultiplePickedFiles(ArrayList<HolloutFile> galleryResults) {
-
         if (!pickedMediaFiles.containsAll(galleryResults)) {
-
             if (pickedMediaFiles.size() < 10) {
-
                 pickedMediaFiles.addAll(galleryResults);
-
                 UiUtils.showView(singleMediaFrame, false);
                 UiUtils.showView(singleMediaViewer, false);
                 UiUtils.showView(cancelPickedSingleMedia, false);
                 UiUtils.showView(multiplePickedMediaFilesRecyclerView, true);
-
                 pickedMediaFilesAdapter.notifyDataSetChanged();
-
                 composeText.setHint("Add caption");
                 displayActiveSendButton();
-
             }
-
         } else {
             UiUtils.showSafeToast("Maximum files for transfer reached");
         }
-
     }
 
     @Override

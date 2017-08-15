@@ -24,8 +24,10 @@ public class EmojiEditText extends AppCompatEditText {
 
     public EmojiEditText(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        if (!HolloutPreferences.isSystemEmojiPreferred()) {
-            setFilters(appendEmojiFilter(this.getFilters()));
+        if (!isInEditMode()) {
+            if (!HolloutPreferences.isSystemEmojiPreferred()) {
+                setFilters(appendEmojiFilter(this.getFilters()));
+            }
         }
     }
 

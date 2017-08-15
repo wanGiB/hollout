@@ -536,7 +536,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         View getCustomTabView(int pos) {
             @SuppressWarnings("InflateParams")
             View view = layoutInflater.inflate(R.layout.tab_custom_view, null);
-            TextView tabTitle = view.findViewById(R.id.tab_title);
+            TextView tabTitle = (TextView) view.findViewById(R.id.tab_title);
             Typeface typeface = FontUtils.selectTypeface(context, 1);
             tabTitle.setTypeface(typeface);
             tabTitle.setText(getPageTitle(pos));

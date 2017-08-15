@@ -120,15 +120,19 @@ public class HolloutPreferences {
     }
 
     public static String getLanguage(String languagePref, String zz) {
-        return getHolloutPreferences().getString(languagePref,zz);
+        return getHolloutPreferences().getString(languagePref, zz);
     }
 
     public static void defaultToSystemEmojis(String systemEmojiPref, boolean b) {
-        getHolloutPreferences().edit().putBoolean(systemEmojiPref,b).commit();
+        getHolloutPreferences().edit().putBoolean(systemEmojiPref, b).commit();
     }
 
-    public static boolean isEnterSendsEnabled(){
-        return getHolloutPreferences().getBoolean(ENTER_SENDS_PREF,false);
+    public static boolean isEnterSendsEnabled() {
+        return getHolloutPreferences().getBoolean(ENTER_SENDS_PREF, false);
+    }
+
+    public static void setLastFileCaption() {
+        getHolloutPreferences().edit().putString(AppConstants.LAST_FILE_CAPTION, null).clear().commit();
     }
 
 }

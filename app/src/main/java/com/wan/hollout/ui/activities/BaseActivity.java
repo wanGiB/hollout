@@ -15,6 +15,7 @@
 
 package com.wan.hollout.ui.activities;
 
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -32,6 +33,13 @@ public class BaseActivity extends ATEActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!isTaskRoot()) {
+            Intent intent = getIntent();
+            String action = intent.getAction();
+            if (intent.hasCategory(Intent.CATEGORY_LAUNCHER) && action.equals(Intent.ACTION_MAIN)) {
+                finish();
+            }
+        }
     }
 
     @Override
@@ -52,7 +60,6 @@ public class BaseActivity extends ATEActivity {
     public void onResume() {
         super.onResume();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

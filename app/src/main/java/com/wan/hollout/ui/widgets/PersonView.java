@@ -159,7 +159,6 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
     private int getRandomMaterialColor(String typeColor) {
         int returnColor = Color.GRAY;
         int arrayId = getResources().getIdentifier("mdcolor_" + typeColor, "array", activity.getPackageName());
-
         if (arrayId != 0) {
             TypedArray colors = getResources().obtainTypedArray(arrayId);
             int index = (int) (Math.random() * colors.length());
@@ -201,7 +200,6 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
                 UiUtils.setTextOnView(userLocationView, " ");
                 userLocationView.invalidate();
             }
-
             ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
             if (signedInUserGeoPoint != null && userGeoPoint != null) {
                 double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
@@ -210,7 +208,6 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
             } else {
                 UiUtils.setTextOnView(distanceToUserView, " ");
             }
-
             List<String> aboutUser = person.getList(AppConstants.ABOUT_USER);
             List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
             if (aboutUser != null && aboutSignedInUser != null) {
@@ -249,11 +246,13 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
             }
 
             userPhotoView.setOnClickListener(new OnClickListener() {
+
                 @Override
                 public void onClick(View view) {
                     UiUtils.blinkView(view);
                     UiUtils.loadUserData(activity, person);
                 }
+
             });
 
             messageContainer.setOnClickListener(new OnClickListener() {

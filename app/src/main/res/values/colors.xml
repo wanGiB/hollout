@@ -260,4 +260,14 @@
     <color name="conversation_item_received_text_secondary_color">#BFffffff</color>
     <color name="conversation_item_sent_text_indicator_tab_color">#99ffffff</color>
 
+    <!--layout_background-->
+    <color name="dark_background">#243e55</color>
+    <color name="light_background">#3d5b76</color>
+    <color name="gray_background">#ced3d9</color>
+    <color name="white_background">#ffffff</color>
+
+    <color name="message_sent_color">@color/white</color>
+    <color name="message_delivered_color">@color/gray5</color>
+    <color name="message_read_color">@color/green_100</color>
+
 </resources>

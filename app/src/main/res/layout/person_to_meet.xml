@@ -124,7 +124,7 @@
                 android:paddingRight="16dp"
                 android:textColor="@color/from"
                 android:textSize="@dimen/msg_text_primary"
-                app:textStyle="medium" />
+                app:textStyle="bold" />
 
             <TextView
                 android:id="@+id/timestamp"
@@ -153,7 +153,7 @@
             android:lines="1"
             android:textColor="@color/list_item_secondary_text"
             android:textSize="@dimen/msg_text_secondary"
-            app:textStyle="medium" />
+            app:textStyle="bold" />
 
         <LinearLayout
             android:layout_width="match_parent"

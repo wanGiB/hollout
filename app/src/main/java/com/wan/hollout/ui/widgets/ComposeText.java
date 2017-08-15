@@ -101,7 +101,6 @@ public class ComposeText extends EmojiEditText {
     @Override
     public InputConnection onCreateInputConnection(EditorInfo editorInfo) {
         InputConnection inputConnection = super.onCreateInputConnection(editorInfo);
-
         if (HolloutPreferences.isEnterSendsEnabled()) {
             editorInfo.imeOptions &= ~EditorInfo.IME_FLAG_NO_ENTER_ACTION;
         }
