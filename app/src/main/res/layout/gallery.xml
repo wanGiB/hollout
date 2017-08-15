@@ -54,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_gravity="bottom"
-        android:background="@color/colorPrimary">
+        android:background="@color/light_gray">
 
         <com.wan.hollout.ui.widgets.HolloutTextView
             android:id="@+id/cancel_selections"
@@ -68,7 +68,7 @@
             android:gravity="center_vertical"
             android:padding="5dp"
             android:text="@string/cancel_text"
-            android:textColor="@color/white"
+            android:textColor="@color/text_black"
             android:textSize="15sp"
             app:textStyle="medium"
             tools:ignore="RtlHardcoded" />
@@ -78,7 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:textColor="@color/white"
+            android:textColor="@color/text_black"
             android:textSize="15sp"
             app:textStyle="bold" />
 
@@ -96,6 +96,7 @@
         android:layout_marginEnd="20dp"
         android:layout_marginRight="20dp"
         android:src="@drawable/ic_done"
+        android:padding="14dp"
         app:backgroundTint="@color/colorAccent"
         app:backgroundTintMode="multiply"
         app:borderWidth="1dp"
