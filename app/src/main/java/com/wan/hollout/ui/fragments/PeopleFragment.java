@@ -340,11 +340,17 @@ public class PeopleFragment extends Fragment {
         peopleAdapter.setSearchString(searchString);
         ParseQuery<ParseUser> parseUserParseQuery = ParseUser.getQuery();
         parseUserParseQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
+        if (signedInUser != null) {
+            parseUserParseQuery.whereNotEqualTo("objectId", signedInUser.getObjectId());
+        }
 
         ParseQuery<ParseUser> categoryQuery = ParseUser.getQuery();
+        if (signedInUser != null) {
+            categoryQuery.whereNotEqualTo("objectId", signedInUser.getObjectId());
+        }
+
         List<String> elements = new ArrayList<>();
         elements.add(StringUtils.stripEnd(searchString.toLowerCase(), "s"));
-
         categoryQuery.whereContainsAll(AppConstants.ABOUT_USER, elements);
 
         List<ParseQuery<ParseUser>> queries = new ArrayList<>();

@@ -238,6 +238,15 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PermissionsUtils.REQUEST_LOCATION && holloutPermissions.verifyPermissions(grantResults)) {
             HolloutPreferences.setCanAccessLocation(true);
+        }else{
+            UiUtils.snackMessage("To enjoy all features of hollout, please allow access to your location.",
+                    drawer, true, "OK", new DoneCallback<Object>() {
+                        @Override
+                        public void done(Object result, Exception e) {
+                            tryAccessLocation();
+                        }
+                    });
+
         }
     }
 
@@ -314,7 +323,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                     String s = (String) o;
                     if (s.equals(AppConstants.PLEASE_REQUEST_LOCATION_ACCESSS)) {
                         if (isLocationEnabled(MainActivity.this)) {
-                            startAppInstanceDetectionService();
+                            tryAccessLocation();
                         } else {
                             turnOnLocationMessage();
                         }
@@ -324,7 +333,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         });
     }
 
-    private void startAppInstanceDetectionService() {
+    private void tryAccessLocation() {
         boolean canAccessLocation = HolloutPreferences.canAccessLocation();
         if (Build.VERSION.SDK_INT >= 23 && !canAccessLocation) {
             holloutPermissions.requestLocationPermissions();
