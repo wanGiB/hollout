@@ -97,7 +97,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     private InterestsSuggestionAdapter interestsSuggestionAdapter;
     private Capture<String> lastSelection = new Capture<>();
 
-    private boolean canLaunchMain = false;
+    private boolean canLaunchMain = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -112,7 +112,10 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("About You");
         }
-        canLaunchMain = getIntent().getExtras().getBoolean(AppConstants.CAN_LAUNCH_MAIN, false);
+        Bundle bundle = getIntent().getExtras();
+        if (bundle!=null){
+            canLaunchMain = getIntent().getExtras().getBoolean(AppConstants.CAN_LAUNCH_MAIN, false);
+        }
         loadSignedInUserPhoto();
         initVibrator();
         initShakeAnimation();
