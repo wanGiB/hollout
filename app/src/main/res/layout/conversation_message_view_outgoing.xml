@@ -22,14 +22,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="3dp"
-            app:cmv_arrowGravity="start"
-            android:layout_marginStart="10dp"
+            android:layout_marginEnd="3dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginRight="3dp"
+            android:layout_marginStart="10dp"
+            app:cmv_arrowGravity="start"
             app:cmv_arrowPosition="right"
             app:cmv_backgroundColor="@color/whitesmoke"
             app:cmv_backgroundColorPressed="@color/ease_gray"
-            app:cmv_cornerRadius="2dp"
             app:cmv_contentPadding="4dp"
+            app:cmv_cornerRadius="2dp"
             app:cmv_showArrow="true">
 
             <LinearLayout
@@ -67,8 +69,7 @@
                         android:padding="10dp"
                         android:textColor="@color/white"
                         android:textSize="13sp"
-                        android:visibility="visible"
-                        android:text="12KB"
+                        android:visibility="gone"
                         app:textStyle="medium" />
 
                     <LinearLayout
@@ -77,10 +78,10 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:paddingEnd="10dp"
-                        android:visibility="gone"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
-                        android:paddingStart="10dp">
+                        android:paddingStart="10dp"
+                        android:visibility="gone">
 
                         <ImageView
                             android:id="@+id/contact_icon"
@@ -123,10 +124,10 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:paddingEnd="10dp"
-                        android:visibility="gone"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
-                        android:paddingStart="10dp">
+                        android:paddingStart="10dp"
+                        android:visibility="gone">
 
                         <ImageView
                             android:id="@+id/document_icon"
@@ -139,11 +140,11 @@
                             android:id="@+id/document_name_and_size"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginStart="10dp"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            android:layout_marginLeft="10dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginStart="10dp"
                             app:textStyle="bold" />
 
                     </LinearLayout>
@@ -154,10 +155,10 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:paddingEnd="10dp"
-                        android:visibility="gone"
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
-                        android:paddingStart="10dp">
+                        android:paddingStart="10dp"
+                        android:visibility="gone">
 
                         <ImageView
                             android:id="@+id/voice_icon"
@@ -170,11 +171,11 @@
                             android:id="@+id/voice_name_and_size"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginStart="10dp"
                             android:textColor="@color/black"
                             android:textSize="16sp"
-                            android:layout_marginLeft="10dp"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginStart="10dp"
                             app:textStyle="bold" />
 
                     </LinearLayout>
@@ -205,9 +206,9 @@
             android:layout_gravity="end"
             android:layout_marginEnd="10dp"
             android:layout_marginRight="10dp"
-            android:text="Sent 12:45PM"
             android:textColor="@color/grey500"
             android:textSize="12sp"
+            android:visibility="gone"
             app:textStyle="medium" />
 
     </LinearLayout>

@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@color/grey_300"
+    android:background="#d4dce4"
     android:orientation="vertical">
 
     <com.wan.hollout.ui.widgets.ChatToolbar
