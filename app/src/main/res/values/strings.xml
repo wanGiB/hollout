@@ -259,5 +259,9 @@
     <string name="em_call_info_lost_rate">Lost Rate</string>
     <string name="em_call_info_local_bitrate">Local Bitrate</string>
     <string name="em_call_info_remote_bitrate">Remote Bitrate</string>
+    <string name="audio_view__play_accessibility_description">Play</string>
+    <string name="audio_view__pause_accessibility_description">Pause</string>
+    <string name="audio_view__download_accessibility_description">Download</string>
+    <string name="AudioSlidePlayer_error_playing_audio">Error playing audio!</string>
 
 </resources>

@@ -50,7 +50,7 @@
                         android:padding="2dp"
                         android:scaleType="centerCrop"
                         android:src="@drawable/splash_background_image"
-                        android:visibility="visible" />
+                        android:visibility="gone" />
 
                     <ImageView
                         android:id="@+id/play_media_if_video_icon"
@@ -158,33 +158,21 @@
                         android:paddingLeft="10dp"
                         android:paddingRight="10dp"
                         android:paddingStart="10dp"
-                        android:visibility="gone">
+                        android:visibility="visible">
 
-                        <ImageView
-                            android:id="@+id/voice_icon"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/attach_contact"
-                            tools:ignore="ContentDescription" />
-
-                        <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/voice_name_and_size"
+                        <com.wan.hollout.ui.widgets.AudioView
+                            android:id="@+id/audio_view"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginStart="10dp"
-                            android:textColor="@color/black"
-                            android:textSize="16sp"
-                            app:textStyle="bold" />
+                            android:layout_height="wrap_content" />
 
                     </LinearLayout>
 
                     <com.john.waveview.WaveView
-                        android:id="@+id/wave_view"
+                        android:id="@+id/photo_video_wave_view"
                         android:layout_width="200dp"
                         android:layout_height="200dp"
                         android:background="#7b000000"
+                        android:visibility="gone"
                         app:above_wave_color="@android:color/white"
                         app:blow_wave_color="@android:color/white"
                         app:progress="10"
