@@ -563,6 +563,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private class AttachButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
+            if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfForStoragePermission(ChatActivity.this)) {
+                holloutPermissions.requestStoragePermissions();
+                return;
+            }
             handleAddAttachment();
         }
     }
@@ -637,7 +641,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             inputPanel.setEmojiDrawer(emojiDrawerStub.get());
             emojiDrawerStub.get().setEmojiEventListener(inputPanel);
         }
-
         if (container.getCurrentInput() == emojiDrawerStub.get()) {
             container.showSoftkey(composeText);
         } else {
