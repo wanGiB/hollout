@@ -504,6 +504,7 @@ public class UiUtils {
                     public void onDismiss(DialogInterface dialogInterface) {
                         try {
                             ApplicationLoader.getParseLiveQueryClient().unsubscribe(userStateQuery);
+                            dialogInterface.cancel();
                         } catch (NullPointerException ignored) {
 
                         }

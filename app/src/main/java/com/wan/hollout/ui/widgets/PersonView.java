@@ -36,6 +36,7 @@ import org.apache.commons.lang3.text.WordUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -227,14 +228,14 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
             }
 
             String userStatusString = person.getString(AppConstants.APP_USER_STATUS);
-            if (userStatusString != null) {
+            if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(person, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
                 userStatus.setText(userStatusString);
             } else {
                 userStatus.setText(activity.getString(R.string.hey_there_holla_me_on_hollout));
             }
 
             String userOnlineStatus = person.getString(AppConstants.APP_USER_ONLINE_STATUS);
-            if (userOnlineStatus != null) {
+            if (userOnlineStatus != null && UiUtils.canShowPresence(person, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
                 if (person.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)
                         && HolloutUtils.isNetWorkConnected(activity)) {
                     userOnlineStatusView.setImageResource(R.drawable.ic_online);
