@@ -100,7 +100,7 @@ import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_VIDEO;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
 
 
-@SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal","unused"})
+@SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal", "unused"})
 public class ChatActivity extends BaseActivity implements ATEActivityThemeCustomizer,
         KeyboardAwareLinearLayout.OnKeyboardShownListener,
         ActivityCompat.OnRequestPermissionsResultCallback, InputPanel.Listener, View.OnClickListener {
@@ -108,15 +108,12 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private boolean isDarkTheme;
 
     private static final int REQUEST_CODE_PICK_FILE = 9;
-
     private static final int REQUEST_CODE_CONTACT_SHARE = 15;
     private static final int PLACE_LOCATION_PICKER_REQUEST_CODE = 20;
-
     protected static final int MESSAGE_TYPE_RECEIVED_CALL = 1;
     protected static final int MESSAGE_TYPE_SENT_CALL = 2;
 
     private AttachmentTypeSelector attachmentTypeSelector;
-
     private Stub<EmojiDrawer> emojiDrawerStub;
 
     @BindView(R.id.bottom_panel)
@@ -237,7 +234,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         initBasicComponents();
         signedInUser = ParseUser.getCurrentUser();
         recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
-        //Init toolbar with private chat
         if (recipientProperties != null) {
             chatToolbar.initView(recipientId, AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
             recipientId = recipientProperties.getObjectId();
@@ -275,7 +271,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     public void startRecorder() {
-        //Start Recording
         resetRecorderAndStartRecording();
     }
 
@@ -349,7 +344,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
         @Override
         public void onClick(int type) {
-            HolloutLogger.d("AttachmentTypeSelector", "ClickedAttachmentType = " + type);
             handleClickedAttachmentType(type);
         }
 
@@ -1078,9 +1072,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
     }
 
-
     protected void sendTextMessage(String content) {
-
+        //Send message here and empty compose box
+        emptyComposeText();
     }
 
     protected void sendVoiceMessage(String filePath, int length) {
@@ -1090,7 +1084,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     @SuppressLint("CommitPrefEdits")
     protected void sendImageMessage(String imagePath, String caption) {
         if (StringUtils.isNotEmpty(caption)) {
-           HolloutPreferences.setLastFileCaption(caption);
+            HolloutPreferences.setLastFileCaption(caption);
         } else {
             String lastFileCaption = HolloutPreferences.getLastFileCaption();
         }
