@@ -131,7 +131,7 @@
                 android:layout_marginEnd="25dp"
                 android:layout_marginRight="25dp"
                 android:layout_marginTop="250dp"
-                android:src="@drawable/chat_tab"
+                android:src="@drawable/floating_message"
                 app:backgroundTint="@color/colorPrimary"
                 app:fabSize="normal"
                 app:rippleColor="@color/colorPrimaryDark"
