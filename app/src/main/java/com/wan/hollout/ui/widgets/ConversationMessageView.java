@@ -15,7 +15,6 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONArray;
 
 import java.util.Date;
 
@@ -77,30 +76,27 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
 
     private ParseObject messageObject;
 
-    public ConversationMessageView(Context context, ParseObject parseObject) {
+    public ConversationMessageView(Context context) {
         super(context);
-        init(context, parseObject);
     }
 
-    public ConversationMessageView(Context context, AttributeSet attrs, ParseObject parseObject) {
+    public ConversationMessageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context, parseObject);
     }
 
-    public ConversationMessageView(Context context, AttributeSet attrs, int defStyleAttr, ParseObject parseObject) {
+    public ConversationMessageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context, parseObject);
     }
 
-    private void init(Context context, ParseObject parseObject) {
-        this.messageObject = parseObject;
-        inflate(context, getMessageDirection(parseObject).equals(AppConstants.MESSAGE_DIRECTION_INCOMING)
+    private void init(Context context) {
+        inflate(context, getMessageDirection(messageObject).equals(AppConstants.MESSAGE_DIRECTION_INCOMING)
                 ? R.layout.conversation_message_view_incoming
                 : R.layout.conversation_message_view_outgoing, this);
     }
 
-    public void bindData(ParseObject messageObject) {
+    public void bindData(Context context,ParseObject messageObject) {
         this.messageObject = messageObject;
+        init(context);
         setupMessageBody();
         setupMessageDate();
         refreshViews();

@@ -221,6 +221,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private File recorderAudioCaptureFilePath;
 
+    private List<ParseObject> messages = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
@@ -565,6 +567,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         public void onClick(View v) {
             if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfForStoragePermission(ChatActivity.this)) {
                 holloutPermissions.requestStoragePermissions();
+                setLastPermissionInitiationAction(AppConstants.REQUEST_STORAGE_ACCESS_FOR_GALLERY);
                 return;
             }
             handleAddAttachment();
