@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.widgets;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -26,6 +27,7 @@ import butterknife.ButterKnife;
 /**
  * @author Wan Clem
  */
+@SuppressWarnings("FieldCanBeLocal")
 public class ConversationMessageView extends RelativeLayout implements View.OnClickListener {
 
     @BindView(R.id.message_container)
@@ -93,6 +95,8 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
     private ParseObject messageObject;
     private ParseUser signedInUser;
 
+    private Activity activity;
+
     public ConversationMessageView(Context context) {
         super(context);
     }
@@ -105,7 +109,8 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         super(context, attrs, defStyleAttr);
     }
 
-    public void bindData(Context context, ParseObject messageObject) {
+    public void bindData(Activity context, ParseObject messageObject) {
+        this.activity = context;
         signedInUser = ParseUser.getCurrentUser();
         this.messageObject = messageObject;
         setupMessageBody();
@@ -178,10 +183,6 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
             UiUtils.showView(deliveryStatusAndTimeView, false);
             AppConstants.messageTimeVisibilePositions.put(getMessageId(), false);
         }
-    }
-
-    private boolean messageHasMedia() {
-        return messageObject.getJSONArray(AppConstants.MESSAGE_MEDIA) != null;
     }
 
     @Override

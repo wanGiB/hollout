@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -35,7 +36,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         StickyRecyclerHeadersAdapter<MessagesAdapter.MessagedDatesHeaderHolder> {
 
     private List<ParseObject> messages;
-    private Context context;
+    private Activity context;
     private LayoutInflater layoutInflater;
     private Calendar calendar;
     private ParseUser signedInUser;
@@ -56,7 +57,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int INCOMING_MESSAGE_WITH_CONTACT = 10;
     private static final int INCOMING_MESSAGE_WITH_LINK_PREVIEW = 11;
 
-    public MessagesAdapter(Context context, List<ParseObject> messages) {
+    public MessagesAdapter(Activity context, List<ParseObject> messages) {
         this.context = context;
         this.messages = messages;
         this.layoutInflater = LayoutInflater.from(context);

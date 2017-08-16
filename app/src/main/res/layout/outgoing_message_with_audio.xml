@@ -26,9 +26,7 @@
         app:cmv_backgroundColorPressed="@color/ease_gray"
         app:cmv_contentPadding="4dp"
         app:cmv_cornerRadius="2dp"
-        app:cmv_showArrow="true"
-        app:viewPartMain="@+id/content_view"
-        app:viewPartSlave="@+id/delivery_status_and_time_view">
+        app:cmv_showArrow="true">
 
         <com.wan.hollout.ui.widgets.AudioView
             android:id="@+id/audio_view"
@@ -54,15 +52,15 @@
             android:id="@+id/delivery_status_and_time_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/audio_view"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
             android:layout_gravity="end"
             android:layout_marginEnd="10dp"
             android:layout_marginRight="10dp"
             android:drawablePadding="4dp"
             android:text="16:00AM"
             android:textColor="@color/grey500"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignBottom="@id/audio_view"
             android:textSize="12sp"
             app:textStyle="medium" />
 
