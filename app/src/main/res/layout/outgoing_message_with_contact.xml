@@ -61,19 +61,34 @@
 
         </LinearLayout>
 
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/delivery_status_and_time_view"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/document_data_layout"
-            android:layout_alignEnd="@id/document_data_layout"
-            android:layout_alignRight="@id/document_data_layout"
-            android:drawablePadding="4dp"
-            android:gravity="end"
-            android:textColor="@color/grey500"
-            android:text="00:12AM"
-            android:textSize="12sp"
-            app:textStyle="medium" />
+            android:layout_gravity="bottom|end"
+            android:orientation="horizontal"
+            android:paddingEnd="5dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingStart="5dp">
+
+            <TextView
+                android:id="@+id/textview_time"
+                style="@style/chat_timings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="4dp"
+                android:layout_marginEnd="4dp" />
+
+            <ImageView
+                android:id="@+id/delivery_status_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:paddingBottom="3dp"
+                android:src="@drawable/msg_status_client_received"
+                tools:ignore="ContentDescription" />
+
+        </LinearLayout>
 
     </com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView>
 

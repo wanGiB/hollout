@@ -139,8 +139,7 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
             UiUtils.showView(messageBodyView, true);
             if (messageBodyView != null) {
                 if (getSenderId(messageObject).equals(signedInUser.getObjectId())) {
-                    messageBodyView.setText(UiUtils.fromHtml(messageBody
-                            + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
+                    messageBodyView.setText(UiUtils.fromHtml(messageBody + "&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
                             "&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
                 } else {
                     messageBodyView.setText(UiUtils.fromHtml(messageBody
@@ -157,7 +156,7 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         }
         String deliveryStatus = messageObject.getString(AppConstants.DELIVERY_STATUS);
         String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
-        timeTextView.setText(activity.getString(R.string.read).concat(messageTime));
+        timeTextView.setText(messageTime);
         if (getSenderId(messageObject).equals(signedInUser.getObjectId())) {
             switch (deliveryStatus) {
                 case AppConstants.READ:

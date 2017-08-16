@@ -32,9 +32,7 @@
         <FrameLayout
             android:id="@+id/incoming_layout_bubble"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true">
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/textview_time"
@@ -42,7 +40,6 @@
                 android:layout_width="wrap_content"
                 android:paddingRight="5dp"
                 android:paddingEnd="5dp"
-                android:text="11:15 PM"
                 style="@style/chat_timings"
                 android:layout_gravity="bottom|end"
                 tools:ignore="RtlSymmetry" />
