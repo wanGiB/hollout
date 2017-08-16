@@ -1128,6 +1128,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         if (signedInUser != null) {
             newTxtMessage.put(AppConstants.SENDER_ID, signedInUser.getObjectId());
         }
+        messages.add(newTxtMessage);
+        messagesAdapter.notifyDataSetChanged();
     }
 
     protected void sendVoiceMessage(String filePath, int length) {
