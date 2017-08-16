@@ -106,11 +106,22 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+        ParseUser signedInUser = ParseUser.getCurrentUser();
+
+        if (signedInUser == null) {
+            Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
+            startActivity(splashIntent);
+            finish();
+            return;
+        }
+
         final ActionBar ab = getSupportActionBar();
+
         if (ab != null) {
             ab.setHomeAsUpIndicator(R.drawable.ic_menu);
             ab.setDisplayHomeAsUpEnabled(true);
         }
+
         if (viewPager != null) {
             Adapter adapter = setupViewPagerAdapter(viewPager);
             viewPager.setOffscreenPageLimit(3);
@@ -118,21 +129,20 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             tabLayout.setupWithViewPager(viewPager);
             setupTabs(adapter);
         }
+
         if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
         } else {
             ATE.apply(this, "light_theme");
         }
+
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
         initAndroidPermissions();
         drawerFragment = (DrawerFragment) getSupportFragmentManager().findFragmentById(R.id.main_navigation_drawer_fragment);
         drawerFragment.setUp(drawer, this);
 
-        ParseUser signedInUser = ParseUser.getCurrentUser();
         if (!HolloutPreferences.isUserWelcomed()) {
-            if (signedInUser != null) {
-                UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)));
-            }
+            UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)));
             HolloutPreferences.setUserWelcomed(true);
         }
 
@@ -238,7 +248,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PermissionsUtils.REQUEST_LOCATION && holloutPermissions.verifyPermissions(grantResults)) {
             HolloutPreferences.setCanAccessLocation(true);
-        }else{
+        } else {
             UiUtils.snackMessage("To enjoy all features of hollout, please allow access to your location.",
                     drawer, true, "OK", new DoneCallback<Object>() {
                         @Override

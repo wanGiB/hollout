@@ -239,8 +239,17 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         setSupportActionBar(chatToolbar.getToolbar());
         Bundle intentExtras = getIntent().getExtras();
         initBasicComponents();
+
         signedInUser = ParseUser.getCurrentUser();
+        if (signedInUser == null) {
+            Intent splashIntent = new Intent(ChatActivity.this, SplashActivity.class);
+            startActivity(splashIntent);
+            finish();
+            return;
+        }
+
         recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
+
         if (recipientProperties != null) {
             chatToolbar.initView(recipientId, AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
             recipientId = recipientProperties.getObjectId();
@@ -248,13 +257,16 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         } else {
             //Init toolbar with group chat
         }
+
         if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
         } else {
             ATE.apply(this, "light_theme");
         }
+
         initializeViews();
         setupAttachmentManager();
+
     }
 
     private void setupMessagesAdapter() {
@@ -541,7 +553,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         iterateThroughPickedMediaAndSendEach();
                     } else {
                         //Send message,considering our file paths
-                        sendTextMessage(composeText.getText().toString().trim());
+                        if (StringUtils.isNotEmpty(composeText.getText().toString().trim())) {
+                            sendTextMessage(composeText.getText().toString().trim());
+                        }
                     }
                 }
             }
@@ -1107,8 +1121,13 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     protected void sendTextMessage(String content) {
-        //Send message here and empty compose box
         ParseObject newTxtMessage = new ParseObject(AppConstants.MESSAGES);
+        newTxtMessage.put(AppConstants.MESSAGE_BODY, content);
+        newTxtMessage.put(AppConstants.DELIVERY_STATUS, AppConstants.SENT);
+        newTxtMessage.put(AppConstants.MESSAGE_DIRECTION, AppConstants.MESSAGE_DIRECTION_OUTGOING);
+        if (signedInUser != null) {
+            newTxtMessage.put(AppConstants.SENDER_ID, signedInUser.getObjectId());
+        }
     }
 
     protected void sendVoiceMessage(String filePath, int length) {

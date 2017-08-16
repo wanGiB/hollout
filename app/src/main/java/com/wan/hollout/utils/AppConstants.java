@@ -153,6 +153,8 @@ public class AppConstants {
     public static final String DELIVERY_STATUS = "delivery_status";
     public static final String REFRESH_MESSAGES_ADAPTER = "refresh_messages_adapter";
     public static final String MESSAGES = "messages";
+    public static final String SENT = "sent";
+    public static final String SENDER_ID = "sender_id";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
