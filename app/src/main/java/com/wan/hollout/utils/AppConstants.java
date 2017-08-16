@@ -155,6 +155,7 @@ public class AppConstants {
     public static final String MESSAGES = "messages";
     public static final String SENT = "sent";
     public static final String SENDER_ID = "sender_id";
+    public static final String MESSAGE_MEDIA = "message_media";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
@@ -225,11 +226,7 @@ public class AppConstants {
 
 
     ///Message Properties
-    public static final String MESSAGE_DIRECTION = "message_direction";
-    public static final String MESSAGE_DIRECTION_INCOMING = "incoming";
-    public static final String MESSAGE_DIRECTION_OUTGOING = "outgoing";
     public static final String MESSAGE_BODY = "message_body";
-
 
     public static SparseBooleanArray reactionsBackgroundPositions = new SparseBooleanArray();
     public static SparseBooleanArray reactionsOpenPositions = new SparseBooleanArray();

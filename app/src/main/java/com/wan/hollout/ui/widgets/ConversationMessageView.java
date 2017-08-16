@@ -9,6 +9,7 @@ import android.widget.RelativeLayout;
 
 import com.john.waveview.WaveView;
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView;
 import com.wan.hollout.utils.AppConstants;
@@ -76,34 +77,27 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
     LinkPreview linkPreview;
 
     private ParseObject messageObject;
+    private ParseUser signedInUser;
 
     public ConversationMessageView(Context context) {
         super(context);
-        init(context);
     }
 
     public ConversationMessageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init(context);
     }
 
     public ConversationMessageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context);
-    }
-
-    private void init(Context context) {
-        inflate(context, /*getMessageDirection(messageObject).equals(AppConstants.MESSAGE_DIRECTION_INCOMING)
-                ? R.layout.conversation_message_view_incoming
-                :*/ R.layout.conversation_message_view_outgoing, this);
     }
 
     public void bindData(Context context, ParseObject messageObject) {
+        signedInUser = ParseUser.getCurrentUser();
         this.messageObject = messageObject;
         setupMessageBody();
         setupMessageDate();
         refreshViews();
-        setOnClickListener(this);
+        chatMessageView.setOnClickListener(this);
     }
 
     @Override
@@ -112,8 +106,8 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         ButterKnife.bind(this);
     }
 
-    private String getMessageDirection(ParseObject message) {
-        return message.getString(AppConstants.MESSAGE_DIRECTION);
+    private String getSenderId(ParseObject message) {
+        return message.getString(AppConstants.SENDER_ID);
     }
 
     private void setupMessageBody() {
@@ -127,33 +121,35 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
 
     private void setupMessageDate() {
         Date messageDate = messageObject.getCreatedAt();
+        if (messageDate == null) {
+            messageDate = new Date();
+        }
         String deliveryStatus = messageObject.getString(AppConstants.DELIVERY_STATUS);
-        if (messageDate != null) {
-            String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
-            if (getMessageDirection(messageObject).equals(AppConstants.MESSAGE_DIRECTION_INCOMING)) {
-                deliveryStatusAndTimeView.setText(messageTime);
-                UiUtils.removeAllDrawablesFromTextView(deliveryStatusAndTimeView);
-            } else {
-                switch (deliveryStatus) {
-                    case AppConstants.READ:
-                        deliveryStatusAndTimeView.setText(getContext().getString(R.string.read).concat(messageTime));
-                        UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_client_read, UiUtils.DrawableDirection.LEFT);
-                        break;
-                    case AppConstants.DELIVERED:
-                        deliveryStatusAndTimeView.setText(getContext().getString(R.string.delivered).concat(messageTime));
-                        UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_client_received_white, UiUtils.DrawableDirection.LEFT);
-                        break;
-                    default:
-                        deliveryStatusAndTimeView.setText(getContext().getString(R.string.sent).concat(messageTime));
-                        UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_server_receive, UiUtils.DrawableDirection.LEFT);
-                        break;
-                }
+        String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
+        if (getSenderId(messageObject).equals(signedInUser.getObjectId())) {
+            deliveryStatusAndTimeView.setText(messageTime);
+            UiUtils.removeAllDrawablesFromTextView(deliveryStatusAndTimeView);
+        } else {
+            switch (deliveryStatus) {
+                case AppConstants.READ:
+                    deliveryStatusAndTimeView.setText(getContext().getString(R.string.read).concat(messageTime));
+                    UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_client_read, UiUtils.DrawableDirection.LEFT);
+                    break;
+                case AppConstants.DELIVERED:
+                    deliveryStatusAndTimeView.setText(getContext().getString(R.string.delivered).concat(messageTime));
+                    UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_client_received_white, UiUtils.DrawableDirection.LEFT);
+                    break;
+                default:
+                    deliveryStatusAndTimeView.setText(getContext().getString(R.string.sent).concat(messageTime));
+                    UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_server_receive, UiUtils.DrawableDirection.LEFT);
+                    break;
             }
         }
     }
 
     private void refreshViews() {
         UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageId()));
+        UiUtils.showView(deliveryStatusAndTimeView, AppConstants.messageTimeVisibilePositions.get(getMessageId()));
     }
 
     public int getMessageId() {
@@ -169,12 +165,20 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         }
     }
 
+    private boolean messageHasMedia() {
+        return messageObject.getList(AppConstants.MESSAGE_MEDIA) != null;
+    }
+
     @Override
     public void onClick(View v) {
-        UiUtils.showView(deliveryStatusAndTimeView, deliveryStatusAndTimeView.getVisibility() != VISIBLE);
-        AppConstants.messageTimeVisibilePositions.clear();
-        AppConstants.messageTimeVisibilePositions.put(getMessageId(), deliveryStatusAndTimeView.getVisibility() == VISIBLE);
-        EventBus.getDefault().post(AppConstants.REFRESH_MESSAGES_ADAPTER);
+        switch (v.getId()) {
+            case R.id.message_container:
+                AppConstants.messageTimeVisibilePositions.clear();
+                AppConstants.messageTimeVisibilePositions.put(getMessageId(), true);
+                UiUtils.showView(deliveryStatusAndTimeView, deliveryStatusAndTimeView.getVisibility() != VISIBLE);
+//                EventBus.getDefault().post(AppConstants.REFRESH_MESSAGES_ADAPTER);
+                break;
+        }
     }
 
 }

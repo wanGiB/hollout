@@ -263,16 +263,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         } else {
             ATE.apply(this, "light_theme");
         }
-
         initializeViews();
         setupAttachmentManager();
-
         setupMessagesAdapter();
     }
 
     private void setupMessagesAdapter() {
         messagesAdapter = new MessagesAdapter(this, messages);
-        messagesLayoutManager = new LinearLayoutManager(ChatActivity.this, LinearLayoutManager.VERTICAL, false);
+        messagesLayoutManager = new LinearLayoutManager(ChatActivity.this, LinearLayoutManager.VERTICAL, true);
         messagesRecyclerView.setLayoutManager(messagesLayoutManager);
         StickyRecyclerHeadersDecoration stickyRecyclerHeadersDecoration = new StickyRecyclerHeadersDecoration(messagesAdapter);
         messagesRecyclerView.addItemDecoration(stickyRecyclerHeadersDecoration);
@@ -1125,12 +1123,11 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         ParseObject newTxtMessage = new ParseObject(AppConstants.MESSAGES);
         newTxtMessage.put(AppConstants.MESSAGE_BODY, content);
         newTxtMessage.put(AppConstants.DELIVERY_STATUS, AppConstants.SENT);
-        newTxtMessage.put(AppConstants.MESSAGE_DIRECTION, AppConstants.MESSAGE_DIRECTION_OUTGOING);
         if (signedInUser != null) {
             newTxtMessage.put(AppConstants.SENDER_ID, signedInUser.getObjectId());
         }
         newTxtMessage.setObjectId(String.valueOf(System.currentTimeMillis()));
-        messages.add(newTxtMessage);
+        messages.add(0,newTxtMessage);
         messagesAdapter.notifyDataSetChanged();
         sendMessage(newTxtMessage);
     }

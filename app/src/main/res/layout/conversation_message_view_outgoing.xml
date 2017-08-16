@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.wan.hollout.ui.widgets.ConversationMessageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:id="@+id/conversation_message_view"
     android:layout_height="wrap_content"
     android:animateLayoutChanges="true"
+    android:layout_marginBottom="3dp"
     android:orientation="vertical">
 
     <LinearLayout
@@ -36,6 +38,7 @@
             app:cmv_showArrow="true">
 
             <LinearLayout
+                android:id="@+id/content_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -192,21 +195,23 @@
 
             </LinearLayout>
 
-        </com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView>
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/delivery_status_and_time_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:textColor="@color/grey500"
+                android:textSize="12sp"
+                android:layout_alignBottom="@+id/content_view"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:drawablePadding="4dp"
+                app:textStyle="medium" />
 
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/delivery_status_and_time_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:textColor="@color/grey500"
-            android:textSize="12sp"
-            android:drawablePadding="4dp"
-            android:visibility="gone"
-            app:textStyle="medium" />
+        </com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView>
 
     </LinearLayout>
 
-</RelativeLayout>
+</com.wan.hollout.ui.widgets.ConversationMessageView>

@@ -8,12 +8,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.parse.ParseObject;
+import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.utils.DateUtils;
 import com.wan.hollout.ui.widgets.ConversationMessageView;
+import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutUtils;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -24,6 +27,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
+@SuppressWarnings("FieldCanBeLocal")
 public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements
         StickyRecyclerHeadersAdapter<MessagesAdapter.MessagedDatesHeaderHolder> {
 
@@ -32,17 +36,32 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private LayoutInflater layoutInflater;
     private Calendar calendar;
 
+    private int TYPE_OUTGOING = 0, TYPE_INCOMING = 1;
+    private ParseUser signedInUser;
+
     public MessagesAdapter(Context context, List<ParseObject> messages) {
         this.context = context;
         this.messages = messages;
         this.layoutInflater = LayoutInflater.from(context);
         calendar = Calendar.getInstance();
+        signedInUser = ParseUser.getCurrentUser();
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View convertView = layoutInflater.inflate(R.layout.chat_messages_recycler_item_list, parent, false);
+        View convertView = layoutInflater.inflate(viewType == TYPE_INCOMING ? R.layout.conversation_message_view_incoming : R.layout.conversation_message_view_outgoing, parent, false);
         return new MessageItemsHolder(convertView);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        ParseObject messageObject = messages.get(position);
+        String senderId = messageObject.getString(AppConstants.SENDER_ID);
+        if (!senderId.equals(signedInUser.getObjectId())) {
+            return TYPE_INCOMING;
+        } else {
+            return TYPE_OUTGOING;
+        }
     }
 
     @Override
@@ -57,7 +76,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public String getHeaderId(int position) {
         ParseObject parseObject = messages.get(position);
-        calendar.setTime(parseObject.getCreatedAt());
+        Date createdAt = parseObject.getCreatedAt();
+        if (createdAt == null) {
+            createdAt = new Date();
+        }
+        calendar.setTime(createdAt);
         return String.valueOf(HolloutUtils.hashCode(calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR)));
     }
 
@@ -71,7 +94,11 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public void onBindHeaderViewHolder(MessagedDatesHeaderHolder holder, int position) {
         ParseObject message = messages.get(position);
         if (message != null) {
-            holder.bindHeader(DateUtils.getRelativeDate(context, Locale.getDefault(), message.getCreatedAt().getTime()));
+            Date createdAT = message.getCreatedAt();
+            if (createdAT == null) {
+                createdAT = new Date();
+            }
+            holder.bindHeader(DateUtils.getRelativeDate(context, Locale.getDefault(), createdAT.getTime()));
         }
     }
 
