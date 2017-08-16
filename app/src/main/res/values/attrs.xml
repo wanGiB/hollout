@@ -320,8 +320,11 @@
         <attr name="cmv_cornerRadius" format="dimension" />
         <attr name="cmv_contentPadding" format="dimension" />
         <attr name="cmv_arrowMargin" format="dimension" />
-        <attr name="viewPartMain" format="reference" />
-        <attr name="viewPartSlave" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="ImFlexboxLayout">
+        <attr name="viewPartMain" format="reference"/>
+        <attr name="viewPartSlave" format="reference"/>
     </declare-styleable>
 
 </resources>

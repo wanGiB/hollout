@@ -223,7 +223,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ButterKnife.bind(this, itemView);
         }
 
-        public void bindMessage(Context context, ParseObject parseObject) {
+        public void bindMessage(Activity context, ParseObject parseObject) {
             conversationMessageView.bindData(context, parseObject);
         }
 

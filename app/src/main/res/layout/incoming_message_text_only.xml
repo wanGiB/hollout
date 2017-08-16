@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.wan.hollout.ui.widgets.ConversationMessageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -26,34 +27,43 @@
         app:cmv_backgroundColorPressed="@color/ease_gray"
         app:cmv_contentPadding="4dp"
         app:cmv_cornerRadius="2dp"
-        app:cmv_showArrow="true"
-        app:viewPartMain="@+id/message_body"
-        app:viewPartSlave="@+id/delivery_status_and_time_view">
+        app:cmv_showArrow="true">
 
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/message_body"
+        <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="8dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingStart="8dp"
-            android:textColor="@color/text_black"
-            android:textSize="16sp"
-            android:visibility="gone"
-            app:textStyle="medium" />
+            android:layout_alignParentTop="true"
+            android:orientation="horizontal">
 
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/delivery_status_and_time_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:drawablePadding="4dp"
-            android:textColor="@color/grey500"
-            android:textSize="12sp"
-            app:textStyle="medium" />
+            <TextView
+                android:id="@+id/delivery_status_and_time_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:padding="4dp"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="10sp"
+                android:textStyle="italic"
+                tools:ignore="SmallSp" />
+
+            <TextView
+                android:id="@+id/message_body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:layout_marginTop="0dp"
+                android:paddingBottom="5dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingTop="5dp"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+        </FrameLayout>
 
     </com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView>
 

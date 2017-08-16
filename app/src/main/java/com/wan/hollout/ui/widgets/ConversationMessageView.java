@@ -5,9 +5,11 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.john.waveview.WaveView;
 import com.parse.ParseObject;
@@ -83,10 +85,10 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
 
     @Nullable
     @BindView(R.id.message_body)
-    HolloutTextView messageBodyView;
+    TextView messageBodyView;
 
     @BindView(R.id.delivery_status_and_time_view)
-    HolloutTextView deliveryStatusAndTimeView;
+    TextView deliveryStatusAndTimeView;
 
     @Nullable
     @BindView(R.id.link_preview)
@@ -134,9 +136,8 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         if (StringUtils.isNotEmpty(messageBody)) {
             UiUtils.showView(messageBodyView, true);
             if (messageBodyView != null) {
-                messageBodyView.setText(messageBody);
+                messageBodyView.setText(UiUtils.fromHtml(messageBody + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
             }
-            AppConstants.messageBodyPositions.put(getMessageId(), true);
         }
     }
 
@@ -153,23 +154,23 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         } else {
             switch (deliveryStatus) {
                 case AppConstants.READ:
-                    deliveryStatusAndTimeView.setText(getContext().getString(R.string.read).concat(messageTime));
-                    UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_client_read, UiUtils.DrawableDirection.LEFT);
+                    deliveryStatusAndTimeView.setText(activity.getString(R.string.read).concat(messageTime));
+                    UiUtils.attachDrawableToTextView(activity, deliveryStatusAndTimeView, R.drawable.msg_status_client_read, UiUtils.DrawableDirection.LEFT);
                     break;
                 case AppConstants.DELIVERED:
-                    deliveryStatusAndTimeView.setText(getContext().getString(R.string.delivered).concat(messageTime));
+                    deliveryStatusAndTimeView.setText(activity.getString(R.string.delivered).concat(messageTime));
                     UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_client_received_white, UiUtils.DrawableDirection.LEFT);
                     break;
                 default:
-                    deliveryStatusAndTimeView.setText(getContext().getString(R.string.sent).concat(messageTime));
-                    UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_server_receive, UiUtils.DrawableDirection.LEFT);
+                    deliveryStatusAndTimeView.setText(activity.getString(R.string.sent).concat(messageTime));
+                    UiUtils.attachDrawableToTextView(activity, deliveryStatusAndTimeView, R.drawable.msg_status_server_receive, UiUtils.DrawableDirection.LEFT);
                     break;
             }
         }
     }
 
     private void refreshViews() {
-        UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageId()));
+
     }
 
     public int getMessageId() {
@@ -179,10 +180,6 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (deliveryStatusAndTimeView != null) {
-            UiUtils.showView(deliveryStatusAndTimeView, false);
-            AppConstants.messageTimeVisibilePositions.put(getMessageId(), false);
-        }
     }
 
     @Override
