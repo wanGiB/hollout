@@ -145,7 +145,7 @@
                 android:clipChildren="false"
                 android:clipToPadding="false">
 
-                <com.wan.hollout.ui.widgets.HolloutTextView
+                <TextView
                     android:id="@+id/about_user"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -161,9 +161,7 @@
                     android:paddingRight="20dp"
                     android:paddingStart="22dp"
                     android:textColor="@color/text_dark"
-                    android:textSize="25sp"
-                    app:emojiconSize="25dp"
-                    app:textStyle="medium" />
+                    android:textSize="25sp" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/about_user_recycler_view"

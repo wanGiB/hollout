@@ -51,6 +51,8 @@ public class FontUtils {
             case 7:
                 font = FontUtils.FONT_AWESOME;
                 break;
+            case 8:
+                return Typeface.DEFAULT;
             default:
                 font = FontUtils.FONT_REGULAR;
                 break;

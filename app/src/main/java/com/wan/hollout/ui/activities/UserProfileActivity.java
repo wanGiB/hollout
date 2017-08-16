@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.flaviofaria.kenburnsview.KenBurnsView;
@@ -37,6 +38,7 @@ import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutEditText;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
@@ -85,7 +87,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     CircleImageView userProfilePhotoView;
 
     @BindView(R.id.about_user)
-    HolloutTextView aboutUserTextView;
+    TextView aboutUserTextView;
 
     @BindView(R.id.start_chat_view)
     FloatingActionButton startChatView;
@@ -134,6 +136,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         setContentView(R.layout.activity_user_profile);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         ButterKnife.bind(this);
+        aboutUserTextView.setTypeface(FontUtils.selectTypeface(this, 4));
         offloadIntent();
         initClickListeners();
     }

@@ -74,7 +74,7 @@
                 android:paddingRight="6dp"
                 android:paddingStart="6dp"
                 app:emojiconSize="25dp"
-                app:textStyle="regular" />
+                app:textStyle="none" />
 
         </FrameLayout>
 
