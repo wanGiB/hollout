@@ -15,6 +15,7 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Date;
 
@@ -94,7 +95,7 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
                 : R.layout.conversation_message_view_outgoing, this);
     }
 
-    public void bindData(Context context,ParseObject messageObject) {
+    public void bindData(Context context, ParseObject messageObject) {
         this.messageObject = messageObject;
         init(context);
         setupMessageBody();
@@ -124,6 +125,29 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
 
     private void setupMessageDate() {
         Date messageDate = messageObject.getCreatedAt();
+        String deliveryStatus = messageObject.getString(AppConstants.DELIVERY_STATUS);
+        if (messageDate != null) {
+            String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
+            if (getMessageDirection(messageObject).equals(AppConstants.MESSAGE_DIRECTION_INCOMING)) {
+                deliveryStatusAndTimeView.setText(messageTime);
+                UiUtils.removeAllDrawablesFromTextView(deliveryStatusAndTimeView);
+            } else {
+                switch (deliveryStatus) {
+                    case AppConstants.READ:
+                        deliveryStatusAndTimeView.setText(getContext().getString(R.string.read).concat(messageTime));
+                        UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_client_read, UiUtils.DrawableDirection.LEFT);
+                        break;
+                    case AppConstants.DELIVERED:
+                        deliveryStatusAndTimeView.setText(getContext().getString(R.string.delivered).concat(messageTime));
+                        UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_client_received_white, UiUtils.DrawableDirection.LEFT);
+                        break;
+                    default:
+                        deliveryStatusAndTimeView.setText(getContext().getString(R.string.sent).concat(messageTime));
+                        UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_server_receive, UiUtils.DrawableDirection.LEFT);
+                        break;
+                }
+            }
+        }
     }
 
     private void refreshViews() {
@@ -139,12 +163,16 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         super.onDetachedFromWindow();
         if (deliveryStatusAndTimeView != null) {
             UiUtils.showView(deliveryStatusAndTimeView, false);
+            AppConstants.messageTimeVisibilePositions.put(getMessageId(), false);
         }
     }
 
     @Override
     public void onClick(View v) {
-
+        UiUtils.showView(deliveryStatusAndTimeView, deliveryStatusAndTimeView.getVisibility() != VISIBLE);
+        AppConstants.messageTimeVisibilePositions.clear();
+        AppConstants.messageTimeVisibilePositions.put(getMessageId(), deliveryStatusAndTimeView.getVisibility() == VISIBLE);
+        EventBus.getDefault().post(AppConstants.REFRESH_MESSAGES_ADAPTER);
     }
 
 }

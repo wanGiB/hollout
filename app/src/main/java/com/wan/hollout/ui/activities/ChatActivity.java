@@ -48,6 +48,8 @@ import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.language.DynamicLanguage;
+import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
+import com.wan.hollout.ui.adapters.MessagesAdapter;
 import com.wan.hollout.ui.adapters.PickedMediaFilesAdapter;
 import com.wan.hollout.ui.services.ContactService;
 import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
@@ -222,6 +224,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private File recorderAudioCaptureFilePath;
 
     private List<ParseObject> messages = new ArrayList<>();
+    private MessagesAdapter messagesAdapter;
+
+    private RecyclerView.LayoutManager messagesLayoutManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -252,6 +257,15 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         setupAttachmentManager();
     }
 
+    private void setupMessagesAdapter() {
+        messagesAdapter = new MessagesAdapter(this, messages);
+        messagesLayoutManager = new LinearLayoutManager(ChatActivity.this, LinearLayoutManager.VERTICAL, false);
+        messagesRecyclerView.setLayoutManager(messagesLayoutManager);
+        StickyRecyclerHeadersDecoration stickyRecyclerHeadersDecoration = new StickyRecyclerHeadersDecoration(messagesAdapter);
+        messagesRecyclerView.addItemDecoration(stickyRecyclerHeadersDecoration);
+        messagesRecyclerView.setAdapter(messagesAdapter);
+    }
+
     private void initBasicComponents() {
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         holloutPermissions = new HolloutPermissions(this, footerAd);
@@ -274,6 +288,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     public void startRecorder() {
         resetRecorderAndStartRecording();
+    }
+
+    private void invalidateEmptyView() {
+        UiUtils.showView(messagesEmptyView, messages.isEmpty());
     }
 
     private void resetRecorderAndStartRecording() {
@@ -1041,10 +1059,20 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             public void run() {
                 if (o instanceof String) {
                     String s = (String) o;
-                    if (s.equals(AppConstants.REPLY_MESSAGE)) {
-                        snackInMessageReplyView(messageReplyView);
-                    } else if (s.equals(AppConstants.HIDE_MESSAGE_REPLY_VIEW)) {
-                        snackOutMessageReplyView(messageReplyView);
+                    switch (s) {
+                        case AppConstants.REPLY_MESSAGE:
+                            snackInMessageReplyView(messageReplyView);
+                            break;
+                        case AppConstants.HIDE_MESSAGE_REPLY_VIEW:
+                            snackOutMessageReplyView(messageReplyView);
+                            break;
+                        case AppConstants.REFRESH_MESSAGES_ADAPTER:
+                            try {
+                                messagesAdapter.notifyDataSetChanged();
+                            } catch (IllegalStateException ignored) {
+
+                            }
+                            break;
                     }
                 }
             }
@@ -1080,7 +1108,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     protected void sendTextMessage(String content) {
         //Send message here and empty compose box
-        emptyComposeText();
+        ParseObject newTxtMessage = new ParseObject(AppConstants.MESSAGES);
     }
 
     protected void sendVoiceMessage(String filePath, int length) {
@@ -1113,8 +1141,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
      * set message Extension attributes
      */
 
-    protected void sendMessage(/*EMMessage message*/) {
-
+    protected void sendMessage(ParseObject messageParts) {
+        invalidateEmptyView();
+        emptyComposeText();
     }
 
     private void emptyComposeText() {
@@ -1124,7 +1153,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     @SuppressWarnings("unused")
-    public void resendMessage(/*EMMessage message*/) {
+    public void resendMessage(ParseObject messageParts) {
 
     }
 

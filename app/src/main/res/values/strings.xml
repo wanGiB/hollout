@@ -281,5 +281,8 @@
     <string name="DeviceListItem_linked_s">Linked %s</string>
     <string name="DeviceListItem_last_active_s">Last active %s</string>
     <string name="DeviceListItem_today">Today</string>
+    <string name="read">Read, </string>
+    <string name="delivered">Delivered, </string>
+    <string name="sent">Sent, </string>
 
 </resources>

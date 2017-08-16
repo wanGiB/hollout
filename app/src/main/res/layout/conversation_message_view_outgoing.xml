@@ -203,6 +203,7 @@
             android:layout_marginRight="10dp"
             android:textColor="@color/grey500"
             android:textSize="12sp"
+            android:drawablePadding="4dp"
             android:visibility="gone"
             app:textStyle="medium" />
 

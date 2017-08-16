@@ -148,6 +148,11 @@ public class AppConstants {
     public static final String USER_COVER_PHOTO_UPLOAD_TIME = "app_user_cover_photo_upload_time";
 
     public static final String SEARCH_VIEW_CLOSED = "search_view_closed_event";
+    public static final String READ = "read";
+    public static final String DELIVERED = "delivered";
+    public static final String DELIVERY_STATUS = "delivery_status";
+    public static final String REFRESH_MESSAGES_ADAPTER = "refresh_messages_adapter";
+    public static final String MESSAGES = "messages";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
@@ -229,6 +234,6 @@ public class AppConstants {
     public static SparseBooleanArray commentPositions = new SparseBooleanArray();
     public static SparseBooleanArray likesPositions = new SparseBooleanArray();
     public static SparseBooleanArray messageBodyPositions = new SparseBooleanArray();
-
+    public static SparseBooleanArray messageTimeVisibilePositions = new SparseBooleanArray();
 }
 
