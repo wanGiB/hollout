@@ -267,6 +267,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         initializeViews();
         setupAttachmentManager();
 
+        setupMessagesAdapter();
     }
 
     private void setupMessagesAdapter() {
@@ -1130,6 +1131,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
         messages.add(newTxtMessage);
         messagesAdapter.notifyDataSetChanged();
+        sendMessage(newTxtMessage);
     }
 
     protected void sendVoiceMessage(String filePath, int length) {
