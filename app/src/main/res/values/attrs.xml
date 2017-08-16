@@ -322,9 +322,4 @@
         <attr name="cmv_arrowMargin" format="dimension" />
     </declare-styleable>
 
-    <declare-styleable name="ImFlexboxLayout">
-        <attr name="viewPartMain" format="reference"/>
-        <attr name="viewPartSlave" format="reference"/>
-    </declare-styleable>
-
 </resources>

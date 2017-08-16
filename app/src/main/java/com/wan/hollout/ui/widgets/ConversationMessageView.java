@@ -5,7 +5,6 @@ import android.content.Context;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -87,8 +86,11 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
     @BindView(R.id.message_body)
     TextView messageBodyView;
 
-    @BindView(R.id.delivery_status_and_time_view)
-    TextView deliveryStatusAndTimeView;
+    @BindView(R.id.textview_time)
+    TextView timeTextView;
+
+    @BindView(R.id.delivery_status_view)
+    ImageView deliveryStatusView;
 
     @Nullable
     @BindView(R.id.link_preview)
@@ -136,7 +138,14 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         if (StringUtils.isNotEmpty(messageBody)) {
             UiUtils.showView(messageBodyView, true);
             if (messageBodyView != null) {
-                messageBodyView.setText(UiUtils.fromHtml(messageBody + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                if (getSenderId(messageObject).equals(signedInUser.getObjectId())) {
+                    messageBodyView.setText(UiUtils.fromHtml(messageBody
+                            + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
+                            "&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                } else {
+                    messageBodyView.setText(UiUtils.fromHtml(messageBody
+                            + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                }
             }
         }
     }
@@ -148,22 +157,17 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         }
         String deliveryStatus = messageObject.getString(AppConstants.DELIVERY_STATUS);
         String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
+        timeTextView.setText(activity.getString(R.string.read).concat(messageTime));
         if (getSenderId(messageObject).equals(signedInUser.getObjectId())) {
-            deliveryStatusAndTimeView.setText(messageTime);
-            UiUtils.removeAllDrawablesFromTextView(deliveryStatusAndTimeView);
-        } else {
             switch (deliveryStatus) {
                 case AppConstants.READ:
-                    deliveryStatusAndTimeView.setText(activity.getString(R.string.read).concat(messageTime));
-                    UiUtils.attachDrawableToTextView(activity, deliveryStatusAndTimeView, R.drawable.msg_status_client_read, UiUtils.DrawableDirection.LEFT);
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
                     break;
                 case AppConstants.DELIVERED:
-                    deliveryStatusAndTimeView.setText(activity.getString(R.string.delivered).concat(messageTime));
-                    UiUtils.attachDrawableToTextView(getContext(), deliveryStatusAndTimeView, R.drawable.msg_status_client_received_white, UiUtils.DrawableDirection.LEFT);
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_received_white);
                     break;
                 default:
-                    deliveryStatusAndTimeView.setText(activity.getString(R.string.sent).concat(messageTime));
-                    UiUtils.attachDrawableToTextView(activity, deliveryStatusAndTimeView, R.drawable.msg_status_server_receive, UiUtils.DrawableDirection.LEFT);
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
                     break;
             }
         }

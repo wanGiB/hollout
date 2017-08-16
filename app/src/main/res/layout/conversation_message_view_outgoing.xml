@@ -27,9 +27,7 @@
         app:cmv_backgroundColorPressed="@color/ease_gray"
         app:cmv_contentPadding="4dp"
         app:cmv_cornerRadius="2dp"
-        app:cmv_showArrow="true"
-        app:viewPartMain="@+id/content_view"
-        app:viewPartSlave="@+id/delivery_status_and_time_view">
+        app:cmv_showArrow="true">
 
         <LinearLayout
             android:id="@+id/content_view"

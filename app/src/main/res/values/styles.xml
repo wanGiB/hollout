@@ -150,11 +150,15 @@
         <item name="conversation_item_sent_text_primary_color">@color/ease_black</item>
         <item name="conversation_icon_attach_audio">@drawable/ease_default_image</item>
         <item name="conversation_icon_attach_video">@drawable/ex_completed_ic_video</item>
-        <item name="conversation_item_received_text_secondary_color">@color/conversation_item_received_text_secondary_color</item>
+        <item name="conversation_item_received_text_secondary_color">
+            @color/conversation_item_received_text_secondary_color
+        </item>
         <item name="conversation_item_sent_indicator_text_background">
             @drawable/conversation_item_sent_indicator_text_shape
         </item>
-        <item name="conversation_item_sent_text_indicator_tab_color">@color/conversation_item_sent_text_indicator_tab_color</item>
+        <item name="conversation_item_sent_text_indicator_tab_color">
+            @color/conversation_item_sent_text_indicator_tab_color
+        </item>
 
     </style>
 
@@ -279,6 +283,24 @@
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:paddingLeft">@dimen/search_icon_padding</item>
         <item name="android:paddingRight">@dimen/search_icon_padding</item>
+    </style>
+
+    <style name="chat_text_message_style">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="chat_timings">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">#a6abad</item>
     </style>
 
 </resources>

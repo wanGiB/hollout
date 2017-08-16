@@ -30,37 +30,53 @@
         app:cmv_showArrow="true">
 
         <FrameLayout
+            android:id="@+id/outgoing_layout_bubble"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:orientation="horizontal">
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true">
 
-            <TextView
-                android:id="@+id/delivery_status_and_time_view"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
-                android:padding="4dp"
+                android:orientation="horizontal"
                 android:paddingEnd="5dp"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp"
-                android:paddingStart="5dp"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="12sp"
-                android:textStyle="italic"
-                tools:ignore="SmallSp" />
+                android:paddingStart="5dp">
+
+                <TextView
+                    android:id="@+id/textview_time"
+                    style="@style/chat_timings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:text="11:15 PM" />
+
+                <ImageView
+                    android:id="@+id/delivery_status_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:paddingBottom="3dp"
+                    android:src="@drawable/msg_status_client_received"
+                    tools:ignore="ContentDescription" />
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/message_body"
+                style="@style/chat_text_message_style"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="start|center_vertical"
-                android:paddingBottom="2dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="2dp"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
+                android:autoLink="web"
+                android:paddingRight="6dp"
+                android:paddingEnd="6dp"
+                android:paddingLeft="6dp"
+                android:paddingStart="6dp"
+                android:text="Wan Clem is a good boy but he does not know what he wants." />
 
         </FrameLayout>
 

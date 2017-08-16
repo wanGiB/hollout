@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 
 
 import com.wan.hollout.R;
+import com.wan.hollout.emoji.EmojiTextView;
 import com.wan.hollout.eventbuses.TypingFinishedBus;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.TypingSimulationConstants;
@@ -22,7 +23,7 @@ import java.util.Random;
  * @author Wan Clem
  */
 
-public class HolloutTextView extends AppCompatTextView {
+public class HolloutTextView extends EmojiTextView {
 
     public static final int INVALIDATE = 0x767;
     private Random random;
