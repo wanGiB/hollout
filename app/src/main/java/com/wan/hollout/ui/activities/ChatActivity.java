@@ -1129,6 +1129,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         if (signedInUser != null) {
             newTxtMessage.put(AppConstants.SENDER_ID, signedInUser.getObjectId());
         }
+        newTxtMessage.setObjectId(String.valueOf(System.currentTimeMillis()));
         messages.add(newTxtMessage);
         messagesAdapter.notifyDataSetChanged();
         sendMessage(newTxtMessage);

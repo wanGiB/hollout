@@ -79,25 +79,27 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
 
     public ConversationMessageView(Context context) {
         super(context);
+        init(context);
     }
 
     public ConversationMessageView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context);
     }
 
     public ConversationMessageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(context);
     }
 
     private void init(Context context) {
-        inflate(context, getMessageDirection(messageObject).equals(AppConstants.MESSAGE_DIRECTION_INCOMING)
+        inflate(context, /*getMessageDirection(messageObject).equals(AppConstants.MESSAGE_DIRECTION_INCOMING)
                 ? R.layout.conversation_message_view_incoming
-                : R.layout.conversation_message_view_outgoing, this);
+                :*/ R.layout.conversation_message_view_outgoing, this);
     }
 
     public void bindData(Context context, ParseObject messageObject) {
         this.messageObject = messageObject;
-        init(context);
         setupMessageBody();
         setupMessageDate();
         refreshViews();
