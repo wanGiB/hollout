@@ -14,6 +14,9 @@ import com.wan.hollout.ui.utils.DateUtils;
 import com.wan.hollout.ui.widgets.ConversationMessageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.UiUtils;
+
+import org.json.JSONArray;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -27,7 +30,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
-@SuppressWarnings("FieldCanBeLocal")
+@SuppressWarnings({"FieldCanBeLocal", "unchecked"})
 public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements
         StickyRecyclerHeadersAdapter<MessagesAdapter.MessagedDatesHeaderHolder> {
 
@@ -35,9 +38,23 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private Context context;
     private LayoutInflater layoutInflater;
     private Calendar calendar;
-
-    private int TYPE_OUTGOING = 0, TYPE_INCOMING = 1;
     private ParseUser signedInUser;
+
+    //Message Types
+    private static final int OUTGOING_MESSAGE_TEXT_ONLY = 0;
+    private static final int OUTGOING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO = 1;
+    private static final int OUTGOING_MESSAGE_WITH_AUDIO = 2;
+    private static final int OUTGOING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE = 3;
+    private static final int OUTGOING_MESSAGE_WITH_CONTACT = 4;
+    private static final int OUTGOING_MESSAGE_WITH_LINK_PREVIEW = 5;
+
+
+    private static final int INCOMING_MESSAGE_TEXT_ONLY = 6;
+    private static final int INCOMING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO = 7;
+    private static final int INCOMING_MESSAGE_WITH_AUDIO = 8;
+    private static final int INCOMING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE = 9;
+    private static final int INCOMING_MESSAGE_WITH_CONTACT = 10;
+    private static final int INCOMING_MESSAGE_WITH_LINK_PREVIEW = 11;
 
     public MessagesAdapter(Context context, List<ParseObject> messages) {
         this.context = context;
@@ -49,7 +66,49 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View convertView = layoutInflater.inflate(viewType == TYPE_INCOMING ? R.layout.conversation_message_view_incoming : R.layout.conversation_message_view_outgoing, parent, false);
+        int layoutRes;
+        switch (viewType) {
+            case OUTGOING_MESSAGE_TEXT_ONLY:
+                layoutRes = R.layout.outgoing_message_text_only;
+                break;
+            case OUTGOING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO:
+                layoutRes = R.layout.outgoing_message_with_photo_location_or_video;
+                break;
+            case OUTGOING_MESSAGE_WITH_AUDIO:
+                layoutRes = R.layout.outgoing_message_with_audio;
+                break;
+            case OUTGOING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE:
+                layoutRes = R.layout.outgoing_message_with_document_or_other_file;
+                break;
+            case OUTGOING_MESSAGE_WITH_CONTACT:
+                layoutRes = R.layout.outgoing_message_with_contact;
+                break;
+            case OUTGOING_MESSAGE_WITH_LINK_PREVIEW:
+                layoutRes = R.layout.outgoing_message_with_link_preview;
+                break;
+            case INCOMING_MESSAGE_TEXT_ONLY:
+                layoutRes = R.layout.incoming_message_text_only;
+                break;
+            case INCOMING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO:
+                layoutRes = R.layout.incoming_message_with_photo_location_or_video;
+                break;
+            case INCOMING_MESSAGE_WITH_AUDIO:
+                layoutRes = R.layout.incoming_message_with_audio;
+                break;
+            case INCOMING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE:
+                layoutRes = R.layout.incoming_message_with_document_or_other_file;
+                break;
+            case INCOMING_MESSAGE_WITH_CONTACT:
+                layoutRes = R.layout.incoming_message_with_contact;
+                break;
+            case INCOMING_MESSAGE_WITH_LINK_PREVIEW:
+                layoutRes = R.layout.incoming_message_with_link_preview;
+                break;
+            default:
+                layoutRes = R.layout.outgoing_message_text_only;
+                break;
+        }
+        View convertView = layoutInflater.inflate(layoutRes,parent,false);
         return new MessageItemsHolder(convertView);
     }
 
@@ -57,11 +116,56 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public int getItemViewType(int position) {
         ParseObject messageObject = messages.get(position);
         String senderId = messageObject.getString(AppConstants.SENDER_ID);
-        if (!senderId.equals(signedInUser.getObjectId())) {
-            return TYPE_INCOMING;
+        JSONArray attachments = messageObject.getJSONArray(AppConstants.ATTACHMENT);
+        if (attachments != null) {
+            String attachmentType = messageObject.getString(AppConstants.ATTACHMENT_TYPE);
+            switch (attachmentType) {
+                case AppConstants.ATTACHMENT_TYPE_PHOTO:
+                case AppConstants.ATTACHMENT_TYPE_VIDEO:
+                case AppConstants.ATTACHMENT_TYPE_LOCATION:
+                    if (senderId.equals(signedInUser.getObjectId())) {
+                        return OUTGOING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO;
+                    } else {
+                        return INCOMING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO;
+                    }
+                case AppConstants.ATTACHMENT_TYPE_CONTACT:
+                    if (senderId.equals(signedInUser.getObjectId())) {
+                        return OUTGOING_MESSAGE_WITH_CONTACT;
+                    } else {
+                        return INCOMING_MESSAGE_WITH_CONTACT;
+                    }
+                case AppConstants.ATTACHMENT_TYPE_DOCUMENT:
+                    if (senderId.equals(signedInUser.getObjectId())) {
+                        return OUTGOING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE;
+                    } else {
+                        return INCOMING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE;
+                    }
+                case AppConstants.ATTACHMENT_TYPE_MUSIC:
+                case AppConstants.ATTACHEMENT_TYPE_VOICE_NOTE:
+                    if (senderId.equals(signedInUser.getObjectId())) {
+                        return OUTGOING_MESSAGE_WITH_AUDIO;
+                    } else {
+                        return INCOMING_MESSAGE_WITH_AUDIO;
+                    }
+            }
         } else {
-            return TYPE_OUTGOING;
+            String messageBody = messageObject.getString(AppConstants.MESSAGE_BODY);
+            List<String> links = UiUtils.pullLinks(messageBody);
+            if (!links.isEmpty()) {
+                if (senderId.equals(signedInUser.getObjectId())) {
+                    return OUTGOING_MESSAGE_WITH_LINK_PREVIEW;
+                } else {
+                    return INCOMING_MESSAGE_WITH_LINK_PREVIEW;
+                }
+            } else {
+                if (senderId.equals(signedInUser.getObjectId())) {
+                    return OUTGOING_MESSAGE_TEXT_ONLY;
+                } else {
+                    return INCOMING_MESSAGE_TEXT_ONLY;
+                }
+            }
         }
+        return -1;
     }
 
     @Override

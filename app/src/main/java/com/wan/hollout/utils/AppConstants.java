@@ -156,6 +156,15 @@ public class AppConstants {
     public static final String SENT = "sent";
     public static final String SENDER_ID = "sender_id";
     public static final String MESSAGE_MEDIA = "message_media";
+    public static final String ATTACHMENT_TYPE = "attachment_type";
+    public static final String ATTACHMENT_TYPE_PHOTO = "attachment_type_photo";
+    public static final String ATTACHMENT_TYPE_VIDEO = "attachment_type_video";
+    public static final String ATTACHMENT_TYPE_LOCATION = "attachment_type_location";
+    public static final String ATTACHMENT_TYPE_CONTACT = "attachment_type_contact";
+    public static final String ATTACHMENT_TYPE_DOCUMENT = "attachment_type_document";
+    public static final String ATTACHEMENT_TYPE_VOICE_NOTE = "attachment_type_voice_note";
+    public static final String ATTACHMENT_TYPE_MUSIC = "attachment_type_music";
+    public static final String ATTACHMENT = "attachments";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

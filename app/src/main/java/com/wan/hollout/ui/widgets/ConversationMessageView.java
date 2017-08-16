@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.widgets;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -16,7 +17,6 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.Date;
 
@@ -31,48 +31,62 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
     @BindView(R.id.message_container)
     ChatMessageView chatMessageView;
 
+    @Nullable
     @BindView(R.id.attached_photo_or_video_thumbnail)
     RoundedImageView attachedPhotoOrVideoThumbnailView;
 
+    @Nullable
     @BindView(R.id.play_media_if_video_icon)
     ImageView playMediaIfVideoIcon;
 
+    @Nullable
     @BindView(R.id.file_size_or_duration)
     HolloutTextView fileSizeDurationView;
 
+    @Nullable
     @BindView(R.id.contact_data_layout)
     LinearLayout contactLayout;
 
+    @Nullable
     @BindView(R.id.contact_icon)
     CircleColorImageView contactIconView;
 
+    @Nullable
     @BindView(R.id.contact_name)
     HolloutTextView contactNameView;
 
+    @Nullable
     @BindView(R.id.contact_phone_numbers)
     HolloutTextView contactPhoneNumbersView;
 
+    @Nullable
     @BindView(R.id.document_data_layout)
     LinearLayout documentDataLayout;
 
+    @Nullable
     @BindView(R.id.document_icon)
     CircleColorImageView documentIconView;
 
+    @Nullable
     @BindView(R.id.document_name_and_size)
     HolloutTextView documentNameAndSizeView;
 
+    @Nullable
     @BindView(R.id.audio_view)
     AudioView audioView;
 
-    @BindView(R.id.photo_video_wave_view)
+    @Nullable
+    @BindView(R.id.upload_progress_wave_view)
     WaveView photoVideoProgressView;
 
+    @Nullable
     @BindView(R.id.message_body)
     HolloutTextView messageBodyView;
 
     @BindView(R.id.delivery_status_and_time_view)
     HolloutTextView deliveryStatusAndTimeView;
 
+    @Nullable
     @BindView(R.id.link_preview)
     LinkPreview linkPreview;
 
@@ -114,7 +128,9 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         String messageBody = messageObject.getString(AppConstants.MESSAGE_BODY);
         if (StringUtils.isNotEmpty(messageBody)) {
             UiUtils.showView(messageBodyView, true);
-            messageBodyView.setText(messageBody);
+            if (messageBodyView != null) {
+                messageBodyView.setText(messageBody);
+            }
             AppConstants.messageBodyPositions.put(getMessageId(), true);
         }
     }
@@ -149,7 +165,6 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
 
     private void refreshViews() {
         UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageId()));
-        UiUtils.showView(deliveryStatusAndTimeView, AppConstants.messageTimeVisibilePositions.get(getMessageId()));
     }
 
     public int getMessageId() {
@@ -166,17 +181,13 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
     }
 
     private boolean messageHasMedia() {
-        return messageObject.getList(AppConstants.MESSAGE_MEDIA) != null;
+        return messageObject.getJSONArray(AppConstants.MESSAGE_MEDIA) != null;
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.message_container:
-                AppConstants.messageTimeVisibilePositions.clear();
-                AppConstants.messageTimeVisibilePositions.put(getMessageId(), true);
-                UiUtils.showView(deliveryStatusAndTimeView, deliveryStatusAndTimeView.getVisibility() != VISIBLE);
-//                EventBus.getDefault().post(AppConstants.REFRESH_MESSAGES_ADAPTER);
                 break;
         }
     }

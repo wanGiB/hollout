@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.wan.hollout.ui.widgets.ConversationMessageView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/conversation_message_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="3dp"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView
+        android:id="@+id/message_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="3dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="10dp"
+        android:animateLayoutChanges="true"
+        app:cmv_arrowGravity="start"
+        app:cmv_arrowPosition="right"
+        app:cmv_backgroundColor="@color/whitesmoke"
+        app:cmv_backgroundColorPressed="@color/ease_gray"
+        app:cmv_contentPadding="4dp"
+        app:cmv_cornerRadius="2dp"
+        app:cmv_showArrow="true">
+
+        <LinearLayout
+            android:id="@+id/document_data_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingEnd="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingStart="10dp"
+            android:visibility="visible">
+
+            <com.wan.hollout.ui.widgets.CircleColorImageView
+                android:id="@+id/contact_icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/attach_contact"
+                tools:ignore="ContentDescription" />
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/contact_phone_numbers"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:text="Hello.js"
+                android:layout_marginStart="10dp"
+                android:textColor="@color/black"
+                android:textSize="16sp"
+                app:textStyle="bold" />
+
+        </LinearLayout>
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/delivery_status_and_time_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/document_data_layout"
+            android:layout_alignEnd="@id/document_data_layout"
+            android:layout_alignRight="@id/document_data_layout"
+            android:drawablePadding="4dp"
+            android:gravity="end"
+            android:textColor="@color/grey500"
+            android:text="00:12AM"
+            android:textSize="12sp"
+            app:textStyle="medium" />
+
+    </com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView>
+
+</com.wan.hollout.ui.widgets.ConversationMessageView>

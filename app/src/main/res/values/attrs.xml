@@ -98,7 +98,7 @@
         <enum name="medium" value="4" />
         <enum name="thin" value="5" />
         <enum name="colophon" value="6" />
-        <enum name="font_awesome" value="7"/>
+        <enum name="font_awesome" value="7" />
     </attr>
 
     <attr name="text_animationStyle" format="enum">
@@ -320,6 +320,8 @@
         <attr name="cmv_cornerRadius" format="dimension" />
         <attr name="cmv_contentPadding" format="dimension" />
         <attr name="cmv_arrowMargin" format="dimension" />
+        <attr name="viewPartMain" format="reference" />
+        <attr name="viewPartSlave" format="reference" />
     </declare-styleable>
 
 </resources>
