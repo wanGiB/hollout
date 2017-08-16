@@ -5,9 +5,7 @@ import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
-
 
 import com.wan.hollout.R;
 import com.wan.hollout.emoji.EmojiTextView;

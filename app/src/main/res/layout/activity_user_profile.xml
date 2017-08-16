@@ -110,8 +110,8 @@
                 android:id="@+id/user_gender"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginLeft="30dp"
-                android:layout_marginStart="30dp"
+                android:layout_marginLeft="27dp"
+                android:layout_marginStart="270dp"
                 android:layout_alignEnd="@id/user_profile_photo_view"
                 android:layout_alignRight="@id/user_profile_photo_view"
                 android:layout_marginTop="282dp"
@@ -162,6 +162,7 @@
                     android:paddingStart="22dp"
                     android:textColor="@color/text_dark"
                     android:textSize="25sp"
+                    app:emojiconSize="25dp"
                     app:textStyle="medium" />
 
                 <android.support.v7.widget.RecyclerView

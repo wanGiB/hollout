@@ -88,6 +88,7 @@
         <attr name="text_animationStyle" />
         <attr name="typerSpeed" format="integer" />
         <attr name="charIncrease" format="integer" />
+        <attr name="emojiconSize" format="dimension" />
     </declare-styleable>
 
     <attr name="textStyle" format="enum">

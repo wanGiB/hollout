@@ -241,6 +241,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         initBasicComponents();
 
         signedInUser = ParseUser.getCurrentUser();
+
         if (signedInUser == null) {
             Intent splashIntent = new Intent(ChatActivity.this, SplashActivity.class);
             startActivity(splashIntent);
@@ -263,6 +264,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         } else {
             ATE.apply(this, "light_theme");
         }
+
         initializeViews();
         setupAttachmentManager();
         setupMessagesAdapter();
