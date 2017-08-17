@@ -282,7 +282,9 @@ public class HolloutCommunicationsManager {
         registerMessageListener();
         // register contacts listener
         registerContactsListener();
+        //register group listener
         registerGroupListener();
+        //register call state listener
         addCallStateChangeListener();
     }
 
@@ -292,7 +294,9 @@ public class HolloutCommunicationsManager {
      * @param callback to receive the result of the logout
      */
     public void signOut(boolean unbindDeviceToken, final EMCallBack callback) {
+
         HolloutLogger.d(TAG, "Sign out: " + unbindDeviceToken);
+
         EMClient.getInstance().logout(unbindDeviceToken, new EMCallBack() {
 
             @Override
@@ -317,7 +321,9 @@ public class HolloutCommunicationsManager {
                     callback.onError(code, error);
                 }
             }
+
         });
+
     }
 
     /**

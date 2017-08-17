@@ -123,18 +123,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         if (intentExtras != null) {
             boolean accountConflict = intentExtras.getBoolean(AppConstants.ACCOUNT_CONFLICT, false);
             if (accountConflict) {
-                final AlertDialog.Builder accountConflictDialog = new AlertDialog.Builder(this);
-                accountConflictDialog.setCancelable(false);
-                accountConflictDialog.setTitle("Another Device detected!");
-                accountConflictDialog.setMessage("This account was logged in to on another device. You'll be logged out here.");
-                accountConflictDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        attemptLogOut();
-                    }
-                });
-                accountConflictDialog.create().show();
+                resolveAuthenticationConflict();
                 return;
             }
         }
@@ -242,23 +231,27 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         });
     }
 
+    private void resolveAuthenticationConflict() {
+        final AlertDialog.Builder accountConflictDialog = new AlertDialog.Builder(this);
+        accountConflictDialog.setCancelable(false);
+        accountConflictDialog.setTitle("Another Device detected!");
+        accountConflictDialog.setMessage("This account was logged in to on another device. You'll be logged out here.");
+        accountConflictDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                attemptLogOut();
+            }
+        });
+        accountConflictDialog.create().show();
+    }
+
     private void checkIsSessionValid() {
         Bundle intentExtras = getIntent().getExtras();
         if (intentExtras != null) {
             boolean accountConflict = intentExtras.getBoolean(AppConstants.ACCOUNT_CONFLICT, false);
             if (accountConflict) {
-                final AlertDialog.Builder accountConflictDialog = new AlertDialog.Builder(this);
-                accountConflictDialog.setCancelable(false);
-                accountConflictDialog.setTitle("Another Device detected!");
-                accountConflictDialog.setMessage("This account was logged in to on another device. You'll be logged out here.");
-                accountConflictDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                        attemptLogOut();
-                    }
-                });
-                accountConflictDialog.create().show();
+                resolveAuthenticationConflict();
             }
         }
     }
@@ -294,8 +287,10 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                         }
                     }
                 });
+            }else{
+                attemptLogOut();
             }
-        }else{
+        } else {
             HolloutCommunicationsManager.getInstance().init(MainActivity.this);
         }
     }
