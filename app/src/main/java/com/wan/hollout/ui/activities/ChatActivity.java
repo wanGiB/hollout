@@ -38,6 +38,7 @@ import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.hyphenate.EMError;
 import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMChatRoom;
 import com.hyphenate.chat.EMClient;
@@ -288,14 +289,31 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private void joinRoom() {
         EMClient.getInstance().chatroomManager().joinChatRoom(recipientId, new EMValueCallBack<EMChatRoom>() {
+
             @Override
             public void onSuccess(EMChatRoom value) {
                 initConversation();
             }
 
             @Override
-            public void onError(int error, String errorMsg) {
-
+            public void onError(final int error, String errorMsg) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        switch (error) {
+                            case EMError.CHATROOM_INVALID_ID:
+                                UiUtils.showSafeToast("Sorry, we lost the key to this room. Please try again");
+                                break;
+                            case EMError.CHATROOM_PERMISSION_DENIED:
+                                UiUtils.showSafeToast("Sorry, the admin would have to grant you permissions before you can join this room");
+                                break;
+                            case EMError.CHATROOM_MEMBERS_FULL:
+                                UiUtils.showSafeToast("Sorry, the room is already congested");
+                                break;
+                        }
+                        finish();
+                    }
+                });
             }
         });
     }
@@ -320,7 +338,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 msgId = msgs.get(0).getMsgId();
             }
             mConversation.loadMoreMsgFromDB(msgId, pageSize - msgCount);
+
         }
+        if (msgs != null) {
+            if (!messages.containsAll(msgs)) {
+                messages.addAll(msgs);
+            }
+        }
+        invalidateEmptyView();
     }
 
     private void setupMessagesAdapter() {
@@ -330,6 +355,20 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         StickyRecyclerHeadersDecoration stickyRecyclerHeadersDecoration = new StickyRecyclerHeadersDecoration(messagesAdapter);
         messagesRecyclerView.addItemDecoration(stickyRecyclerHeadersDecoration);
         messagesRecyclerView.setAdapter(messagesAdapter);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem voiceCallMenuItem = menu.findItem(R.id.place_call);
+        MenuItem viewProfileMenuItem = menu.findItem(R.id.view_profile_info);
+        MenuItem blockUserMenuItem = menu.findItem(R.id.block_user);
+        if (chatType == AppConstants.CHAT_TYPE_GROUP || chatType == AppConstants.CHAT_TYPE_ROOM) {
+            voiceCallMenuItem.setVisible(false);
+            viewProfileMenuItem.setVisible(false);
+            blockUserMenuItem.setVisible(false);
+        }
+        supportInvalidateOptionsMenu();
+        return super.onPrepareOptionsMenu(menu);
     }
 
     private void initBasicComponents() {
