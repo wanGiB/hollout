@@ -178,6 +178,10 @@ public class AppConstants {
     public static final String UNREAD_MESSAGES_COUNT = "unread_messages_count";
     public static final String GROUPS_AND_ROOMS = "groups";
     public static final String CHAT_TYPE = "chat_type";
+    public static final String EXTRA_USER_ID = "userId";
+    public static final String SUSPEND_ALL_USE_OF_AUDIO_MANAGER = "suspend_audio_use";
+    public static final String EXTRA_IS_INCOMING_CALL = "isIncomingCall";
+
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

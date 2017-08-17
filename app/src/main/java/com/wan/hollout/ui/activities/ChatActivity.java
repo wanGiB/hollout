@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
@@ -16,6 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -285,6 +287,18 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         setupAttachmentManager();
         initConversation();
         setupMessagesAdapter();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkAndRegEventBus();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        checkAndRegEventBus();
     }
 
     private void joinRoom() {
@@ -720,6 +734,16 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             case R.id.view_profile_info:
                 chatToolbar.openUserOrGroupProfile();
                 break;
+            case R.id.place_call:
+                AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
+                builder.setItems(new CharSequence[]{"Voice Call", "Video Call"}, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.create().show();
+                break;
             case R.id.view_shared_media:
                 break;
         }
@@ -781,10 +805,22 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         inputPanel.onKeyboardShown();
     }
 
+    private void checkAndRegEventBus() {
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+    }
+
+    private void checkAnUnRegEventBus() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        EventBus.getDefault().register(this);
+        checkAndRegEventBus();
     }
 
     @Override
@@ -792,7 +828,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onPause();
         if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
         inputPanel.onPause();
-        EventBus.getDefault().unregister(this);
+        checkAnUnRegEventBus();
     }
 
     private void removeAnyPendingChatRequestFromThisRecipient() {
@@ -1180,6 +1216,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
                             }
                             break;
+                        case AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER:
+                            break;
                     }
                 }
             }
@@ -1206,8 +1244,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     @Override
     protected void onStop() {
         super.onStop();
-        EventBus.getDefault().unregister(this);
+        checkAnUnRegEventBus();
         sendChatStateMsg(getString(R.string.idle));
+    }
+
+    @Override
+    protected void onDestroy() {
+        checkAnUnRegEventBus();
+        super.onDestroy();
     }
 
     public String getMeetPointWithUser() {

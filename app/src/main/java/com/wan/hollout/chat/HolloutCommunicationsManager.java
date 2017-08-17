@@ -71,6 +71,10 @@ public class HolloutCommunicationsManager {
     private MessageNotifier mNotifier = new MessageNotifier();
     private ExecutorService executor = null;
 
+    //whether in calling
+    public boolean isVoiceCalling;
+    public boolean isVideoCalling;
+
     private HolloutCommunicationsManager() {
         this.executor = Executors.newCachedThreadPool();
     }
