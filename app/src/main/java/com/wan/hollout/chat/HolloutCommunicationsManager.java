@@ -5,9 +5,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.util.Log;
 
 import com.hyphenate.EMCallBack;
 import com.hyphenate.EMConnectionListener;
@@ -27,11 +24,17 @@ import com.wan.hollout.R;
 import com.wan.hollout.call.CallReceiver;
 import com.wan.hollout.call.CallStateChangeListener;
 import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.eventbuses.MessageChangedEvent;
+import com.wan.hollout.eventbuses.MessageDeliveredEvent;
+import com.wan.hollout.eventbuses.MessageReadEvent;
+import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
 
-import java.util.Iterator;
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,9 +43,10 @@ import java.util.concurrent.Executors;
  * @author Wan Clem
  */
 
+@SuppressWarnings({"WeakerAccess", "unused"})
+@SuppressLint("StaticFieldLeak")
 public class HolloutCommunicationsManager {
 
-    @SuppressLint("StaticFieldLeak")
     private static HolloutCommunicationsManager instance;
 
     protected static final String TAG = "HolloutCommunicationsManager";
@@ -57,7 +61,7 @@ public class HolloutCommunicationsManager {
     private ContactsChangeListener mContactListener = null;
     private GroupChangeListener mGroupListener = null;
 
-    private Context mContext;
+    private static Context mContext;
     private MessageNotifier mNotifier = new MessageNotifier();
 
     private ExecutorService executor = null;
@@ -67,6 +71,7 @@ public class HolloutCommunicationsManager {
     }
 
     public synchronized static HolloutCommunicationsManager getInstance() {
+        mContext = ApplicationLoader.getInstance();
         if (instance == null) {
             instance = new HolloutCommunicationsManager();
         }
@@ -88,15 +93,11 @@ public class HolloutCommunicationsManager {
         String processName;
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
         List l = am.getRunningAppProcesses();
-        Iterator i = l.iterator();
-        PackageManager pm = mContext.getPackageManager();
-        while (i.hasNext()) {
+        for (Object aL : l) {
             ActivityManager.RunningAppProcessInfo info =
-                    (ActivityManager.RunningAppProcessInfo) (i.next());
+                    (ActivityManager.RunningAppProcessInfo) (aL);
             try {
                 if (info.pid == pID) {
-                    CharSequence c = pm.getApplicationLabel(
-                            pm.getApplicationInfo(info.processName, PackageManager.GET_META_DATA));
                     processName = info.processName;
                     return processName;
                 }
@@ -322,18 +323,21 @@ public class HolloutCommunicationsManager {
      * activityList.size() <= 0 means all activities already in background or not in Activity Stack
      */
     private void registerMessageListener() {
+
         EMMessageListener messageListener = new EMMessageListener() {
 
             @Override
             public void onMessageReceived(List<EMMessage> messages) {
                 for (EMMessage message : messages) {
-                    EMLog.d(TAG, "onMessageReceived id : " + message.getMsgId());
+                    HolloutLogger.d(TAG, "onMessageReceived id : " + message.getMsgId());
                     // in background, do not refresh UI, notify it in notification bar
                     ParseUser signedInUser = ParseUser.getCurrentUser();
                     if (signedInUser != null) {
                         String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                         if (!signedInUserStatus.equals(AppConstants.ONLINE)) {
                             getNotifier().onNewMsg(message);
+                        } else {
+                            EventBus.getDefault().post(new MessageReceivedEvent(message));
                         }
                     }
                 }
@@ -346,7 +350,6 @@ public class HolloutCommunicationsManager {
                     //get message body
                     EMCmdMessageBody cmdMsgBody = (EMCmdMessageBody) message.getBody();
                     final String action = cmdMsgBody.action();
-
                     //get extension attribute if you need
                     //message.getStringAttribute("");
                     EMLog.d(TAG, String.format("CmdMessage：action:%s,message:%s", action,
@@ -356,16 +359,23 @@ public class HolloutCommunicationsManager {
 
             @Override
             public void onMessageRead(List<EMMessage> messages) {
+                for (EMMessage emMessage : messages) {
+                    EventBus.getDefault().post(new MessageReadEvent(emMessage));
+                }
             }
 
             @Override
-            public void onMessageDelivered(List<EMMessage> message) {
+            public void onMessageDelivered(List<EMMessage> messages) {
+                for (EMMessage emMessage : messages) {
+                    EventBus.getDefault().post(new MessageDeliveredEvent(emMessage));
+                }
             }
 
             @Override
             public void onMessageChanged(EMMessage message, Object change) {
-
+                EventBus.getDefault().post(new MessageChangedEvent(message));
             }
+
         };
 
         EMClient.getInstance().chatManager().addMessageListener(messageListener);

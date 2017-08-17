@@ -35,6 +35,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hyphenate.EMCallBack;
+import com.hyphenate.chat.EMClient;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -137,6 +138,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 return;
             }
         }
+
+        checkEMCAuthenticationStatus();
 
         final ActionBar ab = getSupportActionBar();
 
@@ -276,6 +279,25 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         String ateKey = HolloutPreferences.getATEKey();
         ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
         invalidateDrawerMenuHeader();
+        checkEMCAuthenticationStatus();
+    }
+
+    private void checkEMCAuthenticationStatus() {
+        if (!EMClient.getInstance().isLoggedInBefore()) {
+            ParseUser parseUser = ParseUser.getCurrentUser();
+            if (parseUser != null) {
+                HolloutCommunicationsManager.getInstance().logInEMClient(parseUser.getUsername(), parseUser.getUsername(), new DoneCallback<Boolean>() {
+                    @Override
+                    public void done(Boolean success, Exception e) {
+                        if (e == null && success) {
+                            HolloutCommunicationsManager.getInstance().init(MainActivity.this);
+                        }
+                    }
+                });
+            }
+        }else{
+            HolloutCommunicationsManager.getInstance().init(MainActivity.this);
+        }
     }
 
     private void setupTabs(Adapter pagerAdapter) {
@@ -330,6 +352,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     protected void onStart() {
         super.onStart();
         checkAndRegEventBus();
+        checkEMCAuthenticationStatus();
     }
 
     @Override
