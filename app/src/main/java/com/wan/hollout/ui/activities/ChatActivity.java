@@ -83,7 +83,6 @@ import com.wan.hollout.utils.ViewUtil;
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 import net.alhazmy13.mediapicker.Video.VideoPicker;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -252,7 +251,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
         recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
         if (recipientProperties != null) {
-            chatToolbar.initView(recipientId, AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
+            chatToolbar.initView(recipientId, recipientProperties.getInt(AppConstants.RECIPIENT_TYPE));
             recipientId = recipientProperties.getObjectId();
             setupChatRecipient(recipientProperties);
         } else {
@@ -1130,10 +1129,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
     }
 
-    private String generateMessageId() {
-        return RandomStringUtils.random(5, true, true) + System.currentTimeMillis();
-    }
-
     protected void sendTextMessage(String content) {
 
     }
@@ -1247,8 +1242,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         } else {
             newMessage.put(AppConstants.CONVERSATION_ID, generateNewMeetPoint());
         }
-        newMessage.put(AppConstants.MESSAGE_ID,generateMessageId());
-//        messages.add(0, newMessage);
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
         emptyComposeText();

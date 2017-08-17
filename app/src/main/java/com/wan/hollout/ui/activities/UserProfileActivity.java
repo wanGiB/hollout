@@ -533,6 +533,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onClick(View view) {
                         Intent chatIntent = new Intent(UserProfileActivity.this, ChatActivity.class);
+                        parseUser.put(AppConstants.RECIPIENT_TYPE,AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
                         chatIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
                         startActivity(chatIntent);
                     }

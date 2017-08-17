@@ -631,6 +631,7 @@ public class UiUtils {
                         String signedInUserProfilePhoto = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                         if (StringUtils.isNotEmpty(signedInUserProfilePhoto)) {
                             Intent mChatIntent = new Intent(activity, ChatActivity.class);
+                            parseUser.put(AppConstants.RECIPIENT_TYPE,AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
                             mChatIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
                             activity.startActivity(mChatIntent);
                         } else {

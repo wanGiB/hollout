@@ -176,6 +176,7 @@ public class AppConstants {
     public static final String EXTRA_TO = "to";
     public static final String UNREAD_MESSAGES_COUNT = "unread_messages_count";
     public static final String GROUPS = "groups";
+    public static final String RECIPIENT_TYPE = "recipient_type";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
@@ -253,7 +254,6 @@ public class AppConstants {
     public static SparseBooleanArray likesPositions = new SparseBooleanArray();
     public static SparseBooleanArray messageBodyPositions = new SparseBooleanArray();
     public static SparseBooleanArray messageTimeVisibilePositions = new SparseBooleanArray();
-
 
 
 }
