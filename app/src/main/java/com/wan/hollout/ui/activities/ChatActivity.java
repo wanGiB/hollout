@@ -46,6 +46,7 @@ import com.hyphenate.chat.EMChatRoom;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
 import com.hyphenate.chat.EMMessage;
+import com.hyphenate.exceptions.HyphenateException;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -54,7 +55,10 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
+import com.wan.hollout.call.VideoCallActivity;
+import com.wan.hollout.call.VoiceCallActivity;
 import com.wan.hollout.chat.ChatUtils;
+import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.language.DynamicLanguage;
 import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
@@ -95,7 +99,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -373,13 +376,21 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem voiceCallMenuItem = menu.findItem(R.id.place_call);
+        MenuItem placeCallMenuItem = menu.findItem(R.id.place_call);
         MenuItem viewProfileMenuItem = menu.findItem(R.id.view_profile_info);
         MenuItem blockUserMenuItem = menu.findItem(R.id.block_user);
         if (chatType == AppConstants.CHAT_TYPE_GROUP || chatType == AppConstants.CHAT_TYPE_ROOM) {
-            voiceCallMenuItem.setVisible(false);
+            placeCallMenuItem.setVisible(false);
             viewProfileMenuItem.setVisible(false);
             blockUserMenuItem.setVisible(false);
+        }
+        if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
+            List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+            if (signedInUserChats != null && signedInUserChats.contains(recipientId)) {
+                placeCallMenuItem.setVisible(true);
+            } else {
+                placeCallMenuItem.setVisible(false);
+            }
         }
         supportInvalidateOptionsMenu();
         return super.onPrepareOptionsMenu(menu);
@@ -735,14 +746,32 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 chatToolbar.openUserOrGroupProfile();
                 break;
             case R.id.place_call:
-                AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
-                builder.setItems(new CharSequence[]{"Voice Call", "Video Call"}, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                builder.create().show();
+                List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+                if (signedInUserChats != null && signedInUserChats.contains(recipientId)) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ChatActivity.this);
+                    builder.setItems(new CharSequence[]{"Voice Call", "Video Call"}, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            Intent intent = new Intent();
+                            switch (which) {
+                                case 0:
+                                    intent.setClass(ChatActivity.this, VoiceCallActivity.class);
+                                    intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
+                                    intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
+                                    startActivity(intent);
+                                    break;
+                                case 1:
+                                    intent.setClass(ChatActivity.this, VideoCallActivity.class);
+                                    intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
+                                    intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
+                                    startActivity(intent);
+                                    break;
+                            }
+                        }
+                    });
+                    builder.create().show();
+                }
                 break;
             case R.id.view_shared_media:
                 break;
@@ -1298,12 +1327,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     }
 
-    public String generateNewMeetPoint() {
-        String newMeetPoint = signedInUser.getObjectId() + recipientId;
-        checkAndSendChatRequest(newMeetPoint);
-        return newMeetPoint;
-    }
-
     private void updateSignedInUserChats() {
         List<String> chatIds = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (chatIds != null) {
@@ -1318,53 +1341,33 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         signedInUser.saveInBackground();
     }
 
-    private void checkAndSendChatRequest(final String generatedMeedPoint) {
+    private void checkAndSendChatRequest() {
         String signedInUserId = signedInUser.getObjectId();
         ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUserId);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUserId.toLowerCase());
         pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
         pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT, recipientId);
         pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(ParseObject object, ParseException e) {
                 if (object == null) {
-                    sendNewChatRequest(generatedMeedPoint);
+                    sendNewChatRequest();
                 }
             }
         });
     }
 
-    private void sendNewChatRequest(final String generatedMeetPoint) {
+    private void sendNewChatRequest() {
         final String signedInUserId = signedInUser.getObjectId();
         ParseObject newChatRequestObject = new ParseObject(AppConstants.HOLLOUT_FEED);
-        newChatRequestObject.put(AppConstants.FEED_CREATOR_ID, signedInUserId);
+        newChatRequestObject.put(AppConstants.FEED_CREATOR_ID, signedInUserId.toLowerCase());
         newChatRequestObject.put(AppConstants.FEED_RECIPIENT, recipientId);
         newChatRequestObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-        newChatRequestObject.put(AppConstants.GENERATED_MEET_POINT, generatedMeetPoint);
+        newChatRequestObject.put(AppConstants.FEED_CREATOR, signedInUser);
         newChatRequestObject.saveEventually(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e == null) {
-                    DbUtils.addToMeetPoints(recipientId, generatedMeetPoint);
-                    JSONObject signedInUserMeetPoints = signedInUser.getJSONObject(AppConstants.MEET_POINTS);
-                    if (signedInUserMeetPoints != null) {
-                        try {
-                            signedInUserMeetPoints.put(AppConstants.MEET_POINT_WITH + recipientId, generatedMeetPoint);
-                            signedInUser.saveEventually();
-                        } catch (JSONException e1) {
-                            e1.printStackTrace();
-                        }
-                    } else {
-                        try {
-                            JSONObject newMeetPoints = new JSONObject(AppConstants.MEET_POINTS);
-                            newMeetPoints.put(AppConstants.MEET_POINT_WITH + recipientId, generatedMeetPoint);
-                            signedInUser.put(AppConstants.MEET_POINTS, newMeetPoints);
-                            signedInUser.saveEventually();
-                        } catch (JSONException ex) {
-                            ex.printStackTrace();
-                        }
-                    }
-                    updateSignedInUserChats();
                     NotificationCenter.sendChatRequestNotification(signedInUserId, recipientId);
                 }
             }
@@ -1379,6 +1382,26 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
         emptyComposeText();
+        if (!isAContact()) {
+            HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        EMClient.getInstance().contactManager().addContact(recipientId, "Hi, let's connect");
+                        if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
+                            checkAndSendChatRequest();
+                        }
+                    } catch (HyphenateException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    }
+
+    private boolean isAContact() {
+        List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        return (signedInUserChats != null && signedInUserChats.contains(recipientId));
     }
 
     private void emptyComposeText() {

@@ -1,6 +1,7 @@
 package com.wan.hollout.call;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
@@ -8,39 +9,37 @@ import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 
-import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
-import com.wan.hollout.ui.activities.BaseActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.DbUtils;
-import com.wan.hollout.utils.HolloutPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
 /**
  * @author Wan Clem
  */
-public class CallActivity extends BaseActivity implements ATEActivityThemeCustomizer {
+public class CallActivity extends AppCompatActivity {
 
-    private boolean isDarkTheme;
-
-    protected BaseActivity mActivity;
+    protected Activity mActivity;
 
     // Call time view
     protected Chronometer mChronometer;
 
     // Call id
     protected String mCallId;
+
     // Is incoming call
     protected boolean isInComingCall;
 
     // Call end state, used to save the message after the end of the call tips
     protected int mCallStatus;
+
     // Call type, used to distinguish between voice and video calls, 0 video, 1 voice
     protected int mCallType;
 
@@ -55,7 +54,6 @@ public class CallActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         if (savedInstanceState != null) {
@@ -67,7 +65,6 @@ public class CallActivity extends BaseActivity implements ATEActivityThemeCustom
                 | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-
         EventBus.getDefault().post(AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER);
     }
 
@@ -243,12 +240,6 @@ public class CallActivity extends BaseActivity implements ATEActivityThemeCustom
     @Override
     public void onBackPressed() {
         // super.onBackPressed();
-
-    }
-
-    @Override
-    public int getActivityTheme() {
-        return 0;
     }
 
 }

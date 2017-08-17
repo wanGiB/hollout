@@ -126,6 +126,9 @@ public class DbUtils {
         callLog.partyId = partyId;
         callLog.callId = System.currentTimeMillis() + RandomStringUtils.random(5, true, true);
         callLog.partyName = partyName;
+        callLog.incoming = incoming;
+        callLog.voiceCall =voiceCall;
+        callLog.save();
     }
 
 }

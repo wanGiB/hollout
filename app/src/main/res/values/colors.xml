@@ -270,4 +270,26 @@
     <color name="message_delivered_color">@color/gray5</color>
     <color name="message_read_color">@color/green_100</color>
 
+    <!--white color-->
+    <color name="em_white_100">#ffffffff</color>
+    <color name="em_white_87">#ddffffff</color>
+    <color name="em_white_54">#89ffffff</color>
+    <color name="em_white_38">#61ffffff</color>
+    <color name="em_white_12">#1effffff</color>
+    <color name="em_gray">#50cccccc</color>
+    <color name="em_transparent">#00000000</color>
+
+    <!--red color -->
+    <color name="em_red_100">#ffe62f17</color>
+    <color name="em_red_87">#dde62f17</color>
+    <color name="em_red_54">#89e62f17</color>
+    <color name="em_red_38">#42e62f17</color>
+
+    <!--green color-->
+    <color name="em_green_100">#ff00ba6e</color>
+    <color name="em_green_87">#dd00ba6e</color>
+    <color name="em_green_54">#8900ba6e</color>
+    <color name="em_green_38">#6100ba6e</color>
+    <color name="em_green_12">#1e00ba6e</color>
+
 </resources>

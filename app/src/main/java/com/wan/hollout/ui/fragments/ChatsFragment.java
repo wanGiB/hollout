@@ -35,6 +35,9 @@ public class ChatsFragment extends Fragment {
     @BindView(R.id.swipe_refresh_layout)
     SwipeRefreshLayout swipeRefreshLayout;
 
+    @BindView(R.id.no_feed_view)
+    View noFeedView;
+
     private List<ParseObject> chats = new ArrayList<>();
 
     @Nullable

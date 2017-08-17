@@ -105,7 +105,9 @@
             android:value="1503170817002326#connectwithme" />
 
         <!-- Set appkey -->
-        <meta-data android:name="Hyphenate_AppKey"  android:value="1503170817002326#connectwithme" />
+        <meta-data
+            android:name="Hyphenate_AppKey"
+            android:value="1503170817002326#connectwithme" />
 
         <!-- SDK service -->
         <service
@@ -137,6 +139,22 @@
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name" />
+
+        <!--Video call activity-->
+        <activity
+            android:name=".call.VideoCallActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustPan|stateHidden" />
+
+        <!--Voice call activity-->
+        <activity
+            android:name=".call.VoiceCallActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustPan|stateHidden" />
 
         <activity
             android:name="com.facebook.CustomTabActivity"

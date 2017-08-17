@@ -113,7 +113,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
             getSupportActionBar().setTitle("About You");
         }
         Bundle bundle = getIntent().getExtras();
-        if (bundle!=null){
+        if (bundle != null) {
             canLaunchMain = getIntent().getExtras().getBoolean(AppConstants.CAN_LAUNCH_MAIN, false);
         }
         loadSignedInUserPhoto();
@@ -126,7 +126,8 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     @Override
     protected void onPause() {
         super.onPause();
-        if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
+        if (isFinishing())
+            overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
     }
 
     @Override
