@@ -170,6 +170,7 @@ public class AppConstants {
     public static final String CONVERSATION_ID = "conversation_id";
     public static final String GENERATED_MEET_POINT = "generated_meet_point";
     public static final String RECIPIENT = "recipient";
+    public static final String MESSAGE_ID = "message_id";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

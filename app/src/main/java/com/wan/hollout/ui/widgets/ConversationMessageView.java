@@ -176,10 +176,6 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
 
     }
 
-    public int getMessageId() {
-        return messageObject.getObjectId().hashCode();
-    }
-
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();

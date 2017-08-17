@@ -83,6 +83,8 @@ import com.wan.hollout.utils.ViewUtil;
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 import net.alhazmy13.mediapicker.Video.VideoPicker;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -1130,21 +1132,17 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
     }
 
+    private String generateMessageId() {
+        return RandomStringUtils.random(5, true, true) + System.currentTimeMillis();
+    }
+
     protected void sendTextMessage(String content) {
         ParseObject newTxtMessage = new ParseObject(AppConstants.MESSAGES);
-        if (StringUtils.isNotEmpty(getMeetPointWithUser())) {
-            newTxtMessage.put(AppConstants.CONVERSATION_ID, getMeetPointWithUser());
-        } else {
-            newTxtMessage.put(AppConstants.CONVERSATION_ID, generateNewMeetPoint());
-        }
         newTxtMessage.put(AppConstants.MESSAGE_BODY, content);
         newTxtMessage.put(AppConstants.DELIVERY_STATUS, AppConstants.SENT);
         if (signedInUser != null) {
             newTxtMessage.put(AppConstants.SENDER_ID, signedInUser.getObjectId());
         }
-        newTxtMessage.setObjectId(String.valueOf(System.currentTimeMillis()));
-        messages.add(0, newTxtMessage);
-        messagesAdapter.notifyDataSetChanged();
         sendMessage(newTxtMessage);
     }
 
@@ -1178,6 +1176,20 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         String newMeetPoint = signedInUser.getObjectId() + recipientId;
         checkAndSendChatRequest(newMeetPoint);
         return newMeetPoint;
+    }
+
+    private void updateSignedInUserChats(){
+        List<String>chatIds = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        if (chatIds!=null){
+            if (!chatIds.contains(recipientId)){
+                chatIds.add(recipientId);
+            }
+        }else{
+            chatIds = new ArrayList<>();
+            chatIds.add(recipientId);
+        }
+        signedInUser.put(AppConstants.APP_USER_CHATS,chatIds);
+        signedInUser.saveInBackground();
     }
 
     private void checkAndSendChatRequest(final String generatedMeedPoint) {
@@ -1222,10 +1234,11 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             newMeetPoints.put(AppConstants.MEET_POINT_WITH + recipientId, generatedMeetPoint);
                             signedInUser.put(AppConstants.MEET_POINTS, newMeetPoints);
                             signedInUser.saveEventually();
-                        } catch (JSONException e1) {
-                            e1.printStackTrace();
+                        } catch (JSONException ex) {
+                            ex.printStackTrace();
                         }
                     }
+                    updateSignedInUserChats();
                     NotificationCenter.sendChatRequestNotification(signedInUserId, recipientId);
                 }
             }
@@ -1236,7 +1249,15 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
      * set message Extension attributes
      */
 
-    protected void sendMessage(ParseObject messageParts) {
+    protected void sendMessage(ParseObject newMessage) {
+        if (StringUtils.isNotEmpty(getMeetPointWithUser())) {
+            newMessage.put(AppConstants.CONVERSATION_ID, getMeetPointWithUser());
+        } else {
+            newMessage.put(AppConstants.CONVERSATION_ID, generateNewMeetPoint());
+        }
+        newMessage.put(AppConstants.MESSAGE_ID,generateMessageId());
+        messages.add(0, newMessage);
+        messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
         emptyComposeText();
     }
