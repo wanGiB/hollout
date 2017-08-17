@@ -13,19 +13,17 @@ import android.view.WindowManager;
 import android.widget.Chronometer;
 
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMMessage;
-import com.hyphenate.chat.EMTextMessageBody;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.ui.activities.BaseActivity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.HolloutPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
 /**
- * Created by lzan13 on 2016/10/13.
- * Video and Voice Call parent class
+ * @author Wan Clem
  */
 public class CallActivity extends BaseActivity implements ATEActivityThemeCustomizer {
 
@@ -115,12 +113,6 @@ public class CallActivity extends BaseActivity implements ATEActivityThemeCustom
      */
     protected void saveCallMessage() {
         String content = null;
-        if (isInComingCall) {
-
-        } else {
-
-        }
-
         switch (mCallStatus) {
             case CallStatus.CALL_ACCEPTED:
                 content = mChronometer.getText().toString();
@@ -156,9 +148,16 @@ public class CallActivity extends BaseActivity implements ATEActivityThemeCustom
                 content = mActivity.getString(R.string.em_call_cancel);
                 break;
         }
-        if (mCallType == 0) {
-        } else {
-        }
+
+        final String finalContent = content;
+        DbUtils.getEntityName(AppConstants.ENTITY_TYPE_INDIVIDUAL, mCallId, new DoneCallback<String>() {
+            @Override
+            public void done(String result, Exception e) {
+                if (e == null && result != null) {
+                    DbUtils.createCallLog(mCallId, result, finalContent, isInComingCall, mCallType == 0);
+                }
+            }
+        });
     }
 
     /**

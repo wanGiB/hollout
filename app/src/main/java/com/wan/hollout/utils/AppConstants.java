@@ -182,6 +182,14 @@ public class AppConstants {
     public static final String SUSPEND_ALL_USE_OF_AUDIO_MANAGER = "suspend_audio_use";
     public static final String EXTRA_IS_INCOMING_CALL = "isIncomingCall";
 
+    public static final int ENTITY_TYPE_INDIVIDUAL = 0;
+    public static final int ENTITY_TYPE_GROUP = 1;
+    public static final int ENTITY_TYPE_CHAT_ROOM = 2;
+
+    public static final String GROUP_OR_CHAT_ROOM_ID = "group_or_chat_room_id";
+    public static final String GROUP_OR_CHAT_ROOM_NAME = "group_or_chat_room_name";
+    public static final String GROUP_OR_CHAT_ROOM_PHOTO_URL = "group_or_chat_room_photo_url";
+    public static final String GROUP_OR_CHAT_ROOM_COVER_PHOTO = "group_or_chat_room_cover_photo";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

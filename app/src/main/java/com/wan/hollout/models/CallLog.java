@@ -18,19 +18,16 @@ public class CallLog extends BaseModel {
     public String callId;
 
     @Column
+    public String content;
+
+    @Column
     int callStatus;
 
     @Column
     boolean videoCall;
 
     @Column
-    boolean voiceCall;
-
-    @Column
     boolean incoming;
-
-    @Column
-    boolean outgoing;
 
     @Column
     boolean callTime;

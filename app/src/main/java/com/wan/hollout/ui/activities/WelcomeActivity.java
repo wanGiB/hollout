@@ -243,6 +243,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         newHolloutUser.put(AppConstants.APP_USER_AGE, AppConstants.UNKNOWN);
         newHolloutUser.put(AppConstants.STATUS_VISIBILITY_PREF, getString(R.string.anyone));
         newHolloutUser.put(AppConstants.USER_PROFILE_PHOTO_UPLOAD_TIME, System.currentTimeMillis());
+        newHolloutUser.put(AppConstants.APP_USER_ID,firebaseUser.getUid().trim().toLowerCase());
         newHolloutUser.signUpInBackground(new SignUpCallback() {
             @Override
             public void done(ParseException e) {

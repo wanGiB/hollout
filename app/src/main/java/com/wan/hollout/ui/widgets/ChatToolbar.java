@@ -162,12 +162,12 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     public void refreshToolbar(ParseObject recipientUser) {
         this.recipientObject = recipientUser;
-        String username = recipientUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-        String profilePhotoUrl = recipientUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+        String recipientName = recipientUser instanceof ParseUser?recipientUser.getString(AppConstants.APP_USER_DISPLAY_NAME):recipientUser.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
+        String recipientPhotoUrl = recipientUser instanceof ParseUser?recipientUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL):recipientUser.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
 
-        if (StringUtils.isNotEmpty(username)) {
-            mContext.setRecipientName(username);
-            contactNameView.setText(WordUtils.capitalize(username));
+        if (StringUtils.isNotEmpty(recipientName)) {
+            mContext.setRecipientName(recipientName);
+            contactNameView.setText(WordUtils.capitalize(recipientName));
         }
 
         if (recipientUser instanceof ParseUser) {
@@ -218,8 +218,8 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             }
         }
 
-        if (StringUtils.isNotEmpty(profilePhotoUrl)) {
-            UiUtils.loadImage(mContext, profilePhotoUrl, contactPhotoView);
+        if (StringUtils.isNotEmpty(recipientPhotoUrl)) {
+            UiUtils.loadImage(mContext, recipientPhotoUrl, contactPhotoView);
         }
 
     }
