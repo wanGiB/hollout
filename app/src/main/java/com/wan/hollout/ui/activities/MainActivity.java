@@ -509,6 +509,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
+
                                     HolloutCommunicationsManager.getInstance().signOut(true, new EMCallBack() {
                                         @Override
                                         public void onSuccess() {

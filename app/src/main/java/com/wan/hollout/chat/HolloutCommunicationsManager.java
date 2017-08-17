@@ -20,11 +20,13 @@ import com.hyphenate.chat.EMCmdMessageBody;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMMucSharedFile;
 import com.hyphenate.chat.EMOptions;
+import com.hyphenate.exceptions.HyphenateException;
 import com.hyphenate.util.EMLog;
 import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.call.CallReceiver;
 import com.wan.hollout.call.CallStateChangeListener;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
@@ -69,6 +71,10 @@ public class HolloutCommunicationsManager {
             instance = new HolloutCommunicationsManager();
         }
         return instance;
+    }
+
+    public void execute(Runnable runnable) {
+        executor.execute(runnable);
     }
 
     /**
@@ -173,6 +179,45 @@ public class HolloutCommunicationsManager {
         EMClient.getInstance().callManager().getCallOptions().setIsSendPushIfOffline(true);
     }
 
+    public void signUpEMClient(final String account, final String password, final DoneCallback<Boolean> authenticationCallback) {
+
+        execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    EMClient.getInstance().createAccount(account, password);
+                    authenticationCallback.done(true, null);
+                } catch (HyphenateException e) {
+                    authenticationCallback.done(false, e);
+                }
+            }
+        });
+
+    }
+
+    public void logInEMClient(String account, String password, final DoneCallback<Boolean> authenticationCallback) {
+
+        EMClient.getInstance().login(account, password, new EMCallBack() {
+
+            @Override
+            public void onSuccess() {
+                authenticationCallback.done(true, null);
+            }
+
+            @Override
+            public void onError(int code, String error) {
+                authenticationCallback.done(true, null);
+            }
+
+            @Override
+            public void onProgress(int progress, String status) {
+
+            }
+
+        });
+
+    }
+
     /**
      * Set Connection Listener
      */
@@ -207,7 +252,7 @@ public class HolloutCommunicationsManager {
 
     }
 
-    public MessageNotifier getNotifier() {
+    private MessageNotifier getNotifier() {
         return mNotifier;
     }
 
@@ -248,20 +293,23 @@ public class HolloutCommunicationsManager {
         HolloutLogger.d(TAG, "Sign out: " + unbindDeviceToken);
         EMClient.getInstance().logout(unbindDeviceToken, new EMCallBack() {
 
-            @Override public void onSuccess() {
+            @Override
+            public void onSuccess() {
                 HolloutLogger.d(TAG, "Sign out: onSuccess");
                 if (callback != null) {
                     callback.onSuccess();
                 }
             }
 
-            @Override public void onProgress(int progress, String status) {
+            @Override
+            public void onProgress(int progress, String status) {
                 if (callback != null) {
                     callback.onProgress(progress, status);
                 }
             }
 
-            @Override public void onError(int code, String error) {
+            @Override
+            public void onError(int code, String error) {
                 HolloutLogger.d(TAG, "Sign out: onSuccess");
                 if (callback != null) {
                     callback.onError(code, error);
