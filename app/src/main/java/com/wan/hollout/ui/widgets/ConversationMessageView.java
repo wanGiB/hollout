@@ -10,9 +10,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.hyphenate.chat.EMMessage;
+import com.hyphenate.chat.EMTextMessageBody;
 import com.john.waveview.WaveView;
 import com.parse.ParseObject;
-import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView;
 import com.wan.hollout.utils.AppConstants;
@@ -96,9 +97,7 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
     @BindView(R.id.link_preview)
     LinkPreview linkPreview;
 
-    private ParseObject messageObject;
-    private ParseUser signedInUser;
-
+    private EMMessage message;
     private Activity activity;
 
     public ConversationMessageView(Context context) {
@@ -113,12 +112,11 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         super(context, attrs, defStyleAttr);
     }
 
-    public void bindData(Activity context, ParseObject messageObject) {
+    public void bindData(Activity context, EMMessage messageObject) {
         this.activity = context;
-        signedInUser = ParseUser.getCurrentUser();
-        this.messageObject = messageObject;
+        this.message = messageObject;
         setupMessageBody();
-        setupMessageDate();
+        setupMessageTimeAndDeliveryStatus();
         refreshViews();
         chatMessageView.setOnClickListener(this);
     }
@@ -133,41 +131,47 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         return message.getString(AppConstants.SENDER_ID);
     }
 
+    private EMMessage.Type getMessageType() {
+        return message.getType();
+    }
+
+    public EMMessage.Direct getMessageDirection() {
+        return message.direct();
+    }
+
     private void setupMessageBody() {
-        String messageBody = messageObject.getString(AppConstants.MESSAGE_BODY);
-        if (StringUtils.isNotEmpty(messageBody)) {
-            UiUtils.showView(messageBodyView, true);
-            if (messageBodyView != null) {
-                if (getSenderId(messageObject).equals(signedInUser.getObjectId())) {
-                    messageBodyView.setText(UiUtils.fromHtml(messageBody + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
-                            "&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
-                } else {
-                    messageBodyView.setText(UiUtils.fromHtml(messageBody
-                            + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+        EMMessage.Type messageType = getMessageType();
+        if (messageType == EMMessage.Type.TXT) {
+            EMTextMessageBody emTextMessageBody = (EMTextMessageBody) message.getBody();
+            String message = emTextMessageBody.getMessage();
+            if (StringUtils.isNotEmpty(message)) {
+                UiUtils.showView(messageBodyView, true);
+                if (messageBodyView != null) {
+                    if (getMessageDirection() == EMMessage.Direct.SEND) {
+                        messageBodyView.setText(UiUtils.fromHtml(message + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
+                                "&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                    } else {
+                        messageBodyView.setText(UiUtils.fromHtml(message
+                                + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                    }
                 }
             }
         }
     }
 
-    private void setupMessageDate() {
-        Date messageDate = messageObject.getCreatedAt();
-        if (messageDate == null) {
-            messageDate = new Date();
-        }
-        String deliveryStatus = messageObject.getString(AppConstants.DELIVERY_STATUS);
+    private void setupMessageTimeAndDeliveryStatus() {
+        Date messageDate = new Date(message.getMsgTime());
         String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
         timeTextView.setText(messageTime);
-        if (getSenderId(messageObject).equals(signedInUser.getObjectId())) {
-            switch (deliveryStatus) {
-                case AppConstants.READ:
-                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-                    break;
-                case AppConstants.DELIVERED:
-                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_received_white);
-                    break;
-                default:
-                    deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
-                    break;
+        if (getMessageDirection() == EMMessage.Direct.SEND) {
+            if (message.isAcked()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else if (message.isDelivered()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_received_white);
+            } else if (message.isListened()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
             }
         }
     }

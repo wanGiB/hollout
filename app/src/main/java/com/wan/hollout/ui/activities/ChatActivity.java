@@ -38,6 +38,7 @@ import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.hyphenate.chat.EMMessage;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -226,7 +227,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private File recorderAudioCaptureFilePath;
 
-    private List<ParseObject> messages = new ArrayList<>();
+    private List<EMMessage> messages = new ArrayList<>();
     private MessagesAdapter messagesAdapter;
 
     private RecyclerView.LayoutManager messagesLayoutManager;
@@ -1134,13 +1135,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     protected void sendTextMessage(String content) {
-        ParseObject newTxtMessage = new ParseObject(AppConstants.MESSAGES);
-        newTxtMessage.put(AppConstants.MESSAGE_BODY, content);
-        newTxtMessage.put(AppConstants.DELIVERY_STATUS, AppConstants.SENT);
-        if (signedInUser != null) {
-            newTxtMessage.put(AppConstants.SENDER_ID, signedInUser.getObjectId());
-        }
-        sendMessage(newTxtMessage);
+
     }
 
     protected void sendVoiceMessage(String filePath, int length) {
@@ -1253,7 +1248,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             newMessage.put(AppConstants.CONVERSATION_ID, generateNewMeetPoint());
         }
         newMessage.put(AppConstants.MESSAGE_ID,generateMessageId());
-        messages.add(0, newMessage);
+//        messages.add(0, newMessage);
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
         emptyComposeText();
