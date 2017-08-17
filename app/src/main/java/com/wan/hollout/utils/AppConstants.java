@@ -174,6 +174,8 @@ public class AppConstants {
     public static final String EXTRA_FROM = "from";
     public static final String EXTRA_TYPE = "type";
     public static final String EXTRA_TO = "to";
+    public static final String UNREAD_MESSAGES_COUNT = "unread_messages_count";
+    public static final String GROUPS = "groups";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

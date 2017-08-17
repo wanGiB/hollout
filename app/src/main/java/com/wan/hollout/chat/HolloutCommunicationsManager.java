@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.view.View;
 
 import com.hyphenate.EMCallBack;
 import com.hyphenate.EMConnectionListener;
@@ -32,6 +33,7 @@ import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.HolloutPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -342,6 +344,9 @@ public class HolloutCommunicationsManager {
 
             @Override
             public void onMessageReceived(List<EMMessage> messages) {
+                if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0) {
+                    HolloutPreferences.saveUnreadMessagesCount(EMClient.getInstance().chatManager().getUnreadMessageCount());
+                }
                 for (EMMessage message : messages) {
                     HolloutLogger.d(TAG, "onMessageReceived id : " + message.getMsgId());
                     // in background, do not refresh UI, notify it in notification bar

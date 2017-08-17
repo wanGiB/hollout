@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SubscriptionHandling;
@@ -40,6 +41,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
+@SuppressWarnings("StatementWithEmptyBody")
 public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     @BindView(R.id.contact_photo)
@@ -75,8 +77,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     public int recipientType;
 
     public ParseUser signedInUserObject;
-    private ParseUser recipientObject;
-    private ParseQuery<ParseUser> recipientObjectStateQuery;
+    private ParseObject recipientObject;
+
+    private ParseQuery<ParseObject> recipientGroupStateQuery;
+    private ParseQuery<ParseUser> recipientParseUserStateQuery;
 
     public ChatToolbar(Context context) {
         this(context, null);
@@ -113,7 +117,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     public void setLastSeenText(final long userLastSeen) {
-        contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.text_black));
+        contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.text_black));
         final String fullLastSeenTExt = getLastSeen(userLastSeen);
         contactSubTitle.setText(fullLastSeenTExt);
         new Handler().postDelayed(new Runnable() {
@@ -156,7 +160,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         launchUserProfile.setOnClickListener(this);
     }
 
-    public void refreshToolbar(ParseUser recipientUser) {
+    public void refreshToolbar(ParseObject recipientUser) {
         this.recipientObject = recipientUser;
         String username = recipientUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         String profilePhotoUrl = recipientUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
@@ -166,25 +170,37 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             contactNameView.setText(WordUtils.capitalize(username));
         }
 
-        JSONObject chatStates = recipientUser.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
-        Long userLastSeen = recipientUser.getLong(AppConstants.APP_USER_LAST_SEEN);
+        if (recipientUser instanceof ParseUser) {
 
-        if (chatStates != null) {
-            String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getObjectId());
-            String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
-            if (chatStateToSignedInUser != null) {
-                if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
-                    contactSubTitle.setText(mContext.getString(R.string.online));
-                    contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
-                    UiUtils.showView(typingIndicator, false);
-                } else if (chatStateToSignedInUser.contains(mContext.getString(R.string.typing)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
-                    contactSubTitle.setText(StringUtils.strip(mContext.getString(R.string.typing_), "..."));
-                    contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
-                    UiUtils.showView(typingIndicator, true);
+            JSONObject chatStates = recipientUser.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
+            Long userLastSeen = recipientUser.getLong(AppConstants.APP_USER_LAST_SEEN);
+
+            if (chatStates != null) {
+                String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getObjectId());
+                String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
+                if (chatStateToSignedInUser != null) {
+                    if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
+                        contactSubTitle.setText(mContext.getString(R.string.online));
+                        contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
+                        UiUtils.showView(typingIndicator, false);
+                    } else if (chatStateToSignedInUser.contains(mContext.getString(R.string.typing)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
+                        contactSubTitle.setText(StringUtils.strip(mContext.getString(R.string.typing_), "..."));
+                        contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
+                        UiUtils.showView(typingIndicator, true);
+                    } else {
+                        if (userOnlineStatus.equals(AppConstants.ONLINE)) {
+                            contactSubTitle.setText(mContext.getString(R.string.online));
+                            contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
+                            UiUtils.showView(typingIndicator, false);
+                        } else {
+                            UiUtils.showView(typingIndicator, false);
+                            setLastSeenText(userLastSeen);
+                        }
+                    }
                 } else {
                     if (userOnlineStatus.equals(AppConstants.ONLINE)) {
                         contactSubTitle.setText(mContext.getString(R.string.online));
-                        contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
+                        contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                         UiUtils.showView(typingIndicator, false);
                     } else {
                         UiUtils.showView(typingIndicator, false);
@@ -192,37 +208,45 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                     }
                 }
             } else {
-                if (userOnlineStatus.equals(AppConstants.ONLINE)) {
+                String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
+                if (userOnlineStatus != null && userOnlineStatus.equals(AppConstants.ONLINE)) {
                     contactSubTitle.setText(mContext.getString(R.string.online));
-                    contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
-                    UiUtils.showView(typingIndicator, false);
+                    contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                 } else {
-                    UiUtils.showView(typingIndicator, false);
                     setLastSeenText(userLastSeen);
                 }
             }
-        } else {
-            String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
-            if (userOnlineStatus != null && userOnlineStatus.equals(AppConstants.ONLINE)) {
-                contactSubTitle.setText(mContext.getString(R.string.online));
-                contactSubTitle.setTextColor(ContextCompat.getColor(getContext(),R.color.colorGreen));
-            } else {
-                setLastSeenText(userLastSeen);
-            }
         }
+
         if (StringUtils.isNotEmpty(profilePhotoUrl)) {
             UiUtils.loadImage(mContext, profilePhotoUrl, contactPhotoView);
         }
+
     }
 
     private void subscribeToUserChanges() {
-        if (recipientObject != null) {
-            recipientObjectStateQuery = ParseUser.getQuery();
-            recipientObjectStateQuery.whereEqualTo("objectId", recipientObject.getObjectId());
-            SubscriptionHandling<ParseUser> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientObjectStateQuery);
+        if (recipientObject != null && recipientObject instanceof ParseUser) {
+            recipientParseUserStateQuery = ParseUser.getQuery();
+            recipientParseUserStateQuery.whereEqualTo("objectId", recipientObject.getObjectId());
+            SubscriptionHandling<ParseUser> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientParseUserStateQuery);
             subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseUser>() {
                 @Override
                 public void onEvent(ParseQuery<ParseUser> query, final ParseUser object) {
+                    post(new Runnable() {
+                        @Override
+                        public void run() {
+                            refreshToolbar(object);
+                        }
+                    });
+                }
+            });
+        } else if (recipientObject != null) {
+            recipientGroupStateQuery = ParseQuery.getQuery(AppConstants.GROUPS);
+            recipientGroupStateQuery.whereEqualTo("objectId", recipientObject.getObjectId());
+            SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientGroupStateQuery);
+            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
+                @Override
+                public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
                     post(new Runnable() {
                         @Override
                         public void run() {
@@ -245,10 +269,12 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 mContext.finish();
                 break;
             case R.id.launch_user_profile:
-                if (recipientObject != null) {
+                if (recipientObject != null && recipientObject instanceof ParseUser) {
                     Intent userProfileIntent = new Intent(mContext, UserProfileActivity.class);
                     userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, recipientObject);
                     mContext.startActivity(userProfileIntent);
+                } else if (recipientObject != null) {
+                    //Start Group info activity here
                 }
                 break;
         }
@@ -265,9 +291,16 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     private void unSubscribeFromUserChanges() {
-        if (recipientObjectStateQuery != null) {
+        if (recipientGroupStateQuery != null) {
             try {
-                ApplicationLoader.getParseLiveQueryClient().unsubscribe(recipientObjectStateQuery);
+                ApplicationLoader.getParseLiveQueryClient().unsubscribe(recipientGroupStateQuery);
+            } catch (NullPointerException ignored) {
+
+            }
+        }
+        if (recipientParseUserStateQuery != null) {
+            try {
+                ApplicationLoader.getParseLiveQueryClient().unsubscribe(recipientParseUserStateQuery);
             } catch (NullPointerException ignored) {
 
             }

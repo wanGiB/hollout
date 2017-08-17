@@ -143,4 +143,16 @@ public class HolloutPreferences {
         return getHolloutPreferences().getString(AppConstants.LAST_FILE_CAPTION, "Photo");
     }
 
+    public static long getUnreadMessagesCount() {
+        return getHolloutPreferences().getLong(AppConstants.UNREAD_MESSAGES_COUNT,0);
+    }
+
+    public static void saveUnreadMessagesCount(int unreadMessageCount) {
+        getHolloutPreferences().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT,unreadMessageCount).commit();
+    }
+
+    public static void clearUnreadMessagesCount(){
+        getHolloutPreferences().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT,0).commit();
+    }
+
 }

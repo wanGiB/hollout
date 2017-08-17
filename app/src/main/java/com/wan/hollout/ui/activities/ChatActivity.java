@@ -215,7 +215,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private ParseUser signedInUser;
 
     private String recipientName;
-    private ParseUser recipientProperties;
+    private ParseObject recipientProperties;
 
     private DynamicLanguage dynamicLanguage = new DynamicLanguage();
     private HolloutPermissions holloutPermissions;
@@ -253,7 +253,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         if (recipientProperties != null) {
             chatToolbar.initView(recipientId, AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
             recipientId = recipientProperties.getObjectId();
-            setupPrivateChatRecipient(recipientProperties);
+            setupChatRecipient(recipientProperties);
         } else {
             //Init toolbar with group chat
         }
@@ -631,7 +631,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         return super.onOptionsItemSelected(item);
     }
 
-    private void setupPrivateChatRecipient(ParseUser result) {
+    private void setupChatRecipient(ParseObject result) {
         if (StringUtils.isNotEmpty(recipientId)) {
             if (chatToolbar != null) {
                 chatToolbar.refreshToolbar(result);

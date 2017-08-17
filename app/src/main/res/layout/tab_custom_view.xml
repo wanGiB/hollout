@@ -27,7 +27,6 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
             android:maxLines="1"
-            android:text="TITLE"
             android:textColor="@color/tab_text_color_selector"
             android:textStyle="bold" />
 
@@ -39,7 +38,6 @@
             android:layout_marginStart="6dp"
             android:background="@drawable/tab_badge_selector"
             android:gravity="center"
-            android:text="1"
             android:textColor="@android:color/white"
             android:textSize="12sp"
             android:textStyle="bold"

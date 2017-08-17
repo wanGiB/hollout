@@ -3,6 +3,7 @@ package com.wan.hollout.ui.activities;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -63,6 +64,7 @@ import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -144,6 +146,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             tabLayout.setupWithViewPager(viewPager);
             setupTabs(adapter);
         }
+
+        fetchUnreadMessagesCount();
 
         if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
@@ -229,6 +233,56 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 return true;
             }
         });
+
+    }
+
+    private SharedPreferences.OnSharedPreferenceChangeListener  onSharedPreferenceChangeListener;
+
+    private void fetchUnreadMessagesCount() {
+        getUnreadMessagesCount();
+        if (onSharedPreferenceChangeListener!=null){
+            HolloutPreferences.getHolloutPreferences().unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+            onSharedPreferenceChangeListener = null;
+        }
+        onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                getUnreadMessagesCount();
+            }
+
+        };
+        HolloutPreferences.getHolloutPreferences().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+    }
+
+    private void getUnreadMessagesCount() {
+        long unreadMessagesCount = HolloutPreferences.getUnreadMessagesCount();
+        if (unreadMessagesCount > 0) {
+            updateTab(1,unreadMessagesCount);
+        }
+    }
+
+    private void updateTab(int whichTab, long incrementValue) {
+        TabLayout.Tab tab = tabLayout.getTabAt(whichTab);
+        if (tab != null) {
+            View tabView = tab.getCustomView();
+            if (tabView != null) {
+                TextView tabCountView = (TextView) tabView.findViewById(R.id.tab_count);
+                if (tabCountView != null) {
+                    UiUtils.showView(tabCountView, true);
+                    String textInTab = tabCountView.getText().toString().trim();
+                    if (StringUtils.isNotEmpty(textInTab)) {
+                        long existingValue = Long.parseLong(tabCountView.getText().toString().trim());
+                        if (existingValue != 0) {
+                            existingValue = existingValue + incrementValue;
+                        }
+                        tabCountView.setText(String.valueOf(existingValue));
+                    } else {
+                        tabCountView.setText(String.valueOf(incrementValue));
+                    }
+                }
+            }
+        }
     }
 
     private void resolveAuthenticationConflict() {
@@ -273,6 +327,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
         invalidateDrawerMenuHeader();
         checkEMCAuthenticationStatus();
+        fetchUnreadMessagesCount();
     }
 
     private void checkEMCAuthenticationStatus() {
@@ -287,7 +342,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                         }
                     }
                 });
-            }else{
+            } else {
                 attemptLogOut();
             }
         } else {
@@ -348,12 +403,14 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onStart();
         checkAndRegEventBus();
         checkEMCAuthenticationStatus();
+        fetchUnreadMessagesCount();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
         checkAndRegEventBus();
+        fetchUnreadMessagesCount();
     }
 
     private void turnOnLocationMessage() {
