@@ -5,9 +5,11 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.design.widget.Snackbar;
 import android.view.View;
 
 import com.hyphenate.EMCallBack;
+import com.hyphenate.EMChatRoomChangeListener;
 import com.hyphenate.EMConnectionListener;
 import com.hyphenate.EMContactListener;
 import com.hyphenate.EMError;
@@ -61,6 +63,7 @@ public class HolloutCommunicationsManager {
     // Contacts listener
     private ContactsChangeListener mContactListener = null;
     private GroupChangeListener mGroupListener = null;
+    private ChatRoomChangeListener chatRoomChangeListener;
     private EMConnectionListener mConnectionListener;
     private EMMessageListener messageListener;
 
@@ -286,6 +289,8 @@ public class HolloutCommunicationsManager {
         registerContactsListener();
         //register group listener
         registerGroupListener();
+        //register chat room change listener
+        registerChatRoomListener();
         //register call state listener
         addCallStateChangeListener();
     }
@@ -452,6 +457,16 @@ public class HolloutCommunicationsManager {
         EMClient.getInstance().groupManager().addGroupChangeListener(mGroupListener);
     }
 
+    private void registerChatRoomListener() {
+        if (chatRoomChangeListener != null) {
+            EMClient.getInstance().chatroomManager().removeChatRoomListener(chatRoomChangeListener);
+            chatRoomChangeListener = null;
+        }
+        chatRoomChangeListener = new ChatRoomChangeListener();
+        EMClient.getInstance().chatroomManager().addChatRoomChangeListener(chatRoomChangeListener);
+    }
+
+
     public class GroupChangeListener implements EMGroupChangeListener {
 
         @Override
@@ -546,6 +561,60 @@ public class HolloutCommunicationsManager {
 
         @Override
         public void onSharedFileDeleted(String groupId, String fileId) {
+
+        }
+
+    }
+
+    private class ChatRoomChangeListener implements EMChatRoomChangeListener{
+
+        @Override
+        public void onChatRoomDestroyed(String roomId, String roomName) {
+
+        }
+
+        @Override
+        public void onMemberJoined(String roomId, String participant) {
+
+        }
+
+        @Override
+        public void onMemberExited(String roomId, String roomName, String participant) {
+
+        }
+
+        @Override
+        public void onRemovedFromChatRoom(String roomId, String roomName, String participant) {
+
+        }
+
+        @Override
+        public void onMuteListAdded(String chatRoomId, List<String> mutes, long expireTime) {
+
+        }
+
+        @Override
+        public void onMuteListRemoved(String chatRoomId, List<String> mutes) {
+
+        }
+
+        @Override
+        public void onAdminAdded(String chatRoomId, String admin) {
+
+        }
+
+        @Override
+        public void onAdminRemoved(String chatRoomId, String admin) {
+
+        }
+
+        @Override
+        public void onOwnerChanged(String chatRoomId, String newOwner, String oldOwner) {
+
+        }
+
+        @Override
+        public void onAnnouncementChanged(String chatRoomId, String announcement) {
 
         }
 

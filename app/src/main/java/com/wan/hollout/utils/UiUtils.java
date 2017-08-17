@@ -9,7 +9,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -30,7 +29,6 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.style.DynamicDrawableSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.View;
@@ -60,8 +58,6 @@ import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.emoji.EmojiProvider;
-import com.wan.hollout.emoji.EmojiSpan;
 import com.wan.hollout.emoji.concurrent.ListenableFuture;
 import com.wan.hollout.emoji.concurrent.SettableFuture;
 import com.wan.hollout.ui.activities.ChatActivity;
@@ -631,7 +627,7 @@ public class UiUtils {
                         String signedInUserProfilePhoto = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                         if (StringUtils.isNotEmpty(signedInUserProfilePhoto)) {
                             Intent mChatIntent = new Intent(activity, ChatActivity.class);
-                            parseUser.put(AppConstants.RECIPIENT_TYPE,AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
+                            parseUser.put(AppConstants.CHAT_TYPE,AppConstants.CHAT_TYPE_SINGLE);
                             mChatIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
                             activity.startActivity(mChatIntent);
                         } else {

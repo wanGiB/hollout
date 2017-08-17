@@ -38,6 +38,10 @@ import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.hyphenate.EMValueCallBack;
+import com.hyphenate.chat.EMChatRoom;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMConversation;
 import com.hyphenate.chat.EMMessage;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -47,6 +51,7 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
+import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.language.DynamicLanguage;
 import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
@@ -230,6 +235,16 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private MessagesAdapter messagesAdapter;
 
     private RecyclerView.LayoutManager messagesLayoutManager;
+    protected EMConversation mConversation;
+    private int chatType;
+
+    /**
+     * load 20 messages at one time
+     */
+    protected int pageSize = 20;
+    protected boolean isLoading;
+    protected boolean isFirstLoad = true;
+    protected boolean haveMoreData = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -251,11 +266,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
         recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
         if (recipientProperties != null) {
-            chatToolbar.initView(recipientId, recipientProperties.getInt(AppConstants.RECIPIENT_TYPE));
-            recipientId = recipientProperties.getObjectId();
+            chatType = recipientProperties.getInt(AppConstants.CHAT_TYPE);
+            chatToolbar.initView(recipientId, chatType);
+            recipientId = recipientProperties instanceof ParseUser ? ((ParseUser) recipientProperties).getUsername().trim().toLowerCase() : recipientProperties.getObjectId();
             setupChatRecipient(recipientProperties);
-        } else {
-            //Init toolbar with group chat
+            if (chatType == AppConstants.CHAT_TYPE_ROOM) {
+                messagesEmptyView.setText(getString(R.string.cleaning_up_room));
+                joinRoom();
+            }
         }
         if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
@@ -264,7 +282,45 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
         initializeViews();
         setupAttachmentManager();
+        initConversation();
         setupMessagesAdapter();
+    }
+
+    private void joinRoom() {
+        EMClient.getInstance().chatroomManager().joinChatRoom(recipientId, new EMValueCallBack<EMChatRoom>() {
+            @Override
+            public void onSuccess(EMChatRoom value) {
+                initConversation();
+            }
+
+            @Override
+            public void onError(int error, String errorMsg) {
+
+            }
+        });
+    }
+
+    /**
+     * init conversation
+     * If it is a chat room, Need to join the chat room after the success of initialization
+     */
+    private void initConversation() {
+        //get the mConversation
+        mConversation = EMClient.getInstance()
+                .chatManager()
+                .getConversation(recipientId, ChatUtils.getConversationType(chatType), true);
+        mConversation.markAllMessagesAsRead();
+        // the number of messages loaded into mConversation is getChatOptions().getNumberOfMessagesLoaded
+        // you can change this number
+        final List<EMMessage> msgs = mConversation.getAllMessages();
+        int msgCount = msgs != null ? msgs.size() : 0;
+        if (msgCount < mConversation.getAllMsgCount() && msgCount < pageSize) {
+            String msgId = null;
+            if (msgs != null && msgs.size() > 0) {
+                msgId = msgs.get(0).getMsgId();
+            }
+            mConversation.loadMoreMsgFromDB(msgId, pageSize - msgCount);
+        }
     }
 
     private void setupMessagesAdapter() {
@@ -1165,17 +1221,17 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         return newMeetPoint;
     }
 
-    private void updateSignedInUserChats(){
-        List<String>chatIds = signedInUser.getList(AppConstants.APP_USER_CHATS);
-        if (chatIds!=null){
-            if (!chatIds.contains(recipientId)){
+    private void updateSignedInUserChats() {
+        List<String> chatIds = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        if (chatIds != null) {
+            if (!chatIds.contains(recipientId)) {
                 chatIds.add(recipientId);
             }
-        }else{
+        } else {
             chatIds = new ArrayList<>();
             chatIds.add(recipientId);
         }
-        signedInUser.put(AppConstants.APP_USER_CHATS,chatIds);
+        signedInUser.put(AppConstants.APP_USER_CHATS, chatIds);
         signedInUser.saveInBackground();
     }
 
@@ -1236,12 +1292,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
      * set message Extension attributes
      */
 
-    protected void sendMessage(ParseObject newMessage) {
-        if (StringUtils.isNotEmpty(getMeetPointWithUser())) {
-            newMessage.put(AppConstants.CONVERSATION_ID, getMeetPointWithUser());
-        } else {
-            newMessage.put(AppConstants.CONVERSATION_ID, generateNewMeetPoint());
-        }
+    protected void sendMessage(EMMessage newMessage) {
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
         emptyComposeText();

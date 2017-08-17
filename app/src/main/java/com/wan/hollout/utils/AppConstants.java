@@ -51,8 +51,9 @@ public class AppConstants {
     private static final String HOLLOUT_FOLDER_PATH = "Hollout";
     public static final String HOLLOUT_MEDIA_PATH = HOLLOUT_FOLDER_PATH + "/" + "Media";
 
-    public static final int RECIPIENT_TYPE_INDIVIDUAL = 0;
-    public static final int RECIPIENT_TYPE_GROUP = 1;
+    public static final int CHAT_TYPE_SINGLE = 0;
+    public static final int CHAT_TYPE_GROUP = 1;
+    public static final int CHAT_TYPE_ROOM = 2;
 
     public static final String APP_USER_DISPLAY_NAME = "app_user_display_name";
     public static final String APP_USER_PROFILE_PHOTO_URL = "app_user_profile_photo_url";
@@ -175,8 +176,8 @@ public class AppConstants {
     public static final String EXTRA_TYPE = "type";
     public static final String EXTRA_TO = "to";
     public static final String UNREAD_MESSAGES_COUNT = "unread_messages_count";
-    public static final String GROUPS = "groups";
-    public static final String RECIPIENT_TYPE = "recipient_type";
+    public static final String GROUPS_AND_ROOMS = "groups";
+    public static final String CHAT_TYPE = "chat_type";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

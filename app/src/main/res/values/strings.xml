@@ -286,5 +286,6 @@
     <string name="sent">Sent, </string>
     <string name="no_chats">You\'ve not had any chat so far.When you do, it would show up here</string>
     <string name="gcm_project_number">805027156034</string>
+    <string name="cleaning_up_room">We are cleaning up the room for you. Please wait...</string>
 
 </resources>

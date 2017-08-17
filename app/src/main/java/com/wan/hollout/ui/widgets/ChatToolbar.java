@@ -241,7 +241,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 }
             });
         } else if (recipientObject != null) {
-            recipientGroupStateQuery = ParseQuery.getQuery(AppConstants.GROUPS);
+            recipientGroupStateQuery = ParseQuery.getQuery(AppConstants.GROUPS_AND_ROOMS);
             recipientGroupStateQuery.whereEqualTo("objectId", recipientObject.getObjectId());
             SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientGroupStateQuery);
             subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
