@@ -180,24 +180,22 @@ public class HolloutCommunicationsManager {
     }
 
     public void signUpEMClient(final String account, final String password, final DoneCallback<Boolean> authenticationCallback) {
-
         execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    EMClient.getInstance().createAccount(account, password);
+                    EMClient.getInstance().createAccount(account.trim().toLowerCase(), password.trim().toLowerCase());
                     authenticationCallback.done(true, null);
                 } catch (HyphenateException e) {
                     authenticationCallback.done(false, e);
                 }
             }
         });
-
     }
 
     public void logInEMClient(String account, String password, final DoneCallback<Boolean> authenticationCallback) {
 
-        EMClient.getInstance().login(account, password, new EMCallBack() {
+        EMClient.getInstance().login(account.trim().toLowerCase(), password.trim().toLowerCase(), new EMCallBack() {
 
             @Override
             public void onSuccess() {

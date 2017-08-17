@@ -38,9 +38,6 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.hyphenate.EMCallBack;
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.exceptions.HyphenateException;
 import com.parse.DeleteCallback;
 import com.parse.LogInCallback;
 import com.parse.ParseException;
@@ -135,7 +132,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
                 if (firebaseUser != null) {
-                    authenticateUserOnParse(firebaseUser);
+                    authenticateUser(firebaseUser);
                 }
             }
         };
@@ -146,24 +143,31 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         startTypingAnimation(fieldIndex);
     }
 
-    private void authenticateUserOnParse(final FirebaseUser firebaseUser) {
+    private void authenticateUser(final FirebaseUser firebaseUser) {
         ParseUser.logInInBackground(firebaseUser.getUid(), firebaseUser.getUid(), new LogInCallback() {
             @Override
             public void done(ParseUser user, ParseException e) {
-                UiUtils.dismissProgressDialog();
-                if (e == null) {
-                    if (user != null) {
-                        HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
-                        setupCrashlyticsUser(firebaseUser);
-                        finishUp();
-                    } else {
-                        createNewUserOnParse(firebaseUser);
-                    }
+                if (e == null && user != null) {
+                    HolloutCommunicationsManager.getInstance().logInEMClient(firebaseUser.getUid(), firebaseUser.getUid(), new DoneCallback<Boolean>() {
+                        @Override
+                        public void done(Boolean success, Exception e) {
+                            UiUtils.dismissProgressDialog();
+                            if (success && e == null) {
+                                HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
+                                setupCrashlyticsUser(firebaseUser);
+                                finishUp();
+                            } else {
+                                createNewUserOnParse(firebaseUser);
+                            }
+                        }
+                    });
                 } else {
-                    if (e.getCode() == ParseException.USERNAME_MISSING || e.getCode() == ParseException.OBJECT_NOT_FOUND) {
-                        createNewUserOnParse(firebaseUser);
-                    } else {
-                        UiUtils.showSafeToast("An error while authenticating you. Please try again");
+                    if (e != null) {
+                        if (e.getCode() == ParseException.USERNAME_MISSING || e.getCode() == ParseException.OBJECT_NOT_FOUND) {
+                            createNewUserOnParse(firebaseUser);
+                        } else {
+                            UiUtils.showSafeToast("An error while authenticating you. Please try again");
+                        }
                     }
                 }
             }
@@ -247,22 +251,20 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                         @Override
                         public void done(Boolean result, Exception e) {
                             if (e == null) {
-                                UiUtils.dismissProgressDialog();
-                                HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
-                                finishUp();
-                            } else {
-                                newHolloutUser.deleteInBackground(new DeleteCallback() {
+                                HolloutCommunicationsManager.getInstance().logInEMClient(firebaseUser.getUid(), firebaseUser.getUid(), new DoneCallback<Boolean>() {
                                     @Override
-                                    public void done(ParseException e) {
-                                        UiUtils.dismissProgressDialog();
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                UiUtils.showSafeToast("Sorry, an error occurred while authenticating you. Please try again.");
-                                            }
-                                        });
+                                    public void done(Boolean success, Exception e) {
+                                        if (e == null && success) {
+                                            UiUtils.dismissProgressDialog();
+                                            HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
+                                            finishUp();
+                                        } else {
+                                            terminateAuthentication(newHolloutUser);
+                                        }
                                     }
                                 });
+                            } else {
+                                terminateAuthentication(newHolloutUser);
                             }
                         }
                     });
@@ -277,6 +279,27 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                     } else {
                         UiUtils.showSafeToast("An unresolvable error occurred during authentication. Please try again");
                     }
+                }
+            }
+        });
+    }
+
+    private void terminateAuthentication(final ParseUser newHolloutUser) {
+        newHolloutUser.deleteInBackground(new DeleteCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    UiUtils.dismissProgressDialog();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            UiUtils.showSafeToast("Sorry, an error occurred while authenticating you. Please try again.");
+                        }
+                    });
+                } else {
+                    UiUtils.dismissProgressDialog();
+                    newHolloutUser.deleteEventually();
+                    UiUtils.showSafeToast("Sorry, an error occurred while authenticating you. Please try again.");
                 }
             }
         });
