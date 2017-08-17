@@ -165,6 +165,11 @@ public class AppConstants {
     public static final String ATTACHEMENT_TYPE_VOICE_NOTE = "attachment_type_voice_note";
     public static final String ATTACHMENT_TYPE_MUSIC = "attachment_type_music";
     public static final String ATTACHMENT = "attachments";
+    public static final String MEET_POINTS = "meet_points";
+    public static final String MEET_POINT_WITH = "meet_point_with_";
+    public static final String CONVERSATION_ID = "conversation_id";
+    public static final String GENERATED_MEET_POINT = "generated_meet_point";
+    public static final String RECIPIENT = "recipient";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
@@ -179,7 +184,6 @@ public class AppConstants {
     public static final SimpleDateFormat DATE_FORMATTER_IN_BIRTHDAY_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy", Locale.getDefault());
     public static final SimpleDateFormat DATE_FORMATTER_IN_YEARS = new SimpleDateFormat("yyyy", Locale.getDefault());
     public static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
-
 
     public static int ANIMATION_DURATION_MEDIUM = 400;
 
@@ -234,7 +238,7 @@ public class AppConstants {
     public static final String BROADCAST_ACTION_APPLY = "com.hyphenate.action.apply";
 
 
-    ///Message Properties
+    ///MeetPoint Properties
     public static final String MESSAGE_BODY = "message_body";
 
     public static SparseBooleanArray reactionsBackgroundPositions = new SparseBooleanArray();

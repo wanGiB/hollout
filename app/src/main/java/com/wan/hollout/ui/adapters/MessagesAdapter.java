@@ -41,7 +41,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private Calendar calendar;
     private ParseUser signedInUser;
 
-    //Message Types
+    //MeetPoint Types
     private static final int OUTGOING_MESSAGE_TEXT_ONLY = 0;
     private static final int OUTGOING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO = 1;
     private static final int OUTGOING_MESSAGE_WITH_AUDIO = 2;

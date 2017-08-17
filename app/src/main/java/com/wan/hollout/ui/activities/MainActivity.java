@@ -220,7 +220,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         Adapter adapter = new Adapter(this, getSupportFragmentManager());
         adapter.addFragment(new PeopleFragment(), this.getString(R.string.people));
         adapter.addFragment(new ChatsFragment(), this.getString(R.string.chats));
-        adapter.addFragment(new NotificationsFragment(), this.getString(R.string.notifs));
+        adapter.addFragment(new NotificationsFragment(), this.getString(R.string.feeds));
         viewPager.setAdapter(adapter);
         return adapter;
     }

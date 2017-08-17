@@ -5,10 +5,10 @@ import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 
 import com.wan.hollout.R;
+import com.wan.hollout.emoji.EmojiTextView;
 import com.wan.hollout.eventbuses.TypingFinishedBus;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.TypingSimulationConstants;
@@ -21,9 +21,10 @@ import java.util.Random;
  * @author Wan Clem
  */
 
-public class HolloutTextView extends AppCompatTextView {
+public class ChatMessageTextView extends EmojiTextView{
 
     public static final int INVALIDATE = 0x767;
+
     private Random random;
     private CharSequence mText;
     private Handler handler;
@@ -32,11 +33,11 @@ public class HolloutTextView extends AppCompatTextView {
 
     private static final String DEFAULT_SCHEMA = "xmlns:android=\"http://schemas.android.com/apk/res/android\"";
 
-    public HolloutTextView(Context context) {
+    public ChatMessageTextView(Context context) {
         super(context);
     }
 
-    public HolloutTextView(Context context, AttributeSet attrs) {
+    public ChatMessageTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context, attrs);
     }

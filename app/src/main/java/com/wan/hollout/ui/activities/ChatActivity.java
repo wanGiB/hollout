@@ -39,11 +39,12 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.parse.GetCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.raizlabs.android.dbflow.runtime.FlowContentObserver;
+import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.emoji.EmojiDrawer;
@@ -64,6 +65,7 @@ import com.wan.hollout.ui.widgets.LinkPreview;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 import com.wan.hollout.ui.widgets.Stub;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FilePathFinder;
 import com.wan.hollout.utils.FileUtils;
 import com.wan.hollout.utils.HolloutLogger;
@@ -71,6 +73,7 @@ import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.HolloutVCFParser;
+import com.wan.hollout.utils.NotificationCenter;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.SafeLayoutManager;
 import com.wan.hollout.utils.UiUtils;
@@ -84,6 +87,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -212,7 +217,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private String recipientName;
     private ParseUser recipientProperties;
-    protected FlowContentObserver flowContentObserver;
 
     private DynamicLanguage dynamicLanguage = new DynamicLanguage();
     private HolloutPermissions holloutPermissions;
@@ -239,18 +243,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         setSupportActionBar(chatToolbar.getToolbar());
         Bundle intentExtras = getIntent().getExtras();
         initBasicComponents();
-
         signedInUser = ParseUser.getCurrentUser();
-
         if (signedInUser == null) {
             Intent splashIntent = new Intent(ChatActivity.this, SplashActivity.class);
             startActivity(splashIntent);
             finish();
             return;
         }
-
         recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
-
         if (recipientProperties != null) {
             chatToolbar.initView(recipientId, AppConstants.RECIPIENT_TYPE_INDIVIDUAL);
             recipientId = recipientProperties.getObjectId();
@@ -258,13 +258,11 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         } else {
             //Init toolbar with group chat
         }
-
         if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
         } else {
             ATE.apply(this, "light_theme");
         }
-
         initializeViews();
         setupAttachmentManager();
         setupMessagesAdapter();
@@ -704,7 +702,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     private void removeAnyPendingChatRequestFromThisRecipient() {
-        String signedInUserId = signedInUser.getString(AppConstants.APP_USER_ID);
+        String signedInUserId = signedInUser.getObjectId();
         ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
         pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, recipientId);
         pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
@@ -1116,20 +1114,36 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onStop();
         EventBus.getDefault().unregister(this);
         sendChatStateMsg(getString(R.string.idle));
-        if (flowContentObserver != null) {
-            flowContentObserver.unregisterForContentChanges(this);
+    }
+
+    public String getMeetPointWithUser() {
+        JSONObject signedInUserMeetPoints = signedInUser.getJSONObject(AppConstants.MEET_POINTS);
+        if (signedInUserMeetPoints == null) {
+            return DbUtils.getMeetPoint(recipientId);
+        } else {
+            String meetPoint = signedInUserMeetPoints.optString(AppConstants.MEET_POINT_WITH + recipientId);
+            if (meetPoint != null) {
+                return meetPoint;
+            } else {
+                return DbUtils.getMeetPoint(recipientId);
+            }
         }
     }
 
     protected void sendTextMessage(String content) {
         ParseObject newTxtMessage = new ParseObject(AppConstants.MESSAGES);
+        if (StringUtils.isNotEmpty(getMeetPointWithUser())) {
+            newTxtMessage.put(AppConstants.CONVERSATION_ID, getMeetPointWithUser());
+        } else {
+            newTxtMessage.put(AppConstants.CONVERSATION_ID, generateNewMeetPoint());
+        }
         newTxtMessage.put(AppConstants.MESSAGE_BODY, content);
         newTxtMessage.put(AppConstants.DELIVERY_STATUS, AppConstants.SENT);
         if (signedInUser != null) {
             newTxtMessage.put(AppConstants.SENDER_ID, signedInUser.getObjectId());
         }
         newTxtMessage.setObjectId(String.valueOf(System.currentTimeMillis()));
-        messages.add(0,newTxtMessage);
+        messages.add(0, newTxtMessage);
         messagesAdapter.notifyDataSetChanged();
         sendMessage(newTxtMessage);
     }
@@ -1158,6 +1172,64 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     protected void sendFileMessage(String filePath, HashMap<String, String> moreMessageProps) {
 
+    }
+
+    public String generateNewMeetPoint() {
+        String newMeetPoint = signedInUser.getObjectId() + recipientId;
+        checkAndSendChatRequest(newMeetPoint);
+        return newMeetPoint;
+    }
+
+    private void checkAndSendChatRequest(final String generatedMeedPoint) {
+        String signedInUserId = signedInUser.getObjectId();
+        ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUserId);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT, recipientId);
+        pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject object, ParseException e) {
+                if (object == null) {
+                    sendNewChatRequest(generatedMeedPoint);
+                }
+            }
+        });
+    }
+
+    private void sendNewChatRequest(final String generatedMeetPoint) {
+        final String signedInUserId = signedInUser.getObjectId();
+        ParseObject newChatRequestObject = new ParseObject(AppConstants.HOLLOUT_FEED);
+        newChatRequestObject.put(AppConstants.FEED_CREATOR_ID, signedInUserId);
+        newChatRequestObject.put(AppConstants.FEED_RECIPIENT, recipientId);
+        newChatRequestObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+        newChatRequestObject.put(AppConstants.GENERATED_MEET_POINT, generatedMeetPoint);
+        newChatRequestObject.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    DbUtils.addToMeetPoints(recipientId, generatedMeetPoint);
+                    JSONObject signedInUserMeetPoints = signedInUser.getJSONObject(AppConstants.MEET_POINTS);
+                    if (signedInUserMeetPoints != null) {
+                        try {
+                            signedInUserMeetPoints.put(AppConstants.MEET_POINT_WITH + recipientId, generatedMeetPoint);
+                            signedInUser.saveEventually();
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
+                        }
+                    } else {
+                        try {
+                            JSONObject newMeetPoints = new JSONObject(AppConstants.MEET_POINTS);
+                            newMeetPoints.put(AppConstants.MEET_POINT_WITH + recipientId, generatedMeetPoint);
+                            signedInUser.put(AppConstants.MEET_POINTS, newMeetPoints);
+                            signedInUser.saveEventually();
+                        } catch (JSONException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                    NotificationCenter.sendChatRequestNotification(signedInUserId, recipientId);
+                }
+            }
+        });
     }
 
     /**

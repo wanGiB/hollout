@@ -36,25 +36,27 @@
 
             <TextView
                 android:id="@+id/textview_time"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:paddingRight="5dp"
-                android:paddingEnd="5dp"
                 style="@style/chat_timings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
+                android:paddingEnd="5dp"
+                android:paddingRight="5dp"
                 tools:ignore="RtlSymmetry" />
 
-            <TextView
+            <com.wan.hollout.ui.widgets.ChatMessageTextView
                 android:id="@+id/message_body"
                 style="@style/chat_text_message_style"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:autoLink="web"
-                android:paddingRight="6dp"
                 android:paddingEnd="6dp"
                 android:paddingLeft="6dp"
+                android:paddingRight="6dp"
                 android:paddingStart="6dp"
-                android:text="Wan Clem is a good boy but he does not know what he wants." />
+                android:text="Wan Clem is a good boy but he does not know what he wants."
+                app:emojiconSize="25dp"
+                app:textStyle="none" />
 
         </FrameLayout>
 

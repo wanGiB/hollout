@@ -139,7 +139,7 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
             UiUtils.showView(messageBodyView, true);
             if (messageBodyView != null) {
                 if (getSenderId(messageObject).equals(signedInUser.getObjectId())) {
-                    messageBodyView.setText(UiUtils.fromHtml(messageBody + "&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
+                    messageBodyView.setText(UiUtils.fromHtml(messageBody + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
                             "&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
                 } else {
                     messageBodyView.setText(UiUtils.fromHtml(messageBody

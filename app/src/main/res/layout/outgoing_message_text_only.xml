@@ -63,7 +63,7 @@
 
             </LinearLayout>
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
+            <com.wan.hollout.ui.widgets.ChatMessageTextView
                 android:id="@+id/message_body"
                 style="@style/chat_text_message_style"
                 android:layout_width="wrap_content"

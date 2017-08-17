@@ -132,7 +132,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="notifs">Notifs</string>
+    <string name="feeds">Feeds</string>
     <string name="meet_more_people">MEET MORE PEOPLE</string>
     <string name="online_status">Online Status</string>
     <string name="featured_photos">FEATURED PHOTOS</string>
@@ -284,5 +284,6 @@
     <string name="read">Read, </string>
     <string name="delivered">Delivered, </string>
     <string name="sent">Sent, </string>
+    <string name="no_chats">You\'ve not had any chat so far.When you do, it would show up here</string>
 
 </resources>
