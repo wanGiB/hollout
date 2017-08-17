@@ -56,14 +56,14 @@ public class HolloutCommunicationsManager {
 
     // Call state listener
     private CallStateChangeListener mCallStateChangeListener = null;
-
     // Contacts listener
     private ContactsChangeListener mContactListener = null;
     private GroupChangeListener mGroupListener = null;
+    private EMConnectionListener mConnectionListener;
+    private EMMessageListener messageListener;
 
     private static Context mContext;
     private MessageNotifier mNotifier = new MessageNotifier();
-
     private ExecutorService executor = null;
 
     private HolloutCommunicationsManager() {
@@ -222,7 +222,12 @@ public class HolloutCommunicationsManager {
      */
     private void setConnectionListener() {
 
-        EMConnectionListener mConnectionListener = new EMConnectionListener() {
+        if (mConnectionListener != null) {
+            EMClient.getInstance().removeConnectionListener(mConnectionListener);
+            mConnectionListener = null;
+        }
+
+        mConnectionListener = new EMConnectionListener() {
 
             /**
              * The connection to the server is successful
@@ -273,14 +278,12 @@ public class HolloutCommunicationsManager {
         setCallReceiverListener();
         // set connection listener
         setConnectionListener();
-
         // register message listener
         registerMessageListener();
-
         // register contacts listener
         registerContactsListener();
-
         registerGroupListener();
+        addCallStateChangeListener();
     }
 
     /**
@@ -324,7 +327,12 @@ public class HolloutCommunicationsManager {
      */
     private void registerMessageListener() {
 
-        EMMessageListener messageListener = new EMMessageListener() {
+        if (messageListener != null) {
+            EMClient.getInstance().chatManager().removeMessageListener(messageListener);
+            messageListener = null;
+        }
+
+        messageListener = new EMMessageListener() {
 
             @Override
             public void onMessageReceived(List<EMMessage> messages) {
@@ -386,9 +394,12 @@ public class HolloutCommunicationsManager {
      * Listen for changes to contacts
      */
     private void registerContactsListener() {
-        if (mContactListener == null) {
-            mContactListener = new ContactsChangeListener();
+        if (mContactListener != null) {
+            EMClient.getInstance().contactManager().removeContactListener(mContactListener);
+            mContactListener = null;
         }
+        mContactListener = new ContactsChangeListener();
+
         EMClient.getInstance().contactManager().setContactListener(mContactListener);
     }
 
@@ -422,9 +433,11 @@ public class HolloutCommunicationsManager {
     }
 
     private void registerGroupListener() {
-        if (mGroupListener == null) {
-            mGroupListener = new GroupChangeListener();
+        if (mGroupListener != null) {
+            EMClient.getInstance().groupManager().removeGroupChangeListener(mGroupListener);
+            mGroupListener = null;
         }
+        mGroupListener = new GroupChangeListener();
         EMClient.getInstance().groupManager().addGroupChangeListener(mGroupListener);
     }
 
@@ -524,6 +537,7 @@ public class HolloutCommunicationsManager {
         public void onSharedFileDeleted(String groupId, String fileId) {
 
         }
+
     }
 
     /**
@@ -533,9 +547,11 @@ public class HolloutCommunicationsManager {
         // Set the call broadcast listener to filter the action
         IntentFilter callFilter = new IntentFilter(
                 EMClient.getInstance().callManager().getIncomingCallBroadcastAction());
-        if (mCallReceiver == null) {
-            mCallReceiver = new CallReceiver();
+        if (mCallReceiver != null) {
+            mContext.unregisterReceiver(mCallReceiver);
+            mCallReceiver = null;
         }
+        mCallReceiver = new CallReceiver();
         // Register the call receiver
         mContext.registerReceiver(mCallReceiver, callFilter);
     }
@@ -544,22 +560,12 @@ public class HolloutCommunicationsManager {
      * Add call state listener
      */
     public void addCallStateChangeListener() {
-        if (mCallStateChangeListener == null) {
-            mCallStateChangeListener = new CallStateChangeListener(mContext);
+        if (mCallStateChangeListener != null) {
+            EMClient.getInstance().callManager().removeCallStateChangeListener(mCallStateChangeListener);
+            mCallStateChangeListener = null;
         }
-
+        mCallStateChangeListener = new CallStateChangeListener(mContext);
         EMClient.getInstance().callManager().addCallStateChangeListener(mCallStateChangeListener);
     }
 
-    /**
-     * Remove call state listener
-     */
-    public void removeCallStateChangeListener() {
-        if (mCallStateChangeListener != null) {
-            EMClient.getInstance()
-                    .callManager()
-                    .removeCallStateChangeListener(mCallStateChangeListener);
-            mCallStateChangeListener = null;
-        }
-    }
 }
