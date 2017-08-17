@@ -39,7 +39,6 @@ import com.bumptech.glide.Glide;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.parse.GetCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -84,7 +83,6 @@ import net.alhazmy13.mediapicker.Image.ImagePicker;
 import net.alhazmy13.mediapicker.Video.VideoPicker;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -107,7 +105,6 @@ import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_IMAGE;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_LOCATION;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_VIDEO;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
-
 
 @SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal", "unused"})
 public class ChatActivity extends BaseActivity implements ATEActivityThemeCustomizer,

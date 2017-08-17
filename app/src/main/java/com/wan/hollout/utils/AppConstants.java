@@ -31,7 +31,7 @@ public class AppConstants {
     public static final String FILE_TYPE_CONTACT = "FileTypeContact";
     public static final String FILE_TYPE_LOCATION = "FileTypeLocation";
 
-    public static final String HOLLOUT_FEED = "Feed";
+    public static final String HOLLOUT_FEED = "feed";
     public static final String FEED_CREATOR_ID = "feed_creator_id";
     public static final String FEED_TYPE = "feed_type";
     public static final String FEED_BODY = "feed_body";
@@ -171,6 +171,9 @@ public class AppConstants {
     public static final String GENERATED_MEET_POINT = "generated_meet_point";
     public static final String RECIPIENT = "recipient";
     public static final String MESSAGE_ID = "message_id";
+    public static final String EXTRA_FROM = "from";
+    public static final String EXTRA_TYPE = "type";
+    public static final String EXTRA_TO = "to";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
@@ -233,10 +236,10 @@ public class AppConstants {
     public static final String ACCOUNT_CONFLICT = "conflict";
 
     // Broadcast action
-    public static final String BROADCAST_ACTION_CALL = "com.hyphenate.action.call";
-    public static final String BROADCAST_ACTION_CONTACTS = "com.hyphenate.action.contacts";
-    public static final String BROADCAST_ACTION_GROUP = "com.hyphenate.action.group";
-    public static final String BROADCAST_ACTION_APPLY = "com.hyphenate.action.apply";
+    public static final String BROADCAST_ACTION_CALL = "com.wan.hollout.action.call";
+    public static final String BROADCAST_ACTION_CONTACTS = "com.wan.hollout.action.contacts";
+    public static final String BROADCAST_ACTION_GROUP = "com.wan.hollout.action.group";
+    public static final String BROADCAST_ACTION_APPLY = "com.wan.hollout.action.apply";
 
 
     ///MeetPoint Properties
@@ -248,5 +251,8 @@ public class AppConstants {
     public static SparseBooleanArray likesPositions = new SparseBooleanArray();
     public static SparseBooleanArray messageBodyPositions = new SparseBooleanArray();
     public static SparseBooleanArray messageTimeVisibilePositions = new SparseBooleanArray();
+
+
+
 }
 

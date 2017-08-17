@@ -130,16 +130,20 @@ public class UiUtils {
         }
     }
 
-    public static ProgressDialog operationsProgressDialog;
+    private static ProgressDialog operationsProgressDialog;
 
-    public static void showProgressDialog(final Context context, final String message) {
-        operationsProgressDialog = new ProgressDialog(context);
-        operationsProgressDialog.setCancelable(false);
-        operationsProgressDialog.setMessage(message);
-        operationsProgressDialog.show();
+    public static synchronized void showProgressDialog(final Context context, final String message) {
+        try{
+            operationsProgressDialog = new ProgressDialog(context);
+            operationsProgressDialog.setCancelable(false);
+            operationsProgressDialog.setMessage(message);
+            operationsProgressDialog.show();
+        }catch (Exception ignored){
+
+        }
     }
 
-    public static void dismissProgressDialog() {
+    public static synchronized void dismissProgressDialog() {
         try {
             if (operationsProgressDialog != null) {
                 if (operationsProgressDialog.isShowing()) {

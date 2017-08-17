@@ -17,6 +17,7 @@ import com.parse.ParseLiveQueryClient;
 import com.parse.ParseLiveQueryClientCallbacks;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.wan.hollout.R;
+import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.utils.AppConstants;
@@ -63,6 +64,7 @@ public class ApplicationLoader extends Application {
         configureThemes();
         startAppInstanceDetector();
         defaultSystemEmojiPref();
+        HolloutCommunicationsManager.getInstance().init(this);
     }
 
     private void startAppInstanceDetector() {

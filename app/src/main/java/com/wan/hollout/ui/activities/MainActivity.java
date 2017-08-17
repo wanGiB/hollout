@@ -34,12 +34,14 @@ import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.hyphenate.EMCallBack;
 import com.parse.LogOutCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
@@ -106,6 +108,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+
         ParseUser signedInUser = ParseUser.getCurrentUser();
 
         if (signedInUser == null) {
@@ -113,6 +116,26 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             startActivity(splashIntent);
             finish();
             return;
+        }
+
+        Bundle intentExtras = getIntent().getExtras();
+        if (intentExtras != null) {
+            boolean accountConflict = intentExtras.getBoolean(AppConstants.ACCOUNT_CONFLICT, false);
+            if (accountConflict) {
+                final AlertDialog.Builder accountConflictDialog = new AlertDialog.Builder(this);
+                accountConflictDialog.setCancelable(false);
+                accountConflictDialog.setTitle("Another Device detected!");
+                accountConflictDialog.setMessage("This account was logged in to on another device. You'll be logged out here.");
+                accountConflictDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        attemptLogOut();
+                    }
+                });
+                accountConflictDialog.create().show();
+                return;
+            }
         }
 
         final ActionBar ab = getSupportActionBar();
@@ -214,6 +237,27 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 return true;
             }
         });
+    }
+
+    private void checkIsSessionValid() {
+        Bundle intentExtras = getIntent().getExtras();
+        if (intentExtras != null) {
+            boolean accountConflict = intentExtras.getBoolean(AppConstants.ACCOUNT_CONFLICT, false);
+            if (accountConflict) {
+                final AlertDialog.Builder accountConflictDialog = new AlertDialog.Builder(this);
+                accountConflictDialog.setCancelable(false);
+                accountConflictDialog.setTitle("Another Device detected!");
+                accountConflictDialog.setMessage("This account was logged in to on another device. You'll be logged out here.");
+                accountConflictDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        attemptLogOut();
+                    }
+                });
+                accountConflictDialog.create().show();
+            }
+        }
     }
 
     private Adapter setupViewPagerAdapter(ViewPager viewPager) {
@@ -437,32 +481,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                FirebaseAuth.getInstance().signOut();
-                UiUtils.showProgressDialog(MainActivity.this, "Logging out...");
-                ParseUser.logOutInBackground(new LogOutCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        HolloutPreferences.setUserWelcomed(false);
-                        HolloutPreferences.clearPersistedCredentials();
-                        invalidateDrawerMenuHeader();
-                        ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
-                        AuthUtil.signOut(MainActivity.this).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                UiUtils.dismissProgressDialog();
-                                if (task.isSuccessful()) {
-                                    UiUtils.showSafeToast("You've being logged out");
-                                    Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
-                                    startActivity(splashIntent);
-                                    finish();
-                                } else {
-                                    UiUtils.showSafeToast("Failed to sign out.Please try again");
-                                }
-                            }
-                        });
-
-                    }
-                });
+                finishLogOut();
             }
         }).setNegativeButton("NO", new DialogInterface.OnClickListener() {
             @Override
@@ -471,6 +490,70 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
         });
         builder.create().show();
+    }
+
+    private void finishLogOut() {
+        FirebaseAuth.getInstance().signOut();
+        UiUtils.showProgressDialog(MainActivity.this, "Logging out...");
+        if (ParseUser.getCurrentUser() != null) {
+            ParseUser.logOutInBackground(new LogOutCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e == null) {
+                        HolloutPreferences.setUserWelcomed(false);
+                        HolloutPreferences.clearPersistedCredentials();
+                        invalidateDrawerMenuHeader();
+                        ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
+                        ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
+                        AuthUtil.signOut(MainActivity.this).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    HolloutCommunicationsManager.getInstance().signOut(true, new EMCallBack() {
+                                        @Override
+                                        public void onSuccess() {
+                                            finishUp();
+                                        }
+
+                                        @Override
+                                        public void onError(int code, String error) {
+                                            UiUtils.dismissProgressDialog();
+                                            UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                                            checkIsSessionValid();
+                                        }
+
+                                        @Override
+                                        public void onProgress(int progress, String status) {
+
+                                        }
+
+                                    });
+
+                                } else {
+                                    UiUtils.dismissProgressDialog();
+                                    UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                                    checkIsSessionValid();
+                                }
+                            }
+                        });
+                    } else {
+                        UiUtils.dismissProgressDialog();
+                        UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                        checkIsSessionValid();
+                    }
+                }
+            });
+        } else {
+            finish();
+        }
+    }
+
+    private void finishUp() {
+        UiUtils.dismissProgressDialog();
+        UiUtils.showSafeToast("You've being logged out");
+        Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
+        startActivity(splashIntent);
+        finish();
     }
 
     @Override

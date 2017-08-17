@@ -285,5 +285,6 @@
     <string name="delivered">Delivered, </string>
     <string name="sent">Sent, </string>
     <string name="no_chats">You\'ve not had any chat so far.When you do, it would show up here</string>
+    <string name="gcm_project_number">324169311137</string>
 
 </resources>

@@ -126,6 +126,7 @@ dependencies {
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
     compile 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
     compile 'com.github.john990:WaveView:v0.9'
+    compile 'com.hyphenate:hyphenate-sdk:3.3.2'
 }
 
 apply plugin: 'com.google.gms.google-services'
