@@ -570,7 +570,7 @@ public class HolloutCommunicationsManager {
 
     }
 
-    private class ChatRoomChangeListener implements EMChatRoomChangeListener{
+    private class ChatRoomChangeListener implements EMChatRoomChangeListener {
 
         @Override
         public void onChatRoomDestroyed(String roomId, String roomName) {
@@ -632,7 +632,10 @@ public class HolloutCommunicationsManager {
         IntentFilter callFilter = new IntentFilter(
                 EMClient.getInstance().callManager().getIncomingCallBroadcastAction());
         if (mCallReceiver != null) {
-            mContext.unregisterReceiver(mCallReceiver);
+            try {
+                mContext.unregisterReceiver(mCallReceiver);
+            } catch (IllegalArgumentException ignored) {
+            }
             mCallReceiver = null;
         }
         mCallReceiver = new CallReceiver();
