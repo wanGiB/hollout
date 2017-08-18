@@ -111,27 +111,27 @@ public class ConversationsFragment extends Fragment {
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             conversationsQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
-        }
-        conversationsQuery.setLimit(100);
-        if (skip != 0) {
-            conversationsQuery.setSkip(skip);
-        }
-        conversationsQuery.findInBackground(new FindCallback<ParseUser>() {
-            @Override
-            public void done(List<ParseUser> objects, ParseException e) {
-                if (e == null) {
-                    if (objects != null && !objects.isEmpty()) {
-                        if (!conversations.containsAll(objects)) {
-                            conversations.addAll(objects);
-                        }
-                        sortConversations();
-                        conversationsAdapter.notifyDataSetChanged();
-                    }
-                    invalidateEmptyView();
-                    swipeRefreshLayout.setRefreshing(false);
-                }
+            conversationsQuery.setLimit(100);
+            if (skip != 0) {
+                conversationsQuery.setSkip(skip);
             }
-        });
+            conversationsQuery.findInBackground(new FindCallback<ParseUser>() {
+                @Override
+                public void done(List<ParseUser> objects, ParseException e) {
+                    if (e == null) {
+                        if (objects != null && !objects.isEmpty()) {
+                            if (!conversations.containsAll(objects)) {
+                                conversations.addAll(objects);
+                            }
+                            sortConversations();
+                            conversationsAdapter.notifyDataSetChanged();
+                        }
+                        invalidateEmptyView();
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }
+            });
+        }
     }
 
     private void sortConversations() {

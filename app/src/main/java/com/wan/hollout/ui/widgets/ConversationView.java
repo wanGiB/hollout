@@ -208,55 +208,56 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
             // display profile image
             applyProfilePicture(userProfilePhoto);
             applyIconAnimation();
+            if (emConversation != null) {
+                int unreadMessagesCount = emConversation.getUnreadMsgCount();
 
-            int unreadMessagesCount = emConversation.getUnreadMsgCount();
-
-            if (unreadMessagesCount > 0) {
-                UiUtils.showView(unreadMessagesCountView, true);
-                unreadMessagesCountView.setText(String.valueOf(unreadMessagesCount));
-                AppConstants.unreadMessagesPositions.put(getMessageId(), true);
-                userStatusOrLastMessageView.setTextColor(Color.BLACK);
-                userStatusOrLastMessageView.setTypeface(null, Typeface.BOLD);
-            } else {
-                UiUtils.showView(unreadMessagesCountView, false);
-                AppConstants.unreadMessagesPositions.put(getMessageId(), false);
-                userStatusOrLastMessageView.setTypeface(null, Typeface.NORMAL);
-                userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(activity, R.color.message));
-            }
-
-            lastMessage = emConversation.getLastMessage();
-
-            if (lastMessage != null) {
-                UiUtils.showView(msgTimeStampView, true);
-                long lastMessageTime = lastMessage.getMsgTime();
-                parseObject.put(AppConstants.LAST_UPDATE_TIME, lastMessageTime);
-                Date msgDate = new Date(lastMessageTime);
-                if (msgDate.equals(new Date())) {
-                    //Msg received date = today
-                    String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
-                    msgTimeStampView.setText(msgTime);
+                if (unreadMessagesCount > 0) {
+                    UiUtils.showView(unreadMessagesCountView, true);
+                    unreadMessagesCountView.setText(String.valueOf(unreadMessagesCount));
+                    AppConstants.unreadMessagesPositions.put(getMessageId(), true);
+                    userStatusOrLastMessageView.setTextColor(Color.BLACK);
+                    userStatusOrLastMessageView.setTypeface(null, Typeface.BOLD);
                 } else {
-                    msgTimeStampView.setText(UiUtils.getDaysAgo(AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(msgDate)) + "," + AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate));
+                    UiUtils.showView(unreadMessagesCountView, false);
+                    AppConstants.unreadMessagesPositions.put(getMessageId(), false);
+                    userStatusOrLastMessageView.setTypeface(null, Typeface.NORMAL);
+                    userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(activity, R.color.message));
                 }
-                AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
-                setupLastMessage(lastMessage);
-            } else {
-                parseObject.put(AppConstants.LAST_UPDATE_TIME, 0);
-                UiUtils.showView(msgTimeStampView, false);
-                AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
-                if (parseObject instanceof ParseUser) {
-                    String userStatusString = parseObject.getString(AppConstants.APP_USER_STATUS);
-                    if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
-                        userStatusOrLastMessageView.setText(userStatusString);
+
+                lastMessage = emConversation.getLastMessage();
+
+                if (lastMessage != null) {
+                    UiUtils.showView(msgTimeStampView, true);
+                    long lastMessageTime = lastMessage.getMsgTime();
+                    parseObject.put(AppConstants.LAST_UPDATE_TIME, lastMessageTime);
+                    Date msgDate = new Date(lastMessageTime);
+                    if (msgDate.equals(new Date())) {
+                        //Msg received date = today
+                        String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
+                        msgTimeStampView.setText(msgTime);
                     } else {
-                        userStatusOrLastMessageView.setText(activity.getString(R.string.hey_there_holla_me_on_hollout));
+                        msgTimeStampView.setText(UiUtils.getDaysAgo(AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(msgDate)) + "," + AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate));
                     }
+                    AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
+                    setupLastMessage(lastMessage);
                 } else {
-                    String groupDescription = parseObject.getString(AppConstants.ROOM_DESCRIPTION);
-                    if (StringUtils.isNotEmpty(groupDescription)) {
-                        userStatusOrLastMessageView.setText(groupDescription);
+                    parseObject.put(AppConstants.LAST_UPDATE_TIME, 0);
+                    UiUtils.showView(msgTimeStampView, false);
+                    AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
+                    if (parseObject instanceof ParseUser) {
+                        String userStatusString = parseObject.getString(AppConstants.APP_USER_STATUS);
+                        if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
+                            userStatusOrLastMessageView.setText(userStatusString);
+                        } else {
+                            userStatusOrLastMessageView.setText(activity.getString(R.string.hey_there_holla_me_on_hollout));
+                        }
                     } else {
-                        userStatusOrLastMessageView.setText(activity.getString(R.string.conferencing_happens_here));
+                        String groupDescription = parseObject.getString(AppConstants.ROOM_DESCRIPTION);
+                        if (StringUtils.isNotEmpty(groupDescription)) {
+                            userStatusOrLastMessageView.setText(groupDescription);
+                        } else {
+                            userStatusOrLastMessageView.setText(activity.getString(R.string.conferencing_happens_here));
+                        }
                     }
                 }
             }
@@ -312,7 +313,9 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 }
 
             });
+
         }
+
     }
 
     private void invalidateViewOnScroll() {

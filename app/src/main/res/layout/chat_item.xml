@@ -176,13 +176,12 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/badge_selected"
                 android:gravity="center_horizontal|center_vertical"
-                android:text="99+"
                 android:textColor="@color/white"
                 android:minHeight="18dp"
                 android:textSize="9sp"
                 android:textStyle="bold"
                 android:visibility="visible"
-                app:fontName="Lato-Regular.ttf"
+                app:textStyle="medium"
                 tools:ignore="SmallSp" />
 
         </LinearLayout>
