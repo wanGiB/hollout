@@ -35,7 +35,6 @@ import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.models.Chat;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
@@ -123,10 +122,10 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
         setOnLongClickListener(this);
     }
 
-    public void bindData(Activity activity, String searchString, Chat chat) {
+    public void bindData(Activity activity, String searchString, ParseObject parseObject) {
         this.searchString = searchString;
         this.activity = activity;
-        this.parseObject = chat.getParseObject();
+        this.parseObject = parseObject;
 
         this.emConversation = EMClient.getInstance()
                 .chatManager().getConversation(
@@ -395,6 +394,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
             setMessageSendCallback();
             setupMessageReadStatus(message);
         } else {
+            setMessageReceiveCallback();
             UiUtils.showView(deliveryStatusView, false);
         }
 
@@ -469,7 +469,9 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
     }
 
     protected void setMessageSendCallback() {
+
         if (messageSendCallback == null) {
+
             messageSendCallback = new EMCallBack() {
 
                 @Override
@@ -486,9 +488,44 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 public void onError(int code, String error) {
 
                 }
+
             };
+
         }
+
         lastMessage.setMessageStatusCallback(messageSendCallback);
+
+    }
+
+    /**
+     * set callback for receiving message
+     */
+    protected void setMessageReceiveCallback(){
+
+        if(messageReceiveCallback == null){
+
+            messageReceiveCallback = new EMCallBack() {
+
+                @Override
+                public void onSuccess() {
+                    loadParseObject(searchString);
+                }
+
+                @Override
+                public void onProgress(final int progress, String status) {
+                }
+
+                @Override
+                public void onError(int code, String error) {
+
+                }
+
+            };
+
+        }
+
+        lastMessage.setMessageStatusCallback(messageReceiveCallback);
+
     }
 
     private void setupMessageReadStatus(EMMessage message) {
