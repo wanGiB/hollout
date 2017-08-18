@@ -113,7 +113,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         setSupportActionBar(toolbar);
 
         ParseUser signedInUser = ParseUser.getCurrentUser();
-
         if (signedInUser == null) {
             Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
             startActivity(splashIntent);
@@ -122,6 +121,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         }
 
         Bundle intentExtras = getIntent().getExtras();
+
         if (intentExtras != null) {
             boolean accountConflict = intentExtras.getBoolean(AppConstants.ACCOUNT_CONFLICT, false);
             if (accountConflict) {

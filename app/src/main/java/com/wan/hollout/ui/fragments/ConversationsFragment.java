@@ -121,16 +121,17 @@ public class ConversationsFragment extends Fragment {
 
     private void attemptOffloadConversationsFromCache() {
 
-        ParseQuery<ParseUser> singleChatConversationQuery = ParseUser.getQuery();
+        ParseQuery<ParseObject> singleChatConversationQuery = ParseQuery.getQuery("_User");
         ParseQuery<ParseObject> conferenceQuery = ParseQuery.getQuery(AppConstants.GROUPS_AND_ROOMS);
 
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
 
             singleChatConversationQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
             conferenceQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
 
-            List<ParseQuery> resultantQueries = new ArrayList<>();
+            List<ParseQuery<ParseObject>> resultantQueries = new ArrayList<>();
             resultantQueries.add(singleChatConversationQuery);
             resultantQueries.add(conferenceQuery);
 
@@ -163,24 +164,28 @@ public class ConversationsFragment extends Fragment {
 
     private void fetchConversations(final int skip) {
 
-        ParseQuery<ParseUser> singleChatConversationQuery = ParseUser.getQuery();
+        ParseQuery<ParseObject> singleChatConversationQuery = ParseQuery.getQuery("_User");
         ParseQuery<ParseObject> conferenceQuery = ParseQuery.getQuery(AppConstants.GROUPS_AND_ROOMS);
 
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
 
             singleChatConversationQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
             conferenceQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
 
-            List<ParseQuery> resultantQueries = new ArrayList<>();
+            List<ParseQuery<ParseObject>> resultantQueries = new ArrayList<>();
             resultantQueries.add(singleChatConversationQuery);
             resultantQueries.add(conferenceQuery);
 
             ParseQuery<ParseObject> mainQuery = ParseQuery.or(resultantQueries);
+
             mainQuery.setLimit(100);
+
             if (skip != 0) {
                 mainQuery.setSkip(skip);
             }
+
             mainQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
