@@ -4,7 +4,7 @@ import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.ViewGroup;
 
-import com.parse.ParseObject;
+import com.wan.hollout.models.Chat;
 
 import java.util.List;
 
@@ -12,12 +12,12 @@ import java.util.List;
  * @author Wan Clem
  */
 
-public class ChatsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
-    private List<ParseObject>chats;
+    private List<Chat>chats;
     private Context context;
 
-    public ChatsAdapter(Context context,List<ParseObject>chats){
+    public ConversationsAdapter(Context context, List<Chat>chats){
         this.context = context;
         this.chats = chats;
     }

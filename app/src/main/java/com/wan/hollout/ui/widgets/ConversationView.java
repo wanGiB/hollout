@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -17,9 +18,9 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
-import com.hyphenate.chat.EMFileMessageBody;
 import com.hyphenate.chat.EMImageMessageBody;
 import com.hyphenate.chat.EMLocationMessageBody;
 import com.hyphenate.chat.EMMessage;
@@ -90,6 +91,9 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
     @BindView(R.id.delivery_status_view)
     ImageView deliveryStatusView;
+
+    protected EMCallBack messageSendCallback;
+    protected EMCallBack messageReceiveCallback;
 
     public ParseObject parseObject;
     public Activity activity;
@@ -212,9 +216,13 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 UiUtils.showView(unreadMessagesCountView, true);
                 unreadMessagesCountView.setText(String.valueOf(unreadMessagesCount));
                 AppConstants.unreadMessagesPositions.put(getMessageId(), true);
+                userStatusOrLastMessageView.setTextColor(Color.BLACK);
+                userStatusOrLastMessageView.setTypeface(null, Typeface.BOLD);
             } else {
                 UiUtils.showView(unreadMessagesCountView, false);
                 AppConstants.unreadMessagesPositions.put(getMessageId(), false);
+                userStatusOrLastMessageView.setTypeface(null, Typeface.NORMAL);
+                userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(activity, R.color.message));
             }
 
             lastMessage = emConversation.getLastMessage();
@@ -311,7 +319,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
         UiUtils.showView(msgTimeStampView, AppConstants.lastMessageAvailablePositions.get(getMessageId()));
         UiUtils.showView(userOnlineStatusView, AppConstants.parseUserAvailableOnlineStatusPositions.get(getMessageId()));
         userOnlineStatusView.setImageResource(AppConstants.onlinePositions.get(getMessageId()) ? R.drawable.ic_online : R.drawable.ic_offline_grey);
-        if (AppConstants.lastMessageAvailablePositions.get(getMessageId())) {
+        if (AppConstants.lastMessageAvailablePositions.get(getMessageId()) && lastMessage != null && lastMessage.direct() == EMMessage.Direct.SEND) {
             setupMessageReadStatus(lastMessage);
         } else {
             UiUtils.showView(deliveryStatusView, false);
@@ -384,6 +392,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
         if (message.direct() == EMMessage.Direct.SEND) {
             UiUtils.showView(deliveryStatusView, true);
+            setMessageSendCallback();
             setupMessageReadStatus(message);
         } else {
             UiUtils.showView(deliveryStatusView, false);
@@ -457,6 +466,29 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 e.printStackTrace();
             }
         }
+    }
+
+    protected void setMessageSendCallback() {
+        if (messageSendCallback == null) {
+            messageSendCallback = new EMCallBack() {
+
+                @Override
+                public void onSuccess() {
+                    loadParseObject(searchString);
+                }
+
+                @Override
+                public void onProgress(final int progress, String status) {
+
+                }
+
+                @Override
+                public void onError(int code, String error) {
+
+                }
+            };
+        }
+        lastMessage.setMessageStatusCallback(messageSendCallback);
     }
 
     private void setupMessageReadStatus(EMMessage message) {
