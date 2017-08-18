@@ -304,7 +304,7 @@
 
     <attr name="attachment_type_selector_background" format="color" />
 
-    <declare-styleable name="ChatMessageView">
+    <declare-styleable name="MessageBubbleLayout">
         <attr name="cmv_showArrow" format="boolean" />
         <attr name="cmv_arrowPosition" format="enum">
             <enum name="left" value="0" />

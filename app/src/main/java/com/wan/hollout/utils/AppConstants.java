@@ -190,6 +190,9 @@ public class AppConstants {
     public static final String GROUP_OR_CHAT_ROOM_NAME = "group_or_chat_room_name";
     public static final String GROUP_OR_CHAT_ROOM_PHOTO_URL = "group_or_chat_room_photo_url";
     public static final String GROUP_OR_CHAT_ROOM_COVER_PHOTO = "group_or_chat_room_cover_photo";
+    public static final String ROOM_TYPE = "room_type";
+    public static final int ENTITY_TYPE_CHATS = 1;
+    public static final String ROOM_DESCRIPTION = "room_description";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";
@@ -267,7 +270,9 @@ public class AppConstants {
     public static SparseBooleanArray likesPositions = new SparseBooleanArray();
     public static SparseBooleanArray messageBodyPositions = new SparseBooleanArray();
     public static SparseBooleanArray messageTimeVisibilePositions = new SparseBooleanArray();
-
-
+    public static SparseBooleanArray unreadMessagesPositions = new SparseBooleanArray();
+    public static SparseBooleanArray lastMessageAvailablePositions = new SparseBooleanArray();
+    public static SparseBooleanArray parseUserAvailableOnlineStatusPositions = new SparseBooleanArray();
+    public static SparseBooleanArray onlinePositions = new SparseBooleanArray();
 }
 

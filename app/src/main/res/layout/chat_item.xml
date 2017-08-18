@@ -150,6 +150,13 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
+            <ImageView
+                android:id="@+id/delivery_status_view"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:visibility="gone"
+                tools:ignore="ContentDescription" />
+
             <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/txt_secondary"
                 android:layout_width="0dp"

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.wan.hollout.ui.widgets.ConversationMessageView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.wan.hollout.ui.widgets.ChatMessageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -19,7 +19,7 @@
         android:orientation="vertical"
         tools:ignore="UselessParent">
 
-        <com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView
+        <com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout
             android:id="@+id/message_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -193,7 +193,7 @@
 
             </LinearLayout>
 
-        </com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView>
+        </com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout>
 
         <com.wan.hollout.ui.widgets.HolloutTextView
             android:id="@+id/delivery_status_and_time_view"
@@ -210,4 +210,4 @@
 
     </LinearLayout>
 
-</com.wan.hollout.ui.widgets.ConversationMessageView>
+</com.wan.hollout.ui.widgets.ChatMessageView>

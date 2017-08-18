@@ -26,7 +26,7 @@ import com.wan.hollout.ui.widgets.chatmessageview.util.ViewUtil;
 /**
  * @author Wan Clem
  */
-public class ChatMessageView extends RelativeLayout {
+public class MessageBubbleLayout extends RelativeLayout {
     private static final String TAG = "ChatMessageView";
 
     private ImageView arrowImage;
@@ -42,35 +42,35 @@ public class ChatMessageView extends RelativeLayout {
 
     private TypedArray a;
 
-    public ChatMessageView(Context context) {
+    public MessageBubbleLayout(Context context) {
         super(context);
         initialize(null, 0);
     }
 
-    public ChatMessageView(Context context, AttributeSet attrs) {
+    public MessageBubbleLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         initialize(attrs, 0);
     }
 
-    public ChatMessageView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public MessageBubbleLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initialize(attrs, defStyleAttr);
     }
 
     private void initialize(AttributeSet attrs, int defStyleAttr) {
-        a = getContext().obtainStyledAttributes(attrs, R.styleable.ChatMessageView, defStyleAttr, 0);
+        a = getContext().obtainStyledAttributes(attrs, R.styleable.MessageBubbleLayout, defStyleAttr, 0);
 
-        showArrow = a.getBoolean(R.styleable.ChatMessageView_cmv_showArrow, true);
-        arrowMargin = a.getDimension(R.styleable.ChatMessageView_cmv_arrowMargin, dip2px(5));
-        cornerRadius = a.getDimension(R.styleable.ChatMessageView_cmv_cornerRadius, 0);
-        contentPadding = a.getDimension(R.styleable.ChatMessageView_cmv_contentPadding, dip2px(10));
-        backgroundColor = a.getColor(R.styleable.ChatMessageView_cmv_backgroundColor, 0);
-        backgroundColorPressed = a.getColor(R.styleable.ChatMessageView_cmv_backgroundColorPressed, 0);
+        showArrow = a.getBoolean(R.styleable.MessageBubbleLayout_cmv_showArrow, true);
+        arrowMargin = a.getDimension(R.styleable.MessageBubbleLayout_cmv_arrowMargin, dip2px(5));
+        cornerRadius = a.getDimension(R.styleable.MessageBubbleLayout_cmv_cornerRadius, 0);
+        contentPadding = a.getDimension(R.styleable.MessageBubbleLayout_cmv_contentPadding, dip2px(10));
+        backgroundColor = a.getColor(R.styleable.MessageBubbleLayout_cmv_backgroundColor, 0);
+        backgroundColorPressed = a.getColor(R.styleable.MessageBubbleLayout_cmv_backgroundColorPressed, 0);
 
-        int intPosition = a.getInt(R.styleable.ChatMessageView_cmv_arrowPosition, ArrowPosition.LEFT.getValue());
+        int intPosition = a.getInt(R.styleable.MessageBubbleLayout_cmv_arrowPosition, ArrowPosition.LEFT.getValue());
         arrowPosition = ArrowPosition.getEnum(intPosition);
 
-        int intGravity = a.getInt(R.styleable.ChatMessageView_cmv_arrowGravity, ArrowGravity.START.getValue());
+        int intGravity = a.getInt(R.styleable.MessageBubbleLayout_cmv_arrowGravity, ArrowGravity.START.getValue());
         arrowGravity = ArrowGravity.getEnum(intGravity);
 
         a.recycle();

@@ -15,7 +15,7 @@ import com.hyphenate.chat.EMTextMessageBody;
 import com.john.waveview.WaveView;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
-import com.wan.hollout.ui.widgets.chatmessageview.ChatMessageView;
+import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.UiUtils;
 
@@ -30,10 +30,10 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class ConversationMessageView extends RelativeLayout implements View.OnClickListener {
+public class ChatMessageView extends RelativeLayout implements View.OnClickListener {
 
     @BindView(R.id.message_container)
-    ChatMessageView chatMessageView;
+    MessageBubbleLayout messageBubbleLayout;
 
     @Nullable
     @BindView(R.id.attached_photo_or_video_thumbnail)
@@ -100,15 +100,15 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
     private EMMessage message;
     private Activity activity;
 
-    public ConversationMessageView(Context context) {
+    public ChatMessageView(Context context) {
         super(context);
     }
 
-    public ConversationMessageView(Context context, AttributeSet attrs) {
+    public ChatMessageView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public ConversationMessageView(Context context, AttributeSet attrs, int defStyleAttr) {
+    public ChatMessageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -118,7 +118,7 @@ public class ConversationMessageView extends RelativeLayout implements View.OnCl
         setupMessageBody();
         setupMessageTimeAndDeliveryStatus();
         refreshViews();
-        chatMessageView.setOnClickListener(this);
+        messageBubbleLayout.setOnClickListener(this);
     }
 
     @Override

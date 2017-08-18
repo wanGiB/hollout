@@ -12,7 +12,7 @@ import com.hyphenate.chat.EMTextMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.utils.DateUtils;
-import com.wan.hollout.ui.widgets.ConversationMessageView;
+import com.wan.hollout.ui.widgets.ChatMessageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
@@ -188,7 +188,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     static class MessageItemsHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.conversation_message_view)
-        ConversationMessageView conversationMessageView;
+        ChatMessageView chatMessageView;
 
         public MessageItemsHolder(View itemView) {
             super(itemView);
@@ -196,7 +196,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         public void bindMessage(Activity context, EMMessage emMessage) {
-            conversationMessageView.bindData(context, emMessage);
+            chatMessageView.bindData(context, emMessage);
         }
 
     }
