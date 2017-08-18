@@ -159,7 +159,7 @@ public class PeopleFragment extends Fragment {
     private void fetchPeopleOfCommonInterestFromCache() {
         ParseQuery<ParseUser> localUsersQuery = ParseUser.getQuery();
         localUsersQuery.fromLocalDatastore();
-        localUsersQuery.whereNotEqualTo("objectId", signedInUser.getObjectId());
+        localUsersQuery.whereNotEqualTo(AppConstants.OBJECT_ID, signedInUser.getObjectId());
         localUsersQuery.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> objects, ParseException e) {
@@ -194,7 +194,7 @@ public class PeopleFragment extends Fragment {
         peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
         peopleRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
-//        RecyclerViewUtils.setFooterView(peopleRecyclerView,footerView);
+//        RecyclerViewUtils.setFooterView(conversationsRecyclerView,footerView);
         UiUtils.showView(footerView, false);
 
         peopleRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -245,12 +245,12 @@ public class PeopleFragment extends Fragment {
                         if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
                             savedUserChats.add(signedInUserId.toLowerCase());
                         }
-                        peopleQuery.whereNotContainedIn("objectId", savedUserChats);
+                        peopleQuery.whereNotContainedIn(AppConstants.OBJECT_ID, savedUserChats);
                     } else {
                         if (!newUserChats.contains(signedInUserId)) {
                             newUserChats.add(signedInUserId);
                         }
-                        peopleQuery.whereNotContainedIn("objectId", newUserChats);
+                        peopleQuery.whereNotContainedIn(AppConstants.OBJECT_ID, newUserChats);
                     }
                     if (signedInUserCountry != null) {
                         peopleQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
@@ -341,12 +341,12 @@ public class PeopleFragment extends Fragment {
         ParseQuery<ParseUser> parseUserParseQuery = ParseUser.getQuery();
         parseUserParseQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
         if (signedInUser != null) {
-            parseUserParseQuery.whereNotEqualTo("objectId", signedInUser.getObjectId());
+            parseUserParseQuery.whereNotEqualTo(AppConstants.OBJECT_ID, signedInUser.getObjectId());
         }
 
         ParseQuery<ParseUser> categoryQuery = ParseUser.getQuery();
         if (signedInUser != null) {
-            categoryQuery.whereNotEqualTo("objectId", signedInUser.getObjectId());
+            categoryQuery.whereNotEqualTo(AppConstants.OBJECT_ID, signedInUser.getObjectId());
         }
 
         List<String> elements = new ArrayList<>();

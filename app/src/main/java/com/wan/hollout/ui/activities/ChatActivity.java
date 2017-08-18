@@ -211,7 +211,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     @BindView(R.id.unread_message_indicator)
     TextView unreadMessagesIndicator;
 
-    @BindView(R.id.chats_recycler_view)
+    @BindView(R.id.conversations_recycler_view)
     RecyclerView messagesRecyclerView;
 
     private LinearLayoutManager linearLayoutManager;

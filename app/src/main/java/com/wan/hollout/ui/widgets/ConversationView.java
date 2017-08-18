@@ -229,6 +229,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
             if (lastMessage != null) {
                 UiUtils.showView(msgTimeStampView, true);
                 long lastMessageTime = lastMessage.getMsgTime();
+                parseObject.put(AppConstants.LAST_UPDATE_TIME, lastMessageTime);
                 Date msgDate = new Date(lastMessageTime);
                 if (msgDate.equals(new Date())) {
                     //Msg received date = today
@@ -240,6 +241,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
                 setupLastMessage(lastMessage);
             } else {
+                parseObject.put(AppConstants.LAST_UPDATE_TIME, 0);
                 UiUtils.showView(msgTimeStampView, false);
                 AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
                 if (parseObject instanceof ParseUser) {
@@ -500,9 +502,9 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
     /**
      * set callback for receiving message
      */
-    protected void setMessageReceiveCallback(){
+    protected void setMessageReceiveCallback() {
 
-        if(messageReceiveCallback == null){
+        if (messageReceiveCallback == null) {
 
             messageReceiveCallback = new EMCallBack() {
 

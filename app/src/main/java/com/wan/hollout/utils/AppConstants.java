@@ -193,6 +193,8 @@ public class AppConstants {
     public static final String ROOM_TYPE = "room_type";
     public static final int ENTITY_TYPE_CHATS = 1;
     public static final String ROOM_DESCRIPTION = "room_description";
+    public static final String LAST_UPDATE_TIME = "last_update_time";
+    public static final String OBJECT_ID = "objectId";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

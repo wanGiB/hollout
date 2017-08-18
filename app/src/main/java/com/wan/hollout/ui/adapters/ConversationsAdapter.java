@@ -1,6 +1,6 @@
 package com.wan.hollout.ui.adapters;
 
-import android.content.Context;
+import android.app.Activity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 
 import com.parse.ParseObject;
 import com.wan.hollout.R;
-import com.wan.hollout.models.Chat;
 import com.wan.hollout.ui.widgets.ConversationView;
 
 import java.util.List;
@@ -23,13 +22,22 @@ import butterknife.ButterKnife;
 public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<ParseObject> conversations;
-    private Context context;
+    private Activity context;
     private LayoutInflater layoutInflater;
+    private String searchString;
 
-    public ConversationsAdapter(Context context, List<ParseObject> conversations) {
+    public ConversationsAdapter(Activity context, List<ParseObject> conversations) {
         this.context = context;
         this.conversations = conversations;
         this.layoutInflater = LayoutInflater.from(context);
+    }
+
+    public void setSearchString(String searchString) {
+        this.searchString = searchString;
+    }
+
+    private String getSearchString() {
+        return searchString;
     }
 
     @Override
@@ -40,7 +48,11 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-
+        ConversationsItemHolder conversationsItemHolder = (ConversationsItemHolder)holder;
+        ParseObject conversation = conversations.get(position);
+        if (conversation!=null){
+            conversationsItemHolder.bindData(context,getSearchString(),conversation);
+        }
     }
 
     @Override
@@ -59,8 +71,8 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
             ButterKnife.bind(this,itemView);
         }
 
-        public void bindData(Context context,Chat chat){
-
+        public void bindData(Activity context, String searchString,ParseObject chat){
+            conversationView.bindData(context,searchString,chat);
         }
 
     }
