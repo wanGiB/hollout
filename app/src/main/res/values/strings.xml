@@ -130,9 +130,8 @@
     <string name="yrs">Yrs</string>
     <string name="you_are">You are</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="feeds">Feeds</string>
+    <string name="feeds">Feed</string>
     <string name="meet_more_people">MEET MORE PEOPLE</string>
     <string name="online_status">Online Status</string>
     <string name="featured_photos">FEATURED PHOTOS</string>
@@ -217,7 +216,7 @@
     <string name="record_release_to_cancel">Release to cancel</string>
     <string name="record_recoding_fail">The recording failure, please try again！</string>
     <string name="nice_to_meet_you">Hi, nice to meet you.</string>
-    <string name="cancel_text">CANCEL</string>
+    <string name="cancel_text">@android:string/cancel</string>
     <string name="send_text">SEND</string>
     <string name="no_music">No music</string>
     <string name="no_photos">No photos</string>
@@ -286,7 +285,7 @@
     <string name="sent">Sent, </string>
     <string name="no_chats">You\'ve not had any chat so far.When you do, it would show up here</string>
     <string name="gcm_project_number">805027156034</string>
-    <string name="cleaning_up_room">We are cleaning up the room for you. Please wait...</string>
+    <string name="cleaning_up_room">We are cleaning up the room for you. Please wait…</string>
     <string name="conferencing_happens_here">Conferencing happens here!</string>
     <string name="location">Location</string>
     <string name="voice">Voice Note</string>
@@ -294,7 +293,7 @@
     <string name="decline">DECLINE</string>
     <string name="requester_name">Requester Name</string>
     <string name="android_engineer">Android Engineer</string>
-    <string name="no_feed">No feeds for you now. Feeds would show up here when available</string>
+    <string name="no_feed">No feed for you now. Feed would show up here when available</string>
     <string name="chat_requests">CHAT REQUESTS</string>
     <string name="thats_all_for_now">That\'s all for now</string>
     <string name="see_all">SEE ALL</string>
