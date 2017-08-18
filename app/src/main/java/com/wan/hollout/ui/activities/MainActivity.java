@@ -50,7 +50,7 @@ import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.DrawerFragment;
-import com.wan.hollout.ui.fragments.NotificationsFragment;
+import com.wan.hollout.ui.fragments.FeedFragment;
 import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
@@ -314,7 +314,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         Adapter adapter = new Adapter(this, getSupportFragmentManager());
         adapter.addFragment(new PeopleFragment(), this.getString(R.string.people));
         adapter.addFragment(new ConversationsFragment(), this.getString(R.string.chats));
-        adapter.addFragment(new NotificationsFragment(), this.getString(R.string.feeds));
+        adapter.addFragment(new FeedFragment(), this.getString(R.string.feeds));
         viewPager.setAdapter(adapter);
         return adapter;
     }

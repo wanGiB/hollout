@@ -290,5 +290,14 @@
     <string name="conferencing_happens_here">Conferencing happens here!</string>
     <string name="location">Location</string>
     <string name="voice">Voice Note</string>
+    <string name="accept">ACCEPT</string>
+    <string name="decline">DECLINE</string>
+    <string name="requester_name">Requester Name</string>
+    <string name="android_engineer">Android Engineer</string>
+    <string name="no_feed">No feeds for you now. Feeds would show up here when available</string>
+    <string name="chat_requests">CHAT REQUESTS</string>
+    <string name="thats_all_for_now">That\'s all for now</string>
+    <string name="see_all">SEE ALL</string>
+    <string name="working">Working</string>
 
 </resources>

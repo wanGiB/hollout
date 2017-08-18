@@ -195,6 +195,10 @@ public class AppConstants {
     public static final String ROOM_DESCRIPTION = "room_description";
     public static final String LAST_UPDATE_TIME = "last_update_time";
     public static final String OBJECT_ID = "objectId";
+    public static final String FEED_TYPE_JOIN_GROUP_REQUEST = "feed_type_join_group";
+    public static final String GROUP_OR_ROOM = "group_or_room";
+    public static final String REFRESH_CONVERSATIONS = "refresh_conversations";
+    public static final String CONVERSATIONS = "conversations";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

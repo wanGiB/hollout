@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ViewFlipper;
 
+import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -38,6 +39,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
+@SuppressWarnings("unchecked")
 public class ConversationsFragment extends Fragment {
 
     @BindView(R.id.conversations_recycler_view)
@@ -71,7 +73,7 @@ public class ConversationsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View peopleView = inflater.inflate(R.layout.fragment_chats, container, false);
+        View peopleView = inflater.inflate(R.layout.fragment_conversations, container, false);
         ButterKnife.bind(this, peopleView);
         return peopleView;
     }
@@ -101,30 +103,100 @@ public class ConversationsFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                fetchConversations(0);
+                attemptOffloadConversationsFromCache();
             }
         });
     }
 
-    private void fetchConversations(int skip) {
-        ParseQuery<ParseUser> conversationsQuery = ParseUser.getQuery();
+    private void loadAdapter(List<ParseObject> users) {
+        if (!users.isEmpty()) {
+            for (ParseObject parseUser : users) {
+                if (!conversations.contains(parseUser)) {
+                    conversations.add(parseUser);
+                }
+            }
+        }
+        conversationsAdapter.notifyDataSetChanged();
+    }
+
+    private void attemptOffloadConversationsFromCache() {
+
+        ParseQuery<ParseUser> singleChatConversationQuery = ParseUser.getQuery();
+        ParseQuery<ParseObject> conferenceQuery = ParseQuery.getQuery(AppConstants.GROUPS_AND_ROOMS);
+
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
-            conversationsQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
-            conversationsQuery.setLimit(100);
-            if (skip != 0) {
-                conversationsQuery.setSkip(skip);
-            }
-            conversationsQuery.findInBackground(new FindCallback<ParseUser>() {
+
+            singleChatConversationQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
+            conferenceQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
+
+            List<ParseQuery> resultantQueries = new ArrayList<>();
+            resultantQueries.add(singleChatConversationQuery);
+            resultantQueries.add(conferenceQuery);
+
+            ParseQuery<ParseObject> mainQuery = ParseQuery.or(resultantQueries);
+            mainQuery.fromLocalDatastore();
+            mainQuery.whereNotEqualTo(AppConstants.OBJECT_ID, signedInUser.getObjectId());
+            mainQuery.setLimit(100);
+
+            mainQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
-                public void done(List<ParseUser> objects, ParseException e) {
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if (objects != null && !objects.isEmpty()) {
+                        loadAdapter(objects);
+                    }
+                    invalidateEmptyView();
+                    fetchConversations(0);
+                }
+            });
+        }
+    }
+
+    private void cacheConversations() {
+        ParseObject.unpinAllInBackground(AppConstants.CONVERSATIONS, new DeleteCallback() {
+            @Override
+            public void done(ParseException e) {
+                ParseObject.pinAllInBackground(AppConstants.CONVERSATIONS, conversations);
+            }
+        });
+    }
+
+    private void fetchConversations(final int skip) {
+
+        ParseQuery<ParseUser> singleChatConversationQuery = ParseUser.getQuery();
+        ParseQuery<ParseObject> conferenceQuery = ParseQuery.getQuery(AppConstants.GROUPS_AND_ROOMS);
+
+        List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
+
+            singleChatConversationQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
+            conferenceQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
+
+            List<ParseQuery> resultantQueries = new ArrayList<>();
+            resultantQueries.add(singleChatConversationQuery);
+            resultantQueries.add(conferenceQuery);
+
+            ParseQuery<ParseObject> mainQuery = ParseQuery.or(resultantQueries);
+            mainQuery.setLimit(100);
+            if (skip != 0) {
+                mainQuery.setSkip(skip);
+            }
+            mainQuery.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
                     if (e == null) {
                         if (objects != null && !objects.isEmpty()) {
+                            if (skip == 0) {
+                                conversations.clear();
+                            }
                             if (!conversations.containsAll(objects)) {
                                 conversations.addAll(objects);
                             }
                             sortConversations();
                             conversationsAdapter.notifyDataSetChanged();
+                            if (!conversations.isEmpty()) {
+                                cacheConversations();
+                            }
                         }
                         invalidateEmptyView();
                         swipeRefreshLayout.setRefreshing(false);
@@ -194,6 +266,9 @@ public class ConversationsFragment extends Fragment {
                             break;
                         case AppConstants.ENABLE_NESTED_SCROLLING:
                             conversationsRecyclerView.setNestedScrollingEnabled(true);
+                            break;
+                        case AppConstants.REFRESH_CONVERSATIONS:
+                            fetchConversations(0);
                             break;
                     }
                 }
