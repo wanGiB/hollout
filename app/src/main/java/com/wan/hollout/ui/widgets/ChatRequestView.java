@@ -57,12 +57,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     @BindView(R.id.decline_request)
     TextView declineRequestView;
 
-    private Activity activity;
-    private ParseObject parseObject;
-
     private ParseUser signedInUser;
-
-    private ChatRequestsAdapterView parent;
 
     public ChatRequestView(Context context) {
         this(context, null);
@@ -78,8 +73,6 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     }
 
     public void bindData(final Activity activity, final ChatRequestsAdapterView parent, final ParseObject feedObject) {
-        this.activity = activity;
-        this.parseObject = feedObject;
         this.signedInUser = ParseUser.getCurrentUser();
         if (feedObject != null) {
             String requestType = feedObject.getString(AppConstants.FEED_TYPE);
@@ -181,17 +174,24 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                         @Override
                         public void onClick(View v) {
                             declineRequestView.setText(activity.getString(R.string.working));
-                            ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-                            requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, feedObject.getObjectId());
-                            requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                            ChatUtils.declineChatInvitation(requestOriginator.getUsername(), new DoneCallback<Boolean>() {
                                 @Override
-                                public void done(final ParseObject object, ParseException e) {
-                                    if (e == null && object != null) {
-                                        object.deleteInBackground(new DeleteCallback() {
+                                public void done(Boolean declined, Exception e) {
+                                    if (e == null && declined) {
+                                        ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+                                        requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, feedObject.getObjectId());
+                                        requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                                             @Override
-                                            public void done(ParseException e) {
-                                                UiUtils.snackMessage("Request from " + userDisplayName + " declined successfully.", ChatRequestView.this, true, null, null);
-                                                removeRequest(parent, object);
+                                            public void done(final ParseObject object, ParseException e) {
+                                                if (e == null && object != null) {
+                                                    object.deleteInBackground(new DeleteCallback() {
+                                                        @Override
+                                                        public void done(ParseException e) {
+                                                            UiUtils.snackMessage("Request from " + userDisplayName + " declined successfully.", ChatRequestView.this, true, null, null);
+                                                            removeRequest(parent, object);
+                                                        }
+                                                    });
+                                                }
                                             }
                                         });
                                     }

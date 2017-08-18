@@ -5,8 +5,6 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 
 import com.hyphenate.EMCallBack;
 import com.hyphenate.EMChatRoomChangeListener;
@@ -203,27 +201,31 @@ public class HolloutCommunicationsManager {
         });
     }
 
-    public void logInEMClient(String account, String password, final DoneCallback<Boolean> authenticationCallback) {
-
-        EMClient.getInstance().login(account.trim().toLowerCase(), password.trim().toLowerCase(), new EMCallBack() {
-
+    public void logInEMClient(final String account, final String password, final DoneCallback<Boolean> authenticationCallback) {
+        execute(new Runnable() {
             @Override
-            public void onSuccess() {
-                authenticationCallback.done(true, null);
+            public void run() {
+                EMClient.getInstance().login(account.trim().toLowerCase(), password.trim().toLowerCase(), new EMCallBack() {
+
+                    @Override
+                    public void onSuccess() {
+                        authenticationCallback.done(true, null);
+                    }
+
+                    @Override
+                    public void onError(int code, String error) {
+                        authenticationCallback.done(true, null);
+                    }
+
+                    @Override
+                    public void onProgress(int progress, String status) {
+
+                    }
+
+                });
+
             }
-
-            @Override
-            public void onError(int code, String error) {
-                authenticationCallback.done(true, null);
-            }
-
-            @Override
-            public void onProgress(int progress, String status) {
-
-            }
-
         });
-
     }
 
     /**

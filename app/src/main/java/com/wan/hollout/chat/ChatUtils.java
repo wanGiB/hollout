@@ -25,58 +25,88 @@ public class ChatUtils {
         }
     }
 
-    public static void acceptPrivateGroupInvite(String groupId, String inviter, DoneCallback<Boolean> acceptedCallback) {
-        try {
-            EMClient.getInstance().groupManager().acceptInvitation(groupId, inviter);
-            acceptedCallback.done(true, null);
-        } catch (HyphenateException e) {
-            acceptedCallback.done(null, e);
-        }
+    public static void acceptPrivateGroupInvite(final String groupId, final String inviter, final DoneCallback<Boolean> acceptedCallback) {
+        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    EMClient.getInstance().groupManager().acceptInvitation(groupId, inviter);
+                    acceptedCallback.done(true, null);
+                } catch (HyphenateException e) {
+                    acceptedCallback.done(null, e);
+                }
+            }
+        });
     }
 
-    public static void declinePrivateGroupInvite(String groupId, String inviter, DoneCallback<Boolean> declineCallback) {
-        try {
-            EMClient.getInstance().groupManager().declineInvitation(groupId, inviter, "");
-            declineCallback.done(true, null);
-        } catch (HyphenateException e) {
-            declineCallback.done(null, e);
-        }
+    public static void declinePrivateGroupInvite(final String groupId, final String inviter, final DoneCallback<Boolean> declineCallback) {
+        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    EMClient.getInstance().groupManager().declineInvitation(groupId, inviter, "");
+                    declineCallback.done(true, null);
+                } catch (HyphenateException e) {
+                    declineCallback.done(null, e);
+                }
+            }
+        });
     }
 
-    public static void acceptPublicGroupInvite(String username, String groupId, DoneCallback<Boolean> acceptCallback) {
-        try {
-            EMClient.getInstance().groupManager().acceptApplication(username, groupId);
-            acceptCallback.done(true, null);
-        } catch (HyphenateException e) {
-            acceptCallback.done(null, e);
-        }
+    public static void acceptPublicGroupInvite(final String username, final String groupId, final DoneCallback<Boolean> acceptCallback) {
+        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    EMClient.getInstance().groupManager().acceptApplication(username, groupId);
+                    acceptCallback.done(true, null);
+                } catch (HyphenateException e) {
+                    acceptCallback.done(null, e);
+                }
+            }
+        });
     }
 
-    public static void declinePublicGroupInvite(String username, String groupId, DoneCallback<Boolean> declineCallback) {
-        try {
-            EMClient.getInstance().groupManager().declineApplication(username, groupId,"");
-            declineCallback.done(true, null);
-        } catch (HyphenateException e) {
-            declineCallback.done(null, e);
-        }
+    public static void declinePublicGroupInvite(final String username, final String groupId, final DoneCallback<Boolean> declineCallback) {
+        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    EMClient.getInstance().groupManager().declineApplication(username, groupId, "");
+                    declineCallback.done(true, null);
+                } catch (HyphenateException e) {
+                    declineCallback.done(false, e);
+                }
+            }
+        });
     }
 
-    public static void acceptChatInvitation(String username, DoneCallback<Boolean> acceptCallback) {
-        try {
-            EMClient.getInstance().contactManager().acceptInvitation(username);
-            acceptCallback.done(true, null);
-        } catch (HyphenateException e) {
-            acceptCallback.done(null, e);
-        }
+    public static void acceptChatInvitation(final String username, final DoneCallback<Boolean> acceptCallback) {
+        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    EMClient.getInstance().contactManager().acceptInvitation(username);
+                    acceptCallback.done(true, null);
+                } catch (HyphenateException e) {
+                    acceptCallback.done(false, e);
+                }
+            }
+        });
     }
 
-    public static void declineChatInvitation(String username, DoneCallback<Boolean> declineCallback) {
-        try {
-            EMClient.getInstance().contactManager().declineInvitation(username);
-            declineCallback.done(true, null);
-        } catch (HyphenateException e) {
-            declineCallback.done(null, e);
-        }
+    public static void declineChatInvitation(final String username, final DoneCallback<Boolean> declineCallback) {
+        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    EMClient.getInstance().contactManager().declineInvitation(username);
+                    declineCallback.done(true, null);
+                } catch (HyphenateException e) {
+                    declineCallback.done(false, e);
+                }
+            }
+        });
     }
 
 }
