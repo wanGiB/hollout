@@ -159,34 +159,37 @@ public class ConversationsFragment extends Fragment {
             peopleAndGroupsQuery.whereContainedIn(AppConstants.REPLICATED_OBJECT_ID, signedInUserChats);
             peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REPLICATED_OBJECT_ID, signedInUser.getObjectId());
             peopleAndGroupsQuery.setLimit(100);
-        }
 
-        if (skip != 0) {
-            peopleAndGroupsQuery.setSkip(skip);
-        }
-
-        peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                if (e == null) {
-                    if (objects != null && !objects.isEmpty()) {
-                        if (skip == 0) {
-                            conversations.clear();
-                        }
-                        if (!conversations.containsAll(objects)) {
-                            conversations.addAll(objects);
-                        }
-                        sortConversations();
-                        conversationsAdapter.notifyDataSetChanged();
-                        if (!conversations.isEmpty()) {
-                            cacheConversations();
-                        }
-                    }
-                    invalidateEmptyView();
-                    swipeRefreshLayout.setRefreshing(false);
-                }
+            if (skip != 0) {
+                peopleAndGroupsQuery.setSkip(skip);
             }
-        });
+
+            peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
+
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if (e == null) {
+                        if (objects != null && !objects.isEmpty()) {
+                            if (skip == 0) {
+                                conversations.clear();
+                            }
+                            if (!conversations.containsAll(objects)) {
+                                conversations.addAll(objects);
+                            }
+                            sortConversations();
+                            conversationsAdapter.notifyDataSetChanged();
+                            if (!conversations.isEmpty()) {
+                                cacheConversations();
+                            }
+                        }
+                        invalidateEmptyView();
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }
+            });
+
+        }
+
     }
 
     private void sortConversations() {

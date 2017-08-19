@@ -1388,6 +1388,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
      */
 
     protected void sendMessage(EMMessage newMessage) {
+        EMClient.getInstance().chatManager().sendMessage(newMessage);
         //Send message here
         messages.add(newMessage);
         messagesAdapter.notifyDataSetChanged();
