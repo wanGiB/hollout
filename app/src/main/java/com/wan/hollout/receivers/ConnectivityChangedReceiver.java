@@ -1,4 +1,4 @@
-package com.wan.hollout.components;
+package com.wan.hollout.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

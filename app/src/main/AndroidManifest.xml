@@ -113,7 +113,9 @@
             android:name="com.hyphenate.chat.EMChatService"
             android:exported="true" />
 
-        <service android:name=".ui.services.ObjectReplicationService"/>
+        <service android:name=".ui.services.ObjectReplicationService" android:enabled="true"/>
+
+        <service android:name=".ui.services.FetchUserInfoService" android:enabled="true"/>
 
         <service
             android:name="com.hyphenate.chat.EMJobService"
@@ -243,11 +245,21 @@
             android:name=".ui.services.AppInstanceDetectionService"
             android:enabled="true" />
 
-        <receiver android:name=".components.ConnectivityChangedReceiver">
+        <receiver android:name=".receivers.ConnectivityChangedReceiver">
             <intent-filter>
                 <action
                     android:name="android.net.conn.CONNECTIVITY_CHANGE"
                     tools:ignore="BatteryLife" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receivers.NotificationsReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.parse.push.intent.RECEIVE" />
+                <action android:name="com.parse.push.intent.OPEN" />
+                <action android:name="com.parse.push.intent.DELETE" />
             </intent-filter>
         </receiver>
 

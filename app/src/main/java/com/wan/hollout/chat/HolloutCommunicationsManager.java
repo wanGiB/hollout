@@ -20,6 +20,10 @@ import com.hyphenate.chat.EMMucSharedFile;
 import com.hyphenate.chat.EMOptions;
 import com.hyphenate.exceptions.HyphenateException;
 import com.hyphenate.util.EMLog;
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.call.CallReceiver;
@@ -426,11 +430,30 @@ public class HolloutCommunicationsManager {
         EMClient.getInstance().contactManager().setContactListener(mContactListener);
     }
 
+    private void removeAnyPendingChatRequestFromThisRecipient(String recipientId) {
+        ParseUser signedInUser = ParseUser.getCurrentUser();
+        if (signedInUser != null) {
+            String signedInUserId = signedInUser.getObjectId();
+            ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, recipientId.toLowerCase());
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_HYPHENATED_ID, signedInUserId.toLowerCase());
+            pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(ParseObject object, ParseException e) {
+                    if (e == null && object != null) {
+                        object.deleteInBackground();
+                    }
+                }
+            });
+        }
+    }
+
     private class ContactsChangeListener implements EMContactListener {
 
         @Override
         public void onContactAdded(String username) {
-
+            removeAnyPendingChatRequestFromThisRecipient(username);
         }
 
         @Override

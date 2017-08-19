@@ -443,7 +443,7 @@ public class HolloutUtils {
 
     public static void updateCurrentParseInstallation(List<String> newChannelProps, List<String> removableChannelProps) {
         ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
-        parseInstallation.put(AppConstants.APP_USER_ID,ParseUser.getCurrentUser().getObjectId());
+        parseInstallation.put(AppConstants.APP_USER_ID, ParseUser.getCurrentUser().getObjectId());
         List<String> existingChannels = parseInstallation.getList("channels");
         checkAndUpdateChannels(newChannelProps, removableChannelProps, parseInstallation, existingChannels);
         parseInstallation.saveInBackground();
@@ -932,6 +932,14 @@ public class HolloutUtils {
 
         return sortedVideoEntries;
 
+    }
+
+    public static String getQualifier(String word) {
+        if (StringUtils.startsWithAny(word.toLowerCase(), "a,e,i,o,u")) {
+            return "an";
+        } else {
+            return "a";
+        }
     }
 
 }

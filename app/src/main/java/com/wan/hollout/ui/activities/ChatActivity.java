@@ -863,28 +863,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         checkAnUnRegEventBus();
     }
 
-    private void removeAnyPendingChatRequestFromThisRecipient() {
-        String signedInUserId = signedInUser.getObjectId();
-        ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, recipientId.toLowerCase());
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_HYPHENATED_ID, signedInUserId.toLowerCase());
-        pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
-            @Override
-            public void done(ParseObject object, ParseException e) {
-                if (e == null && object != null) {
-                    object.deleteInBackground();
-                }
-            }
-        });
-    }
-
-    @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        removeAnyPendingChatRequestFromThisRecipient();
-    }
-
     public void sendChatStateMsg(final String chatState) {
         HolloutUtils.sendChatState(chatState, recipientId);
     }
