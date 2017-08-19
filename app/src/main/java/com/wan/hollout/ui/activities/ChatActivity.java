@@ -1348,6 +1348,22 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
     }
 
+    private void updateSignedInUserChats() {
+        List<String> chatIds = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        if (chatIds != null) {
+            if (!chatIds.contains(recipientId.toLowerCase())) {
+                chatIds.add(recipientId.toLowerCase());
+                signedInUser.put(AppConstants.APP_USER_CHATS, chatIds);
+                signedInUser.saveInBackground();
+            }
+        } else {
+            chatIds = new ArrayList<>();
+            chatIds.add(recipientId.toLowerCase());
+            signedInUser.put(AppConstants.APP_USER_CHATS, chatIds);
+            signedInUser.saveInBackground();
+        }
+    }
+
     private void sendNewChatRequest() {
         if (signedInUser != null) {
             final String signedInUserId = signedInUser.getUsername();
@@ -1377,6 +1393,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
         emptyComposeText();
+        updateSignedInUserChats();
         if (!isAContact()) {
             HolloutCommunicationsManager.getInstance().execute(new Runnable() {
                 @Override
