@@ -248,7 +248,13 @@ public class AppInstanceDetectionService extends Service implements
                                 if (parseGeoPoint != null) {
                                     parseInstallation.put(AppConstants.APP_USER_GEO_POINT, parseGeoPoint);
                                 }
-                                parseInstallation.saveInBackground();
+                                parseInstallation.saveInBackground(new SaveCallback() {
+                                    @Override
+                                    public void done(ParseException e) {
+                                        Intent objectReplicationServiceIntent = new Intent(AppInstanceDetectionService.this, ObjectReplicationService.class);
+                                        startService(objectReplicationServiceIntent);
+                                    }
+                                });
                             } catch (NullPointerException ignored) {
                             }
                         }

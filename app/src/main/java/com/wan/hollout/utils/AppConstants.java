@@ -199,6 +199,11 @@ public class AppConstants {
     public static final String GROUP_OR_ROOM = "group_or_room";
     public static final String REFRESH_CONVERSATIONS = "refresh_conversations";
     public static final String CONVERSATIONS = "conversations";
+    public static final String PEOPLE_AND_GROUPS = "people_and_groups";
+    public static final String REPLICATED_OBJECT_ID = "replicated_object_id";
+    public static final String REPLICABLE_OBJECT = "replicable_object";
+    public static final String OBJECT_TYPE = "object_type";
+    public static final Object OBJECT_TYPE_INDIVIDUAL = "object_type_individual";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

@@ -16,7 +16,6 @@
         android:glEsVersion="0x00020000"
         android:required="true" />
 
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -113,6 +112,8 @@
         <service
             android:name="com.hyphenate.chat.EMChatService"
             android:exported="true" />
+
+        <service android:name=".ui.services.ObjectReplicationService"/>
 
         <service
             android:name="com.hyphenate.chat.EMJobService"

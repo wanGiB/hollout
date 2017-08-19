@@ -120,27 +120,14 @@ public class ConversationsFragment extends Fragment {
     }
 
     private void attemptOffloadConversationsFromCache() {
-
-        ParseQuery<ParseObject> singleChatConversationQuery = ParseQuery.getQuery("_User");
-        ParseQuery<ParseObject> conferenceQuery = ParseQuery.getQuery(AppConstants.GROUPS_AND_ROOMS);
-
+        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
-
-            singleChatConversationQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
-            conferenceQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
-
-            List<ParseQuery<ParseObject>> resultantQueries = new ArrayList<>();
-            resultantQueries.add(singleChatConversationQuery);
-            resultantQueries.add(conferenceQuery);
-
-            ParseQuery<ParseObject> mainQuery = ParseQuery.or(resultantQueries);
-            mainQuery.fromLocalDatastore();
-            mainQuery.whereNotEqualTo(AppConstants.OBJECT_ID, signedInUser.getObjectId());
-            mainQuery.setLimit(100);
-
-            mainQuery.findInBackground(new FindCallback<ParseObject>() {
+            peopleAndGroupsQuery.fromLocalDatastore();
+            peopleAndGroupsQuery.whereContainedIn(AppConstants.REPLICATED_OBJECT_ID, signedInUserChats);
+            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REPLICATED_OBJECT_ID, signedInUser.getObjectId());
+            peopleAndGroupsQuery.setLimit(100);
+            peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
                     if (objects != null && !objects.isEmpty()) {
@@ -164,51 +151,41 @@ public class ConversationsFragment extends Fragment {
 
     private void fetchConversations(final int skip) {
 
-        ParseQuery<ParseObject> singleChatConversationQuery = ParseQuery.getQuery("_User");
-        ParseQuery<ParseObject> conferenceQuery = ParseQuery.getQuery(AppConstants.GROUPS_AND_ROOMS);
-
+        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
 
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
-
-            singleChatConversationQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
-            conferenceQuery.whereContainedIn(AppConstants.OBJECT_ID, signedInUserChats);
-
-            List<ParseQuery<ParseObject>> resultantQueries = new ArrayList<>();
-            resultantQueries.add(singleChatConversationQuery);
-            resultantQueries.add(conferenceQuery);
-
-            ParseQuery<ParseObject> mainQuery = ParseQuery.or(resultantQueries);
-
-            mainQuery.setLimit(100);
-
-            if (skip != 0) {
-                mainQuery.setSkip(skip);
-            }
-
-            mainQuery.findInBackground(new FindCallback<ParseObject>() {
-                @Override
-                public void done(List<ParseObject> objects, ParseException e) {
-                    if (e == null) {
-                        if (objects != null && !objects.isEmpty()) {
-                            if (skip == 0) {
-                                conversations.clear();
-                            }
-                            if (!conversations.containsAll(objects)) {
-                                conversations.addAll(objects);
-                            }
-                            sortConversations();
-                            conversationsAdapter.notifyDataSetChanged();
-                            if (!conversations.isEmpty()) {
-                                cacheConversations();
-                            }
-                        }
-                        invalidateEmptyView();
-                        swipeRefreshLayout.setRefreshing(false);
-                    }
-                }
-            });
+            peopleAndGroupsQuery.whereContainedIn(AppConstants.REPLICATED_OBJECT_ID, signedInUserChats);
+            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REPLICATED_OBJECT_ID, signedInUser.getObjectId());
+            peopleAndGroupsQuery.setLimit(100);
         }
+
+        if (skip != 0) {
+            peopleAndGroupsQuery.setSkip(skip);
+        }
+
+        peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null) {
+                    if (objects != null && !objects.isEmpty()) {
+                        if (skip == 0) {
+                            conversations.clear();
+                        }
+                        if (!conversations.containsAll(objects)) {
+                            conversations.addAll(objects);
+                        }
+                        sortConversations();
+                        conversationsAdapter.notifyDataSetChanged();
+                        if (!conversations.isEmpty()) {
+                            cacheConversations();
+                        }
+                    }
+                    invalidateEmptyView();
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+            }
+        });
     }
 
     private void sortConversations() {

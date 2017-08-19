@@ -39,7 +39,6 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         ButterKnife.bind(this);
-//        pushInterests();
         checkAuthStatus();
     }
 
@@ -72,7 +71,6 @@ public class SplashActivity extends AppCompatActivity {
             }
         }
     }
-
 
     private void loginUser(final String username, final String password) {
         UiUtils.showProgressDialog(SplashActivity.this, "Refreshing your session. Please wait...");
