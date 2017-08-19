@@ -204,6 +204,12 @@ public class AppConstants {
     public static final String REPLICABLE_OBJECT = "replicable_object";
     public static final String OBJECT_TYPE = "object_type";
     public static final Object OBJECT_TYPE_INDIVIDUAL = "object_type_individual";
+    public static final String NOTIFICATION_TYPE_INDIVIDUAL_CHAT_REQUEST = "individual_chat_request";
+    public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
+
+    public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
+
+    public static String NOTIFICATION_TYPE = "notification_type";
 
     public static boolean ARE_REACTIONS_OPEN = false;
     public static final String CLOSE_REACTIONS = "close_reactions";

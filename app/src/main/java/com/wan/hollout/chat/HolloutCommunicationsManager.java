@@ -34,6 +34,7 @@ import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.NotificationCenter;
 
 import org.greenrobot.eventbus.EventBus;
 
