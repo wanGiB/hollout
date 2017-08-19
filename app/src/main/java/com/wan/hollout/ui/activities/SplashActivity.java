@@ -150,7 +150,7 @@ public class SplashActivity extends AppCompatActivity {
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 
-    private void pushInterests() {
+    private void pushInterestsIfNotAlreadyPushed() {
         ParseQuery<ParseObject> interestsQuery = ParseQuery.getQuery(AppConstants.INTERESTS);
         interestsQuery.setLimit(1);
         interestsQuery.getFirstInBackground(new GetCallback<ParseObject>() {

@@ -97,7 +97,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
     public ParseObject parseObject;
     public Activity activity;
 
-    private ParseQuery<ParseUser> userStateQuery;
+    private ParseQuery<ParseObject> objectStateQuery;
 
     private String searchString;
 
@@ -129,10 +129,10 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
         this.emConversation = EMClient.getInstance()
                 .chatManager().getConversation(
-                        parseObject instanceof ParseUser
+                        parseObject.get(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                                 ? parseObject.getString(AppConstants.APP_USER_ID)
                                 : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_ID),
-                        ChatUtils.getConversationType(parseObject instanceof ParseUser
+                        ChatUtils.getConversationType(parseObject.get(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                                 ? AppConstants.CHAT_TYPE_SINGLE
                                 : (parseObject.getInt(AppConstants.ROOM_TYPE) == AppConstants.CHAT_TYPE_GROUP)
                                 ? AppConstants.CHAT_TYPE_GROUP : AppConstants.CHAT_TYPE_ROOM));
@@ -193,8 +193,8 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
     public void loadParseObject(String searchString) {
         if (parseObject != null) {
-            String userName = parseObject instanceof ParseUser ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-            String userProfilePhoto = parseObject instanceof ParseUser ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
+            String userName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL) ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
+            String userProfilePhoto = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL) ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
             if (StringUtils.isNotEmpty(userName)) {
                 if (StringUtils.isNotEmpty(searchString)) {
                     usernameEntryView.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(userName),
@@ -244,7 +244,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                     parseObject.put(AppConstants.LAST_UPDATE_TIME, 0);
                     UiUtils.showView(msgTimeStampView, false);
                     AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
-                    if (parseObject instanceof ParseUser) {
+                    if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                         String userStatusString = parseObject.getString(AppConstants.APP_USER_STATUS);
                         if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
                             userStatusOrLastMessageView.setText(userStatusString);
@@ -262,7 +262,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 }
             }
 
-            if (parseObject instanceof ParseUser) {
+            if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                 UiUtils.showView(userOnlineStatusView, true);
                 String userOnlineStatus = parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS);
                 if (userOnlineStatus != null && UiUtils.canShowPresence(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
@@ -289,7 +289,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 @Override
                 public void onClick(View view) {
                     UiUtils.blinkView(view);
-                    if (parseObject instanceof ParseUser) {
+                    if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                         UiUtils.loadUserData(activity, (ParseUser) parseObject);
                     }
                 }
@@ -332,12 +332,12 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
     private void subscribeToUserChanges() {
         if (parseObject != null) {
-            userStateQuery = ParseUser.getQuery();
-            userStateQuery.whereEqualTo("objectId", parseObject.getObjectId());
-            SubscriptionHandling<ParseUser> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
-            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseUser>() {
+            objectStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
+            objectStateQuery.whereEqualTo("objectId", parseObject.getObjectId());
+            SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(objectStateQuery);
+            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
                 @Override
-                public void onEvent(ParseQuery<ParseUser> query, final ParseUser object) {
+                public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
                     post(new Runnable() {
                         @Override
                         public void run() {
@@ -364,8 +364,8 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
     private void unSubscribeFromUserChanges() {
         try {
-            if (userStateQuery != null) {
-                ApplicationLoader.getParseLiveQueryClient().unsubscribe(userStateQuery);
+            if (objectStateQuery != null) {
+                ApplicationLoader.getParseLiveQueryClient().unsubscribe(objectStateQuery);
             }
         } catch (NullPointerException ignored) {
 

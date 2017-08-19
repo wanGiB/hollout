@@ -131,6 +131,7 @@ public class ConversationsFragment extends Fragment {
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
                     if (objects != null && !objects.isEmpty()) {
+                        sortConversations();
                         loadAdapter(objects);
                     }
                     invalidateEmptyView();

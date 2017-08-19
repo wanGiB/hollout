@@ -251,8 +251,7 @@ public class AppInstanceDetectionService extends Service implements
                                 parseInstallation.saveInBackground(new SaveCallback() {
                                     @Override
                                     public void done(ParseException e) {
-                                        Intent objectReplicationServiceIntent = new Intent(AppInstanceDetectionService.this, ObjectReplicationService.class);
-                                        startService(objectReplicationServiceIntent);
+                                        startObjectReplicationService();
                                     }
                                 });
                             } catch (NullPointerException ignored) {
@@ -262,6 +261,11 @@ public class AppInstanceDetectionService extends Service implements
                 }
             });
         }
+    }
+
+    private void startObjectReplicationService() {
+        Intent objectReplicationServiceIntent = new Intent(AppInstanceDetectionService.this, ObjectReplicationService.class);
+        startService(objectReplicationServiceIntent);
     }
 
 }

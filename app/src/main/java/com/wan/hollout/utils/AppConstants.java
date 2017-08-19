@@ -32,12 +32,12 @@ public class AppConstants {
     public static final String FILE_TYPE_LOCATION = "FileTypeLocation";
 
     public static final String HOLLOUT_FEED = "feed";
-    public static final String FEED_CREATOR_ID = "feed_creator_id";
+    public static final String FEED_CREATOR_USERNAME = "feed_creator_id";
     public static final String FEED_TYPE = "feed_type";
     public static final String FEED_BODY = "feed_body";
     public static final String FEED_CREATOR = "feed_creator";
     public static final String FEED_TYPE_CHAT_REQUEST = "feed_type_chat_request";
-    public static final String FEED_RECIPIENT = "feed_recipient";
+    public static final String FEED_RECIPIENT_HYPHENATED_ID = "feed_recipient";
     public static final String RECIPIENT_NAME = "com.app.hollout.RECIPIENT_NAME";
     public static final String LAST_FILE_CAPTION = "last_file_caption";
 
@@ -199,7 +199,7 @@ public class AppConstants {
     public static final String GROUP_OR_ROOM = "group_or_room";
     public static final String REFRESH_CONVERSATIONS = "refresh_conversations";
     public static final String CONVERSATIONS = "conversations";
-    public static final String PEOPLE_AND_GROUPS = "people_and_groups";
+    public static final String PEOPLE_AND_GROUPS = "PeopleAndGroups";
     public static final String REPLICATED_OBJECT_ID = "replicated_object_id";
     public static final String REPLICABLE_OBJECT = "replicable_object";
     public static final String OBJECT_TYPE = "object_type";

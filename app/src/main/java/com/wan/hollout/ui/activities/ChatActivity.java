@@ -274,7 +274,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         if (recipientProperties != null) {
             chatType = recipientProperties.getInt(AppConstants.CHAT_TYPE);
             chatToolbar.initView(recipientId, chatType);
-            recipientId = recipientProperties instanceof ParseUser ? ((ParseUser) recipientProperties).getUsername().trim().toLowerCase() : recipientProperties.getObjectId();
+            recipientId = recipientProperties instanceof ParseUser
+                    ? ((ParseUser) recipientProperties).getUsername().trim().toLowerCase()
+                    : (recipientProperties.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? recipientProperties.getString(AppConstants.APP_USER_ID) : recipientProperties.getObjectId());
             setupChatRecipient(recipientProperties);
             if (chatType == AppConstants.CHAT_TYPE_ROOM) {
                 messagesEmptyView.setText(getString(R.string.cleaning_up_room));
@@ -863,9 +866,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private void removeAnyPendingChatRequestFromThisRecipient() {
         String signedInUserId = signedInUser.getObjectId();
         ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, recipientId);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, recipientId.toLowerCase());
         pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT, signedInUserId);
+        pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_HYPHENATED_ID, signedInUserId.toLowerCase());
         pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(ParseObject object, ParseException e) {
@@ -1327,51 +1330,41 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     }
 
-    private void updateSignedInUserChats() {
-        List<String> chatIds = signedInUser.getList(AppConstants.APP_USER_CHATS);
-        if (chatIds != null) {
-            if (!chatIds.contains(recipientId)) {
-                chatIds.add(recipientId);
-            }
-        } else {
-            chatIds = new ArrayList<>();
-            chatIds.add(recipientId);
-        }
-        signedInUser.put(AppConstants.APP_USER_CHATS, chatIds);
-        signedInUser.saveInBackground();
-    }
-
     private void checkAndSendChatRequest() {
-        String signedInUserId = signedInUser.getObjectId();
-        ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUserId.toLowerCase());
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-        pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT, recipientId);
-        pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
-            @Override
-            public void done(ParseObject object, ParseException e) {
-                if (object == null) {
-                    sendNewChatRequest();
+        if (signedInUser != null) {
+            String signedInUserId = signedInUser.getUsername();
+            ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_HYPHENATED_ID, recipientId.toLowerCase());
+            pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(ParseObject object, ParseException e) {
+                    if (object == null) {
+                        sendNewChatRequest();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void sendNewChatRequest() {
-        final String signedInUserId = signedInUser.getObjectId();
-        ParseObject newChatRequestObject = new ParseObject(AppConstants.HOLLOUT_FEED);
-        newChatRequestObject.put(AppConstants.FEED_CREATOR_ID, signedInUserId.toLowerCase());
-        newChatRequestObject.put(AppConstants.FEED_RECIPIENT, recipientId);
-        newChatRequestObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-        newChatRequestObject.put(AppConstants.FEED_CREATOR, signedInUser);
-        newChatRequestObject.saveEventually(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e == null) {
-                    NotificationCenter.sendChatRequestNotification(signedInUserId, recipientId);
+        if (signedInUser != null) {
+            final String signedInUserId = signedInUser.getUsername();
+            ParseObject newChatRequestObject = new ParseObject(AppConstants.HOLLOUT_FEED);
+            newChatRequestObject.put(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
+            newChatRequestObject.put(AppConstants.FEED_RECIPIENT_HYPHENATED_ID, recipientId.toLowerCase());
+            newChatRequestObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            newChatRequestObject.put(AppConstants.FEED_CREATOR, signedInUser);
+            newChatRequestObject.saveEventually(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e == null) {
+                        NotificationCenter.sendChatRequestNotification(signedInUserId, recipientId);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -1379,6 +1372,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
      */
 
     protected void sendMessage(EMMessage newMessage) {
+        //Send message here
+        messages.add(newMessage);
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
         emptyComposeText();

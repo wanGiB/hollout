@@ -61,7 +61,7 @@ public class DbUtils {
                 }
             });
         } else if (entityType == AppConstants.ENTITY_TYPE_GROUP || entityType == AppConstants.ENTITY_TYPE_CHAT_ROOM) {
-            ParseQuery<ParseObject> groupsAndRoomsQuery = ParseQuery.getQuery(AppConstants.GROUPS_AND_ROOMS);
+            ParseQuery<ParseObject> groupsAndRoomsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
             groupsAndRoomsQuery.whereEqualTo(AppConstants.GROUP_OR_CHAT_ROOM_ID, entityId);
             groupsAndRoomsQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                 @Override

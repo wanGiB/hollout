@@ -126,13 +126,18 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                                         requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                                             @Override
                                             public void done(final ParseObject returnedFeedObject, ParseException e) {
+
                                                 List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-                                                if (signedInUserChats != null && !signedInUserChats.contains(requestOriginator.getObjectId())) {
-                                                    signedInUserChats.add(requestOriginator.getObjectId());
-                                                } else {
-                                                    signedInUserChats = new ArrayList<>();
+
+                                                if (signedInUserChats != null && !signedInUserChats.contains(requestOriginator.getUsername().toLowerCase())) {
                                                     signedInUserChats.add(requestOriginator.getObjectId());
                                                 }
+
+                                                if (signedInUserChats == null) {
+                                                    signedInUserChats = new ArrayList<>();
+                                                    signedInUserChats.add(requestOriginator.getUsername().toLowerCase());
+                                                }
+
                                                 signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
                                                 signedInUser.saveInBackground(new SaveCallback() {
                                                     @Override

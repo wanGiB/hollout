@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -53,6 +54,7 @@ import com.wan.hollout.ui.fragments.DrawerFragment;
 import com.wan.hollout.ui.fragments.FeedFragment;
 import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
+import com.wan.hollout.ui.services.ObjectReplicationService;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
@@ -546,6 +548,19 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
         } else {
             getSupportFragmentManager().findFragmentById(R.id.fragment_container).onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void startObjectReplicationService() {
+        Intent objectReplicationServiceIntent = new Intent(MainActivity.this, ObjectReplicationService.class);
+        startService(objectReplicationServiceIntent);
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        if (ParseUser.getCurrentUser()!=null){
+            startObjectReplicationService();
         }
     }
 

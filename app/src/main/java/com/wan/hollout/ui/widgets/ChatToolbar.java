@@ -160,17 +160,43 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         launchUserProfile.setOnClickListener(this);
     }
 
+    public String getRecipientName() {
+        if (recipientObject instanceof ParseUser) {
+            return recipientObject.getString(AppConstants.APP_USER_DISPLAY_NAME);
+        } else {
+            if (recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
+                return recipientObject.getString(AppConstants.APP_USER_DISPLAY_NAME);
+            } else {
+                recipientObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
+            }
+        }
+        return "Unknown User";
+    }
+
+    public String getRecipientPhotoUrl() {
+        if (recipientObject instanceof ParseUser) {
+            return recipientObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+        } else {
+            if (recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
+                return recipientObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            } else {
+                recipientObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
+            }
+        }
+        return null;
+    }
+
     public void refreshToolbar(ParseObject recipientUser) {
         this.recipientObject = recipientUser;
-        String recipientName = recipientUser instanceof ParseUser?recipientUser.getString(AppConstants.APP_USER_DISPLAY_NAME):recipientUser.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-        String recipientPhotoUrl = recipientUser instanceof ParseUser?recipientUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL):recipientUser.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
+        String recipientName = getRecipientName();
+        String recipientPhotoUrl = getRecipientPhotoUrl();
 
         if (StringUtils.isNotEmpty(recipientName)) {
             mContext.setRecipientName(recipientName);
             contactNameView.setText(WordUtils.capitalize(recipientName));
         }
 
-        if (recipientUser instanceof ParseUser) {
+        if (recipientUser instanceof ParseUser || recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
 
             JSONObject chatStates = recipientUser.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
             Long userLastSeen = recipientUser.getLong(AppConstants.APP_USER_LAST_SEEN);
@@ -241,7 +267,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 }
             });
         } else if (recipientObject != null) {
-            recipientGroupStateQuery = ParseQuery.getQuery(AppConstants.GROUPS_AND_ROOMS);
+            recipientGroupStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
             recipientGroupStateQuery.whereEqualTo("objectId", recipientObject.getObjectId());
             SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientGroupStateQuery);
             subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
