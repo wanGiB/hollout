@@ -282,12 +282,23 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+
         MenuItem searchItem = menu.findItem(R.id.action_search);
+
         searchItem.setVisible(false);
-        MenuItem settingsActionItem = menu.findItem(R.id.action_settings);
-        settingsActionItem.setVisible(false);
+
+        MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
+        MenuItem createNewGroupItem  = menu.findItem(R.id.create_new_group);
+        MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
+
+        invitePeopleMenuItem.setVisible(false);
+        createNewGroupItem.setVisible(false);
+        filterPeopleMenuItem.setVisible(false);
+
         supportInvalidateOptionsMenu();
+
         return super.onPrepareOptionsMenu(menu);
+
     }
 
     @Override
