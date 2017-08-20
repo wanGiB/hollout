@@ -576,6 +576,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             endAgeEditText.setText("70");
         }
         genderFilterOptionsGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+
             @Override
             public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
                 if (checkedId == R.id.males_only) {
@@ -584,6 +585,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                     genderChoice = AppConstants.FEMALE;
                 }
             }
+
         });
         peopleFilterDialog.setView(peopleFilterDialogView);
         peopleFilterDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
