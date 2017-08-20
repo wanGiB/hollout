@@ -10,7 +10,10 @@ import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.wan.hollout.chat.NotificationUtils;
+import com.wan.hollout.models.PathEntity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.DbUtils;
+import com.wan.hollout.utils.HolloutUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -43,12 +46,17 @@ public class FetchUserInfoService extends IntentService {
         userInfo.whereEqualTo(AppConstants.APP_USER_ID, idToFetch.toLowerCase());
         userInfo.getFirstInBackground(new GetCallback<ParseUser>() {
             @Override
-            public void done(ParseUser object, ParseException e) {
-                if (e == null && object != null) {
+            public void done(ParseUser userObject, ParseException e) {
+                if (e == null && userObject != null) {
                     if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_INDIVIDUAL_CHAT_REQUEST)) {
-                        NotificationUtils.displayIndividualChatRequestNotification(object);
+                        NotificationUtils.displayIndividualChatRequestNotification(userObject);
                     }else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_AM_NEARBY)){
-                        NotificationUtils.displayKindIsNearbyNotification(object);
+                        String userLocation = HolloutUtils.resolveToBestLocation(userObject);
+                        PathEntity pathEntity = DbUtils.getPathEntity(userLocation,userObject.getString(AppConstants.APP_USER_ID));
+                        if (pathEntity==null){
+                            NotificationUtils.displayKindIsNearbyNotification(userObject);
+                            DbUtils.savePathEntity(userLocation,userObject.getString(AppConstants.APP_USER_ID));
+                        }
                     }
                 }
             }

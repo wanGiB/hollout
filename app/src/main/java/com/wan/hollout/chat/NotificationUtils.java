@@ -173,6 +173,7 @@ public class NotificationUtils {
                     return null;
                 }
             }
+
         };
 
         FutureTask<Bitmap> bitmapFutureTask = new FutureTask<>(bitmapCallable);

@@ -298,5 +298,15 @@
     <string name="thats_all_for_now">That\'s all for now</string>
     <string name="see_all">SEE ALL</string>
     <string name="working">Working</string>
+    <string name="create_new_group">Create new Group</string>
+    <string name="filter_people">Filter People</string>
+    <string name="males_only">Males only</string>
+    <string name="females_only">Females Only</string>
+    <string name="both">Both</string>
+    <string name="start_age">Start Age</string>
+    <string name="to">TO</string>
+    <string name="end_age">End Age</string>
+    <string name="gender_filter">Gender Filter</string>
+    <string name="age_filter">Age Filter</string>
 
 </resources>

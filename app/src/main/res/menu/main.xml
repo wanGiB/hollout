@@ -12,9 +12,18 @@
         tools:ignore="AlwaysShowAction" />
 
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/filter_people"
+        android:title="@string/filter_people" />
+
+    <item
+        android:id="@+id/create_new_group"
+        android:title="@string/create_new_group"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/invite_people"
         android:orderInCategory="1"
-        android:title="@string/settings"
+        android:title="@string/invite_friends"
         app:showAsAction="never" />
 
 </menu>
