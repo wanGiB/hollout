@@ -206,8 +206,12 @@ public class AppConstants {
     public static final String NOTIFICATION_TYPE_INDIVIDUAL_CHAT_REQUEST = "individual_chat_request";
     public static final int NEARBY_KIND_NOTIFICATION_ID = 0x14;
     public static final String NOTIFICATION_TYPE_AM_NEARBY = "am_nearby";
-    public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
+    public static final String GENDER_FILTER = "gender_filter";
 
+    public static final String AGE_START_FILTER = "age_start_filter";
+    public static final String AGE_END_FILTER = "age_end_filter";
+
+    public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
 
     public static String NOTIFICATION_TYPE = "notification_type";
@@ -293,5 +297,13 @@ public class AppConstants {
     public static SparseBooleanArray parseUserAvailableOnlineStatusPositions = new SparseBooleanArray();
     public static SparseBooleanArray onlinePositions = new SparseBooleanArray();
     public static int NEARBY_KIND_NOTIFICATION_COUNT = 0;
+
+    public static final String MALE = "Male";
+    public static final String FEMALE = "Female";
+    public static String Both = "Both";
+
+    public static final String START_AGE_FILTER_VALUE = "start_age_filter_value";
+    public static final String END_AGE_FILTER_VALUE = "end_age_filter_value";
+
 }
 

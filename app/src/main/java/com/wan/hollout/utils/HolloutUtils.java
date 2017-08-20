@@ -942,4 +942,12 @@ public class HolloutUtils {
         }
     }
 
+    public static List<String> computeAgeRanges(String startAge, String endAge) {
+        List<String> ageRanges = new ArrayList<>();
+        for (int i = Integer.parseInt(startAge); i < Integer.parseInt(endAge); i++) {
+            ageRanges.add(String.valueOf(i));
+        }
+        return ageRanges;
+    }
+
 }

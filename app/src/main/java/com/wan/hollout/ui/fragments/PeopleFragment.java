@@ -11,6 +11,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import com.wan.hollout.ui.adapters.PeopleAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.SafeLayoutManager;
 import com.wan.hollout.utils.UiUtils;
@@ -239,8 +241,25 @@ public class PeopleFragment extends Fragment {
                     List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
                     String signedInUserCountry = signedInUser.getString(AppConstants.APP_USER_COUNTRY);
                     List<String> signedInUserInterests = signedInUser.getList(AppConstants.INTERESTS);
+
+                    String startAgeValue = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
+                    String endAgeValue = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
+
                     ArrayList<String> newUserChats = new ArrayList<>();
                     ParseQuery<ParseUser> peopleQuery = ParseUser.getQuery();
+
+                    if (startAgeValue != null && endAgeValue != null) {
+                        List<String> ageRanges = HolloutUtils.computeAgeRanges(startAgeValue, endAgeValue);
+                        HolloutLogger.d("AgeRanges", TextUtils.join(",", ageRanges));
+                        peopleQuery.whereContainedIn(AppConstants.APP_USER_AGE, ageRanges);
+                    }
+
+                    String genderFilter= signedInUser.getString(AppConstants.GENDER_FILTER);
+
+                    if (genderFilter!=null && !genderFilter.equals(AppConstants.Both)){
+                        peopleQuery.whereEqualTo(AppConstants.APP_USER_GENDER,genderFilter);
+                    }
+
                     if (savedUserChats != null) {
                         if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
                             savedUserChats.add(signedInUserId.toLowerCase());

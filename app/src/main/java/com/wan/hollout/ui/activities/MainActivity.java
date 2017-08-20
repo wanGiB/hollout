@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
@@ -27,7 +29,9 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.afollestad.appthemeengine.ATE;
@@ -42,6 +46,7 @@ import com.parse.LogOutCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
@@ -238,11 +243,11 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     }
 
-    private SharedPreferences.OnSharedPreferenceChangeListener  onSharedPreferenceChangeListener;
+    private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
 
     private void fetchUnreadMessagesCount() {
         getUnreadMessagesCount();
-        if (onSharedPreferenceChangeListener!=null){
+        if (onSharedPreferenceChangeListener != null) {
             HolloutPreferences.getHolloutPreferences().unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
             onSharedPreferenceChangeListener = null;
         }
@@ -260,7 +265,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     private void getUnreadMessagesCount() {
         long unreadMessagesCount = HolloutPreferences.getUnreadMessagesCount();
         if (unreadMessagesCount > 0) {
-            updateTab(1,unreadMessagesCount);
+            updateTab(1, unreadMessagesCount);
         }
     }
 
@@ -511,6 +516,16 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
+        MenuItem createNewGroupChatItem = menu.findItem(R.id.create_new_group);
+        filterPeopleMenuItem.setVisible(viewPager.getCurrentItem() == 0);
+        createNewGroupChatItem.setVisible(viewPager.getCurrentItem() == 1);
+        supportInvalidateOptionsMenu();
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
@@ -528,15 +543,71 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            drawer.openDrawer(GravityCompat.START);
             return true;
         } else if (id == android.R.id.home) {
             drawer.openDrawer(GravityCompat.START);
             return true;
-        } else if (id == R.id.action_search) {
-            //TODO:Open search bar here
+        } else if (id == R.id.filter_people) {
+            initPeopleFilterDialog();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private String genderChoice = AppConstants.Both;
+
+    @SuppressLint("SetTextI18n")
+    private void initPeopleFilterDialog() {
+        final ParseUser signedInUser = ParseUser.getCurrentUser();
+        String ageStartFilter = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
+        final String ageEndFilter = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
+        AlertDialog.Builder peopleFilterDialog = new AlertDialog.Builder(MainActivity.this);
+        @SuppressLint("InflateParams")
+        View peopleFilterDialogView = getLayoutInflater().inflate(R.layout.people_filter_options_dialog, null);
+        RadioGroup genderFilterOptionsGroup = (RadioGroup) peopleFilterDialogView.findViewById(R.id.gender_filter_options);
+        final EditText startAgeEditText = (EditText) peopleFilterDialogView.findViewById(R.id.start_age);
+        if (StringUtils.isNotEmpty(ageStartFilter)) {
+            startAgeEditText.setText(ageStartFilter);
+        } else {
+            startAgeEditText.setText("16");
+        }
+        final EditText endAgeEditText = (EditText) peopleFilterDialogView.findViewById(R.id.end_age);
+        if (StringUtils.isNotEmpty(ageEndFilter)) {
+            endAgeEditText.setText(ageEndFilter);
+        } else {
+            endAgeEditText.setText("70");
+        }
+        genderFilterOptionsGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                if (checkedId == R.id.males_only) {
+                    genderChoice = AppConstants.MALE;
+                } else if (checkedId == R.id.females_only) {
+                    genderChoice = AppConstants.FEMALE;
+                }
+            }
+        });
+        peopleFilterDialog.setView(peopleFilterDialogView);
+        peopleFilterDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(final DialogInterface dialog, int which) {
+                signedInUser.put(AppConstants.GENDER_FILTER, genderChoice);
+                if (StringUtils.isNotEmpty(startAgeEditText.getText().toString().trim()) && StringUtils.isNotEmpty(endAgeEditText.getText().toString().trim())) {
+                    signedInUser.put(AppConstants.AGE_START_FILTER, startAgeEditText.getText().toString().trim());
+                    signedInUser.put(AppConstants.AGE_END_FILTER, endAgeEditText.getText().toString().trim());
+                }
+                signedInUser.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        dialog.dismiss();
+                        dialog.cancel();
+                        EventBus.getDefault().post(AppConstants.REFRESH_PEOPLE);
+                    }
+                });
+            }
+        });
+        peopleFilterDialog.create().show();
     }
 
     @Override
@@ -559,7 +630,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        if (ParseUser.getCurrentUser()!=null){
+        if (ParseUser.getCurrentUser() != null) {
             startObjectReplicationService();
         }
     }
