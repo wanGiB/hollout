@@ -201,7 +201,6 @@ public class AppConstants {
     public static final String CONVERSATIONS = "conversations";
     public static final String PEOPLE_AND_GROUPS = "PeopleAndGroups";
     public static final String REPLICATED_OBJECT_ID = "replicated_object_id";
-    public static final String REPLICABLE_OBJECT = "replicable_object";
     public static final String OBJECT_TYPE = "object_type";
     public static final Object OBJECT_TYPE_INDIVIDUAL = "object_type_individual";
     public static final String NOTIFICATION_TYPE_INDIVIDUAL_CHAT_REQUEST = "individual_chat_request";

@@ -159,7 +159,7 @@ public class PeopleFragment extends Fragment {
     private void fetchPeopleOfCommonInterestFromCache() {
         ParseQuery<ParseUser> localUsersQuery = ParseUser.getQuery();
         localUsersQuery.fromLocalDatastore();
-        localUsersQuery.whereNotEqualTo(AppConstants.OBJECT_ID, signedInUser.getObjectId());
+        localUsersQuery.whereNotEqualTo(AppConstants.APP_USER_ID, signedInUser.getString(AppConstants.APP_USER_ID));
         localUsersQuery.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> objects, ParseException e) {
@@ -235,7 +235,7 @@ public class PeopleFragment extends Fragment {
         if (getActivity() != null) {
             if (HolloutUtils.isNetWorkConnected(getActivity())) {
                 if (signedInUser != null) {
-                    String signedInUserId = signedInUser.getObjectId();
+                    String signedInUserId = signedInUser.getString(AppConstants.APP_USER_ID);
                     List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
                     String signedInUserCountry = signedInUser.getString(AppConstants.APP_USER_COUNTRY);
                     List<String> signedInUserInterests = signedInUser.getList(AppConstants.INTERESTS);
@@ -245,12 +245,12 @@ public class PeopleFragment extends Fragment {
                         if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
                             savedUserChats.add(signedInUserId.toLowerCase());
                         }
-                        peopleQuery.whereNotContainedIn(AppConstants.OBJECT_ID, savedUserChats);
+                        peopleQuery.whereNotContainedIn(AppConstants.APP_USER_ID, savedUserChats);
                     } else {
                         if (!newUserChats.contains(signedInUserId)) {
                             newUserChats.add(signedInUserId);
                         }
-                        peopleQuery.whereNotContainedIn(AppConstants.OBJECT_ID, newUserChats);
+                        peopleQuery.whereNotContainedIn(AppConstants.APP_USER_ID, newUserChats);
                     }
                     if (signedInUserCountry != null) {
                         peopleQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
@@ -341,28 +341,23 @@ public class PeopleFragment extends Fragment {
         ParseQuery<ParseUser> parseUserParseQuery = ParseUser.getQuery();
         parseUserParseQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
         if (signedInUser != null) {
-            parseUserParseQuery.whereNotEqualTo(AppConstants.OBJECT_ID, signedInUser.getObjectId());
+            parseUserParseQuery.whereNotEqualTo(AppConstants.APP_USER_ID, signedInUser.getString(AppConstants.APP_USER_ID));
         }
-
         ParseQuery<ParseUser> categoryQuery = ParseUser.getQuery();
         if (signedInUser != null) {
-            categoryQuery.whereNotEqualTo(AppConstants.OBJECT_ID, signedInUser.getObjectId());
+            categoryQuery.whereNotEqualTo(AppConstants.APP_USER_ID, signedInUser.getString(AppConstants.APP_USER_ID));
         }
-
         List<String> elements = new ArrayList<>();
         elements.add(StringUtils.stripEnd(searchString.toLowerCase(), "s"));
         categoryQuery.whereContainsAll(AppConstants.ABOUT_USER, elements);
-
         List<ParseQuery<ParseUser>> queries = new ArrayList<>();
         queries.add(parseUserParseQuery);
         queries.add(categoryQuery);
-
         ParseQuery<ParseUser> joinedQuery = ParseQuery.or(queries);
         joinedQuery.setLimit(100);
         if (skip != 0) {
             joinedQuery.setSkip(skip);
         }
-
         joinedQuery.findInBackground(new FindCallback<ParseUser>() {
             @Override
             public void done(List<ParseUser> objects, ParseException e) {

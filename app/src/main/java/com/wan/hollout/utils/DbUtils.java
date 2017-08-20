@@ -12,6 +12,8 @@ import com.wan.hollout.models.HolloutEntity;
 import com.wan.hollout.models.HolloutEntity_Table;
 import com.wan.hollout.models.MeetPoint;
 import com.wan.hollout.models.MeetPoint_Table;
+import com.wan.hollout.models.PathEntity;
+import com.wan.hollout.models.PathEntity_Table;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -110,16 +112,6 @@ public class DbUtils {
         return null;
     }
 
-    public static void addToMeetPoints(String recipientId, String meetPointString) {
-        MeetPoint meetPoint = SQLite.select().from(MeetPoint.class).where(MeetPoint_Table.senderId.eq(recipientId)).querySingle();
-        if (meetPoint == null) {
-            MeetPoint newMeetPoint = new MeetPoint();
-            newMeetPoint.senderId = recipientId;
-            newMeetPoint.meetPoint = meetPointString;
-            newMeetPoint.save();
-        }
-    }
-
     public static void createCallLog(String partyId, String partyName, String content, boolean incoming, boolean voiceCall) {
         CallLog callLog = new CallLog();
         callLog.content = content;
@@ -129,6 +121,25 @@ public class DbUtils {
         callLog.incoming = incoming;
         callLog.voiceCall =voiceCall;
         callLog.save();
+    }
+
+    public static PathEntity getPathEntity(String pathName,String personId){
+        return SQLite.select().from(PathEntity.class).where(PathEntity_Table.pathId.in(getPathId(personId,pathName))).querySingle();
+    }
+
+    public static void savePathEntity(String pathName,String personId){
+        PathEntity pathEntity = SQLite.select().from(PathEntity.class).where(PathEntity_Table.pathId.in(getPathId(personId,pathName))).querySingle();
+        if (pathEntity==null){
+            PathEntity newPathEntity = new PathEntity();
+            newPathEntity.pathId  = getPathId(personId,pathName);
+            newPathEntity.personId = personId;
+            newPathEntity.pathName = pathName;
+            newPathEntity.save();
+        }
+    }
+
+    public static String getPathId(String personId,String pathName){
+        return personId+pathName;
     }
 
 }

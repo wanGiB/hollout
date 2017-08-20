@@ -2,14 +2,11 @@ package com.wan.hollout.receivers;
 
 import android.content.Context;
 import android.content.Intent;
-
-
 import com.parse.ParsePushBroadcastReceiver;
 import com.parse.ParseUser;
 import com.wan.hollout.ui.services.FetchUserInfoService;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,11 +32,8 @@ public class NotificationsReceiver extends ParsePushBroadcastReceiver {
         } catch (JSONException e) {
             HolloutLogger.e(TAG, "Unexpected JSONException when receiving push data: " + e.getMessage());
         }
-
         if (pushData != null) {
-
             String pushType = pushData.optString(AppConstants.NOTIFICATION_TYPE);
-
             if (pushType.equals(AppConstants.NOTIFICATION_TYPE_INDIVIDUAL_CHAT_REQUEST)
                     || pushType.equals(AppConstants.NOTIFICATION_TYPE_AM_NEARBY)) {
                 ParseUser signedInUser = ParseUser.getCurrentUser();
@@ -50,9 +44,7 @@ public class NotificationsReceiver extends ParsePushBroadcastReceiver {
                     fetchUserInfoIntent.putExtra(AppConstants.NOTIFICATION_TYPE, pushType);
                     context.startService(fetchUserInfoIntent);
                 }
-
             }
-
         }
 
     }

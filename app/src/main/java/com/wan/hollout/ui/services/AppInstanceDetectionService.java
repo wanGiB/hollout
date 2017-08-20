@@ -17,9 +17,11 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseInstallation;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.wan.hollout.components.ApplicationLoader;
@@ -28,11 +30,13 @@ import com.wan.hollout.utils.AppStateManager;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.NotificationCenter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -61,14 +65,14 @@ public class AppInstanceDetectionService extends Service implements
         public void onBecameForeground() {
             signedInUser.put(AppConstants.APP_USER_ONLINE_STATUS, AppConstants.ONLINE);
             signedInUser.put(AppConstants.APP_USER_LAST_SEEN, System.currentTimeMillis());
-            updateSignedInUserProps();
+            updateSignedInUserProps(false);
         }
 
         public void onBecameBackground() {
             //This is also a good place to blow new message notifications for a foregrounded app
             signedInUser.put(AppConstants.APP_USER_ONLINE_STATUS, AppConstants.OFFLINE);
             signedInUser.put(AppConstants.APP_USER_LAST_SEEN, System.currentTimeMillis());
-            updateSignedInUserProps();
+            updateSignedInUserProps(false);
         }
 
     };
@@ -167,7 +171,7 @@ public class AppInstanceDetectionService extends Service implements
                 if (StringUtils.isNotEmpty(adminAddress)) {
                     signedInUser.put(AppConstants.APP_USER_ADMIN_AREA, HolloutUtils.stripDollar(adminAddress));
                 }
-                updateSignedInUserProps();
+                updateSignedInUserProps(true);
             }
             return null;
         }
@@ -235,7 +239,7 @@ public class AppInstanceDetectionService extends Service implements
         }
     }
 
-    private void updateSignedInUserProps() {
+    private void updateSignedInUserProps(final boolean sendPushNotification) {
         if (signedInUser != null) {
             signedInUser.saveInBackground(new SaveCallback() {
                 @Override
@@ -252,6 +256,9 @@ public class AppInstanceDetectionService extends Service implements
                                     @Override
                                     public void done(ParseException e) {
                                         startObjectReplicationService();
+                                        if (sendPushNotification) {
+                                            sendAmNearbyPushNotification();
+                                        }
                                     }
                                 });
                             } catch (NullPointerException ignored) {
@@ -268,4 +275,51 @@ public class AppInstanceDetectionService extends Service implements
         startService(objectReplicationServiceIntent);
     }
 
+    private void sendAmNearbyPushNotification() {
+        String signedInUserId = signedInUser.getString(AppConstants.APP_USER_ID);
+        List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
+        ArrayList<String> newUserChats = new ArrayList<>();
+        ParseQuery<ParseUser> peopleQuery = ParseUser.getQuery();
+        ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+        if (signedInUserGeoPoint != null && aboutUser != null) {
+            if (savedUserChats != null) {
+                if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
+                    savedUserChats.add(signedInUserId.toLowerCase());
+                }
+                peopleQuery.whereNotContainedIn(AppConstants.APP_USER_ID, savedUserChats);
+            } else {
+                if (!newUserChats.contains(signedInUserId)) {
+                    newUserChats.add(signedInUserId);
+                }
+                peopleQuery.whereNotContainedIn(AppConstants.APP_USER_ID, newUserChats);
+            }
+            peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, aboutUser);
+            peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 10.0);
+            peopleQuery.findInBackground(new FindCallback<ParseUser>() {
+                @Override
+                public void done(List<ParseUser> parseUsers, ParseException e) {
+                    if (e==null && parseUsers!=null && !parseUsers.isEmpty()){
+                        List<String>appUserIds = new ArrayList<>();
+                        for (ParseUser parseUser:parseUsers){
+                            String appUserId = parseUser.getString(AppConstants.APP_USER_ID);
+                            appUserIds.add(appUserId);
+                        }
+                        if (!appUserIds.isEmpty()){
+                            final ParseQuery<ParseInstallation>parseInstallationParseQuery = ParseInstallation.getQuery();
+                            parseInstallationParseQuery.whereContainedIn(AppConstants.APP_USER_ID,appUserIds);
+                            parseInstallationParseQuery.findInBackground(new FindCallback<ParseInstallation>() {
+                                @Override
+                                public void done(List<ParseInstallation> objects, ParseException e) {
+                                    if (e==null && objects!=null){
+                                        NotificationCenter.sendAmNearbyNotification(signedInUser.getUsername(),parseInstallationParseQuery);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    }
 }
