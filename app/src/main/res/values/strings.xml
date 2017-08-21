@@ -308,5 +308,6 @@
     <string name="end_age">End Age</string>
     <string name="gender_filter">Gender Filter</string>
     <string name="age_filter">Age Filter</string>
+    <string name="wants_to_chat">Wants to Chat</string>
 
 </resources>

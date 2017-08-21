@@ -10,18 +10,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 /**
- * Created by Ravi Tamada on 21/02/17.
- * www.androidhive.info
+ * @author Wan Clem
  */
 public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
-    private static final int[] ATTRS = new int[]{
-            android.R.attr.listDivider
-    };
+    private static final int[] ATTRS = new int[]{android.R.attr.listDivider};
 
-    public static final int HORIZONTAL_LIST = LinearLayoutManager.HORIZONTAL;
+    private static final int HORIZONTAL_LIST = LinearLayoutManager.HORIZONTAL;
 
-    public static final int VERTICAL_LIST = LinearLayoutManager.VERTICAL;
+    private static final int VERTICAL_LIST = LinearLayoutManager.VERTICAL;
 
     private Drawable mDivider;
 
@@ -56,13 +53,15 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
         final int childCount = parent.getChildCount();
         for (int i = 0; i < childCount; i++) {
-            final View child = parent.getChildAt(i);
-            final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
-                    .getLayoutParams();
-            final int top = child.getBottom() + params.bottomMargin;
-            final int bottom = top + mDivider.getIntrinsicHeight();
-            mDivider.setBounds(left, top, right, bottom);
-            mDivider.draw(c);
+            if (i != childCount - 1) {
+                final View child = parent.getChildAt(i);
+                final RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child
+                        .getLayoutParams();
+                final int top = child.getBottom() + params.bottomMargin;
+                final int bottom = top + mDivider.getIntrinsicHeight();
+                mDivider.setBounds(left, top, right, bottom);
+                mDivider.draw(c);
+            }
         }
     }
 
@@ -90,4 +89,5 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
             outRect.set(0, 0, mDivider.getIntrinsicWidth(), 0);
         }
     }
+
 }

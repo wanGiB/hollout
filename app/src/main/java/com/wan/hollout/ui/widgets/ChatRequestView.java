@@ -2,6 +2,7 @@ package com.wan.hollout.ui.widgets;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -19,6 +20,8 @@ import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.ChatUtils;
+import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
+import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
@@ -59,6 +62,11 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
     private ParseUser signedInUser;
 
+    private ParseUser requestOriginator;
+    private Activity activity;
+
+    private ParseObject feedObject;
+
     public ChatRequestView(Context context) {
         this(context, null);
     }
@@ -70,18 +78,23 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     public ChatRequestView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         inflate(context, R.layout.chat_request_item, this);
+        init();
     }
 
     public void bindData(final Activity activity, final ChatRequestsAdapterView parent, final ParseObject feedObject) {
+        this.activity = activity;
         this.signedInUser = ParseUser.getCurrentUser();
+        this.feedObject = feedObject;
         if (feedObject != null) {
             String requestType = feedObject.getString(AppConstants.FEED_TYPE);
             if (requestType.equals(AppConstants.FEED_TYPE_CHAT_REQUEST)) {
-                final ParseUser requestOriginator = feedObject.getParseUser(AppConstants.FEED_CREATOR);
+                requestOriginator = feedObject.getParseUser(AppConstants.FEED_CREATOR);
                 if (requestOriginator != null) {
                     final String userDisplayName = requestOriginator.getString(AppConstants.APP_USER_DISPLAY_NAME);
-                    if (StringUtils.isNotEmpty(userDisplayName)) {
+                    if (StringUtils.isNotEmpty(userDisplayName) && !(activity instanceof UserProfileActivity)) {
                         requesterNameView.setText(WordUtils.capitalize(userDisplayName));
+                    } else {
+                        requesterNameView.setText(activity.getString(R.string.wants_to_chat));
                     }
                     String userProfilePhotoUrl = requestOriginator.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                     if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
@@ -89,28 +102,35 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                     } else {
                         requesterPhotoView.setImageResource(R.drawable.empty_profile);
                     }
-                    List<String> aboutUser = requestOriginator.getList(AppConstants.ABOUT_USER);
-                    List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
+                    if (!(activity instanceof UserProfileActivity)){
+                        List<String> aboutUser = requestOriginator.getList(AppConstants.ABOUT_USER);
+                        List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
 
-                    if (aboutUser != null && aboutSignedInUser != null) {
-                        try {
-                            List<String> common = new ArrayList<>(aboutUser);
-                            common.retainAll(aboutSignedInUser);
-                            String firstInterest = !common.isEmpty() ? common.get(0) : aboutUser.get(0);
-                            aboutRequesterView.setText(WordUtils.capitalize(firstInterest));
-                        } catch (NullPointerException ignored) {
+                        if (aboutUser != null && aboutSignedInUser != null) {
+                            try {
+                                List<String> common = new ArrayList<>(aboutUser);
+                                common.retainAll(aboutSignedInUser);
+                                String firstInterest = !common.isEmpty() ? common.get(0) : aboutUser.get(0);
+                                aboutRequesterView.setText(WordUtils.capitalize(firstInterest));
+                            } catch (NullPointerException ignored) {
 
+                            }
                         }
+
+                        ParseGeoPoint userGeoPoint = requestOriginator.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+                        ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+                        if (signedInUserGeoPoint != null && userGeoPoint != null) {
+                            double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
+                            String value = HolloutUtils.formatDistance(distanceInKills);
+                            UiUtils.setTextOnView(distanceToRequesterView, value + "Km from you");
+                        } else {
+                            UiUtils.setTextOnView(distanceToRequesterView, " ");
+                        }
+                    }else{
+                        UiUtils.showView(aboutRequesterView,false);
+                        UiUtils.showView(distanceToRequesterView,false);
                     }
-                    ParseGeoPoint userGeoPoint = requestOriginator.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
-                    ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
-                    if (signedInUserGeoPoint != null && userGeoPoint != null) {
-                        double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
-                        String value = HolloutUtils.formatDistance(distanceInKills);
-                        UiUtils.setTextOnView(distanceToRequesterView, value + "Km from you");
-                    } else {
-                        UiUtils.setTextOnView(distanceToRequesterView, " ");
-                    }
+
                     acceptRequestTextView.setOnClickListener(new OnClickListener() {
 
                         @Override
@@ -149,7 +169,9 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                                                                     public void done(ParseException e) {
                                                                         if (e == null) {
                                                                             UiUtils.snackMessage("Request from " + userDisplayName + " successfully accepted.", ChatRequestView.this, true, null, null);
-                                                                            removeRequest(parent, feedObject);
+                                                                            if (parent != null) {
+                                                                                removeRequest(parent, feedObject);
+                                                                            }
                                                                             EventBus.getDefault().post(AppConstants.REFRESH_CONVERSATIONS);
                                                                         } else {
                                                                             UiUtils.snackMessage("Failed to accept request from " + userDisplayName + ". Please try again.", ChatRequestView.this, true, null, null);
@@ -193,7 +215,9 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                                                         @Override
                                                         public void done(ParseException e) {
                                                             UiUtils.snackMessage("Request from " + userDisplayName + " declined successfully.", ChatRequestView.this, true, null, null);
-                                                            removeRequest(parent, object);
+                                                            if (parent != null) {
+                                                                removeRequest(parent, object);
+                                                            }
                                                         }
                                                     });
                                                 }
@@ -214,6 +238,8 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     private void removeRequest(ChatRequestsAdapterView parent, ParseObject parseObject) {
         if (parent != null) {
             parent.removeChatRequest(parseObject);
+        } else {
+            EventBus.getDefault().post(new RemovableChatRequestEvent(parseObject));
         }
     }
 
@@ -230,7 +256,11 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
     @Override
     public void onClick(View v) {
-
+        if (requestOriginator != null) {
+            Intent requesterInfoIntent = new Intent(activity, UserProfileActivity.class);
+            requesterInfoIntent.putExtra(AppConstants.PENDING_CHAT_REQUEST, feedObject);
+            activity.startActivity(requesterInfoIntent);
+        }
     }
 
     @Override

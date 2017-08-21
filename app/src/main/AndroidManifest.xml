@@ -88,19 +88,15 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="com.hyphenate.sdk.push" />
-
                 <category android:name="com.hyphenate.chatuidemo" />
             </intent-filter>
         </receiver>
-        <!-- gcm end -->
-
 
         <!-- set your API key -->
         <meta-data
             android:name="EASEMOB_APPKEY"
             android:value="1503170817002326#connectwithme" />
 
-        <!-- Set appkey -->
         <meta-data
             android:name="Hyphenate_AppKey"
             android:value="1503170817002326#connectwithme" />

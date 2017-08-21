@@ -211,6 +211,12 @@ public class AppConstants {
     public static final String AGE_START_FILTER = "age_start_filter";
     public static final String AGE_END_FILTER = "age_end_filter";
 
+    public static final String HAS_PENDING_CHAT_REQUEST = "has_pending_chat_request";
+    public static final String PENDING_CHAT_REQUEST = "pending_chat_request";
+    public static final String FILE_CAPTION = "file_caption";
+    public static final String NOTIFICATION_TYPE_NEW_MESSAGE = "new_message";
+    public static final String UNREAD_MESSAGE = "unread_message";
+
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
 

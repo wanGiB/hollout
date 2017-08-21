@@ -32,8 +32,10 @@ import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
 import com.wan.hollout.ui.adapters.FeaturedPhotosRectangleAdapter;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
+import com.wan.hollout.ui.widgets.ChatRequestView;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutEditText;
 import com.wan.hollout.ui.widgets.HolloutTextView;
@@ -48,6 +50,9 @@ import net.alhazmy13.mediapicker.Image.ImagePicker;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -128,6 +133,11 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.scroller)
     ScrollView scrollView;
 
+    @BindView(R.id.chat_request_view)
+    ChatRequestView chatRequestView;
+
+    ParseObject pendingChatRequest;
+
     private ParseUser parseUser;
 
     @Override
@@ -139,6 +149,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         aboutUserTextView.setTypeface(FontUtils.selectTypeface(this, 4));
         offloadIntent();
         initClickListeners();
+        checkAndRegEventBus();
     }
 
     private void initClickListeners() {
@@ -147,7 +158,11 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     private void offloadIntent() {
         parseUser = getIntent().getExtras().getParcelable(AppConstants.USER_PROPERTIES);
+        pendingChatRequest = getIntent().getExtras().getParcelable(AppConstants.PENDING_CHAT_REQUEST);
         loadUserDetails();
+        if (pendingChatRequest !=null){
+            chatRequestView.bindData(this,null,pendingChatRequest);
+        }
     }
 
     private void loadUserDetails() {
@@ -750,6 +765,29 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        checkAndRegEventBus();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        checkAnUnRegEventBus();
+    }
+
+    private void checkAndRegEventBus() {
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+    }
+
+    private void checkAnUnRegEventBus() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
+    }
+    @Override
     protected void onPause() {
         super.onPause();
         if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
@@ -761,6 +799,23 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     public int getCurrentUploadAction() {
         return currentUploadAction;
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
+    public void onEventAsync(final Object o) {
+        UiUtils.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                if (o instanceof RemovableChatRequestEvent) {
+                    RemovableChatRequestEvent removableChatRequestEvent = (RemovableChatRequestEvent) o;
+                    ParseObject removableChatRequest = removableChatRequestEvent.getRemovableChatRequest();
+                    if (removableChatRequest != null) {
+                        UiUtils.showView(chatRequestView,false);
+                    }
+                }
+            }
+        });
     }
 
 }

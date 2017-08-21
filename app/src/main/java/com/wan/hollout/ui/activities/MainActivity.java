@@ -52,6 +52,7 @@ import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
+import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.eventbuses.UnreadFeedsBadge;
@@ -468,6 +469,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 }else if (o instanceof UnreadFeedsBadge){
                     UnreadFeedsBadge unreadFeedsBadge = (UnreadFeedsBadge)o;
                     updateTab(2,unreadFeedsBadge.getUnreadFeedsSize());
+                }else if (o instanceof MessageReceivedEvent){
+                    fetchUnreadMessagesCount();
                 }
             }
         });
@@ -687,6 +690,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                                     HolloutCommunicationsManager.getInstance().signOut(true, new EMCallBack() {
                                         @Override
                                         public void onSuccess() {
+                                            HolloutPreferences.clearUnreadMessagesCount();
                                             finishUp();
                                         }
 

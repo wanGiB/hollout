@@ -359,22 +359,23 @@ public class HolloutCommunicationsManager {
 
             @Override
             public void onMessageReceived(List<EMMessage> messages) {
+
                 if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0) {
                     HolloutPreferences.saveUnreadMessagesCount(EMClient.getInstance().chatManager().getUnreadMessageCount());
                 }
-                for (EMMessage message : messages) {
-                    HolloutLogger.d(TAG, "onMessageReceived id : " + message.getMsgId());
-                    // in background, do not refresh UI, notify it in notification bar
-                    ParseUser signedInUser = ParseUser.getCurrentUser();
-                    if (signedInUser != null) {
-                        String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
-                        if (!signedInUserStatus.equals(AppConstants.ONLINE)) {
-                            getNotifier().onNewMsg(message);
-                        } else {
+
+                ParseUser signedInUser = ParseUser.getCurrentUser();
+                if (signedInUser != null) {
+                    String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
+                    if (!signedInUserStatus.equals(AppConstants.ONLINE)) {
+                        getNotifier().onNewMsg(messages);
+                    } else {
+                        for (EMMessage message : messages) {
                             EventBus.getDefault().post(new MessageReceivedEvent(message));
                         }
                     }
                 }
+
             }
 
             @Override
@@ -425,7 +426,6 @@ public class HolloutCommunicationsManager {
             mContactListener = null;
         }
         mContactListener = new ContactsChangeListener();
-
         EMClient.getInstance().contactManager().setContactListener(mContactListener);
     }
 
@@ -663,6 +663,10 @@ public class HolloutCommunicationsManager {
             }
             mCallReceiver = null;
         }
+        initNewCallReceiver(callFilter);
+    }
+
+    private void initNewCallReceiver(IntentFilter callFilter) {
         mCallReceiver = new CallReceiver();
         // Register the call receiver
         mContext.registerReceiver(mCallReceiver, callFilter);

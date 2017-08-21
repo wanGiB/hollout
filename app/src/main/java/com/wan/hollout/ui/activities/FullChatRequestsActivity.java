@@ -1,17 +1,33 @@
 package com.wan.hollout.ui.activities;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
+import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
+import com.wan.hollout.ui.adapters.ChatRequestsAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
+import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.UiUtils;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -33,6 +49,8 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
     RecyclerView chatRequestsRecyclerView;
 
     private ParseUser signedInUser;
+    private List<ParseObject> chatRequests = new ArrayList<>();
+    private ChatRequestsAdapter chatRequestsAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,7 +60,53 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         signedInUser = ParseUser.getCurrentUser();
+        initFeedAdapter();
+        fetchChatRequests(0);
+        checkAndRegEventBus();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        checkAndRegEventBus();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        checkAnUnRegEventBus();
+    }
+
+    private void initFeedAdapter() {
+        chatRequestsAdapter = new ChatRequestsAdapter(this, chatRequests);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        chatRequestsRecyclerView.setLayoutManager(linearLayoutManager);
+        chatRequestsRecyclerView.setAdapter(chatRequestsAdapter);
+    }
+
+    private void checkAndRegEventBus() {
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+    }
+
+    private void checkAnUnRegEventBus() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
     }
 
     @Override
@@ -57,4 +121,51 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
             overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
     }
 
+    private void fetchChatRequests(final int skip) {
+        if (signedInUser != null) {
+            ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            if (skip != 0) {
+                chatRequestsQuery.setSkip(skip);
+            }
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.APP_USER_ID));
+            chatRequestsQuery.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if (skip == 0) {
+                        chatRequests.clear();
+                    }
+                    if (e == null && objects != null && !objects.isEmpty()) {
+                        UiUtils.showView(nothingToLoadView, false);
+                        UiUtils.showView(progressWheel, false);
+                        UiUtils.showView(chatRequestsRecyclerView, true);
+                        chatRequests.add(new ParseObject(AppConstants.HOLLOUT_FEED));
+                        chatRequestsAdapter.notifyDataSetChanged();
+                    }
+                }
+            });
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
+    public void onEventAsync(final Object o) {
+        UiUtils.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                if (o instanceof RemovableChatRequestEvent) {
+                    RemovableChatRequestEvent removableChatRequestEvent = (RemovableChatRequestEvent) o;
+                    ParseObject removableChatRequest = removableChatRequestEvent.getRemovableChatRequest();
+                    if (removableChatRequest != null) {
+                        if (chatRequests.contains(removableChatRequest)) {
+                            chatRequests.remove(removableChatRequest);
+                            chatRequestsAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+            }
+        });
+    }
+
 }
+

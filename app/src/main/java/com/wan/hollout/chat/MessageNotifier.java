@@ -1,40 +1,192 @@
 package com.wan.hollout.chat;
 
+import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
-import android.media.AudioManager;
-import android.os.Vibrator;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.support.v4.app.NotificationCompat;
+import android.text.Spanned;
 
 import com.hyphenate.chat.EMMessage;
+import com.hyphenate.chat.EMTextMessageBody;
+import com.hyphenate.exceptions.HyphenateException;
+import com.parse.ParseUser;
+import com.wan.hollout.R;
+import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.ui.activities.ChatActivity;
+import com.wan.hollout.ui.services.FetchUserInfoService;
+import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.UiUtils;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 
 /**
  * @author Wan Clem
  */
-
 public class MessageNotifier {
 
-
-    private NotificationManager notificationManager = null;
-
+    private final static String[] msgStandIns = {"Photo", "Voice Note",
+            "Location", "Video", "Audio", "Contact", "Document"
+    };
     private Context appContext;
-    private String packageName;
-    private String[] msgs;
-    private long lastNotifyTime;
-    private AudioManager audioManager;
-    private Vibrator vibrator;
 
+    public static MessageNotifier getInstance(){
+        return new MessageNotifier();
+    }
 
-    public MessageNotifier init(Context context){
+    public MessageNotifier init(Context context) {
         appContext = context;
-        notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        packageName = appContext.getApplicationInfo().packageName;
-        audioManager = (AudioManager) appContext.getSystemService(Context.AUDIO_SERVICE);
-        vibrator = (Vibrator) appContext.getSystemService(Context.VIBRATOR_SERVICE);
         return this;
     }
 
-    public  void onNewMsg(EMMessage emMessage){
+    private NotificationManager getNotificationManager(Context context) {
+        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    }
 
+    void onNewMsg(List<EMMessage> emMessages) {
+        if (!emMessages.isEmpty()) {
+            if (emMessages.size() == 1) {
+                Intent userInfoIntent = new Intent(appContext, FetchUserInfoService.class);
+                userInfoIntent.putExtra(AppConstants.EXTRA_USER_ID, emMessages.get(0).getFrom());
+                userInfoIntent.putExtra(AppConstants.UNREAD_MESSAGE,emMessages.get(0));
+                appContext.startService(userInfoIntent);
+            } else {
+                sendMultipleNotifications(emMessages);
+            }
+        }
+    }
+
+    public String getMessage(EMMessage message){
+        if (message.getType()== EMMessage.Type.TXT){
+            return ((EMTextMessageBody)message.getBody()).getMessage();
+        }else  if (message.getType()== EMMessage.Type.IMAGE){
+            return msgStandIns[0];
+        }else if (message.getType()== EMMessage.Type.VOICE){
+            return msgStandIns[1];
+        }else if (message.getType()== EMMessage.Type.LOCATION){
+            return msgStandIns[2];
+        }else if (message.getType()== EMMessage.Type.VIDEO){
+            return msgStandIns[3];
+        }else if (message.getType()== EMMessage.Type.FILE){
+            try {
+                String fileType= message.getStringAttribute(AppConstants.FILE_TYPE);
+                switch (fileType) {
+                    case AppConstants.FILE_TYPE_AUDIO:
+                        return msgStandIns[4];
+                    case AppConstants.FILE_TYPE_CONTACT:
+                        return msgStandIns[5];
+                    default:
+                        return msgStandIns[6];
+                }
+            } catch (HyphenateException e) {
+                e.printStackTrace();
+            }
+        }
+        return "New Message";
+    }
+
+    private void sendMultipleNotifications(List<EMMessage> emMessages) {
+
+    }
+
+    public void sendSingleNotification(final EMMessage message, final ParseUser sender) {
+        if (appContext == null) {
+            appContext = ApplicationLoader.getInstance();
+        }
+        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                Intent userProfileIntent = new Intent(appContext, ChatActivity.class);
+                userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, sender);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                String senderName = appContext.getString(R.string.app_name);
+
+                try {
+                    senderName = message.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
+                } catch (HyphenateException e) {
+                    e.printStackTrace();
+                }
+
+                String senderPhoto = null;
+                try {
+                    senderPhoto = message.getStringAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+                } catch (HyphenateException e) {
+                    e.printStackTrace();
+                }
+
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
+                builder.setContentTitle(senderName);
+                Spanned messageSpannable = UiUtils.fromHtml(getMessage(message));
+                builder.setContentText(messageSpannable);
+                builder.setTicker(messageSpannable);
+                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setLights(Color.parseColor("blue"), 500, 1000);
+                Bitmap notifInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
+                if (StringUtils.isNotEmpty(senderPhoto)) {
+                    notifInitiatorBitmap = getBitmapFromURL(senderPhoto);
+                }
+                builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+                builder.setLargeIcon(notifInitiatorBitmap);
+                builder.setAutoCancel(true);
+                builder.setContentIntent(pendingIntent);
+                builder.setContentText(messageSpannable);
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(messageSpannable).setBigContentTitle(senderName));
+                builder.setSubText("1 New Message");
+                Notification notification = builder.build();
+                notification.defaults |= Notification.DEFAULT_LIGHTS;
+                notification.defaults |= Notification.DEFAULT_VIBRATE;
+                notification.defaults |= Notification.DEFAULT_SOUND;
+                if (pendingIntent != null) {
+                    getNotificationManager(appContext).notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
+                }
+            }
+        });
+    }
+
+    private static Bitmap getBitmapFromURL(final String strURL) {
+        Callable<Bitmap> bitmapCallable = new Callable<Bitmap>() {
+            @Override
+            public Bitmap call() throws Exception {
+                try {
+                    URL url = new URL(strURL);
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    return BitmapFactory.decodeStream(input);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        };
+        FutureTask<Bitmap> bitmapFutureTask = new FutureTask<>(bitmapCallable);
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        executorService.execute(bitmapFutureTask);
+        try {
+            return bitmapFutureTask.get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

@@ -57,13 +57,13 @@
                         android:background="@android:color/transparent"
                         android:cursorVisible="false"
                         android:ellipsize="end"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
                         android:inputType="text|textNoSuggestions"
                         android:maxLines="2"
                         android:paddingLeft="20dp"
-                        android:focusableInTouchMode="false"
                         android:paddingStart="20dp"
                         android:textColor="@color/white"
-                        android:focusable="false"
                         android:textSize="26sp"
                         app:textStyle="medium"
                         tools:ignore="RtlSymmetry" />
@@ -72,19 +72,19 @@
                         android:id="@+id/age_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
                         android:textColor="@color/white"
                         android:textSize="25sp"
-                        android:clickable="true"
-                        android:background="?attr/selectableItemBackground"
                         app:textStyle="medium" />
 
                     <ImageView
                         android:id="@+id/done_with_display_name_edit"
                         android:layout_width="25dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginLeft="16dp"
                         android:layout_height="25dp"
                         android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginStart="16dp"
                         android:src="@drawable/ic_done_white_24dp"
                         android:visibility="gone"
                         tools:ignore="ContentDescription" />
@@ -110,15 +110,15 @@
                 android:id="@+id/user_gender"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginLeft="27dp"
-                android:layout_marginStart="270dp"
                 android:layout_alignEnd="@id/user_profile_photo_view"
                 android:layout_alignRight="@id/user_profile_photo_view"
+                android:layout_marginLeft="27dp"
+                android:layout_marginStart="270dp"
                 android:layout_marginTop="282dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
-                android:visibility="gone"
                 android:src="@drawable/authentication_background_image"
+                android:visibility="gone"
                 app:border_color="@color/white"
                 app:border_width="2dp" />
 
@@ -206,8 +206,8 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="20dp"
                     android:drawablePadding="3dp"
-                    android:textColor="@color/ease_gray"
                     android:gravity="center_vertical"
+                    android:textColor="@color/ease_gray"
                     android:textSize="15sp"
                     app:textStyle="medium" />
 
@@ -217,24 +217,32 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/user_location_and_distance"
                     android:layout_centerHorizontal="true"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
                     android:gravity="center_horizontal"
                     android:paddingBottom="10dp"
                     android:paddingEnd="20dp"
                     android:paddingLeft="20dp"
                     android:paddingRight="20dp"
                     android:paddingStart="20dp"
-                    android:clickable="true"
-                    android:background="?attr/selectableItemBackground"
                     android:paddingTop="16dp"
                     android:text="@string/hey_there_holla_me_on_hollout"
                     android:textSize="17sp"
                     app:textStyle="medium" />
 
+                <com.wan.hollout.ui.widgets.ChatRequestView
+                    android:id="@+id/chat_request_view"
+                    android:visibility="gone"
+                    android:layout_gravity="top"
+                    android:layout_width="match_parent"
+                    android:layout_below="@+id/user_status"
+                    android:layout_height="wrap_content" />
+
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/featured_photos_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/user_status"
+                    android:layout_below="@+id/chat_request_view"
                     android:paddingBottom="8dp"
                     android:paddingEnd="16dp"
                     android:paddingLeft="16dp"
@@ -270,9 +278,9 @@
                         android:id="@+id/featured_photos_place_holder_image"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:clickable="true"
                         android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:scaleType="centerCrop"
                         android:src="@drawable/authentication_background_image"
                         tools:ignore="ContentDescription" />
 

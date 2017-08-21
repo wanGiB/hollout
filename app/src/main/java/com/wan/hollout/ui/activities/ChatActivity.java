@@ -59,6 +59,9 @@ import com.wan.hollout.call.VoiceCallActivity;
 import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.emoji.EmojiDrawer;
+import com.wan.hollout.eventbuses.MessageDeliveredEvent;
+import com.wan.hollout.eventbuses.MessageReadEvent;
+import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.language.DynamicLanguage;
 import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
 import com.wan.hollout.ui.adapters.MessagesAdapter;
@@ -1228,9 +1231,36 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         case AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER:
                             break;
                     }
+                } else if (o instanceof MessageReceivedEvent) {
+                    MessageReceivedEvent messageReceivedEvent = (MessageReceivedEvent) o;
+                    EMMessage emMessage = messageReceivedEvent.getMessage();
+                    if (emMessage != null) {
+                        messages.add(emMessage);
+                        messagesAdapter.notifyDataSetChanged();
+                    }
+                } else if (o instanceof MessageDeliveredEvent) {
+                    MessageDeliveredEvent messageDeliveredEvent = (MessageDeliveredEvent) o;
+                    EMMessage emMessage = messageDeliveredEvent.getMessage();
+                    int indexOfMessage = messages.indexOf(emMessage);
+                    if (indexOfMessage != -1) {
+                        messages.set(indexOfMessage, emMessage);
+                        messagesAdapter.notifyDataSetChanged();
+                    }
+                } else if (o instanceof MessageReadEvent) {
+                    MessageReadEvent messageReadEvent = (MessageReadEvent) o;
+                    EMMessage emMessage = messageReadEvent.getMessage();
+                    int indexOfMessage = messages.indexOf(emMessage);
+                    if (indexOfMessage != -1) {
+                        messages.set(indexOfMessage, emMessage);
+                        messagesAdapter.notifyDataSetChanged();
+                    }
                 }
             }
         });
+    }
+
+    private void scrollToBottom() {
+
     }
 
     @Override
@@ -1277,34 +1307,56 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
     }
 
-    protected void sendTextMessage(String content) {
+    @NonNull
+    private String getRecipient() {
+        return recipientId.toLowerCase();
+    }
 
+    protected void sendTextMessage(String content) {
+        // create a message
+        EMMessage message = EMMessage.createTxtSendMessage(content, getRecipient());
+        // send message
+        sendMessage(message);
     }
 
     protected void sendVoiceMessage(String filePath, int length) {
-
+        EMMessage message = EMMessage.createVoiceSendMessage(filePath, length, getRecipient());
+        sendMessage(message);
     }
 
     @SuppressLint("CommitPrefEdits")
     protected void sendImageMessage(String imagePath, String caption) {
+        String fileCaption;
+        EMMessage message = EMMessage.createImageSendMessage(imagePath, false, getRecipient());
         if (StringUtils.isNotEmpty(caption)) {
             HolloutPreferences.setLastFileCaption(caption);
+            fileCaption = caption;
         } else {
-            String lastFileCaption = HolloutPreferences.getLastFileCaption();
+            fileCaption = HolloutPreferences.getLastFileCaption();
         }
+        message.setAttribute(AppConstants.FILE_CAPTION, fileCaption);
+        sendMessage(message);
     }
 
     protected void sendLocationMessage(double latitude, double longitude, String locationAddress) {
-
+        EMMessage message = EMMessage.createLocationSendMessage(latitude, longitude, locationAddress, getRecipient());
+        sendMessage(message);
     }
 
     @SuppressLint("CommitPrefEdits")
     protected void sendVideoMessage(String videoPath, String thumbPath, int videoLength, String caption) {
-
+        EMMessage message = EMMessage.createVideoSendMessage(videoPath, thumbPath, videoLength, getRecipient());
+        sendMessage(message);
     }
 
     protected void sendFileMessage(String filePath, HashMap<String, String> moreMessageProps) {
-
+        EMMessage message = EMMessage.createFileSendMessage(filePath, getRecipient());
+        if (moreMessageProps != null && !moreMessageProps.isEmpty()) {
+            for (String key : moreMessageProps.keySet()) {
+                message.setAttribute(key, moreMessageProps.get(key));
+            }
+        }
+        sendMessage(message);
     }
 
     private void checkAndSendChatRequest() {
@@ -1313,7 +1365,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
             pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-            pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, recipientId.toLowerCase());
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, getRecipient());
             pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                 @Override
                 public void done(ParseObject object, ParseException e) {
@@ -1328,14 +1380,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private void updateSignedInUserChats() {
         List<String> chatIds = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (chatIds != null) {
-            if (!chatIds.contains(recipientId.toLowerCase())) {
-                chatIds.add(recipientId.toLowerCase());
+            if (!chatIds.contains(getRecipient())) {
+                chatIds.add(getRecipient());
                 signedInUser.put(AppConstants.APP_USER_CHATS, chatIds);
                 signedInUser.saveInBackground();
             }
         } else {
             chatIds = new ArrayList<>();
-            chatIds.add(recipientId.toLowerCase());
+            chatIds.add(getRecipient());
             signedInUser.put(AppConstants.APP_USER_CHATS, chatIds);
             signedInUser.saveInBackground();
         }
@@ -1346,7 +1398,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             final String signedInUserId = signedInUser.getUsername();
             ParseObject newChatRequestObject = new ParseObject(AppConstants.HOLLOUT_FEED);
             newChatRequestObject.put(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
-            newChatRequestObject.put(AppConstants.FEED_RECIPIENT_ID, recipientId.toLowerCase());
+            newChatRequestObject.put(AppConstants.FEED_RECIPIENT_ID, getRecipient());
             newChatRequestObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
             newChatRequestObject.put(AppConstants.FEED_CREATOR, signedInUser);
             newChatRequestObject.saveEventually(new SaveCallback() {
@@ -1360,15 +1412,33 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
     }
 
+    private void reAuthenticate() {
+        Intent splashIntent = new Intent(ChatActivity.this, SplashActivity.class);
+        startActivity(splashIntent);
+        finish();
+    }
+
     /**
      * set message Extension attributes
      */
     protected void sendMessage(EMMessage newMessage) {
+        if (signedInUser == null) {
+            reAuthenticate();
+            finish();
+            return;
+        }
+        String signedInUserDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+        String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+        newMessage.setAttribute(AppConstants.APP_USER_DISPLAY_NAME, signedInUserDisplayName);
+        if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
+            newMessage.setAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL, signedInUserPhotoUrl);
+        }
         EMClient.getInstance().chatManager().sendMessage(newMessage);
         //Send message here
         messages.add(newMessage);
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
+        messagesRecyclerView.smoothScrollToPosition(messages.size() - 1);
         emptyComposeText();
         updateSignedInUserChats();
         if (!isAContact()) {
@@ -1400,8 +1470,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     @SuppressWarnings("unused")
-    public void resendMessage(ParseObject messageParts) {
-
+    public void resendMessage(EMMessage message) {
+        message.setStatus(EMMessage.Status.CREATE);
+        EMClient.getInstance().chatManager().sendMessage(message);
+        messagesAdapter.notifyDataSetChanged();
     }
 
     @Override

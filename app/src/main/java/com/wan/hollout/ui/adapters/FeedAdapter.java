@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,6 +67,7 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @SuppressWarnings("WeakerAccess")
     static class FeedItemHolder extends RecyclerView.ViewHolder {
 
+        @Nullable
         @BindView(R.id.feed_view_item)
         FeedView feedView;
 
@@ -75,7 +77,9 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         public void bindBlogPost(Activity context, ParseObject feedItem) {
-            feedView.bindData(context, feedItem);
+            if (feedView != null) {
+                feedView.bindData(context, feedItem);
+            }
         }
 
     }
