@@ -6,11 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.parse.ParseObject;
 import com.wan.hollout.R;
-import com.wan.hollout.models.HolloutObject;
-import com.wan.hollout.ui.widgets.BlogPostsView;
-
-import org.json.JSONObject;
+import com.wan.hollout.ui.widgets.FeedView;
 
 import java.util.List;
 
@@ -25,47 +23,59 @@ public class FeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private LayoutInflater layoutInflater;
     private Activity context;
-    private List<HolloutObject> blogPosts;
+    private List<ParseObject> feeds;
 
-    public FeedAdapter(Activity context, List<HolloutObject> blogPosts) {
+    private final int REAL_FEED = 0;
+
+    public FeedAdapter(Activity context, List<ParseObject> feeds) {
         this.context = context;
-        this.blogPosts = blogPosts;
+        this.feeds = feeds;
         this.layoutInflater = LayoutInflater.from(context);
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View convertView = layoutInflater.inflate(R.layout.blog_post_recycler_item, parent, false);
+        View convertView = layoutInflater.inflate(viewType == REAL_FEED ? R.layout.feed_recycler_item : R.layout.padded_empty_view, parent, false);
         return new FeedItemHolder(convertView);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         FeedItemHolder feedItemHolder = (FeedItemHolder) holder;
-        JSONObject blogPost = blogPosts.get(position).getJsonObject();
-        if (blogPost != null) {
-            feedItemHolder.bindBlogPost(context, blogPost);
+        ParseObject feedItem = feeds.get(position);
+        if (feedItem != null) {
+            feedItemHolder.bindBlogPost(context, feedItem);
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        ParseObject feedObject = feeds.get(position);
+        if (!feedObject.keySet().isEmpty()) {
+            return REAL_FEED;
+        } else {
+            return 1;
         }
     }
 
     @Override
     public int getItemCount() {
-        return blogPosts != null ? blogPosts.size() : 0;
+        return feeds != null ? feeds.size() : 0;
     }
 
     @SuppressWarnings("WeakerAccess")
     static class FeedItemHolder extends RecyclerView.ViewHolder {
 
-        @BindView(R.id.blog_post_view)
-        BlogPostsView blogPostsView;
+        @BindView(R.id.feed_view_item)
+        FeedView feedView;
 
         public FeedItemHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
 
-        public void bindBlogPost(Activity context, JSONObject blogPost) {
-            blogPostsView.bindData(context,blogPost);
+        public void bindBlogPost(Activity context, ParseObject feedItem) {
+            feedView.bindData(context, feedItem);
         }
 
     }

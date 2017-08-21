@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ViewFlipper;
 
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
+import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -196,7 +197,7 @@ public class PeopleFragment extends Fragment {
         peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
         peopleRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
-//        RecyclerViewUtils.setFooterView(conversationsRecyclerView,footerView);
+        RecyclerViewUtils.setFooterView(peopleRecyclerView,footerView);
         UiUtils.showView(footerView, false);
 
         peopleRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -227,6 +228,7 @@ public class PeopleFragment extends Fragment {
                     Intent interestsIntent = new Intent(getActivity(), MeetPeopleActivity.class);
                     startActivity(interestsIntent);
                 }
+
             }
 
         });

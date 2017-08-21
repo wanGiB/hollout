@@ -929,9 +929,7 @@ public class HolloutUtils {
                 }
             }
         }
-
         return sortedVideoEntries;
-
     }
 
     public static String getQualifier(String word) {

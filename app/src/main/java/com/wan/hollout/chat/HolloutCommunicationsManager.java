@@ -38,7 +38,6 @@ import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
-import com.wan.hollout.utils.NotificationCenter;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -437,7 +436,7 @@ public class HolloutCommunicationsManager {
             ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, recipientId.toLowerCase());
             pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-            pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_HYPHENATED_ID, signedInUserId.toLowerCase());
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUserId.toLowerCase());
             pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                 @Override
                 public void done(ParseObject object, ParseException e) {

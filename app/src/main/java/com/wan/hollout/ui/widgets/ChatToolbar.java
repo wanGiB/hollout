@@ -25,6 +25,7 @@ import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.widgets.dotloader.DotLoader;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -186,6 +187,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         return null;
     }
 
+    private boolean userConnected() {
+        return HolloutUtils.isNetWorkConnected(getContext());
+    }
+
     public void refreshToolbar(ParseObject recipientUser) {
         this.recipientObject = recipientUser;
         String recipientName = getRecipientName();
@@ -205,7 +210,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getObjectId());
                 String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                 if (chatStateToSignedInUser != null) {
-                    if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
+                    if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
                         contactSubTitle.setText(mContext.getString(R.string.online));
                         contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                         UiUtils.showView(typingIndicator, false);
@@ -214,7 +219,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                         contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                         UiUtils.showView(typingIndicator, true);
                     } else {
-                        if (userOnlineStatus.equals(AppConstants.ONLINE)) {
+                        if (userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
                             contactSubTitle.setText(mContext.getString(R.string.online));
                             contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                             UiUtils.showView(typingIndicator, false);
@@ -224,7 +229,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                         }
                     }
                 } else {
-                    if (userOnlineStatus.equals(AppConstants.ONLINE)) {
+                    if (userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
                         contactSubTitle.setText(mContext.getString(R.string.online));
                         contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                         UiUtils.showView(typingIndicator, false);
@@ -235,7 +240,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 }
             } else {
                 String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
-                if (userOnlineStatus != null && userOnlineStatus.equals(AppConstants.ONLINE)) {
+                if (userOnlineStatus != null && userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
                     contactSubTitle.setText(mContext.getString(R.string.online));
                     contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                 } else {

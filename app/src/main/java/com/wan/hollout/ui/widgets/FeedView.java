@@ -33,6 +33,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.BounceInterpolator;
 import com.wan.hollout.ui.adapters.ReactionsAdapter;
@@ -74,7 +75,7 @@ import butterknife.ButterKnife;
  */
 
 @SuppressWarnings({"FieldCanBeLocal", "unused", "ConstantConditions", "deprecation"})
-public class BlogPostsView extends FrameLayout {
+public class FeedView extends FrameLayout {
 
     @BindView(R.id.author_image)
     RoundedImageView authorImageView;
@@ -169,17 +170,17 @@ public class BlogPostsView extends FrameLayout {
 
     private Vibrator vibe;
 
-    public BlogPostsView(Context context) {
+    public FeedView(Context context) {
         super(context);
         init(context);
     }
 
-    public BlogPostsView(Context context, @Nullable AttributeSet attrs) {
+    public FeedView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init(context);
     }
 
-    public BlogPostsView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public FeedView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
     }
@@ -200,31 +201,31 @@ public class BlogPostsView extends FrameLayout {
         inflate(context, R.layout.blog_post_item, this);
     }
 
-    public void bindData(final Activity context, JSONObject blogPost) {
+    public void bindData(final Activity context, ParseObject feedItem) {
         vibe = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         this.activity = context;
-        HolloutLogger.d(TAG, blogPost.toString());
-        final String postId = blogPost.optString(AppConstants.POST_ID);
+        HolloutLogger.d(TAG, feedItem.toString());
+        final String postId = feedItem.getString(AppConstants.POST_ID);
 
         this.globalPostId = postId;
-        String publishedDate = blogPost.optString(AppConstants.POST_PUBLISHED_DATE);
+        String publishedDate = feedItem.getString(AppConstants.POST_PUBLISHED_DATE);
 
-        JSONObject blog = blogPost.optJSONObject(AppConstants.BLOG);
+        JSONObject blog = feedItem.getJSONObject(AppConstants.BLOG);
         final String blogId = blog.optString(AppConstants.BLOG_ID);
-        String postLink = blogPost.optString(AppConstants.PUBLIC_POST_LINK);
-        String selfLink = blogPost.optString(AppConstants.POST_SELF_LINK);
+        String postLink = feedItem.getString(AppConstants.PUBLIC_POST_LINK);
+        String selfLink = feedItem.getString(AppConstants.POST_SELF_LINK);
 
-        String postTitle = blogPost.optString(AppConstants.POST_TITLE);
+        String postTitle = feedItem.getString(AppConstants.POST_TITLE);
         feedTitleView.setText(postTitle);
 
-        String postContent = blogPost.optString(AppConstants.POST_CONTENT);
+        String postContent = feedItem.getString(AppConstants.POST_CONTENT);
 
         //Author
-        JSONObject author = blogPost.optJSONObject(AppConstants.AUTHOR);
+        JSONObject author = feedItem.getJSONObject(AppConstants.AUTHOR);
         setupAuthorAndPublishedDate(context, author, publishedDate);
 
-        JSONObject postReplies = blogPost.optJSONObject(AppConstants.POST_REPLIES);
+        JSONObject postReplies = feedItem.getJSONObject(AppConstants.POST_REPLIES);
         String totalReplies = postReplies.optString(AppConstants.REPLIES_COUNT);
 
         comments = Long.parseLong(totalReplies);
@@ -238,7 +239,7 @@ public class BlogPostsView extends FrameLayout {
             AppConstants.commentPositions.put(getPostHashCode(postId), false);
         }
 
-        JSONArray labels = blogPost.optJSONArray(AppConstants.LABELS);
+        JSONArray labels = feedItem.getJSONArray(AppConstants.LABELS);
 
         Random random = new Random();
         int randomColor = ContextCompat.getColor(context, randomColors[random.nextInt(randomColors.length - 1)]);

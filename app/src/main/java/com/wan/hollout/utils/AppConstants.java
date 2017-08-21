@@ -37,7 +37,7 @@ public class AppConstants {
     public static final String FEED_BODY = "feed_body";
     public static final String FEED_CREATOR = "feed_creator";
     public static final String FEED_TYPE_CHAT_REQUEST = "feed_type_chat_request";
-    public static final String FEED_RECIPIENT_HYPHENATED_ID = "feed_recipient";
+    public static final String FEED_RECIPIENT_ID = "feed_recipient";
     public static final String RECIPIENT_NAME = "com.app.hollout.RECIPIENT_NAME";
     public static final String LAST_FILE_CAPTION = "last_file_caption";
 

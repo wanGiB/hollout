@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.wan.hollout.ui.widgets.BlogPostsView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/blog_post_view"
+<com.wan.hollout.ui.widgets.FeedView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/feed_view_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical" />

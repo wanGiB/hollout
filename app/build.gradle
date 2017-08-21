@@ -4,7 +4,9 @@ apply plugin: 'io.fabric'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
-    maven { url "https://raw.githubusercontent.com/HyphenateInc/Hyphenate-SDK-Android/master/repository" }
+    maven {
+        url "https://raw.githubusercontent.com/HyphenateInc/Hyphenate-SDK-Android/master/repository"
+    }
 }
 
 def dbflow_version = "4.0.4"
@@ -120,8 +122,6 @@ dependencies {
     compile 'com.parse:parse-android:1.15.8'
     compile 'net.alhazmy13.MediaPicker:libary:2.2.5'
     compile 'com.google.code.gson:gson:2.8.0'
-    testCompile 'junit:junit:4.12'
-    apt 'com.jakewharton:butterknife-compiler:8.4.0'
     compile 'com.github.florent37:diagonallayout:1.0.7'
     compile 'com.flaviofaria:kenburnsview:1.0.7'
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
@@ -129,6 +129,8 @@ dependencies {
     compile 'com.github.john990:WaveView:v0.9'
     compile 'com.google.android.gms:play-services-gcm:11.0.4'
     compile 'com.hyphenate:hyphenate-sdk:3.3.2'
+    testCompile 'junit:junit:4.12'
+    apt 'com.jakewharton:butterknife-compiler:8.4.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

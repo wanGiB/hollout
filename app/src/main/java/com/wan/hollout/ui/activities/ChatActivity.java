@@ -13,7 +13,6 @@ import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -1314,7 +1313,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
             pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-            pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_HYPHENATED_ID, recipientId.toLowerCase());
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, recipientId.toLowerCase());
             pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                 @Override
                 public void done(ParseObject object, ParseException e) {
@@ -1347,7 +1346,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             final String signedInUserId = signedInUser.getUsername();
             ParseObject newChatRequestObject = new ParseObject(AppConstants.HOLLOUT_FEED);
             newChatRequestObject.put(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
-            newChatRequestObject.put(AppConstants.FEED_RECIPIENT_HYPHENATED_ID, recipientId.toLowerCase());
+            newChatRequestObject.put(AppConstants.FEED_RECIPIENT_ID, recipientId.toLowerCase());
             newChatRequestObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
             newChatRequestObject.put(AppConstants.FEED_CREATOR, signedInUser);
             newChatRequestObject.saveEventually(new SaveCallback() {

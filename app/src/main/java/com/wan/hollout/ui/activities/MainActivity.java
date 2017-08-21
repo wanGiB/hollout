@@ -54,6 +54,7 @@ import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
+import com.wan.hollout.eventbuses.UnreadFeedsBadge;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.DrawerFragment;
 import com.wan.hollout.ui.fragments.FeedFragment;
@@ -464,6 +465,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                             turnOnLocationMessage();
                         }
                     }
+                }else if (o instanceof UnreadFeedsBadge){
+                    UnreadFeedsBadge unreadFeedsBadge = (UnreadFeedsBadge)o;
+                    updateTab(2,unreadFeedsBadge.getUnreadFeedsSize());
                 }
             }
         });
@@ -574,6 +578,16 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             endAgeEditText.setText(ageEndFilter);
         } else {
             endAgeEditText.setText("70");
+        }
+        genderChoice = signedInUser.getString(AppConstants.GENDER_FILTER);
+        if (StringUtils.isNotEmpty(genderChoice)){
+            if (genderChoice.equals(AppConstants.Both)){
+                genderFilterOptionsGroup.check(R.id.both);
+            }else if (genderChoice.equals(AppConstants.MALE)){
+                genderFilterOptionsGroup.check(R.id.males_only);
+            }else if (genderChoice.equals(AppConstants.FEMALE)){
+                genderFilterOptionsGroup.check(R.id.females_only);
+            }
         }
         genderFilterOptionsGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
 

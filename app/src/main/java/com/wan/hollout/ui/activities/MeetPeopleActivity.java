@@ -99,7 +99,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_people_i_like_to_meet_with);
+        setContentView(R.layout.activity_meet_people);
         ButterKnife.bind(this);
         signedInUser = ParseUser.getCurrentUser();
         initEventHandlers();
