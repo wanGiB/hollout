@@ -19,6 +19,8 @@ import com.wan.hollout.utils.HolloutUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
+
 /**
  * @author Wan Clem
  */
@@ -37,14 +39,15 @@ public class FetchUserInfoService extends IntentService {
                 String userIdToFetch = intentExtras.getString(AppConstants.EXTRA_USER_ID);
                 String notificationType = intentExtras.getString(AppConstants.NOTIFICATION_TYPE);
                 EMMessage unreadMessage = intentExtras.getParcelable(AppConstants.UNREAD_MESSAGE);
+                List<EMMessage>unreadMessagesFromSameSender = intentExtras.getParcelableArrayList(AppConstants.UNREAD_MESSAGES_FROM_SAME_SENDER);
                 if (StringUtils.isNotEmpty(userIdToFetch)) {
-                    fetchUserDetails(userIdToFetch, notificationType,unreadMessage);
+                    fetchUserDetails(userIdToFetch, notificationType,unreadMessage,unreadMessagesFromSameSender);
                 }
             }
         }
     }
 
-    private void fetchUserDetails(String idToFetch, final String notificationType, final EMMessage unreadMessage) {
+    private void fetchUserDetails(String idToFetch, final String notificationType, final EMMessage unreadMessage, final List<EMMessage>unreadMessagesFromSameSender) {
         ParseQuery<ParseUser> userInfo = ParseUser.getQuery();
         userInfo.whereEqualTo(AppConstants.APP_USER_ID, idToFetch.toLowerCase());
         userInfo.getFirstInBackground(new GetCallback<ParseUser>() {
@@ -60,8 +63,10 @@ public class FetchUserInfoService extends IntentService {
                             NotificationUtils.displayKindIsNearbyNotification(userObject);
                             DbUtils.savePathEntity(userLocation,userObject.getString(AppConstants.APP_USER_ID));
                         }
-                    }else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE)){
+                    }else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE) && unreadMessage!=null){
                         MessageNotifier.getInstance().init(FetchUserInfoService.this).sendSingleNotification(unreadMessage,userObject);
+                    }else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE) && unreadMessagesFromSameSender!=null){
+                        MessageNotifier.getInstance().init(FetchUserInfoService.this).sendSameSenderNotification(unreadMessagesFromSameSender,userObject);
                     }
                 }
             }

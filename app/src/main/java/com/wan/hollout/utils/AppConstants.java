@@ -216,6 +216,7 @@ public class AppConstants {
     public static final String FILE_CAPTION = "file_caption";
     public static final String NOTIFICATION_TYPE_NEW_MESSAGE = "new_message";
     public static final String UNREAD_MESSAGE = "unread_message";
+    public static final String UNREAD_MESSAGES_FROM_SAME_SENDER = "unread_messages_from_same_sender";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
