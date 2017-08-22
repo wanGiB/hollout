@@ -138,7 +138,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     ParseObject pendingChatRequest;
 
-    private ParseUser parseUser;
+    private ParseObject parseUser;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -172,7 +172,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    private void offloadUserAboutsIfAvailable(ParseUser parseUser) {
+    private void offloadUserAboutsIfAvailable(ParseObject parseUser) {
         List<ParseObject> aboutUserList = new ArrayList<>();
         List<String> userAboutList = parseUser.getList(AppConstants.ABOUT_USER);
         if (userAboutList != null) {
@@ -198,7 +198,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     @SuppressLint("SetTextI18n")
-    private void loadUserProfile(final ParseUser parseUser) {
+    private void loadUserProfile(final ParseObject parseUser) {
         final ParseUser signedInUser = ParseUser.getCurrentUser();
         if (signedInUser != null) {
             String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
@@ -402,7 +402,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         scrollView.smoothScrollTo(0, 0);
     }
 
-    private void detailCoverPhoto(ParseUser parseUser) {
+    private void detailCoverPhoto(ParseObject parseUser) {
         String coverPhotoUrl = parseUser.getString(AppConstants.APP_USER_COVER_PHOTO);
         List<String> allPhotos = new ArrayList<>();
         if (StringUtils.isNotEmpty(coverPhotoUrl)) {
@@ -418,7 +418,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    private void detailProfilePhoto(ParseUser parseUser) {
+    private void detailProfilePhoto(ParseObject parseUser) {
         String signedInUserProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         List<String> allPhotos = new ArrayList<>();
         if (StringUtils.isNotEmpty(signedInUserProfilePhotoUrl)) {
@@ -448,7 +448,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     @SuppressLint("SetTextI18n")
-    private void fetchFeaturedPhotos(ParseUser parseUser) {
+    private void fetchFeaturedPhotos(ParseObject parseUser) {
         ParseUser signedInUser = ParseUser.getCurrentUser();
         List<String> featuredPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
         if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
@@ -481,14 +481,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    private void loadFeaturedPhotosPlaceHolder(ParseUser parseUser) {
+    private void loadFeaturedPhotosPlaceHolder(ParseObject parseUser) {
         String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
             UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, featuredPhotosPlaceHolderImageView);
         }
     }
 
-    private void setupFeaturedPhotos(ParseUser parseUser) {
+    private void setupFeaturedPhotos(ParseObject parseUser) {
         UiUtils.showView(featuredPhotosDimView, false);
         UiUtils.showView(featurePhotosInstruction, false);
         UiUtils.showView(featuredPhotosPlaceHolderImageView, false);
@@ -521,7 +521,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         HolloutUtils.startImagePicker(this);
     }
 
-    private void fetchCommonalities(final ParseUser parseUser) {
+    private void fetchCommonalities(final ParseObject parseUser) {
         final ParseUser signedInUser = ParseUser.getCurrentUser();
         if (signedInUser != null) {
             if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
@@ -698,7 +698,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         }
     }
 
-    private void openPhotoViewActivity(String photo, List<String> photos, ParseUser parseUser) {
+    private void openPhotoViewActivity(String photo, List<String> photos, ParseObject parseUser) {
         Intent mProfilePhotoViewIntent = new Intent(UserProfileActivity.this, SlidePagerActivity.class);
         mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_TITLE, parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
         ArrayList<String> photoExtras = new ArrayList<>();
@@ -712,7 +712,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         startActivity(mProfilePhotoViewIntent);
     }
 
-    private void handleUserOnlineStatus(ParseUser parseUser) {
+    private void handleUserOnlineStatus(ParseObject parseUser) {
         Long userLastSeenAt = parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
         if (HolloutUtils.isNetWorkConnected(ApplicationLoader.getInstance())
                 && parseUser.getString(AppConstants.APP_USER_ONLINE_STATUS).

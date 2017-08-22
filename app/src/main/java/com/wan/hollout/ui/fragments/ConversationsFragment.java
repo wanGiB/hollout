@@ -156,8 +156,8 @@ public class ConversationsFragment extends Fragment {
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
 
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
-            peopleAndGroupsQuery.whereContainedIn(AppConstants.REPLICATED_OBJECT_ID, signedInUserChats);
-            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REPLICATED_OBJECT_ID, signedInUser.getObjectId());
+            peopleAndGroupsQuery.whereContainedIn(AppConstants.APP_USER_ID, signedInUserChats);
+            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.APP_USER_ID, signedInUser.getUsername());
             peopleAndGroupsQuery.setLimit(100);
 
             if (skip != 0) {
