@@ -6,9 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.parse.ParseUser;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
-import com.wan.hollout.ui.widgets.PersonView;
+import com.wan.hollout.ui.widgets.NearbyPersonView;
 
 import java.util.List;
 
@@ -20,13 +20,13 @@ import butterknife.ButterKnife;
  */
 public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<ParseUser> people;
+    private List<ParseObject> people;
     private Activity activity;
     private LayoutInflater layoutInflater;
 
     private String searchString;
 
-    public PeopleAdapter(Activity activity, List<ParseUser> people) {
+    public PeopleAdapter(Activity activity, List<ParseObject> people) {
         this.activity = activity;
         this.people = people;
         this.layoutInflater = LayoutInflater.from(activity);
@@ -49,7 +49,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         final PersonHolder personHolder = (PersonHolder) holder;
-        ParseUser parseUser = people.get(position);
+        ParseObject parseUser = people.get(position);
         personHolder.bindData(activity, getSearchString(), parseUser);
     }
 
@@ -61,15 +61,15 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     static class PersonHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.person_view)
-        PersonView personView;
+        NearbyPersonView nearbyPersonView;
 
         PersonHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
 
-        void bindData(Activity activity, String searchString, ParseUser parseUser) {
-            personView.bindData(activity, searchString, parseUser);
+        void bindData(Activity activity, String searchString, ParseObject parseUser) {
+            nearbyPersonView.bindData(activity, searchString, parseUser);
         }
 
     }

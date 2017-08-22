@@ -12,11 +12,12 @@ import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spanned;
 
-import com.parse.ParseUser;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -51,7 +52,7 @@ public class NotificationUtils {
         return (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
     }
 
-    public static void displayIndividualChatRequestNotification(final ParseUser requester) {
+    public static void displayIndividualChatRequestNotification(final ParseObject requester) {
 
         HolloutCommunicationsManager.getInstance().execute(new Runnable() {
 
@@ -99,14 +100,14 @@ public class NotificationUtils {
 
     }
 
-    public static void displayKindIsNearbyNotification(final ParseUser requester) {
+    public static void displayKindIsNearbyNotification(final ParseObject requester) {
 
         HolloutCommunicationsManager.getInstance().execute(new Runnable() {
 
             @Override
             public void run() {
 
-                ParseUser signedInUser = ParseUser.getCurrentUser();
+                ParseObject signedInUser = AuthUtil.getCurrentUser();
                 List<String> aboutUser = requester.getList(AppConstants.ABOUT_USER);
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutUser != null && aboutSignedInUser != null) {

@@ -24,11 +24,8 @@ import com.amulyakhare.textdrawable.TextDrawable;
 import com.flaviofaria.kenburnsview.KenBurnsView;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
-import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
@@ -40,6 +37,7 @@ import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutEditText;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.RequestCodes;
@@ -160,8 +158,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         parseUser = getIntent().getExtras().getParcelable(AppConstants.USER_PROPERTIES);
         pendingChatRequest = getIntent().getExtras().getParcelable(AppConstants.PENDING_CHAT_REQUEST);
         loadUserDetails();
-        if (pendingChatRequest !=null){
-            chatRequestView.bindData(this,null,pendingChatRequest);
+        if (pendingChatRequest != null) {
+            chatRequestView.bindData(this, null, pendingChatRequest);
         }
     }
 
@@ -199,7 +197,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @SuppressLint("SetTextI18n")
     private void loadUserProfile(final ParseObject parseUser) {
-        final ParseUser signedInUser = ParseUser.getCurrentUser();
+        final ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
             String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String userAge = parseUser.getString(AppConstants.APP_USER_AGE);
@@ -211,7 +209,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
                 distanceToUser = HolloutUtils.formatDistance(distanceInKills);
             }
-            if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                 if (userLocation != null) {
                     userLocationAndDistanceView.setText(userLocation);
                 } else {
@@ -234,7 +232,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 userStatusTextView.setText(StringUtils.capitalize(userStatus));
             }
 
-            if (parseUser.getObjectId().equals(signedInUser.getObjectId())) {
+            if (parseUser.getString(AppConstants.REAL_OBJECT_ID).equals(signedInUser.getString(AppConstants.REAL_OBJECT_ID))) {
                 userStatusTextView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -246,7 +244,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             UiUtils.attachDrawableToTextView(UserProfileActivity.this, userLocationAndDistanceView, R.drawable.ic_location_on, UiUtils.DrawableDirection.LEFT);
 
             userDisplayNameView.setText(WordUtils.capitalize(username));
-            if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                 userDisplayNameView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -263,9 +261,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                             public void onClick(View view) {
                                 UiUtils.showProgressDialog(UserProfileActivity.this, "Updating display name...");
                                 signedInUser.put(AppConstants.APP_USER_DISPLAY_NAME, userDisplayNameView.getText().toString().trim());
-                                signedInUser.saveInBackground(new SaveCallback() {
+                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                                     @Override
-                                    public void done(ParseException e) {
+                                    public void done(Boolean result, Exception e) {
                                         UiUtils.dismissProgressDialog();
                                         if (e == null) {
                                             dismissEditComponents();
@@ -312,7 +310,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 UiUtils.showView(userGenderView, false);
             }
 
-            if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                 userGenderView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -338,7 +336,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             fetchCommonalities(parseUser);
             fetchFeaturedPhotos(parseUser);
 
-            if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                 userProfilePhotoView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -449,34 +447,36 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @SuppressLint("SetTextI18n")
     private void fetchFeaturedPhotos(ParseObject parseUser) {
-        ParseUser signedInUser = ParseUser.getCurrentUser();
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
         List<String> featuredPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
-        if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
-            if (featuredPhotos == null || featuredPhotos.isEmpty()) {
-                featurePhotosInstruction.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.get_started_button_background));
-                featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + ", tap here to add some featured photos");
-                loadFeaturedPhotosPlaceHolder(parseUser);
-                featurePhotosInstruction.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        addNewFeaturedPhoto();
-                    }
-                });
-                featuredPhotosPlaceHolderImageView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        featurePhotosInstruction.performClick();
-                    }
-                });
+        if (signedInUser != null) {
+            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                if (featuredPhotos == null || featuredPhotos.isEmpty()) {
+                    featurePhotosInstruction.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.get_started_button_background));
+                    featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + ", tap here to add some featured photos");
+                    loadFeaturedPhotosPlaceHolder(parseUser);
+                    featurePhotosInstruction.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            addNewFeaturedPhoto();
+                        }
+                    });
+                    featuredPhotosPlaceHolderImageView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            featurePhotosInstruction.performClick();
+                        }
+                    });
+                } else {
+                    setupFeaturedPhotos(parseUser);
+                }
             } else {
-                setupFeaturedPhotos(parseUser);
-            }
-        } else {
-            if (featuredPhotos == null || featuredPhotos.isEmpty()) {
-                featurePhotosInstruction.setText("" + WordUtils.capitalize(parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + " doesn't have any featured photos yet");
-                loadFeaturedPhotosPlaceHolder(parseUser);
-            } else {
-                setupFeaturedPhotos(parseUser);
+                if (featuredPhotos == null || featuredPhotos.isEmpty()) {
+                    featurePhotosInstruction.setText("" + WordUtils.capitalize(parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + " doesn't have any featured photos yet");
+                    loadFeaturedPhotosPlaceHolder(parseUser);
+                } else {
+                    setupFeaturedPhotos(parseUser);
+                }
             }
         }
     }
@@ -496,14 +496,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
         FeaturedPhotosRectangleAdapter featuredPhotosRectangleAdapter = new FeaturedPhotosRectangleAdapter(this,
                 featuredPhotos,
-                parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME), parseUser.getObjectId());
+                parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME), parseUser.getString(AppConstants.REAL_OBJECT_ID));
 
         HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(featuredPhotosRectangleAdapter);
         featuredPhotosRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         featuredPhotosRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
 
-        ParseUser signedInUser = ParseUser.getCurrentUser();
-        if (signedInUser != null && signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null && signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
             @SuppressLint("InflateParams")
             View footerView = getLayoutInflater().inflate(R.layout.add_more_featured_photo_view, null);
             RecyclerViewUtils.setFooterView(featuredPhotosRecyclerView, footerView);
@@ -522,9 +522,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void fetchCommonalities(final ParseObject parseUser) {
-        final ParseUser signedInUser = ParseUser.getCurrentUser();
+        final ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
-            if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutSignedInUser != null) {
                     aboutUserTextView.setText(WordUtils.capitalize(aboutSignedInUser.get(0)));
@@ -548,7 +548,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onClick(View view) {
                         Intent chatIntent = new Intent(UserProfileActivity.this, ChatActivity.class);
-                        parseUser.put(AppConstants.CHAT_TYPE,AppConstants.CHAT_TYPE_SINGLE);
+                        parseUser.put(AppConstants.CHAT_TYPE, AppConstants.CHAT_TYPE_SINGLE);
                         chatIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
                         startActivity(chatIntent);
                     }
@@ -560,7 +560,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 public void onClick(View view) {
                     if (aboutUserRecyclerView.getVisibility() != View.VISIBLE) {
                         aboutUserRecyclerView.setVisibility(View.VISIBLE);
-                        if (signedInUser.getObjectId().equals(parseUser.getObjectId())) {
+                        if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                             editAboutYou.setVisibility(View.VISIBLE);
                         }
                     } else {
@@ -610,13 +610,13 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                     @Override
                                     public void run() {
                                         if (e == null && result != null) {
-                                            ParseUser signedInUser = ParseUser.getCurrentUser();
+                                            ParseObject signedInUser = AuthUtil.getCurrentUser();
                                             if (signedInUser != null) {
                                                 signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.APP_USER_PROFILE_PHOTO_URL : AppConstants.APP_USER_COVER_PHOTO, result);
                                                 signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.USER_PROFILE_PHOTO_UPLOAD_TIME : AppConstants.USER_COVER_PHOTO_UPLOAD_TIME, System.currentTimeMillis());
-                                                signedInUser.saveInBackground(new SaveCallback() {
+                                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                                                     @Override
-                                                    public void done(ParseException e) {
+                                                    public void done(Boolean result, Exception e) {
                                                         UiUtils.dismissProgressDialog();
                                                         if (e == null) {
                                                             UiUtils.showSafeToast("Upload Success");
@@ -651,7 +651,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                     @Override
                                     public void run() {
                                         if (e == null && result != null) {
-                                            ParseUser signedInUser = ParseUser.getCurrentUser();
+                                            ParseObject signedInUser = AuthUtil.getCurrentUser();
                                             if (signedInUser != null) {
                                                 List<String> featuredPhotos = signedInUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
                                                 if (featuredPhotos != null) {
@@ -663,9 +663,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                                     featuredPhotos.add(result);
                                                 }
                                                 signedInUser.put(AppConstants.APP_USER_FEATURED_PHOTOS, featuredPhotos);
-                                                signedInUser.saveInBackground(new SaveCallback() {
+                                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                                                     @Override
-                                                    public void done(ParseException e) {
+                                                    public void done(Boolean result, Exception e) {
                                                         UiUtils.dismissProgressDialog();
                                                         if (e == null) {
                                                             UiUtils.showSafeToast("Photo featured successfully");
@@ -733,7 +733,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         searchItem.setVisible(false);
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
-        MenuItem createNewGroupItem  = menu.findItem(R.id.create_new_group);
+        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
         MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
 
         invitePeopleMenuItem.setVisible(false);
@@ -787,6 +787,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             EventBus.getDefault().unregister(this);
         }
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -811,7 +812,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     RemovableChatRequestEvent removableChatRequestEvent = (RemovableChatRequestEvent) o;
                     ParseObject removableChatRequest = removableChatRequestEvent.getRemovableChatRequest();
                     if (removableChatRequest != null) {
-                        UiUtils.showView(chatRequestView,false);
+                        UiUtils.showView(chatRequestView, false);
                     }
                 }
             }

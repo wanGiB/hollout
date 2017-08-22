@@ -6,9 +6,11 @@ import android.preference.Preference;
 import android.preference.SwitchPreference;
 
 import com.github.machinarius.preferencefragment.PreferenceFragment;
-import com.parse.ParseUser;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -21,7 +23,7 @@ public class ChatSettingsFragment extends PreferenceFragment implements Preferen
 
     private String[] messagesAndTextSize = new String[]{"12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"};
 
-    private ParseUser parseUser;
+    private ParseObject parseUser;
     ListPreference messagesAndTextSizePref;
 
     @Override
@@ -29,7 +31,7 @@ public class ChatSettingsFragment extends PreferenceFragment implements Preferen
         super.onCreate(paramBundle);
         addPreferencesFromResource(R.xml.chat_settings);
 
-        parseUser = ParseUser.getCurrentUser();
+        parseUser = AuthUtil.getCurrentUser();
 
         messagesAndTextSizePref = (ListPreference) findPreference(AppConstants.MESSAGES_TEXT_SIZE);
         messagesAndTextSizePref.setEntries(messagesAndTextSize);
@@ -63,7 +65,12 @@ public class ChatSettingsFragment extends PreferenceFragment implements Preferen
         }
         if (parseUser != null) {
             parseUser.put(preference.getKey(), o);
-            parseUser.saveInBackground();
+            AuthUtil.updateCurrentLocalUser(parseUser, new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean result, Exception e) {
+
+                }
+            });
         }
         return true;
     }

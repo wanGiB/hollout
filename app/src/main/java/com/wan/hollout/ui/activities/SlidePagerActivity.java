@@ -14,11 +14,11 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.parse.ParseObject;
-import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.adapters.SlidePagerAdapter;
 import com.wan.hollout.ui.widgets.PageIndicator;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,10 +42,10 @@ public class SlidePagerActivity extends AppCompatActivity {
         SlidePagerAdapter pagerAdapter = new SlidePagerAdapter(getSupportFragmentManager());
         if (getIntent() == null) return;
         String title = getIntent().getStringExtra(AppConstants.EXTRA_TITLE);
-        String userId = getIntent().getStringExtra(AppConstants.APP_USER_ID);
-        ParseObject signedInUser = ParseUser.getCurrentUser();
+        String userId = getIntent().getStringExtra(AppConstants.REAL_OBJECT_ID);
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
-            if (signedInUser.getObjectId().equals(userId)) {
+            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(userId)) {
                 getSupportActionBar().setTitle("Me");
             } else {
                 if (StringUtils.isNotEmpty(title)) {

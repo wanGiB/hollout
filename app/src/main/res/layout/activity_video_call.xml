@@ -361,4 +361,6 @@
 
     </TableLayout>
 
+    <include layout="@layout/footer_snack" />
+
 </android.support.design.widget.CoordinatorLayout>

@@ -14,7 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.parse.ParseUser;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
 import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
@@ -22,6 +22,7 @@ import com.wan.hollout.interfaces.DrawerRecyclerInterface;
 import com.wan.hollout.listeners.OnSingleClickListener;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -106,7 +107,7 @@ public class DrawerRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         } else if (holder instanceof ViewHolderHeader) {
             ViewHolderHeader viewHolderHeader = (ViewHolderHeader) holder;
 
-            ParseUser user = ParseUser.getCurrentUser();
+            ParseObject user = AuthUtil.getCurrentUser();
             if (user != null) {
                 viewHolderHeader.userName.setText(WordUtils.capitalize(user.getString(AppConstants.APP_USER_DISPLAY_NAME)));
                 String userProfilePhotoUrl = user.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);

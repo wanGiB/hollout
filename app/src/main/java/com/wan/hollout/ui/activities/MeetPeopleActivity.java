@@ -24,15 +24,15 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.eventbuses.SelectedPerson;
 import com.wan.hollout.layoutmanagers.chipslayoutmanager.ChipsLayoutManager;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -94,14 +94,14 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
     private List<ParseObject> selectedPeopleToMeet = new ArrayList<>();
     private View potentialPeopleToMeetFooterView;
 
-    private ParseUser signedInUser;
+    private ParseObject signedInUser;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meet_people);
         ButterKnife.bind(this);
-        signedInUser = ParseUser.getCurrentUser();
+        signedInUser = AuthUtil.getCurrentUser();
         initEventHandlers();
         initFooters();
         setupPotentialPeopleToMeetAdapter();
@@ -338,11 +338,11 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 break;
             case R.id.done_with_selection:
                 UiUtils.showProgressDialog(MeetPeopleActivity.this, "Please wait...");
-                signedInUser.saveInBackground(new SaveCallback() {
+                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                     @Override
-                    public void done(ParseException e) {
+                    public void done(Boolean result, Exception e) {
                         UiUtils.dismissProgressDialog();
-                        List<String> userInterests = ParseUser.getCurrentUser().getList(AppConstants.INTERESTS);
+                        List<String> userInterests = AuthUtil.getCurrentUser().getList(AppConstants.INTERESTS);
                         HolloutUtils.updateCurrentParseInstallation(userInterests, null);
                         sendBackResultToCaller();
                     }

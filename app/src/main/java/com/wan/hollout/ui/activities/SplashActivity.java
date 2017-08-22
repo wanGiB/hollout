@@ -5,19 +5,15 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.parse.GetCallback;
-import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
-import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.RequestCodes;
-import com.wan.hollout.utils.UiUtils;
 
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,6 +28,7 @@ import butterknife.ButterKnife;
 /**
  * @author Wan Clem
  */
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class SplashActivity extends AppCompatActivity {
 
     @Override
@@ -43,13 +40,13 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void checkAuthStatus() {
-        ParseUser parseUser = ParseUser.getCurrentUser();
-        if (parseUser != null) {
-            List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
+        ParseObject authenticatedUser = AuthUtil.getCurrentUser();
+        if (authenticatedUser != null) {
+            List<String> aboutUser = authenticatedUser.getList(AppConstants.ABOUT_USER);
             if (aboutUser != null) {
                 if (!aboutUser.isEmpty()) {
-                    String userAge = parseUser.getString(AppConstants.APP_USER_GENDER);
-                    String userGender = parseUser.getString(AppConstants.APP_USER_GENDER);
+                    String userAge = authenticatedUser.getString(AppConstants.APP_USER_GENDER);
+                    String userGender = authenticatedUser.getString(AppConstants.APP_USER_GENDER);
                     if (userAge.equals(AppConstants.UNKNOWN) || userGender.equals(AppConstants.UNKNOWN)) {
                         launchGenderAndAgeActivity();
                     } else {
@@ -61,44 +58,9 @@ public class SplashActivity extends AppCompatActivity {
             } else {
                 launchAboutActivity();
             }
-        } else {
-            String availableUsername = HolloutPreferences.getAvailableUsername();
-            String availablePassword = HolloutPreferences.getAvailablePassword();
-            if (StringUtils.isNotEmpty(availablePassword) && StringUtils.isNotEmpty(availableUsername)) {
-                loginUser(availableUsername, availablePassword);
-            } else {
-                launchWelcomeActivity();
-            }
+        }else{
+            launchWelcomeActivity();
         }
-    }
-
-    private void loginUser(final String username, final String password) {
-        UiUtils.showProgressDialog(SplashActivity.this, "Refreshing your session. Please wait...");
-        ParseUser.logInInBackground(username, password, new LogInCallback() {
-            @Override
-            public void done(final ParseUser user, final ParseException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        UiUtils.dismissProgressDialog();
-                        if (e == null && user != null) {
-                            HolloutPreferences.persistCredentials(username, password);
-                            launchMainActivity();
-                        } else {
-                            if (e != null) {
-                                String errorMessage = e.getMessage();
-                                if (!errorMessage.contains("i/o")) {
-                                    UiUtils.showSafeToast(e.getMessage());
-                                } else {
-                                    UiUtils.showSafeToast("Failed to login. Please review your data connection and login in again");
-                                    launchWelcomeActivity();
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-        });
     }
 
     @Override

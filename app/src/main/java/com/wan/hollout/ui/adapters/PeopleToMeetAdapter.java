@@ -11,8 +11,8 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import com.google.android.gms.auth.api.Auth;
 import com.parse.ParseObject;
-import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.BounceInterpolator;
 import com.wan.hollout.components.ApplicationLoader;
@@ -20,6 +20,7 @@ import com.wan.hollout.eventbuses.SelectedPerson;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
@@ -121,7 +122,7 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
 
         private void handleItemViewClick(final Context context, final String host, final int position, final List<ParseObject> people, final PeopleToMeetAdapter peopleToMeetAdapter, final ParseObject personObject) {
-            final ParseUser parseUser = ParseUser.getCurrentUser();
+            final ParseObject parseUser = AuthUtil.getCurrentUser();
             final String personName = personObject.getString(AppConstants.NAME);
             final List<String> selectedPeopleToMeet = parseUser.getList(AppConstants.INTERESTS);
             if (!(context instanceof UserProfileActivity)) {

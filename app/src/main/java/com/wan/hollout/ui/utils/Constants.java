@@ -1,10 +1,5 @@
 package com.wan.hollout.ui.utils;
 
-import com.wan.hollout.models.Feed;
-
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author Wan Clem
  */
@@ -19,5 +14,4 @@ public class Constants {
 
     public static final int MAX_ALPHA = 255;
 
-    public static final List<Feed> feeds = Arrays.asList(new Feed(), new Feed());
 }

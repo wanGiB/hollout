@@ -133,7 +133,7 @@ public class AppConstants {
     public static final String APP_USER_CHAT_STATES = "app_user_chat_states";
     public static final String APP_USER_FEATURED_PHOTOS = "app_user_featured_photos";
     public static final String EXTRA_TITLE = "extra_title";
-    public static final String APP_USER_ID = "user_id";
+    public static final String REAL_OBJECT_ID = "real_object_id";
     public static final String EXTRA_PICTURES = "pictures";
     public static final String USER_PROPERTIES = "user_properties";
     public static final String APP_USER_CHATS = "app_user_chats";
@@ -199,7 +199,7 @@ public class AppConstants {
     public static final String GROUP_OR_ROOM = "group_or_room";
     public static final String REFRESH_CONVERSATIONS = "refresh_conversations";
     public static final String CONVERSATIONS = "conversations";
-    public static final String PEOPLE_AND_GROUPS = "PeopleAndGroups";
+    public static final String PEOPLE_GROUPS_AND_ROOMS = "PeopleGroupsAndRooms";
     public static final String REPLICATED_OBJECT_ID = "replicated_object_id";
     public static final String OBJECT_TYPE = "object_type";
     public static final Object OBJECT_TYPE_INDIVIDUAL = "object_type_individual";
@@ -217,6 +217,11 @@ public class AppConstants {
     public static final String NOTIFICATION_TYPE_NEW_MESSAGE = "new_message";
     public static final String UNREAD_MESSAGE = "unread_message";
     public static final String UNREAD_MESSAGES_FROM_SAME_SENDER = "unread_messages_from_same_sender";
+    public static final String OBJECT_TYPE_GROUP = "object_type_group";
+    public static final String OBJECT_TYPE_ROOM = "object_type_room";
+
+    public static final String MASKED_OBJECT_ID = "masked_objectId";
+    public static final String ATTEMPT_LOGOUT = "attempt_logout";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

@@ -6,9 +6,11 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 
 import com.github.machinarius.preferencefragment.PreferenceFragment;
-import com.parse.ParseUser;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,13 +26,13 @@ public class PrivacySettingsFragment extends PreferenceFragment implements Prefe
     private ListPreference ageVisibilityPref;
     private PreferenceCategory locationSettingsCategory, presenceSettingsCategory, statusSettingsCategory, ageSettingsCategory;
     private Preference locationVisibilityContractPref, lastSeenVisibilityContractPref, statusVisibilityContractPref, ageVisibilityContractPref;
-    private ParseUser parseUser;
+    private ParseObject parseUser;
 
     @Override
     public void onCreate(Bundle paramBundle) {
         super.onCreate(paramBundle);
         addPreferencesFromResource(R.xml.privacy_and_security_settings);
-        parseUser = ParseUser.getCurrentUser();
+        parseUser = AuthUtil.getCurrentUser();
 
         locationSettingsCategory = (PreferenceCategory) findPreference("location_settings_category");
         ageSettingsCategory = (PreferenceCategory) findPreference("age_settings_category");
@@ -102,7 +104,12 @@ public class PrivacySettingsFragment extends PreferenceFragment implements Prefe
         }
         if (parseUser != null) {
             parseUser.put(preference.getKey(), newValue);
-            parseUser.saveInBackground();
+            AuthUtil.updateCurrentLocalUser(parseUser, new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean result, Exception e) {
+
+                }
+            });
         }
         return true;
     }

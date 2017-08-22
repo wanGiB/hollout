@@ -15,14 +15,13 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -60,9 +59,10 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     @BindView(R.id.decline_request)
     TextView declineRequestView;
 
-    private ParseUser signedInUser;
+    private ParseObject signedInUser;
 
-    private ParseUser requestOriginator;
+    private ParseObject requestOriginator;
+    
     private Activity activity;
 
     private ParseObject feedObject;
@@ -83,7 +83,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
     public void bindData(final Activity activity, final ChatRequestsAdapterView parent, final ParseObject feedObject) {
         this.activity = activity;
-        this.signedInUser = ParseUser.getCurrentUser();
+        this.signedInUser = AuthUtil.getCurrentUser();
         this.feedObject = feedObject;
         if (feedObject != null) {
             String requestType = feedObject.getString(AppConstants.FEED_TYPE);
@@ -136,7 +136,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                         @Override
                         public void onClick(View v) {
                             acceptRequestTextView.setText(activity.getString(R.string.working));
-                            ChatUtils.acceptChatInvitation(requestOriginator.getUsername().toLowerCase(), new DoneCallback<Boolean>() {
+                            ChatUtils.acceptChatInvitation(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase(), new DoneCallback<Boolean>() {
                                 @Override
                                 public void done(Boolean result, Exception e) {
                                     if (e == null) {
@@ -149,19 +149,18 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
                                                 List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
 
-                                                if (signedInUserChats != null && !signedInUserChats.contains(requestOriginator.getUsername().toLowerCase())) {
+                                                if (signedInUserChats != null && !signedInUserChats.contains(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase())) {
                                                     signedInUserChats.add(requestOriginator.getObjectId());
                                                 }
 
                                                 if (signedInUserChats == null) {
                                                     signedInUserChats = new ArrayList<>();
-                                                    signedInUserChats.add(requestOriginator.getUsername().toLowerCase());
+                                                    signedInUserChats.add(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
                                                 }
-
                                                 signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
-                                                signedInUser.saveInBackground(new SaveCallback() {
+                                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                                                     @Override
-                                                    public void done(ParseException e) {
+                                                    public void done(Boolean result, Exception e) {
                                                         if (e == null) {
                                                             if (returnedFeedObject != null) {
                                                                 returnedFeedObject.deleteInBackground(new DeleteCallback() {
@@ -201,7 +200,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                         @Override
                         public void onClick(View v) {
                             declineRequestView.setText(activity.getString(R.string.working));
-                            ChatUtils.declineChatInvitation(requestOriginator.getUsername(), new DoneCallback<Boolean>() {
+                            ChatUtils.declineChatInvitation(requestOriginator.getString(AppConstants.REAL_OBJECT_ID), new DoneCallback<Boolean>() {
                                 @Override
                                 public void done(Boolean declined, Exception e) {
                                     if (e == null && declined) {

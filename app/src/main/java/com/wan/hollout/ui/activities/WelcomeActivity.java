@@ -39,10 +39,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.parse.DeleteCallback;
-import com.parse.LogInCallback;
+import com.parse.GetCallback;
 import com.parse.ParseException;
-import com.parse.ParseUser;
-import com.parse.SignUpCallback;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
@@ -50,6 +51,7 @@ import com.wan.hollout.eventbuses.TypingFinishedBus;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.ShimmerFrameLayout;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.RequestCodes;
@@ -144,11 +146,15 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     }
 
     private void authenticateUser(final FirebaseUser firebaseUser) {
-        ParseUser.logInInBackground(firebaseUser.getUid(), firebaseUser.getUid(), new LogInCallback() {
+        ParseQuery<ParseObject>peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        peopleQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID,getValidAppUserId(firebaseUser));
+        peopleQuery.whereEqualTo(AppConstants.APP_USER_PASSWORD,getValidAppUserId(firebaseUser));
+        peopleQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
-            public void done(ParseUser user, ParseException e) {
-                if (e == null && user != null) {
-                    HolloutCommunicationsManager.getInstance().logInEMClient(firebaseUser.getUid(), firebaseUser.getUid(), new DoneCallback<Boolean>() {
+            public void done(ParseObject object, ParseException e) {
+                if (e == null && object != null) {
+                    AuthUtil.createLocalUser(object);
+                    HolloutCommunicationsManager.getInstance().logInEMClient(getValidAppUserId(firebaseUser), getValidAppUserId(firebaseUser), new DoneCallback<Boolean>() {
                         @Override
                         public void done(Boolean success, Exception e) {
                             UiUtils.dismissProgressDialog();
@@ -175,7 +181,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     }
 
     private void finishUp() {
-        ParseUser currentUser = ParseUser.getCurrentUser();
+        ParseObject currentUser = AuthUtil.getCurrentUser();
         if (currentUser != null) {
             List<String> aboutUser = currentUser.getList(AppConstants.ABOUT_USER);
             if (aboutUser != null) {
@@ -216,19 +222,17 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     private void createNewUserOnParse(final FirebaseUser firebaseUser) {
         UiUtils.showProgressDialog(this, "Creating account...");
         setupCrashlyticsUser(firebaseUser);
-        final ParseUser newHolloutUser = new ParseUser();
-        newHolloutUser.setUsername(firebaseUser.getUid());
-        newHolloutUser.setPassword(firebaseUser.getUid());
+        final ParseObject newHolloutUser = new ParseObject(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         if (firebaseUser.getDisplayName() != null) {
             newHolloutUser.put(AppConstants.APP_USER_DISPLAY_NAME, firebaseUser.getDisplayName().toLowerCase());
-        }
-        if (firebaseUser.getEmail() != null) {
-            newHolloutUser.setEmail(firebaseUser.getEmail());
         }
         if (firebaseUser.getPhotoUrl() != null) {
             newHolloutUser.put(AppConstants.APP_USER_PROFILE_PHOTO_URL, firebaseUser.getPhotoUrl().toString());
         }
+        newHolloutUser.put(AppConstants.REAL_OBJECT_ID, getValidAppUserId(firebaseUser));
+        newHolloutUser.put(AppConstants.APP_USER_PASSWORD,getValidAppUserId(firebaseUser));
         newHolloutUser.put(AppConstants.PLAY_SOUND_ON_NEW_MESAGE_NOTIF, true);
+        newHolloutUser.put(AppConstants.OBJECT_TYPE,AppConstants.OBJECT_TYPE_INDIVIDUAL);
         newHolloutUser.put(AppConstants.WAKE_PHONE_ON_NOTIFICATION, true);
         newHolloutUser.put(AppConstants.SHOW_MESSAGE_TICKER, true);
         newHolloutUser.put(AppConstants.VIBRATE_ON_NEW_NOTIFICATION, true);
@@ -243,16 +247,16 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         newHolloutUser.put(AppConstants.APP_USER_AGE, AppConstants.UNKNOWN);
         newHolloutUser.put(AppConstants.STATUS_VISIBILITY_PREF, getString(R.string.anyone));
         newHolloutUser.put(AppConstants.USER_PROFILE_PHOTO_UPLOAD_TIME, System.currentTimeMillis());
-        newHolloutUser.put(AppConstants.APP_USER_ID,firebaseUser.getUid().trim().toLowerCase());
-        newHolloutUser.signUpInBackground(new SignUpCallback() {
+        newHolloutUser.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e == null) {
-                    HolloutCommunicationsManager.getInstance().signUpEMClient(firebaseUser.getUid(), firebaseUser.getUid(), new DoneCallback<Boolean>() {
+                    AuthUtil.createLocalUser(newHolloutUser);
+                    HolloutCommunicationsManager.getInstance().signUpEMClient(getValidAppUserId(firebaseUser), getValidAppUserId(firebaseUser), new DoneCallback<Boolean>() {
                         @Override
                         public void done(Boolean result, Exception e) {
                             if (e == null) {
-                                HolloutCommunicationsManager.getInstance().logInEMClient(firebaseUser.getUid(), firebaseUser.getUid(), new DoneCallback<Boolean>() {
+                                HolloutCommunicationsManager.getInstance().logInEMClient(getValidAppUserId(firebaseUser), getValidAppUserId(firebaseUser), new DoneCallback<Boolean>() {
                                     @Override
                                     public void done(Boolean success, Exception e) {
                                         if (e == null && success) {
@@ -285,11 +289,17 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         });
     }
 
-    private void terminateAuthentication(final ParseUser newHolloutUser) {
+    @NonNull
+    private String getValidAppUserId(FirebaseUser firebaseUser) {
+        return firebaseUser.getUid().trim().toLowerCase();
+    }
+
+    private void terminateAuthentication(final ParseObject newHolloutUser) {
         newHolloutUser.deleteInBackground(new DeleteCallback() {
             @Override
             public void done(ParseException e) {
                 if (e == null) {
+                    AuthUtil.dissolveAuthenticatedUser(null);
                     UiUtils.dismissProgressDialog();
                     runOnUiThread(new Runnable() {
                         @Override

@@ -31,12 +31,13 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.ui.adapters.InterestsSuggestionAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.RequestCodes;
@@ -82,7 +83,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     @BindView(R.id.rootLayout)
     View rootLayout;
 
-    private ParseUser signedInUser;
+    private ParseObject signedInUser;
 
     private String NO_QUALIFIER_TIP = "Do not use the <b>I,a,am,an</b> prefixes. Use only keywords.<br/><br/><b>Example: Fashion Designer.</b> and not <b>A fashion Designer</b>";
     private String NO_WORK_PLACE = "Nope! Do not include where you work or school.";
@@ -107,7 +108,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-        signedInUser = ParseUser.getCurrentUser();
+        signedInUser = AuthUtil.getCurrentUser();
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setTitle("About You");
@@ -138,7 +139,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
         searchItem.setVisible(false);
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
-        MenuItem createNewGroupItem  = menu.findItem(R.id.create_new_group);
+        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
         MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
 
         invitePeopleMenuItem.setVisible(false);
@@ -317,10 +318,9 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                     signedInUser.put(AppConstants.INTERESTS, interests);
                     signedInUser.put(AppConstants.ABOUT_USER, aboutUserList);
                     UiUtils.showProgressDialog(AboutUserActivity.this, "Please wait...");
-                    signedInUser.saveInBackground(new SaveCallback() {
-
+                    AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                         @Override
-                        public void done(ParseException e) {
+                        public void done(Boolean success, Exception e) {
                             if (e == null) {
                                 checkAndPushInterests(Arrays.asList(moreAboutUserField.getText().toString().trim().split(",")));
                                 UiUtils.dismissProgressDialog();

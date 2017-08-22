@@ -9,10 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.parse.ParseUser;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +50,7 @@ public class FeaturedPhotosCircleAdapter extends RecyclerView.Adapter<RecyclerVi
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
-        final ParseUser signedInUserObject = ParseUser.getCurrentUser();
+        final ParseObject signedInUserObject = AuthUtil.getCurrentUser();
         if (signedInUserObject != null) {
             final FeaturedPhotosCircleAdapter.PhotoItemHolder photoItemHolder = (PhotoItemHolder) holder;
             final String photo = photos.get(position);

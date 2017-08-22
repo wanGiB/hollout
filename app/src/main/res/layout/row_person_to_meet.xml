@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.wan.hollout.ui.widgets.PersonView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.wan.hollout.ui.widgets.NearbyPersonView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/person_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content" />

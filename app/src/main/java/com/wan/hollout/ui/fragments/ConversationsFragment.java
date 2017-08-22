@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,11 +17,12 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
+import com.wan.hollout.ui.helpers.DividerItemDecoration;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -56,11 +58,11 @@ public class ConversationsFragment extends Fragment {
 
     private ConversationsAdapter conversationsAdapter;
     private List<ParseObject> conversations = new ArrayList<>();
-    private ParseUser signedInUser;
+    private ParseObject signedInUser;
 
     private void initSignedInUser() {
         if (signedInUser == null) {
-            signedInUser = ParseUser.getCurrentUser();
+            signedInUser = AuthUtil.getCurrentUser();
         }
     }
 
@@ -82,6 +84,8 @@ public class ConversationsFragment extends Fragment {
         conversationsAdapter = new ConversationsAdapter(getActivity(), conversations);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         conversationsRecyclerView.setLayoutManager(linearLayoutManager);
+        conversationsRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        conversationsRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         conversationsRecyclerView.setAdapter(conversationsAdapter);
         conversationsRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
@@ -120,12 +124,12 @@ public class ConversationsFragment extends Fragment {
     }
 
     private void attemptOffloadConversationsFromCache() {
-        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
+        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             peopleAndGroupsQuery.fromLocalDatastore();
-            peopleAndGroupsQuery.whereContainedIn(AppConstants.REPLICATED_OBJECT_ID, signedInUserChats);
-            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REPLICATED_OBJECT_ID, signedInUser.getObjectId());
+            peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
+            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             peopleAndGroupsQuery.setLimit(100);
             peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
@@ -152,18 +156,16 @@ public class ConversationsFragment extends Fragment {
 
     private void fetchConversations(final int skip) {
 
-        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
+        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
 
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
-            peopleAndGroupsQuery.whereContainedIn(AppConstants.APP_USER_ID, signedInUserChats);
-            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.APP_USER_ID, signedInUser.getUsername());
+            peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
+            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             peopleAndGroupsQuery.setLimit(100);
-
             if (skip != 0) {
                 peopleAndGroupsQuery.setSkip(skip);
             }
-
             peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
 
                 @Override
@@ -173,11 +175,8 @@ public class ConversationsFragment extends Fragment {
                             if (skip == 0) {
                                 conversations.clear();
                             }
-                            if (!conversations.containsAll(objects)) {
-                                conversations.addAll(objects);
-                            }
                             sortConversations();
-                            conversationsAdapter.notifyDataSetChanged();
+                            loadAdapter(objects);
                             if (!conversations.isEmpty()) {
                                 cacheConversations();
                             }
@@ -187,9 +186,7 @@ public class ConversationsFragment extends Fragment {
                     }
                 }
             });
-
         }
-
     }
 
     private void sortConversations() {

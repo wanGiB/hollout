@@ -52,7 +52,6 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
@@ -377,28 +376,30 @@ public class UiUtils {
 
 
     public static boolean canShowStatus(ParseObject parseUser, int type, HashMap<String, Object> optionalProps) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser!=null) {
+            String signedInUserStatusVisibility = signedInUser.getString(AppConstants.STATUS_VISIBILITY_PREF);
+            String statusVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.STATUS_VISIBILITY_PREF) : (String) optionalProps.get(AppConstants.STATUS_VISIBILITY_PREF);
 
-        String signedInUserStatusVisibility = ParseUser.getCurrentUser().getString(AppConstants.STATUS_VISIBILITY_PREF);
-        String statusVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.STATUS_VISIBILITY_PREF) : (String) optionalProps.get(AppConstants.STATUS_VISIBILITY_PREF);
-
-        //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
-        if (type == AppConstants.ENTITY_TYPE_CLOSEBY) {
-            return (statusVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
-                    || statusVisibilityOfOtherUser.equals(mContext.getString(R.string.only_closebies)))
-                    && signedInUserStatusVisibility.equals(mContext.getString(R.string.anyone))
-                    || signedInUserStatusVisibility.equals(mContext.getString(R.string.only_closebies));
-        } else {
-            return (statusVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
-                    || statusVisibilityOfOtherUser.equals(mContext.getString(R.string.only_chats)))
-                    && (signedInUserStatusVisibility.equals(mContext.getString(R.string.anyone))
-                    || signedInUserStatusVisibility.equals(mContext.getString(R.string.only_chats)));
+            //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
+            if (type == AppConstants.ENTITY_TYPE_CLOSEBY) {
+                return (statusVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
+                        || statusVisibilityOfOtherUser.equals(mContext.getString(R.string.only_closebies)))
+                        && signedInUserStatusVisibility.equals(mContext.getString(R.string.anyone))
+                        || signedInUserStatusVisibility.equals(mContext.getString(R.string.only_closebies));
+            } else {
+                return (statusVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
+                        || statusVisibilityOfOtherUser.equals(mContext.getString(R.string.only_chats)))
+                        && (signedInUserStatusVisibility.equals(mContext.getString(R.string.anyone))
+                        || signedInUserStatusVisibility.equals(mContext.getString(R.string.only_chats)));
+            }
         }
-
+        return true;
     }
 
     public static boolean canShowLocation(ParseObject parseUser, int entityType, HashMap<String, Object> optionalProps) {
 
-        String signedInUserLocationVisibility = ParseUser.getCurrentUser().getString(AppConstants.LOCATION_VISIBILITY_PREF);
+        String signedInUserLocationVisibility = AuthUtil.getCurrentUser().getString(AppConstants.LOCATION_VISIBILITY_PREF);
         String locationVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.LOCATION_VISIBILITY_PREF) : (String) optionalProps.get(AppConstants.LOCATION_VISIBILITY_PREF);
 
         //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
@@ -418,7 +419,7 @@ public class UiUtils {
 
     public static boolean canShowPresence(ParseObject parseUser, int type, HashMap<String, Object> optionalProps) {
 
-        String signedInUserLastSeenVisibility = ParseUser.getCurrentUser().getString(AppConstants.LAST_SEEN_VISIBILITY_PREF);
+        String signedInUserLastSeenVisibility = AuthUtil.getCurrentUser().getString(AppConstants.LAST_SEEN_VISIBILITY_PREF);
         String lastSeenVisibilityOtherUser = parseUser != null ? parseUser.getString(AppConstants.LAST_SEEN_VISIBILITY_PREF) :
                 (String) optionalProps.get(AppConstants.LAST_SEEN_VISIBILITY_PREF);
 
@@ -438,7 +439,7 @@ public class UiUtils {
     }
 
     public static boolean canShowAge(ParseObject parseUser, int type, HashMap<String, Object> optionalProps) {
-        String signedInUserAgeVisibility = ParseUser.getCurrentUser().getString(AppConstants.AGE_VISIBILITY_PREF);
+        String signedInUserAgeVisibility = AuthUtil.getCurrentUser().getString(AppConstants.AGE_VISIBILITY_PREF);
         String ageVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.AGE_VISIBILITY_PREF) :
                 (String) optionalProps.get(AppConstants.AGE_VISIBILITY_PREF);
 
@@ -474,11 +475,11 @@ public class UiUtils {
         }
     }
 
-    public static void loadUserData(final Activity activity, final ParseUser parseUser) {
+    public static void loadUserData(final Activity activity, final ParseObject parseUser) {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                final ParseUser signedInUser = ParseUser.getCurrentUser();
+                final ParseObject signedInUser = AuthUtil.getCurrentUser();
                 SweetAlertDialog sweetAlertDialog = new SweetAlertDialog(activity);
                 @SuppressLint("InflateParams")
                 final View profilePreview = activity.getLayoutInflater().inflate(R.layout.preview_profile, null);
@@ -489,12 +490,12 @@ public class UiUtils {
                 final HolloutTextView viewProfileView = ButterKnife.findById(profilePreview, R.id.view_user_profile);
                 final HolloutTextView usernameView = ButterKnife.findById(profilePreview, R.id.user_name);
                 refreshUserData(signedInUser, additionalPhotosRecyclerView, photoView, onlineStatusView, startChatView, viewProfileView, usernameView, parseUser, activity);
-                final ParseQuery<ParseUser> userStateQuery = ParseUser.getQuery();
-                userStateQuery.whereEqualTo("objectId", parseUser.getObjectId());
-                SubscriptionHandling<ParseUser> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
-                subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseUser>() {
+                final ParseQuery<ParseObject> userStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+                userStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, parseUser.getString(AppConstants.REAL_OBJECT_ID));
+                SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
+                subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
                     @Override
-                    public void onEvent(ParseQuery<ParseUser> query, final ParseUser object) {
+                    public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -577,7 +578,7 @@ public class UiUtils {
         imm.showSoftInput(trigger, InputMethodManager.SHOW_FORCED);
     }
 
-    private static void refreshUserData(final ParseUser signedInUser, RecyclerView additionalPhotosRecyclerView, RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseUser parseUser, final Activity activity) {
+    private static void refreshUserData(final ParseObject signedInUser, RecyclerView additionalPhotosRecyclerView, RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseObject parseUser, final Activity activity) {
         final String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         final String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         Long userLastSeenAt = parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);

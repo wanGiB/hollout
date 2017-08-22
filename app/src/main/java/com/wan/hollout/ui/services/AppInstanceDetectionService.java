@@ -21,12 +21,14 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseInstallation;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.parse.SaveCallback;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppStateManager;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -56,7 +58,7 @@ public class AppInstanceDetectionService extends Service implements
     private LocationRequest mLocationRequest;
     private String TAG = AppInstanceDetectionService.class.getSimpleName();
 
-    private ParseUser signedInUser;
+    private ParseObject signedInUser;
 
     private AppStateManager appStateManager;
 
@@ -81,7 +83,7 @@ public class AppInstanceDetectionService extends Service implements
     public void onCreate() {
         super.onCreate();
         attemptToConnectGoogleApiClient();
-        signedInUser = ParseUser.getCurrentUser();
+        signedInUser = AuthUtil.getCurrentUser();
         appStateManager = AppStateManager.init(ApplicationLoader.getInstance());
     }
 
@@ -94,7 +96,7 @@ public class AppInstanceDetectionService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (signedInUser == null) {
-            signedInUser = ParseUser.getCurrentUser();
+            signedInUser = AuthUtil.getCurrentUser();
         }
         if (appStateManager == null) {
             appStateManager = AppStateManager.init(ApplicationLoader.getInstance());
@@ -241,21 +243,20 @@ public class AppInstanceDetectionService extends Service implements
 
     private void updateSignedInUserProps(final boolean sendPushNotification) {
         if (signedInUser != null) {
-            signedInUser.saveInBackground(new SaveCallback() {
+            AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                 @Override
-                public void done(ParseException e) {
+                public void done(Boolean result, Exception e) {
                     if (e == null) {
                         ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
                         if (parseInstallation != null) {
                             try {
-                                ParseGeoPoint parseGeoPoint = ParseUser.getCurrentUser().getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+                                ParseGeoPoint parseGeoPoint = AuthUtil.getCurrentUser().getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                                 if (parseGeoPoint != null) {
                                     parseInstallation.put(AppConstants.APP_USER_GEO_POINT, parseGeoPoint);
                                 }
                                 parseInstallation.saveInBackground(new SaveCallback() {
                                     @Override
                                     public void done(ParseException e) {
-                                        startObjectReplicationService();
                                         if (sendPushNotification) {
                                             sendAmNearbyPushNotification();
                                         }
@@ -270,49 +271,45 @@ public class AppInstanceDetectionService extends Service implements
         }
     }
 
-    private void startObjectReplicationService() {
-        Intent objectReplicationServiceIntent = new Intent(AppInstanceDetectionService.this, ObjectReplicationService.class);
-        startService(objectReplicationServiceIntent);
-    }
-
     private void sendAmNearbyPushNotification() {
-        String signedInUserId = signedInUser.getString(AppConstants.APP_USER_ID);
+        String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
         List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
         ArrayList<String> newUserChats = new ArrayList<>();
-        ParseQuery<ParseUser> peopleQuery = ParseUser.getQuery();
+        ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
         if (signedInUserGeoPoint != null && aboutUser != null) {
             if (savedUserChats != null) {
                 if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
                     savedUserChats.add(signedInUserId.toLowerCase());
                 }
-                peopleQuery.whereNotContainedIn(AppConstants.APP_USER_ID, savedUserChats);
+                peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, savedUserChats);
             } else {
                 if (!newUserChats.contains(signedInUserId)) {
                     newUserChats.add(signedInUserId);
                 }
-                peopleQuery.whereNotContainedIn(AppConstants.APP_USER_ID, newUserChats);
+                peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
             }
+            peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE,AppConstants.OBJECT_TYPE_INDIVIDUAL);
             peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, aboutUser);
             peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 10.0);
-            peopleQuery.findInBackground(new FindCallback<ParseUser>() {
+            peopleQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
-                public void done(List<ParseUser> parseUsers, ParseException e) {
+                public void done(List<ParseObject> parseUsers, ParseException e) {
                     if (e==null && parseUsers!=null && !parseUsers.isEmpty()){
                         List<String>appUserIds = new ArrayList<>();
-                        for (ParseUser parseUser:parseUsers){
-                            String appUserId = parseUser.getString(AppConstants.APP_USER_ID);
+                        for (ParseObject parseUser:parseUsers){
+                            String appUserId = parseUser.getString(AppConstants.REAL_OBJECT_ID);
                             appUserIds.add(appUserId);
                         }
                         if (!appUserIds.isEmpty()){
                             final ParseQuery<ParseInstallation>parseInstallationParseQuery = ParseInstallation.getQuery();
-                            parseInstallationParseQuery.whereContainedIn(AppConstants.APP_USER_ID,appUserIds);
+                            parseInstallationParseQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID,appUserIds);
                             parseInstallationParseQuery.findInBackground(new FindCallback<ParseInstallation>() {
                                 @Override
                                 public void done(List<ParseInstallation> objects, ParseException e) {
                                     if (e==null && objects!=null){
-                                        NotificationCenter.sendAmNearbyNotification(signedInUser.getUsername(),parseInstallationParseQuery);
+                                        NotificationCenter.sendAmNearbyNotification(signedInUser.getString(AppConstants.REAL_OBJECT_ID),parseInstallationParseQuery);
                                     }
                                 }
                             });

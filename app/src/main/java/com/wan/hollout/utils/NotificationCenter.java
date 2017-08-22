@@ -17,7 +17,7 @@ public class NotificationCenter {
 
     public static void sendChatRequestNotification(final String from, final String to) {
         final ParseQuery<ParseInstallation> parseInstallationParseQuery = ParseInstallation.getQuery();
-        parseInstallationParseQuery.whereEqualTo(AppConstants.APP_USER_ID, to.toLowerCase());
+        parseInstallationParseQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, to.toLowerCase());
         parseInstallationParseQuery.getFirstInBackground(new GetCallback<ParseInstallation>() {
             @Override
             public void done(ParseInstallation object, ParseException e) {

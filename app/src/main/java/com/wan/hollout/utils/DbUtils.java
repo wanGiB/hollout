@@ -4,7 +4,6 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.models.CallLog;
@@ -40,11 +39,11 @@ public class DbUtils {
             entityNameCallback.done(entityNameFromDb, null);
         }
         if (entityType == AppConstants.ENTITY_TYPE_INDIVIDUAL) {
-            ParseQuery<ParseUser> parseUserParseQuery = ParseUser.getQuery();
-            parseUserParseQuery.whereEqualTo(AppConstants.APP_USER_ID, entityId);
-            parseUserParseQuery.getFirstInBackground(new GetCallback<ParseUser>() {
+            ParseQuery<ParseObject> parseUserParseQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+            parseUserParseQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, entityId);
+            parseUserParseQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                 @Override
-                public void done(ParseUser object, ParseException e) {
+                public void done(ParseObject object, ParseException e) {
                     if (e == null) {
                         if (object != null) {
                             String entityName = object.getString(AppConstants.APP_USER_DISPLAY_NAME);
@@ -63,8 +62,8 @@ public class DbUtils {
                 }
             });
         } else if (entityType == AppConstants.ENTITY_TYPE_GROUP || entityType == AppConstants.ENTITY_TYPE_CHAT_ROOM) {
-            ParseQuery<ParseObject> groupsAndRoomsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
-            groupsAndRoomsQuery.whereEqualTo(AppConstants.GROUP_OR_CHAT_ROOM_ID, entityId);
+            ParseQuery<ParseObject> groupsAndRoomsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+            groupsAndRoomsQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, entityId);
             groupsAndRoomsQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                 @Override
                 public void done(ParseObject object, ParseException e) {
@@ -90,18 +89,38 @@ public class DbUtils {
     private static void upsertEntity(String entityId, ParseObject parseObject) {
         HolloutEntity holloutEntity = SQLite.select().from(HolloutEntity.class).where(HolloutEntity_Table.entityId.eq(entityId)).querySingle();
         if (holloutEntity != null) {
-            holloutEntity.entityName = parseObject instanceof ParseUser ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-            holloutEntity.entityProfilePhotoUrl = parseObject instanceof ParseUser ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
-            holloutEntity.entityCoverPhotoUrl = parseObject instanceof ParseUser ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO);
+
+            holloutEntity.entityName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
+
+            holloutEntity.entityProfilePhotoUrl =  parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
+
+            holloutEntity.entityCoverPhotoUrl =  parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO);
+
             holloutEntity.update();
+
         } else {
+
             HolloutEntity newHolloutEntity = new HolloutEntity();
-            newHolloutEntity.entityId = parseObject instanceof ParseUser ? parseObject.getString(AppConstants.APP_USER_ID) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_ID);
-            newHolloutEntity.entityName = parseObject instanceof ParseUser ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-            newHolloutEntity.entityProfilePhotoUrl = parseObject instanceof ParseUser ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
-            newHolloutEntity.entityCoverPhotoUrl = parseObject instanceof ParseUser ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO);
+
+            newHolloutEntity.entityId =  parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? parseObject.getString(AppConstants.REAL_OBJECT_ID) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_ID);
+
+            newHolloutEntity.entityName =  parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
+
+            newHolloutEntity.entityProfilePhotoUrl =  parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
+
+            newHolloutEntity.entityCoverPhotoUrl =  parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO);
+
             newHolloutEntity.save();
+
         }
+
     }
 
     public static String getEntityName(String entityId) {

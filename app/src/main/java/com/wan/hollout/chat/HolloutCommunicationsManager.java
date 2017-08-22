@@ -24,7 +24,6 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.call.CallReceiver;
 import com.wan.hollout.call.CallStateChangeListener;
@@ -36,6 +35,7 @@ import com.wan.hollout.eventbuses.MessageReadEvent;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 
@@ -364,7 +364,7 @@ public class HolloutCommunicationsManager {
                     HolloutPreferences.saveUnreadMessagesCount(EMClient.getInstance().chatManager().getUnreadMessageCount());
                 }
 
-                ParseUser signedInUser = ParseUser.getCurrentUser();
+                ParseObject signedInUser = AuthUtil.getCurrentUser();
                 if (signedInUser != null) {
                     String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                     if (!signedInUserStatus.equals(AppConstants.ONLINE)) {
@@ -430,7 +430,7 @@ public class HolloutCommunicationsManager {
     }
 
     private void removeAnyPendingChatRequestFromThisRecipient(String recipientId) {
-        ParseUser signedInUser = ParseUser.getCurrentUser();
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
             String signedInUserId = signedInUser.getObjectId();
             ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);

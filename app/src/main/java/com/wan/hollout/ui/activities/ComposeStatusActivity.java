@@ -11,16 +11,15 @@ import android.view.View;
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.Config;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
-import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.CircularProgressButton;
 import com.wan.hollout.ui.widgets.MaterialEditText;
 import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
@@ -60,7 +59,7 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
         } else {
             ATE.apply(this, "light_theme");
         }
-        signedInUser = ParseUser.getCurrentUser();
+        signedInUser = AuthUtil.getCurrentUser();
         shareThoughtButton.setIndeterminateProgressMode(true);
         if (signedInUser != null) {
             String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_STATUS);
@@ -147,9 +146,9 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
             UiUtils.morphRequestToProgress(shareThoughtButton);
             UiUtils.dismissKeyboard(statusField);
             signedInUser.put(AppConstants.APP_USER_STATUS, statusField.getText().toString().trim());
-            signedInUser.saveInBackground(new SaveCallback() {
+            AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                 @Override
-                public void done(ParseException e) {
+                public void done(Boolean result, Exception e) {
                     if (e == null) {
                         UiUtils.morphRequestToSuccess(shareThoughtButton);
                         Intent callerIntent = new Intent();

@@ -5,9 +5,11 @@ import android.preference.Preference;
 import android.preference.SwitchPreference;
 
 import com.github.machinarius.preferencefragment.PreferenceFragment;
-import com.parse.ParseUser;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 
 /**
  * @author Wan Clem
@@ -15,14 +17,14 @@ import com.wan.hollout.utils.AppConstants;
 
 public class NotificationSettingsFragment extends PreferenceFragment implements Preference.OnPreferenceChangeListener {
 
-    private ParseUser parseUser;
+    private ParseObject parseUser;
 
     @Override
     public void onCreate(Bundle paramBundle) {
         super.onCreate(paramBundle);
         addPreferencesFromResource(R.xml.notification_settings);
 
-        parseUser = ParseUser.getCurrentUser();
+        parseUser = AuthUtil.getCurrentUser();
 
         SwitchPreference playSoundOnNewMessageSwitch = (SwitchPreference) findPreference(AppConstants.PLAY_SOUND_ON_NEW_MESAGE_NOTIF);
         playSoundOnNewMessageSwitch.setOnPreferenceChangeListener(this);
@@ -56,7 +58,12 @@ public class NotificationSettingsFragment extends PreferenceFragment implements 
     public boolean onPreferenceChange(final Preference preference, final Object o) {
         if (parseUser != null) {
             parseUser.put(preference.getKey(), o);
-            parseUser.saveInBackground();
+            AuthUtil.updateCurrentLocalUser(parseUser, new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean result, Exception e) {
+
+                }
+            });
         }
         return true;
     }

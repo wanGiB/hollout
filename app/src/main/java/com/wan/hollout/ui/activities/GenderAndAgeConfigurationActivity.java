@@ -20,12 +20,12 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
-import com.parse.ParseException;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
@@ -70,7 +70,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
     @BindView(R.id.female)
     RadioButton femaleRadioButton;
 
-    private ParseUser signedInUser;
+    private ParseObject signedInUser;
 
     public String selectedGenderType = null;
 
@@ -87,7 +87,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-        signedInUser = ParseUser.getCurrentUser();
+        signedInUser = AuthUtil.getCurrentUser();
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -147,9 +147,9 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
                     signedInUser.put(AppConstants.APP_USER_GENDER, selectedGenderType);
                     signedInUser.put(AppConstants.APP_USER_AGE, ageBox.getText().toString().trim());
                     UiUtils.showProgressDialog(GenderAndAgeConfigurationActivity.this, "Please wait...");
-                    signedInUser.saveInBackground(new SaveCallback() {
+                    AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                         @Override
-                        public void done(ParseException e) {
+                        public void done(Boolean result, Exception e) {
                             UiUtils.dismissProgressDialog();
                             if (e == null) {
                                 navigateBackToCaller();

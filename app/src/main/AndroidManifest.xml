@@ -106,7 +106,7 @@
             android:name="com.hyphenate.chat.EMChatService"
             android:exported="true" />
         <service
-            android:name=".ui.services.ObjectReplicationService"
+            android:name=".ui.services.EMClientAuthenticationService"
             android:enabled="true" />
         <service
             android:name=".ui.services.FetchUserInfoService"

@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -41,12 +40,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hyphenate.EMCallBack;
-import com.hyphenate.chat.EMClient;
-import com.parse.LogOutCallback;
-import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
@@ -61,7 +55,7 @@ import com.wan.hollout.ui.fragments.DrawerFragment;
 import com.wan.hollout.ui.fragments.FeedFragment;
 import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
-import com.wan.hollout.ui.services.ObjectReplicationService;
+import com.wan.hollout.ui.services.EMClientAuthenticationService;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
@@ -121,14 +115,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        ParseUser signedInUser = ParseUser.getCurrentUser();
-        if (signedInUser == null) {
-            Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
-            startActivity(splashIntent);
-            finish();
-            return;
-        }
-
         Bundle intentExtras = getIntent().getExtras();
 
         if (intentExtras != null) {
@@ -139,8 +125,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
         }
 
-        checkEMCAuthenticationStatus();
-
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
         final ActionBar ab = getSupportActionBar();
 
         if (ab != null) {
@@ -170,7 +155,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         drawerFragment.setUp(drawer, this);
 
         if (!HolloutPreferences.isUserWelcomed()) {
-            UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)));
+            if (signedInUser != null) {
+                UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)));
+            }
             HolloutPreferences.setUserWelcomed(true);
         }
 
@@ -243,6 +230,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
         });
 
+        startEMClientAuthenticationService();
     }
 
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
@@ -335,28 +323,13 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         String ateKey = HolloutPreferences.getATEKey();
         ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
         invalidateDrawerMenuHeader();
-        checkEMCAuthenticationStatus();
         fetchUnreadMessagesCount();
+        startEMClientAuthenticationService();
     }
 
-    private void checkEMCAuthenticationStatus() {
-        if (!EMClient.getInstance().isLoggedInBefore()) {
-            ParseUser parseUser = ParseUser.getCurrentUser();
-            if (parseUser != null) {
-                HolloutCommunicationsManager.getInstance().logInEMClient(parseUser.getUsername(), parseUser.getUsername(), new DoneCallback<Boolean>() {
-                    @Override
-                    public void done(Boolean success, Exception e) {
-                        if (e == null && success) {
-                            HolloutCommunicationsManager.getInstance().init(MainActivity.this);
-                        }
-                    }
-                });
-            } else {
-                attemptLogOut();
-            }
-        } else {
-            HolloutCommunicationsManager.getInstance().init(MainActivity.this);
-        }
+    private void startEMClientAuthenticationService(){
+        Intent emcService = new Intent(MainActivity.this, EMClientAuthenticationService.class);
+        startService(emcService);
     }
 
     private void setupTabs(Adapter pagerAdapter) {
@@ -411,7 +384,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     protected void onStart() {
         super.onStart();
         checkAndRegEventBus();
-        checkEMCAuthenticationStatus();
+        startEMClientAuthenticationService();
         fetchUnreadMessagesCount();
     }
 
@@ -465,11 +438,13 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                         } else {
                             turnOnLocationMessage();
                         }
+                    }else if (s.equals(AppConstants.ATTEMPT_LOGOUT)){
+                        attemptLogOut();
                     }
-                }else if (o instanceof UnreadFeedsBadge){
-                    UnreadFeedsBadge unreadFeedsBadge = (UnreadFeedsBadge)o;
-                    updateTab(2,unreadFeedsBadge.getUnreadFeedsSize());
-                }else if (o instanceof MessageReceivedEvent){
+                } else if (o instanceof UnreadFeedsBadge) {
+                    UnreadFeedsBadge unreadFeedsBadge = (UnreadFeedsBadge) o;
+                    updateTab(2, unreadFeedsBadge.getUnreadFeedsSize());
+                } else if (o instanceof MessageReceivedEvent) {
                     fetchUnreadMessagesCount();
                 }
             }
@@ -563,67 +538,70 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @SuppressLint("SetTextI18n")
     private void initPeopleFilterDialog() {
-        final ParseUser signedInUser = ParseUser.getCurrentUser();
-        String ageStartFilter = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
-        final String ageEndFilter = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
-        AlertDialog.Builder peopleFilterDialog = new AlertDialog.Builder(MainActivity.this);
-        @SuppressLint("InflateParams")
-        View peopleFilterDialogView = getLayoutInflater().inflate(R.layout.people_filter_options_dialog, null);
-        RadioGroup genderFilterOptionsGroup = (RadioGroup) peopleFilterDialogView.findViewById(R.id.gender_filter_options);
-        final EditText startAgeEditText = (EditText) peopleFilterDialogView.findViewById(R.id.start_age);
-        if (StringUtils.isNotEmpty(ageStartFilter)) {
-            startAgeEditText.setText(ageStartFilter);
-        } else {
-            startAgeEditText.setText("16");
-        }
-        final EditText endAgeEditText = (EditText) peopleFilterDialogView.findViewById(R.id.end_age);
-        if (StringUtils.isNotEmpty(ageEndFilter)) {
-            endAgeEditText.setText(ageEndFilter);
-        } else {
-            endAgeEditText.setText("70");
-        }
-        genderChoice = signedInUser.getString(AppConstants.GENDER_FILTER);
-        if (StringUtils.isNotEmpty(genderChoice)){
-            if (genderChoice.equals(AppConstants.Both)){
-                genderFilterOptionsGroup.check(R.id.both);
-            }else if (genderChoice.equals(AppConstants.MALE)){
-                genderFilterOptionsGroup.check(R.id.males_only);
-            }else if (genderChoice.equals(AppConstants.FEMALE)){
-                genderFilterOptionsGroup.check(R.id.females_only);
+        final ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            String ageStartFilter = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
+            final String ageEndFilter = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
+            AlertDialog.Builder peopleFilterDialog = new AlertDialog.Builder(MainActivity.this);
+            @SuppressLint("InflateParams")
+            View peopleFilterDialogView = getLayoutInflater().inflate(R.layout.people_filter_options_dialog, null);
+            RadioGroup genderFilterOptionsGroup = (RadioGroup) peopleFilterDialogView.findViewById(R.id.gender_filter_options);
+            final EditText startAgeEditText = (EditText) peopleFilterDialogView.findViewById(R.id.start_age);
+            if (StringUtils.isNotEmpty(ageStartFilter)) {
+                startAgeEditText.setText(ageStartFilter);
+            } else {
+                startAgeEditText.setText("16");
             }
-        }
-        genderFilterOptionsGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-
-            @Override
-            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
-                if (checkedId == R.id.males_only) {
-                    genderChoice = AppConstants.MALE;
-                } else if (checkedId == R.id.females_only) {
-                    genderChoice = AppConstants.FEMALE;
+            final EditText endAgeEditText = (EditText) peopleFilterDialogView.findViewById(R.id.end_age);
+            if (StringUtils.isNotEmpty(ageEndFilter)) {
+                endAgeEditText.setText(ageEndFilter);
+            } else {
+                endAgeEditText.setText("70");
+            }
+            genderChoice = signedInUser.getString(AppConstants.GENDER_FILTER);
+            if (StringUtils.isNotEmpty(genderChoice)) {
+                if (genderChoice.equals(AppConstants.Both)) {
+                    genderFilterOptionsGroup.check(R.id.both);
+                } else if (genderChoice.equals(AppConstants.MALE)) {
+                    genderFilterOptionsGroup.check(R.id.males_only);
+                } else if (genderChoice.equals(AppConstants.FEMALE)) {
+                    genderFilterOptionsGroup.check(R.id.females_only);
                 }
             }
+            genderFilterOptionsGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
 
-        });
-        peopleFilterDialog.setView(peopleFilterDialogView);
-        peopleFilterDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(final DialogInterface dialog, int which) {
-                signedInUser.put(AppConstants.GENDER_FILTER, genderChoice);
-                if (StringUtils.isNotEmpty(startAgeEditText.getText().toString().trim()) && StringUtils.isNotEmpty(endAgeEditText.getText().toString().trim())) {
-                    signedInUser.put(AppConstants.AGE_START_FILTER, startAgeEditText.getText().toString().trim());
-                    signedInUser.put(AppConstants.AGE_END_FILTER, endAgeEditText.getText().toString().trim());
-                }
-                signedInUser.saveInBackground(new SaveCallback() {
-                    @Override
-                    public void done(ParseException e) {
-                        dialog.dismiss();
-                        dialog.cancel();
-                        EventBus.getDefault().post(AppConstants.REFRESH_PEOPLE);
+                @Override
+                public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
+                    if (checkedId == R.id.males_only) {
+                        genderChoice = AppConstants.MALE;
+                    } else if (checkedId == R.id.females_only) {
+                        genderChoice = AppConstants.FEMALE;
                     }
-                });
-            }
-        });
-        peopleFilterDialog.create().show();
+                }
+
+            });
+            peopleFilterDialog.setView(peopleFilterDialogView);
+            peopleFilterDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(final DialogInterface dialog, int which) {
+                    signedInUser.put(AppConstants.GENDER_FILTER, genderChoice);
+                    if (StringUtils.isNotEmpty(startAgeEditText.getText().toString().trim()) && StringUtils.isNotEmpty(endAgeEditText.getText().toString().trim())) {
+                        signedInUser.put(AppConstants.AGE_START_FILTER, startAgeEditText.getText().toString().trim());
+                        signedInUser.put(AppConstants.AGE_END_FILTER, endAgeEditText.getText().toString().trim());
+                    }
+                    AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                        @Override
+                        public void done(Boolean result, Exception e) {
+                            dialog.dismiss();
+                            dialog.cancel();
+                            EventBus.getDefault().post(AppConstants.REFRESH_PEOPLE);
+                        }
+                    });
+                }
+            });
+            peopleFilterDialog.create().show();
+
+        }
     }
 
     @Override
@@ -635,19 +613,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
         } else {
             getSupportFragmentManager().findFragmentById(R.id.fragment_container).onActivityResult(requestCode, resultCode, data);
-        }
-    }
-
-    private void startObjectReplicationService() {
-        Intent objectReplicationServiceIntent = new Intent(MainActivity.this, ObjectReplicationService.class);
-        startService(objectReplicationServiceIntent);
-    }
-
-    @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        if (ParseUser.getCurrentUser() != null) {
-            startObjectReplicationService();
         }
     }
 
@@ -672,10 +637,10 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     private void finishLogOut() {
         FirebaseAuth.getInstance().signOut();
         UiUtils.showProgressDialog(MainActivity.this, "Logging out...");
-        if (ParseUser.getCurrentUser() != null) {
-            ParseUser.logOutInBackground(new LogOutCallback() {
+        if (AuthUtil.getCurrentUser() != null) {
+            AuthUtil.dissolveAuthenticatedUser(new DoneCallback<Boolean>() {
                 @Override
-                public void done(ParseException e) {
+                public void done(Boolean result, Exception e) {
                     if (e == null) {
                         HolloutPreferences.setUserWelcomed(false);
                         HolloutPreferences.clearPersistedCredentials();
@@ -776,8 +741,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private void launchUserProfile() {
         Intent signedInUserIntent = new Intent(MainActivity.this, UserProfileActivity.class);
-        if (ParseUser.getCurrentUser() != null) {
-            signedInUserIntent.putExtra(AppConstants.USER_PROPERTIES, ParseUser.getCurrentUser());
+        if (AuthUtil.getCurrentUser() != null) {
+            signedInUserIntent.putExtra(AppConstants.USER_PROPERTIES, AuthUtil.getCurrentUser());
             startActivity(signedInUserIntent);
         }
     }

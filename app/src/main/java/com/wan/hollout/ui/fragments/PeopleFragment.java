@@ -25,7 +25,6 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
@@ -35,6 +34,7 @@ import com.wan.hollout.ui.adapters.PeopleAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.SafeLayoutManager;
@@ -75,7 +75,7 @@ public class PeopleFragment extends Fragment {
     HolloutTextView meetPeopleTextView;
 
     private PeopleAdapter peopleAdapter;
-    private List<ParseUser> people = new ArrayList<>();
+    private List<ParseObject> people = new ArrayList<>();
     private ParseObject signedInUser;
 
     private View footerView;
@@ -94,7 +94,7 @@ public class PeopleFragment extends Fragment {
 
     private void initSignedInUser() {
         if (signedInUser == null) {
-            signedInUser = ParseUser.getCurrentUser();
+            signedInUser = AuthUtil.getCurrentUser();
         }
     }
 
@@ -160,12 +160,12 @@ public class PeopleFragment extends Fragment {
     }
 
     private void fetchPeopleOfCommonInterestFromCache() {
-        ParseQuery<ParseUser> localUsersQuery = ParseUser.getQuery();
+        ParseQuery<ParseObject> localUsersQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         localUsersQuery.fromLocalDatastore();
-        localUsersQuery.whereNotEqualTo(AppConstants.APP_USER_ID, signedInUser.getString(AppConstants.APP_USER_ID));
-        localUsersQuery.findInBackground(new FindCallback<ParseUser>() {
+        localUsersQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+        localUsersQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
-            public void done(List<ParseUser> objects, ParseException e) {
+            public void done(List<ParseObject> objects, ParseException e) {
                 if (objects != null && !objects.isEmpty()) {
                     loadAdapter(objects);
                     UiUtils.toggleFlipperState(peopleContentFlipper, 2);
@@ -239,7 +239,7 @@ public class PeopleFragment extends Fragment {
         if (getActivity() != null) {
             if (HolloutUtils.isNetWorkConnected(getActivity())) {
                 if (signedInUser != null) {
-                    String signedInUserId = signedInUser.getString(AppConstants.APP_USER_ID);
+                    String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
                     List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
                     String signedInUserCountry = signedInUser.getString(AppConstants.APP_USER_COUNTRY);
                     List<String> signedInUserInterests = signedInUser.getList(AppConstants.INTERESTS);
@@ -248,8 +248,8 @@ public class PeopleFragment extends Fragment {
                     String endAgeValue = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
 
                     ArrayList<String> newUserChats = new ArrayList<>();
-                    ParseQuery<ParseUser> peopleQuery = ParseUser.getQuery();
-
+                    ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+                    peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE,AppConstants.OBJECT_TYPE_INDIVIDUAL);
                     if (startAgeValue != null && endAgeValue != null) {
                         List<String> ageRanges = HolloutUtils.computeAgeRanges(startAgeValue, endAgeValue);
                         HolloutLogger.d("AgeRanges", TextUtils.join(",", ageRanges));
@@ -266,12 +266,12 @@ public class PeopleFragment extends Fragment {
                         if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
                             savedUserChats.add(signedInUserId.toLowerCase());
                         }
-                        peopleQuery.whereNotContainedIn(AppConstants.APP_USER_ID, savedUserChats);
+                        peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, savedUserChats);
                     } else {
                         if (!newUserChats.contains(signedInUserId)) {
                             newUserChats.add(signedInUserId);
                         }
-                        peopleQuery.whereNotContainedIn(AppConstants.APP_USER_ID, newUserChats);
+                        peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
                     }
                     if (signedInUserCountry != null) {
                         peopleQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
@@ -287,10 +287,10 @@ public class PeopleFragment extends Fragment {
                     if (skip != 0) {
                         peopleQuery.setSkip(skip);
                     }
-                    peopleQuery.findInBackground(new FindCallback<ParseUser>() {
+                    peopleQuery.findInBackground(new FindCallback<ParseObject>() {
 
                         @Override
-                        public void done(final List<ParseUser> users, final ParseException e) {
+                        public void done(final List<ParseObject> users, final ParseException e) {
                             if (swipeRefreshLayout.isRefreshing()) {
                                 swipeRefreshLayout.setRefreshing(false);
                             }
@@ -333,9 +333,9 @@ public class PeopleFragment extends Fragment {
         });
     }
 
-    private void loadAdapter(List<ParseUser> users) {
+    private void loadAdapter(List<ParseObject> users) {
         if (!users.isEmpty()) {
-            for (ParseUser parseUser : users) {
+            for (ParseObject parseUser : users) {
                 if (!people.contains(parseUser)) {
                     people.add(parseUser);
                 }
@@ -359,35 +359,36 @@ public class PeopleFragment extends Fragment {
 
     private void searchPeople(final int skip, String searchString) {
         peopleAdapter.setSearchString(searchString);
-        ParseQuery<ParseUser> parseUserParseQuery = ParseUser.getQuery();
+        ParseQuery<ParseObject> parseUserParseQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         parseUserParseQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
+        parseUserParseQuery.whereEqualTo(AppConstants.OBJECT_TYPE,AppConstants.OBJECT_TYPE_INDIVIDUAL);
         if (signedInUser != null) {
-            parseUserParseQuery.whereNotEqualTo(AppConstants.APP_USER_ID, signedInUser.getString(AppConstants.APP_USER_ID));
+            parseUserParseQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
         }
-        ParseQuery<ParseUser> categoryQuery = ParseUser.getQuery();
+        ParseQuery<ParseObject> categoryQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         if (signedInUser != null) {
-            categoryQuery.whereNotEqualTo(AppConstants.APP_USER_ID, signedInUser.getString(AppConstants.APP_USER_ID));
+            categoryQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
         }
         List<String> elements = new ArrayList<>();
         elements.add(StringUtils.stripEnd(searchString.toLowerCase(), "s"));
         categoryQuery.whereContainsAll(AppConstants.ABOUT_USER, elements);
-        List<ParseQuery<ParseUser>> queries = new ArrayList<>();
+        List<ParseQuery<ParseObject>> queries = new ArrayList<>();
         queries.add(parseUserParseQuery);
         queries.add(categoryQuery);
-        ParseQuery<ParseUser> joinedQuery = ParseQuery.or(queries);
+        ParseQuery<ParseObject> joinedQuery = ParseQuery.or(queries);
         joinedQuery.setLimit(100);
         if (skip != 0) {
             joinedQuery.setSkip(skip);
         }
-        joinedQuery.findInBackground(new FindCallback<ParseUser>() {
+        joinedQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
-            public void done(List<ParseUser> objects, ParseException e) {
+            public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null) {
                     if (objects != null && !objects.isEmpty()) {
                         if (skip == 0) {
                             people.clear();
                         }
-                        for (ParseUser parseUser : objects) {
+                        for (ParseObject parseUser : objects) {
                             if (!people.contains(parseUser)) {
                                 people.add(parseUser);
                             }

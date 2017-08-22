@@ -16,7 +16,6 @@ import android.widget.RelativeLayout;
 
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
@@ -24,6 +23,7 @@ import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.widgets.dotloader.DotLoader;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
@@ -77,11 +77,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     public String recipientChatId;
     public int recipientType;
 
-    public ParseUser signedInUserObject;
+    public ParseObject signedInUserObject;
     private ParseObject recipientObject;
 
-    private ParseQuery<ParseObject> recipientGroupStateQuery;
-    private ParseQuery<ParseUser> recipientParseUserStateQuery;
+    private ParseQuery<ParseObject> recipientObjectStateQuery;
 
     public ChatToolbar(Context context) {
         this(context, null);
@@ -111,7 +110,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     public void initView(String recipientChatId, int recipientType) {
-        this.signedInUserObject = ParseUser.getCurrentUser();
+        this.signedInUserObject = AuthUtil.getCurrentUser();
         setRecipientChatId(recipientChatId);
         setRecipientType(recipientType);
         attachCallbacks();
@@ -162,29 +161,20 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     public String getRecipientName() {
-        if (recipientObject instanceof ParseUser) {
+        if (recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
             return recipientObject.getString(AppConstants.APP_USER_DISPLAY_NAME);
         } else {
-            if (recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-                return recipientObject.getString(AppConstants.APP_USER_DISPLAY_NAME);
-            } else {
-                recipientObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-            }
+            recipientObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
         }
         return "Unknown User";
     }
 
     public String getRecipientPhotoUrl() {
-        if (recipientObject instanceof ParseUser) {
+        if (recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
             return recipientObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         } else {
-            if (recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-                return recipientObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-            } else {
-                recipientObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
-            }
+            return recipientObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
         }
-        return null;
     }
 
     private boolean userConnected() {
@@ -201,7 +191,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             contactNameView.setText(WordUtils.capitalize(recipientName));
         }
 
-        if (recipientUser instanceof ParseUser || recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
+        if (recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
 
             JSONObject chatStates = recipientUser.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
             Long userLastSeen = recipientUser.getLong(AppConstants.APP_USER_LAST_SEEN);
@@ -255,26 +245,11 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     }
 
-    private void subscribeToUserChanges() {
-        if (recipientObject != null && recipientObject instanceof ParseUser) {
-            recipientParseUserStateQuery = ParseUser.getQuery();
-            recipientParseUserStateQuery.whereEqualTo("objectId", recipientObject.getObjectId());
-            SubscriptionHandling<ParseUser> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientParseUserStateQuery);
-            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseUser>() {
-                @Override
-                public void onEvent(ParseQuery<ParseUser> query, final ParseUser object) {
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            refreshToolbar(object);
-                        }
-                    });
-                }
-            });
-        } else if (recipientObject != null) {
-            recipientGroupStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
-            recipientGroupStateQuery.whereEqualTo("objectId", recipientObject.getObjectId());
-            SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientGroupStateQuery);
+    private void subscribeToObjectChanges() {
+        if (recipientObject != null) {
+            recipientObjectStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+            recipientObjectStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, recipientObject.getString(AppConstants.REAL_OBJECT_ID));
+            SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientObjectStateQuery);
             subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
                 @Override
                 public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
@@ -300,7 +275,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 mContext.finish();
                 break;
             case R.id.launch_user_profile:
-                if (recipientObject != null && recipientObject instanceof ParseUser) {
+                if (recipientObject != null && recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                     Intent userProfileIntent = new Intent(mContext, UserProfileActivity.class);
                     userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, recipientObject);
                     mContext.startActivity(userProfileIntent);
@@ -318,20 +293,13 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        subscribeToUserChanges();
+        subscribeToObjectChanges();
     }
 
     private void unSubscribeFromUserChanges() {
-        if (recipientGroupStateQuery != null) {
+        if (recipientObjectStateQuery != null) {
             try {
-                ApplicationLoader.getParseLiveQueryClient().unsubscribe(recipientGroupStateQuery);
-            } catch (NullPointerException ignored) {
-
-            }
-        }
-        if (recipientParseUserStateQuery != null) {
-            try {
-                ApplicationLoader.getParseLiveQueryClient().unsubscribe(recipientParseUserStateQuery);
+                ApplicationLoader.getParseLiveQueryClient().unsubscribe(recipientObjectStateQuery);
             } catch (NullPointerException ignored) {
 
             }

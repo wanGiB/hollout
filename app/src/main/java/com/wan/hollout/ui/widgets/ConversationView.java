@@ -30,14 +30,14 @@ import com.hyphenate.chat.EMVoiceMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.ui.activities.UserProfileActivity;
+import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -128,14 +128,11 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
         this.parseObject = parseObject;
 
         this.emConversation = EMClient.getInstance()
-                .chatManager().getConversation(
-                        parseObject.get(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                                ? parseObject.getString(AppConstants.APP_USER_ID)
-                                : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_ID),
+                .chatManager().getConversation(parseObject.getString(AppConstants.REAL_OBJECT_ID),
                         ChatUtils.getConversationType(parseObject.get(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                                 ? AppConstants.CHAT_TYPE_SINGLE
                                 : (parseObject.getInt(AppConstants.ROOM_TYPE) == AppConstants.CHAT_TYPE_GROUP)
-                                ? AppConstants.CHAT_TYPE_GROUP : AppConstants.CHAT_TYPE_ROOM));
+                                ? AppConstants.CHAT_TYPE_GROUP : AppConstants.CHAT_TYPE_ROOM), true);
 
         init();
         loadParseObject(searchString);
@@ -227,6 +224,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 lastMessage = emConversation.getLastMessage();
 
                 if (lastMessage != null) {
+                    HolloutLogger.d("LastMessageTracker","Last Message in conversation is not null");
                     UiUtils.showView(msgTimeStampView, true);
                     long lastMessageTime = lastMessage.getMsgTime();
                     parseObject.put(AppConstants.LAST_UPDATE_TIME, lastMessageTime);
@@ -241,6 +239,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                     AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
                     setupLastMessage(lastMessage);
                 } else {
+                    HolloutLogger.d("LastMessageTracker","Last Message in conversation is null");
                     parseObject.put(AppConstants.LAST_UPDATE_TIME, 0);
                     UiUtils.showView(msgTimeStampView, false);
                     AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
@@ -260,6 +259,8 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                         }
                     }
                 }
+            }else{
+                HolloutLogger.d("LastMessageTracker","Sorry, conversation does not even exist. Lolz.");
             }
 
             if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
@@ -290,7 +291,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 public void onClick(View view) {
                     UiUtils.blinkView(view);
                     if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-                        UiUtils.loadUserData(activity, (ParseUser) parseObject);
+                        UiUtils.loadUserData(activity,  parseObject);
                     }
                 }
 
@@ -332,7 +333,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
     private void subscribeToUserChanges() {
         if (parseObject != null) {
-            objectStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_AND_GROUPS);
+            objectStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
             objectStateQuery.whereEqualTo("objectId", parseObject.getObjectId());
             SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(objectStateQuery);
             subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
@@ -380,9 +381,16 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
     @Override
     public void onClick(View v) {
-        Intent viewProfileIntent = new Intent(activity, UserProfileActivity.class);
+        Intent viewProfileIntent = new Intent(activity, ChatActivity.class);
+        parseObject.put(AppConstants.CHAT_TYPE, (getObjectType().equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                ? AppConstants.CHAT_TYPE_SINGLE : getObjectType().equals(AppConstants.OBJECT_TYPE_GROUP)
+                ?AppConstants.CHAT_TYPE_GROUP:AppConstants.CHAT_TYPE_ROOM));
         viewProfileIntent.putExtra(AppConstants.USER_PROPERTIES, parseObject);
         activity.startActivity(viewProfileIntent);
+    }
+
+    private String getObjectType() {
+        return parseObject.getString(AppConstants.OBJECT_TYPE);
     }
 
     @Override

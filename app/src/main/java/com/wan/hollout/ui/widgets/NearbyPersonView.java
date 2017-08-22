@@ -20,13 +20,13 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -36,7 +36,6 @@ import org.apache.commons.lang3.text.WordUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,7 +44,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 @SuppressWarnings("unused")
-public class PersonView extends RelativeLayout implements View.OnClickListener, View.OnLongClickListener {
+public class NearbyPersonView extends RelativeLayout implements View.OnClickListener, View.OnLongClickListener {
 
     @BindView(R.id.user_online_status)
     ImageView userOnlineStatusView;
@@ -83,26 +82,26 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
     @BindView(R.id.icon_container)
     RelativeLayout iconContainer;
 
-    public ParseUser person;
+    public ParseObject person;
 
     private ParseObject signedInUser;
     public Activity activity;
 
-    private ParseQuery<ParseUser> userStateQuery;
+    private ParseQuery<ParseObject> userStateQuery;
 
     private String searchString;
 
-    public PersonView(Context context) {
+    public NearbyPersonView(Context context) {
         this(context, null);
     }
 
-    public PersonView(Context context, @Nullable AttributeSet attrs) {
+    public NearbyPersonView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public PersonView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public NearbyPersonView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        inflate(context, R.layout.person_to_meet, this);
+        inflate(context, R.layout.nearby_person_to_meet, this);
     }
 
     private void init() {
@@ -115,11 +114,11 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    public void bindData(Activity activity, String searchString, ParseUser person) {
+    public void bindData(Activity activity, String searchString, ParseObject person) {
         this.searchString = searchString;
         this.activity = activity;
         this.person = person;
-        signedInUser = ParseUser.getCurrentUser();
+        signedInUser = AuthUtil.getCurrentUser();
         init();
         loadParseUser(searchString);
     }
@@ -260,7 +259,7 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
 
                 @Override
                 public void onClick(View view) {
-                    PersonView.this.performClick();
+                    NearbyPersonView.this.performClick();
                 }
 
             });
@@ -269,7 +268,7 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
 
                 @Override
                 public void onClick(View view) {
-                    PersonView.this.performClick();
+                    NearbyPersonView.this.performClick();
                 }
 
             });
@@ -280,12 +279,12 @@ public class PersonView extends RelativeLayout implements View.OnClickListener, 
 
     private void subscribeToUserChanges() {
         if (person != null) {
-            userStateQuery = ParseUser.getQuery();
-            userStateQuery.whereEqualTo("objectId", person.getObjectId());
-            SubscriptionHandling<ParseUser> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
-            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseUser>() {
+            userStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+            userStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, person.getString(AppConstants.REAL_OBJECT_ID));
+            SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
+            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
                 @Override
-                public void onEvent(ParseQuery<ParseUser> query, final ParseUser object) {
+                public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
                     post(new Runnable() {
                         @Override
                         public void run() {

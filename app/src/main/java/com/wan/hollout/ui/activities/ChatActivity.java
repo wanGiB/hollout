@@ -50,12 +50,12 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.call.VideoCallActivity;
 import com.wan.hollout.call.VoiceCallActivity;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.emoji.EmojiDrawer;
@@ -79,6 +79,7 @@ import com.wan.hollout.ui.widgets.LinkPreview;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 import com.wan.hollout.ui.widgets.Stub;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FilePathFinder;
 import com.wan.hollout.utils.FileUtils;
@@ -118,6 +119,10 @@ import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_IMAGE;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_LOCATION;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_VIDEO;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
+
+/***
+ * @author Wan Clem
+ * ***/
 
 @SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal", "unused"})
 public class ChatActivity extends BaseActivity implements ATEActivityThemeCustomizer,
@@ -225,7 +230,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private ArrayList<HolloutFile> pickedMediaFiles = new ArrayList<>();
     private PickedMediaFilesAdapter pickedMediaFilesAdapter;
 
-    private ParseUser signedInUser;
+    private ParseObject signedInUser;
 
     private String recipientName;
     private ParseObject recipientProperties;
@@ -265,27 +270,33 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         setSupportActionBar(chatToolbar.getToolbar());
         Bundle intentExtras = getIntent().getExtras();
         initBasicComponents();
-        signedInUser = ParseUser.getCurrentUser();
+        signedInUser = AuthUtil.getCurrentUser();
+
         if (signedInUser == null) {
             Intent splashIntent = new Intent(ChatActivity.this, SplashActivity.class);
             startActivity(splashIntent);
             finish();
             return;
         }
+
         recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
+
         if (recipientProperties != null) {
+
             chatType = recipientProperties.getInt(AppConstants.CHAT_TYPE);
             chatToolbar.initView(recipientId, chatType);
-            recipientId = recipientProperties instanceof ParseUser
-                    ? ((ParseUser) recipientProperties).getUsername().trim().toLowerCase()
-                    : (recipientProperties.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                    ? recipientProperties.getString(AppConstants.APP_USER_ID) : recipientProperties.getObjectId());
+
+            recipientId = recipientProperties.getString(AppConstants.REAL_OBJECT_ID);
+
             setupChatRecipient(recipientProperties);
+
             if (chatType == AppConstants.CHAT_TYPE_ROOM) {
                 messagesEmptyView.setText(getString(R.string.cleaning_up_room));
                 joinRoom();
             }
+
         }
+
         if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
         } else {
@@ -360,7 +371,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 msgId = msgs.get(0).getMsgId();
             }
             mConversation.loadMoreMsgFromDB(msgId, pageSize - msgCount);
-
         }
         if (msgs != null) {
             if (!messages.containsAll(msgs)) {
@@ -1361,7 +1371,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private void checkAndSendChatRequest() {
         if (signedInUser != null) {
-            String signedInUserId = signedInUser.getUsername();
+            String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
             ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
             pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
@@ -1383,19 +1393,30 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             if (!chatIds.contains(getRecipient())) {
                 chatIds.add(getRecipient());
                 signedInUser.put(AppConstants.APP_USER_CHATS, chatIds);
-                signedInUser.saveInBackground();
+                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                    @Override
+                    public void done(Boolean result, Exception e) {
+
+                    }
+                });
             }
         } else {
             chatIds = new ArrayList<>();
             chatIds.add(getRecipient());
             signedInUser.put(AppConstants.APP_USER_CHATS, chatIds);
-            signedInUser.saveInBackground();
+            AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean result, Exception e) {
+
+                }
+            });
+
         }
     }
 
     private void sendNewChatRequest() {
         if (signedInUser != null) {
-            final String signedInUserId = signedInUser.getUsername();
+            final String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
             ParseObject newChatRequestObject = new ParseObject(AppConstants.HOLLOUT_FEED);
             newChatRequestObject.put(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
             newChatRequestObject.put(AppConstants.FEED_RECIPIENT_ID, getRecipient());
@@ -1435,7 +1456,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
         EMClient.getInstance().chatManager().sendMessage(newMessage);
         //Send message here
-        messages.add(newMessage);
+        messages.add(0, newMessage);
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
         messagesRecyclerView.smoothScrollToPosition(messages.size() - 1);

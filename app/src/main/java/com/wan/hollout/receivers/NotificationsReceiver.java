@@ -2,10 +2,12 @@ package com.wan.hollout.receivers;
 
 import android.content.Context;
 import android.content.Intent;
+
+import com.parse.ParseObject;
 import com.parse.ParsePushBroadcastReceiver;
-import com.parse.ParseUser;
 import com.wan.hollout.ui.services.FetchUserInfoService;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,7 +38,7 @@ public class NotificationsReceiver extends ParsePushBroadcastReceiver {
             String pushType = pushData.optString(AppConstants.NOTIFICATION_TYPE);
             if (pushType.equals(AppConstants.NOTIFICATION_TYPE_INDIVIDUAL_CHAT_REQUEST)
                     || pushType.equals(AppConstants.NOTIFICATION_TYPE_AM_NEARBY)) {
-                ParseUser signedInUser = ParseUser.getCurrentUser();
+                ParseObject signedInUser = AuthUtil.getCurrentUser();
                 if (signedInUser != null && !signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)) {
                     String senderId = pushData.optString(AppConstants.SENDER_ID);
                     Intent fetchUserInfoIntent = new Intent(context, FetchUserInfoService.class);

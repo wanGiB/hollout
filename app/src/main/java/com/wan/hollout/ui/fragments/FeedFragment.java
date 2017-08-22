@@ -18,13 +18,13 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.eventbuses.UnreadFeedsBadge;
 import com.wan.hollout.ui.adapters.FeedAdapter;
 import com.wan.hollout.ui.widgets.ChatRequestsAdapterView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -49,7 +49,7 @@ public class FeedFragment extends Fragment {
     @BindView(R.id.feed_recycler_view)
     RecyclerView feedRecyclerView;
 
-    private ParseUser signedInUser;
+    private ParseObject signedInUser;
     private View headerView;
     private ChatRequestsAdapterView chatRequestsAdapterView;
 
@@ -83,7 +83,7 @@ public class FeedFragment extends Fragment {
 
     private void initSignedInUser() {
         if (signedInUser == null) {
-            signedInUser = ParseUser.getCurrentUser();
+            signedInUser = AuthUtil.getCurrentUser();
         }
     }
 
@@ -135,7 +135,7 @@ public class FeedFragment extends Fragment {
         if (signedInUser != null) {
             ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.APP_USER_ID));
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             chatRequestsQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {

@@ -12,13 +12,13 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.ParseUser;
 import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
 import com.wan.hollout.ui.adapters.ChatRequestsAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
@@ -48,7 +48,7 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
     @BindView(R.id.chat_requests_recycler_view)
     RecyclerView chatRequestsRecyclerView;
 
-    private ParseUser signedInUser;
+    private ParseObject signedInUser;
     private List<ParseObject> chatRequests = new ArrayList<>();
     private ChatRequestsAdapter chatRequestsAdapter;
 
@@ -63,7 +63,7 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-        signedInUser = ParseUser.getCurrentUser();
+        signedInUser = AuthUtil.getCurrentUser();
         initFeedAdapter();
         fetchChatRequests(0);
         checkAndRegEventBus();
@@ -128,7 +128,7 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
             if (skip != 0) {
                 chatRequestsQuery.setSkip(skip);
             }
-            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.APP_USER_ID));
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             chatRequestsQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {

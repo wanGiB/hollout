@@ -15,7 +15,7 @@ import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMTextMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
-import com.parse.ParseUser;
+import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.ChatActivity;
@@ -140,7 +140,7 @@ public class MessageNotifier {
         return conversationIds;
     }
 
-    public void sendSingleNotification(final EMMessage message, final ParseUser sender) {
+    public void sendSingleNotification(final EMMessage message, final ParseObject sender) {
 
         if (appContext == null) {
             appContext = ApplicationLoader.getInstance();
@@ -199,7 +199,7 @@ public class MessageNotifier {
         });
     }
 
-    public void sendSameSenderNotification(final List<EMMessage> emMessages, final ParseUser parseUser) {
+    public void sendSameSenderNotification(final List<EMMessage> emMessages, final ParseObject parseUser) {
         if (appContext == null) {
             appContext = ApplicationLoader.getInstance();
         }

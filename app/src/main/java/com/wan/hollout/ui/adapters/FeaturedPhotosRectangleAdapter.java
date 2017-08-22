@@ -12,11 +12,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.parse.ParseException;
-import com.parse.ParseUser;
+import com.parse.ParseObject;
+
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +57,7 @@ public class FeaturedPhotosRectangleAdapter extends RecyclerView.Adapter<Recycle
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
-        final ParseUser signedInUserObject = ParseUser.getCurrentUser();
+        final ParseObject signedInUserObject = AuthUtil.getCurrentUser();
         if (signedInUserObject != null) {
             final FeaturedPhotosRectangleAdapter.PhotoItemHolder photoItemHolder = (FeaturedPhotosRectangleAdapter.PhotoItemHolder) holder;
             final String photo = photos.get(position);

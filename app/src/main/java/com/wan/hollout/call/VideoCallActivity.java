@@ -7,17 +7,22 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.NotificationCompat;
 import android.view.View;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +38,9 @@ import com.hyphenate.util.EMLog;
 import com.wan.hollout.R;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.HolloutPermissions;
+import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.PermissionsUtils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -45,7 +53,7 @@ import butterknife.OnClick;
  * Create by lzan13 2016/10/13
  * Video call activity
  */
-public class VideoCallActivity extends CallActivity {
+public class VideoCallActivity extends CallActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
 
     private final String TAG = VideoCallActivity.class.getSimpleName();
 
@@ -68,8 +76,10 @@ public class VideoCallActivity extends CallActivity {
     // Use ButterKnife define view
     @BindView(R.id.layout_call_control)
     View mControlLayout;
-    @BindView(R.id.surface_view_local) EMCallSurfaceView mLocalSurfaceView;
-    @BindView(R.id.surface_view_opposite) EMCallSurfaceView mOppositeSurfaceView;
+    @BindView(R.id.surface_view_local)
+    EMCallSurfaceView mLocalSurfaceView;
+    @BindView(R.id.surface_view_opposite)
+    EMCallSurfaceView mOppositeSurfaceView;
 
     @BindView(R.id.layout_call_info)
     View mCallInfoView;
@@ -109,6 +119,10 @@ public class VideoCallActivity extends CallActivity {
     @BindView(R.id.fab_answer_call)
     FloatingActionButton mAnswerCallFab;
 
+    @BindView(R.id.footerAd)
+    LinearLayout footerView;
+
+    private HolloutPermissions holloutPermissions;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +130,10 @@ public class VideoCallActivity extends CallActivity {
         HolloutCommunicationsManager.getInstance().isVideoCalling = true;
         // init ButterKnife
         ButterKnife.bind(this);
+        holloutPermissions = new HolloutPermissions(this,footerView);
+        if (HolloutUtils.hasMarshmallow()&& PermissionsUtils.checkSelfForCameraPermission(this)){
+            holloutPermissions.requestCameraPermission();
+        }
         initView();
         // register call broadcast receiver
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
@@ -123,6 +141,14 @@ public class VideoCallActivity extends CallActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.BROADCAST_ACTION_CALL);
         localBroadcastManager.registerReceiver(broadcastReceiver, filter);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode==PermissionsUtils.REQUEST_CAMERA && holloutPermissions.verifyPermissions(grantResults)){
+            initView();
+        }
     }
 
     /**
@@ -264,7 +290,8 @@ public class VideoCallActivity extends CallActivity {
             R.id.surface_view_opposite, R.id.btn_exit_full_screen, R.id.btn_change_camera_switch,
             R.id.btn_call_info, R.id.layout_call_info, R.id.btn_mic_switch, R.id.btn_camera_switch,
             R.id.btn_speaker_switch, R.id.fab_reject_call, R.id.fab_end_call, R.id.fab_answer_call
-    }) void onClick(View v) {
+    })
+    void onClick(View v) {
         switch (v.getId()) {
             case R.id.layout_call_control:
             case R.id.img_call_background:
@@ -804,22 +831,21 @@ public class VideoCallActivity extends CallActivity {
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(mActivity);
 
-        builder.setSmallIcon(R.mipmap.ic_launcher);
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
+        builder.setLargeIcon(largeIcon);
+        builder.setSmallIcon(R.mipmap.ic_launcher_round);
         builder.setPriority(Notification.PRIORITY_HIGH);
         builder.setAutoCancel(true);
         builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
 
-        builder.setContentText("While the video call is in progress, tap Resume");
-
+        builder.setContentText("Tap here to go back to call");
         builder.setContentTitle(getString(R.string.app_name));
         Intent intent = new Intent(mActivity, VideoCallActivity.class);
         PendingIntent pIntent =
                 PendingIntent.getActivity(mActivity, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         builder.setContentIntent(pIntent);
         builder.setOngoing(true);
-
         builder.setWhen(System.currentTimeMillis());
-
         mNotificationManager.notify(callNotificationId, builder.build());
     }
 

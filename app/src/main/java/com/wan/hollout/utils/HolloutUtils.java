@@ -33,10 +33,6 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoException;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.OnProgressListener;
@@ -46,12 +42,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
-import com.parse.ParseUser;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.AudioFile;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.models.HolloutObject;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 
@@ -60,13 +54,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.RoundingMode;
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -162,7 +151,7 @@ public class HolloutUtils {
         String referenceHolloutLocality = (String) referenceUser.get(AppConstants.APP_USER_LOCALITY);
         String referenceHolloutStreetAddress = (String) referenceUser.get(AppConstants.APP_USER_STREET);
 
-        ParseUser signedInUser = ParseUser.getCurrentUser();
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
 
         if (signedInUser != null) {
 
@@ -254,44 +243,6 @@ public class HolloutUtils {
         return (int) Math.ceil(density * value);
     }
 
-
-    public static Kryo getKryoInstance() {
-        return new Kryo();
-    }
-
-    public static synchronized void serializeListContent(List<HolloutObject> tObjects, String serializableName) {
-        Kryo kryo = getKryoInstance();
-        try {
-            FileOutputStream fileOutputStream = ApplicationLoader.getInstance().openFileOutput(serializableName, Context.MODE_PRIVATE);
-            Output messageOutPuts = new Output(fileOutputStream);
-            kryo.writeObject(messageOutPuts, tObjects);
-            messageOutPuts.close();
-        } catch (IOException | KryoException | BufferOverflowException e) {
-            e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public static synchronized void deserializeListContent(String fileName, DoneCallback<List<HolloutObject>> doneCallback) {
-        Kryo kryo = getKryoInstance();
-        try {
-            Input input = new Input(ApplicationLoader.getInstance().openFileInput(fileName));
-            ArrayList<HolloutObject> previouslySerializedChats = kryo.readObject(input, ArrayList.class);
-            if (doneCallback != null) {
-                doneCallback.done(previouslySerializedChats, null);
-            }
-            input.close();
-        } catch (FileNotFoundException | KryoException | BufferUnderflowException e) {
-
-            if (doneCallback != null) {
-                doneCallback.done(null, null);
-            }
-            e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
-        }
-    }
-
     private static final NavigableMap<Long, String> suffixes = new TreeMap<>();
 
     static {
@@ -334,7 +285,7 @@ public class HolloutUtils {
     }
 
     public static void sendChatState(String chatState, String recipientId) {
-        ParseUser signedInUserObject = ParseUser.getCurrentUser();
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
         JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
         JSONObject chatStates = existingChatStates != null ? existingChatStates : new JSONObject();
         try {
@@ -343,7 +294,12 @@ public class HolloutUtils {
             e.printStackTrace();
         }
         signedInUserObject.put(AppConstants.APP_USER_CHAT_STATES, chatStates);
-        signedInUserObject.saveInBackground();
+        AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
+            @Override
+            public void done(Boolean result, Exception e) {
+
+            }
+        });
     }
 
     public static String convertAdditionalPhotosToString(List<Object> additionalPhotosOfUser) {
@@ -443,7 +399,7 @@ public class HolloutUtils {
 
     public static void updateCurrentParseInstallation(List<String> newChannelProps, List<String> removableChannelProps) {
         ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
-        parseInstallation.put(AppConstants.APP_USER_ID, ParseUser.getCurrentUser().getObjectId());
+        parseInstallation.put(AppConstants.REAL_OBJECT_ID, AuthUtil.getCurrentUser().getString(AppConstants.REAL_OBJECT_ID));
         List<String> existingChannels = parseInstallation.getList("channels");
         checkAndUpdateChannels(newChannelProps, removableChannelProps, parseInstallation, existingChannels);
         parseInstallation.saveInBackground();
