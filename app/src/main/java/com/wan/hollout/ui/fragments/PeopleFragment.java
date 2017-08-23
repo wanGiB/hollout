@@ -425,7 +425,7 @@ public class PeopleFragment extends Fragment {
                             peopleRecyclerView.setNestedScrollingEnabled(true);
                             break;
                         case AppConstants.REFRESH_PEOPLE:
-                            fetchPeople();
+                            fetchPeopleOfCommonInterestsFromNetwork(0);
                             break;
                         case AppConstants.SEARCH_VIEW_CLOSED:
                             peopleAdapter.setSearchString(null);
