@@ -144,15 +144,23 @@ public class HolloutPreferences {
     }
 
     public static long getUnreadMessagesCount() {
-        return getHolloutPreferences().getLong(AppConstants.UNREAD_MESSAGES_COUNT,0);
+        return getHolloutPreferences().getLong(AppConstants.UNREAD_MESSAGES_COUNT, 0);
     }
 
     public static void saveUnreadMessagesCount(int unreadMessageCount) {
-        getHolloutPreferences().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT,unreadMessageCount).commit();
+        getHolloutPreferences().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT, unreadMessageCount).commit();
     }
 
-    public static void clearUnreadMessagesCount(){
-        getHolloutPreferences().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT,0).commit();
+    public static void clearUnreadMessagesCount() {
+        getHolloutPreferences().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT, 0).commit();
+    }
+
+    public static String getLastAttemptedMessage(String recipientId) {
+        return getHolloutPreferences().getString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, null);
+    }
+
+    public static void saveLastAttemptedMsg(String recipientId, String message) {
+        getHolloutPreferences().edit().putString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, message).commit();
     }
 
 }

@@ -306,6 +306,22 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         setupAttachmentManager();
         initConversation();
         setupMessagesAdapter();
+
+        if (!isAContact()){
+            composeText.setText(getString(R.string.nice_to_meet_you));
+        }else{
+            tryOffloadLastMessage();
+        }
+
+    }
+
+    private void tryOffloadLastMessage(){
+        String lastAttemptedMessageForRecipient = HolloutPreferences.getLastAttemptedMessage(recipientId);
+        if (StringUtils.isNotEmpty(lastAttemptedMessageForRecipient)){
+            composeText.setText(lastAttemptedMessageForRecipient);
+        }else{
+            composeText.setText(getString(R.string.hey_a_while));
+        }
     }
 
     @Override
@@ -374,7 +390,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
         if (msgs != null) {
             if (!messages.containsAll(msgs)) {
-                messages.addAll(msgs);
+                messages.addAll(0,msgs);
             }
         }
         invalidateEmptyView();
@@ -1294,6 +1310,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onStop();
         checkAnUnRegEventBus();
         sendChatStateMsg(getString(R.string.idle));
+        if (StringUtils.isNotEmpty(composeText.getText().toString().trim())){
+            HolloutPreferences.saveLastAttemptedMsg(recipientId,composeText.getText().toString().trim());
+        }
     }
 
     @Override

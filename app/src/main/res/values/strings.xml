@@ -309,5 +309,6 @@
     <string name="gender_filter">Gender Filter</string>
     <string name="age_filter">Age Filter</string>
     <string name="wants_to_chat">Wants to Chat</string>
+    <string name="hey_a_while">Hey, it\'s being a while</string>
 
 </resources>
