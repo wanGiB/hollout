@@ -32,7 +32,7 @@ public class AppConstants {
     public static final String FILE_TYPE_LOCATION = "FileTypeLocation";
 
     public static final String HOLLOUT_FEED = "feed";
-    public static final String FEED_CREATOR_USERNAME = "feed_creator_id";
+    public static final String FEED_CREATOR_ID = "feed_creator_id";
     public static final String FEED_TYPE = "feed_type";
     public static final String FEED_BODY = "feed_body";
     public static final String FEED_CREATOR = "feed_creator";

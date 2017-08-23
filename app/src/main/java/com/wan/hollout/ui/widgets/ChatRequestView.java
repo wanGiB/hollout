@@ -88,7 +88,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
         if (feedObject != null) {
             String requestType = feedObject.getString(AppConstants.FEED_TYPE);
             if (requestType.equals(AppConstants.FEED_TYPE_CHAT_REQUEST)) {
-                requestOriginator = feedObject.getParseUser(AppConstants.FEED_CREATOR);
+                requestOriginator = feedObject.getParseObject(AppConstants.FEED_CREATOR);
                 if (requestOriginator != null) {
                     final String userDisplayName = requestOriginator.getString(AppConstants.APP_USER_DISPLAY_NAME);
                     if (StringUtils.isNotEmpty(userDisplayName) && !(activity instanceof UserProfileActivity)) {

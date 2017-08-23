@@ -1167,7 +1167,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     }
 
-
     @SuppressLint("Recycle")
     protected void sendFileByUri(Uri uri) {
         String filePath = null;
@@ -1373,7 +1372,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         if (signedInUser != null) {
             String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
             ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-            pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUserId.toLowerCase());
             pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
             pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, getRecipient());
             pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
@@ -1418,7 +1417,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         if (signedInUser != null) {
             final String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
             ParseObject newChatRequestObject = new ParseObject(AppConstants.HOLLOUT_FEED);
-            newChatRequestObject.put(AppConstants.FEED_CREATOR_USERNAME, signedInUserId.toLowerCase());
+            newChatRequestObject.put(AppConstants.FEED_CREATOR_ID, signedInUserId.toLowerCase());
             newChatRequestObject.put(AppConstants.FEED_RECIPIENT_ID, getRecipient());
             newChatRequestObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
             newChatRequestObject.put(AppConstants.FEED_CREATOR, signedInUser);
@@ -1443,11 +1442,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
      * set message Extension attributes
      */
     protected void sendMessage(EMMessage newMessage) {
-        if (signedInUser == null) {
-            reAuthenticate();
-            finish();
-            return;
-        }
         String signedInUserDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         newMessage.setAttribute(AppConstants.APP_USER_DISPLAY_NAME, signedInUserDisplayName);

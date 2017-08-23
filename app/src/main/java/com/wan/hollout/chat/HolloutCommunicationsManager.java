@@ -434,7 +434,7 @@ public class HolloutCommunicationsManager {
         if (signedInUser != null) {
             String signedInUserId = signedInUser.getObjectId();
             ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-            pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_USERNAME, recipientId.toLowerCase());
+            pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, recipientId.toLowerCase());
             pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
             pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUserId.toLowerCase());
             pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {

@@ -273,6 +273,7 @@ public class PeopleFragment extends Fragment {
                         }
                         peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
                     }
+
                     if (signedInUserCountry != null) {
                         peopleQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
                     }
