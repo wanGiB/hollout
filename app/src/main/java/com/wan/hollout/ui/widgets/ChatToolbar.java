@@ -197,7 +197,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             Long userLastSeen = recipientUser.getLong(AppConstants.APP_USER_LAST_SEEN);
 
             if (chatStates != null) {
-                String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getObjectId());
+                String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
                 String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                 if (chatStateToSignedInUser != null) {
                     if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {

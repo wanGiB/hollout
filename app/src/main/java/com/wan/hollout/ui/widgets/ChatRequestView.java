@@ -150,12 +150,12 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                                                 List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
 
                                                 if (signedInUserChats != null && !signedInUserChats.contains(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase())) {
-                                                    signedInUserChats.add(requestOriginator.getObjectId());
+                                                    signedInUserChats.add(requestOriginator.getString(AppConstants.REAL_OBJECT_ID));
                                                 }
 
                                                 if (signedInUserChats == null) {
                                                     signedInUserChats = new ArrayList<>();
-                                                    signedInUserChats.add(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
+                                                    signedInUserChats.add(requestOriginator.getString(AppConstants.REAL_OBJECT_ID));
                                                 }
                                                 signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
                                                 AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {

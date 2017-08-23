@@ -87,7 +87,7 @@ public class FeaturedPhotosRectangleAdapter extends RecyclerView.Adapter<Recycle
 
                         @Override
                         public boolean onLongClick(View view) {
-                            if (signedInUserObject.getObjectId().equals(userId)) {
+                            if (signedInUserObject.getString(AppConstants.REAL_OBJECT_ID).equals(userId)) {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
                                 builder.setMessage("Delete and un-feature photo");
                                 builder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {

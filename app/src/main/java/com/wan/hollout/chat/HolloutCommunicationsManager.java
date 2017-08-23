@@ -663,6 +663,7 @@ public class HolloutCommunicationsManager {
             }
             mCallReceiver = null;
         }
+
         initNewCallReceiver(callFilter);
     }
 

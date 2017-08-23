@@ -334,7 +334,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
     private void subscribeToUserChanges() {
         if (parseObject != null) {
             objectStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-            objectStateQuery.whereEqualTo("objectId", parseObject.getObjectId());
+            objectStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, parseObject.getString(AppConstants.REAL_OBJECT_ID));
             SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(objectStateQuery);
             subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
                 @Override

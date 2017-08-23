@@ -75,7 +75,7 @@ public class AuthUtil {
 
     private static void updateRemoteUserVariant(final ParseObject updatableProps, String objectMaskId, final DoneCallback<Boolean> successCallback) {
         ParseQuery<ParseObject> personQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        personQuery.whereEqualTo(AppConstants.MASKED_OBJECT_ID, objectMaskId);
+        personQuery.whereEqualTo(AppConstants.OBJECT_ID, objectMaskId);
         personQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(final ParseObject object, ParseException e) {
