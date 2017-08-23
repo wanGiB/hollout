@@ -714,9 +714,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     private void handleUserOnlineStatus(ParseObject parseUser) {
         Long userLastSeenAt = parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
-        if (HolloutUtils.isNetWorkConnected(ApplicationLoader.getInstance())
-                && parseUser.getString(AppConstants.APP_USER_ONLINE_STATUS).
-                equals(AppConstants.ONLINE)) {
+        if (HolloutUtils.isNetWorkConnected(UserProfileActivity.this) && parseUser.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)) {
             attachDrawableToTextView(ApplicationLoader.getInstance(), onlineStatusView, R.drawable.ic_online, UiUtils.DrawableDirection.LEFT);
             onlineStatusView.setText(getString(R.string.online));
         } else {

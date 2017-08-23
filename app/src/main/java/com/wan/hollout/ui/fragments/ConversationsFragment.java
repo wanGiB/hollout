@@ -127,7 +127,7 @@ public class ConversationsFragment extends Fragment {
         ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
-            peopleAndGroupsQuery.fromLocalDatastore();
+            peopleAndGroupsQuery.fromPin(AppConstants.CONVERSATIONS);
             peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
             peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             peopleAndGroupsQuery.setLimit(100);

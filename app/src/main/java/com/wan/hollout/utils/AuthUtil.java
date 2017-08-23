@@ -43,7 +43,7 @@ public class AuthUtil {
 
     public static ParseObject getCurrentUser() {
         ParseQuery<ParseObject> currentUserQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        currentUserQuery.fromLocalDatastore();
+        currentUserQuery.fromPin(AppConstants.AUTHENTICATED_USER_DETAILS);
         try {
             return currentUserQuery.getFirst();
         } catch (ParseException e) {
@@ -70,7 +70,7 @@ public class AuthUtil {
                 newLocalObject.put(key, remoteObject.get(key));
             }
         }
-        newLocalObject.pinInBackground();
+        newLocalObject.pinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS);
     }
 
     private static void updateRemoteUserVariant(final ParseObject updatableProps, String realObjectId, final DoneCallback<Boolean> successCallback) {
@@ -100,9 +100,9 @@ public class AuthUtil {
     }
 
     public static void dissolveAuthenticatedUser(final DoneCallback<Boolean> dissolutionCallback) {
-        ParseObject localObject = getCurrentUser();
+        final ParseObject localObject = getCurrentUser();
         if (localObject != null) {
-            localObject.unpinInBackground(new DeleteCallback() {
+            localObject.unpinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS,new DeleteCallback() {
                 @Override
                 public void done(ParseException e) {
                     if (dissolutionCallback != null) {

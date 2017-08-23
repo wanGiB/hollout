@@ -661,9 +661,7 @@ public class HolloutCommunicationsManager {
                 mContext.unregisterReceiver(mCallReceiver);
             } catch (IllegalArgumentException ignored) {
             }
-            mCallReceiver = null;
         }
-
         initNewCallReceiver(callFilter);
     }
 

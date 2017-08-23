@@ -161,7 +161,7 @@ public class PeopleFragment extends Fragment {
 
     private void fetchPeopleOfCommonInterestFromCache() {
         ParseQuery<ParseObject> localUsersQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        localUsersQuery.fromLocalDatastore();
+        localUsersQuery.fromPin(AppConstants.APP_USERS);
         localUsersQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
         localUsersQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
