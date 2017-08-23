@@ -69,6 +69,7 @@ import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.fabric.sdk.android.services.common.Crash;
 
 
 public class WelcomeActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
@@ -172,7 +173,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                         if (e.getCode() == ParseException.USERNAME_MISSING || e.getCode() == ParseException.OBJECT_NOT_FOUND) {
                             createNewUserOnParse(firebaseUser);
                         } else {
-                            UiUtils.showSafeToast("An error while authenticating you. Please try again "+e.getMessage());
+                            UiUtils.showSafeToast("An error while authenticating you. Please try again");
                             Crashlytics.logException(e);
                         }
                     }
@@ -296,7 +297,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         return firebaseUser.getUid().trim().toLowerCase();
     }
 
-    private void terminateAuthentication(final ParseObject newHolloutUser, Exception gobe) {
+    private void terminateAuthentication(final ParseObject newHolloutUser, final Exception gobe) {
         newHolloutUser.deleteInBackground(new DeleteCallback() {
             @Override
             public void done(ParseException e) {
@@ -313,6 +314,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                     UiUtils.dismissProgressDialog();
                     newHolloutUser.deleteEventually();
                     UiUtils.showSafeToast("Sorry, an error occurred while authenticating you. Please try again.");
+                    Crashlytics.logException(gobe);
                 }
             }
         });
