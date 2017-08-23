@@ -154,6 +154,7 @@
                 android:id="@+id/delivery_status_view"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
+                android:layout_gravity="center_vertical"
                 android:visibility="gone"
                 tools:ignore="ContentDescription" />
 
@@ -165,6 +166,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:paddingEnd="16dp"
+                android:layout_gravity="center_vertical"
                 android:paddingRight="16dp"
                 android:textColor="@color/message"
                 android:textSize="@dimen/msg_text_secondary"
@@ -178,6 +180,7 @@
                 android:gravity="center_horizontal|center_vertical"
                 android:textColor="@color/white"
                 android:minHeight="18dp"
+                android:layout_gravity="center_vertical"
                 android:textSize="9sp"
                 android:textStyle="bold"
                 android:visibility="visible"

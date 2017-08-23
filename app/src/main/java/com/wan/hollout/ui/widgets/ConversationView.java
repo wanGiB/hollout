@@ -37,12 +37,14 @@ import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.json.JSONObject;
 
 import java.util.Date;
 
@@ -104,6 +106,8 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
     private EMConversation emConversation;
     private EMMessage lastMessage;
 
+    private ParseObject signedInUserObject;
+
     public ConversationView(Context context) {
         this(context, null);
     }
@@ -125,8 +129,8 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
     public void bindData(Activity activity, String searchString, ParseObject parseObject) {
         this.searchString = searchString;
         this.activity = activity;
+        this.signedInUserObject = AuthUtil.getCurrentUser();
         this.parseObject = parseObject;
-
         this.emConversation = EMClient.getInstance()
                 .chatManager().getConversation(parseObject.getString(AppConstants.REAL_OBJECT_ID),
                         ChatUtils.getConversationType(parseObject.get(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
@@ -222,45 +226,26 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 }
 
                 lastMessage = emConversation.getLastMessage();
-
-                if (lastMessage != null) {
-                    HolloutLogger.d("LastMessageTracker","Last Message in conversation is not null");
-                    UiUtils.showView(msgTimeStampView, true);
-                    long lastMessageTime = lastMessage.getMsgTime();
-                    parseObject.put(AppConstants.LAST_UPDATE_TIME, lastMessageTime);
-                    Date msgDate = new Date(lastMessageTime);
-                    if (msgDate.equals(new Date())) {
-                        //Msg received date = today
-                        String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
-                        msgTimeStampView.setText(msgTime);
+                if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
+                    JSONObject chatStates = parseObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
+                    if (chatStates != null) {
+                        String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
+                        if (chatStateToSignedInUser.contains(activity.getString(R.string.typing)) && parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS)
+                                .equals(AppConstants.ONLINE)) {
+                            userStatusOrLastMessageView.setText(StringUtils.strip(activity.getString(R.string.typing_)));
+                            userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
+                            UiUtils.showView(deliveryStatusView,false);
+                        }else {
+                            doTheOtherThings();
+                        }
                     } else {
-                        msgTimeStampView.setText(UiUtils.getDaysAgo(AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(msgDate)) + "," + AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate));
+                        doTheOtherThings();
                     }
-                    AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
-                    setupLastMessage(lastMessage);
                 } else {
-                    HolloutLogger.d("LastMessageTracker","Last Message in conversation is null");
-                    parseObject.put(AppConstants.LAST_UPDATE_TIME, 0);
-                    UiUtils.showView(msgTimeStampView, false);
-                    AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
-                    if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-                        String userStatusString = parseObject.getString(AppConstants.APP_USER_STATUS);
-                        if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
-                            userStatusOrLastMessageView.setText(userStatusString);
-                        } else {
-                            userStatusOrLastMessageView.setText(activity.getString(R.string.hey_there_holla_me_on_hollout));
-                        }
-                    } else {
-                        String groupDescription = parseObject.getString(AppConstants.ROOM_DESCRIPTION);
-                        if (StringUtils.isNotEmpty(groupDescription)) {
-                            userStatusOrLastMessageView.setText(groupDescription);
-                        } else {
-                            userStatusOrLastMessageView.setText(activity.getString(R.string.conferencing_happens_here));
-                        }
-                    }
+                    doTheOtherThings();
                 }
-            }else{
-                HolloutLogger.d("LastMessageTracker","Sorry, conversation does not even exist. Lolz.");
+            } else {
+                HolloutLogger.d("LastMessageTracker", "Sorry, conversation does not even exist. Lolz.");
             }
 
             if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
@@ -291,7 +276,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                 public void onClick(View view) {
                     UiUtils.blinkView(view);
                     if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-                        UiUtils.loadUserData(activity,  parseObject);
+                        UiUtils.loadUserData(activity, parseObject);
                     }
                 }
 
@@ -317,6 +302,45 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
         }
 
+    }
+
+    private void doTheOtherThings() {
+        if (lastMessage != null) {
+            HolloutLogger.d("LastMessageTracker", "Last Message in conversation is not null");
+            UiUtils.showView(msgTimeStampView, true);
+            long lastMessageTime = lastMessage.getMsgTime();
+            parseObject.put(AppConstants.LAST_UPDATE_TIME, lastMessageTime);
+            Date msgDate = new Date(lastMessageTime);
+            if (msgDate.equals(new Date())) {
+                //Msg received date = today
+                String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
+                msgTimeStampView.setText(msgTime);
+            } else {
+                msgTimeStampView.setText(UiUtils.getDaysAgo(AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(msgDate)) + ", " + AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate));
+            }
+            AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
+            setupLastMessage(lastMessage);
+        } else {
+            HolloutLogger.d("LastMessageTracker", "Last Message in conversation is null");
+            parseObject.put(AppConstants.LAST_UPDATE_TIME, 0);
+            UiUtils.showView(msgTimeStampView, false);
+            AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
+            if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
+                String userStatusString = parseObject.getString(AppConstants.APP_USER_STATUS);
+                if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
+                    userStatusOrLastMessageView.setText(userStatusString);
+                } else {
+                    userStatusOrLastMessageView.setText(activity.getString(R.string.hey_there_holla_me_on_hollout));
+                }
+            } else {
+                String groupDescription = parseObject.getString(AppConstants.ROOM_DESCRIPTION);
+                if (StringUtils.isNotEmpty(groupDescription)) {
+                    userStatusOrLastMessageView.setText(groupDescription);
+                } else {
+                    userStatusOrLastMessageView.setText(activity.getString(R.string.conferencing_happens_here));
+                }
+            }
+        }
     }
 
     private void invalidateViewOnScroll() {
@@ -384,7 +408,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
         Intent viewProfileIntent = new Intent(activity, ChatActivity.class);
         parseObject.put(AppConstants.CHAT_TYPE, (getObjectType().equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                 ? AppConstants.CHAT_TYPE_SINGLE : getObjectType().equals(AppConstants.OBJECT_TYPE_GROUP)
-                ?AppConstants.CHAT_TYPE_GROUP:AppConstants.CHAT_TYPE_ROOM));
+                ? AppConstants.CHAT_TYPE_GROUP : AppConstants.CHAT_TYPE_ROOM));
         viewProfileIntent.putExtra(AppConstants.USER_PROPERTIES, parseObject);
         activity.startActivity(viewProfileIntent);
     }

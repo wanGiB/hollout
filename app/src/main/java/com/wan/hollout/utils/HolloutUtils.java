@@ -284,6 +284,7 @@ public class HolloutUtils {
         return false;
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static void sendChatState(String chatState, String recipientId) {
         ParseObject signedInUserObject = AuthUtil.getCurrentUser();
         JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
