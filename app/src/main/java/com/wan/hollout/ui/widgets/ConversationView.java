@@ -93,6 +93,9 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
     @BindView(R.id.delivery_status_view)
     ImageView deliveryStatusView;
 
+    @BindView(R.id.parent_layout)
+    View parentView;
+
     protected EMCallBack messageSendCallback;
     protected EMCallBack messageReceiveCallback;
 
@@ -124,6 +127,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
     private void init() {
         setOnClickListener(this);
         setOnLongClickListener(this);
+        parentView.setOnClickListener(this);
     }
 
     public void bindData(Activity activity, String searchString, ParseObject parseObject) {
@@ -230,11 +234,14 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                     JSONObject chatStates = parseObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
                     if (chatStates != null) {
                         String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
-                        if (chatStateToSignedInUser.contains(activity.getString(R.string.typing)) && parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS)
+                        if (chatStateToSignedInUser.contains(activity.getString(R.string.typing))
+                                 && parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS)
                                 .equals(AppConstants.ONLINE)) {
-                            userStatusOrLastMessageView.setText(StringUtils.strip(activity.getString(R.string.typing_)));
-                            userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
+                            userStatusOrLastMessageView.setTypeface(null,Typeface.BOLD);
+                            userStatusOrLastMessageView.setText(activity.getString(R.string.typing));
+                            userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(getContext(), R.color.hollout_color_one));
                             UiUtils.showView(deliveryStatusView,false);
+                            AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
                         }else {
                             doTheOtherThings();
                         }

@@ -82,6 +82,9 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
     @BindView(R.id.icon_container)
     RelativeLayout iconContainer;
 
+    @BindView(R.id.parent_layout)
+    View parentView;
+
     public ParseObject person;
 
     private ParseObject signedInUser;
@@ -107,6 +110,7 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
     private void init() {
         setOnClickListener(this);
         setOnLongClickListener(this);
+        parentView.setOnClickListener(this);
     }
 
     @Override

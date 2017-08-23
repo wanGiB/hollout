@@ -8,6 +8,7 @@
     android:clickable="true"
     android:focusable="true"
     android:paddingBottom="@dimen/padding_list_row"
+    android:id="@+id/parent_layout"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
     android:paddingTop="@dimen/padding_list_row"

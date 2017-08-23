@@ -7,6 +7,7 @@
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
+    android:id="@+id/parent_layout"
     android:paddingBottom="@dimen/padding_list_row"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
@@ -140,7 +141,7 @@
                 android:maxWidth="100dp"
                 android:textColor="@color/ease_gray"
                 android:textSize="@dimen/timestamp"
-                android:textStyle="bold"
+                android:textStyle="normal"
                 tools:ignore="RelativeOverlap,RtlHardcoded" />
 
         </RelativeLayout>
