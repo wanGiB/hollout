@@ -49,7 +49,7 @@ public class AuthUtil {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return new ParseObject(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        return null;
     }
 
     public static void updateCurrentLocalUser(final ParseObject updatableProps, final DoneCallback<Boolean>successCallback) {

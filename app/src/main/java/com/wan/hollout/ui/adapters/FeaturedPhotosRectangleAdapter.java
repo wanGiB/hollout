@@ -11,11 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.parse.ParseException;
 import com.parse.ParseObject;
-
-import com.parse.SaveCallback;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -100,15 +98,14 @@ public class FeaturedPhotosRectangleAdapter extends RecyclerView.Adapter<Recycle
                                             featuredPhotos.remove(photo);
                                             UiUtils.showProgressDialog(activity,"Un-Featuring photo...");
                                             signedInUserObject.put(AppConstants.APP_USER_FEATURED_PHOTOS, featuredPhotos);
-                                            signedInUserObject.saveInBackground(new SaveCallback() {
+                                            AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
                                                 @Override
-                                                public void done(ParseException e) {
+                                                public void done(Boolean result, Exception e) {
                                                     if (e == null) {
                                                         UiUtils.dismissProgressDialog();
                                                         UiUtils.showSafeToast("Deleted and un-featured successfully");
                                                         notifyDataSetChanged();
                                                     }
-
                                                 }
                                             });
                                         }
