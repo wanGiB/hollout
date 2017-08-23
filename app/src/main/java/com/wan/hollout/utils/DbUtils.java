@@ -105,8 +105,7 @@ public class DbUtils {
 
             HolloutEntity newHolloutEntity = new HolloutEntity();
 
-            newHolloutEntity.entityId =  parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                    ? parseObject.getString(AppConstants.REAL_OBJECT_ID) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_ID);
+            newHolloutEntity.entityId =  parseObject.getString(parseObject.getString(AppConstants.REAL_OBJECT_ID));
 
             newHolloutEntity.entityName =  parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);

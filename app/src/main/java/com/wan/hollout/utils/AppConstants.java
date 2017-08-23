@@ -186,7 +186,6 @@ public class AppConstants {
     public static final int ENTITY_TYPE_GROUP = 1;
     public static final int ENTITY_TYPE_CHAT_ROOM = 2;
 
-    public static final String GROUP_OR_CHAT_ROOM_ID = "group_or_chat_room_id";
     public static final String GROUP_OR_CHAT_ROOM_NAME = "group_or_chat_room_name";
     public static final String GROUP_OR_CHAT_ROOM_PHOTO_URL = "group_or_chat_room_photo_url";
     public static final String GROUP_OR_CHAT_ROOM_COVER_PHOTO = "group_or_chat_room_cover_photo";
