@@ -218,7 +218,7 @@ public class HolloutCommunicationsManager {
 
                     @Override
                     public void onError(int code, String error) {
-                        authenticationCallback.done(true, null);
+                        authenticationCallback.done(false, null);
                     }
 
                     @Override

@@ -172,7 +172,8 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                         if (e.getCode() == ParseException.USERNAME_MISSING || e.getCode() == ParseException.OBJECT_NOT_FOUND) {
                             createNewUserOnParse(firebaseUser);
                         } else {
-                            UiUtils.showSafeToast("An error while authenticating you. Please try again");
+                            UiUtils.showSafeToast("An error while authenticating you. Please try again "+e.getMessage());
+                            Crashlytics.logException(e);
                         }
                     }
                 }
@@ -264,12 +265,12 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                                             HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
                                             finishUp();
                                         } else {
-                                            terminateAuthentication(newHolloutUser);
+                                            terminateAuthentication(newHolloutUser,e);
                                         }
                                     }
                                 });
                             } else {
-                                terminateAuthentication(newHolloutUser);
+                                terminateAuthentication(newHolloutUser,e);
                             }
                         }
                     });
@@ -282,7 +283,8 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                             UiUtils.showSafeToast(errorMessage);
                         }
                     } else {
-                        UiUtils.showSafeToast("An unresolvable error occurred during authentication. Please try again");
+                        UiUtils.showSafeToast("An unresolvable error occurred during authentication. Please try again ");
+                        Crashlytics.logException(e);
                     }
                 }
             }
@@ -294,7 +296,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         return firebaseUser.getUid().trim().toLowerCase();
     }
 
-    private void terminateAuthentication(final ParseObject newHolloutUser) {
+    private void terminateAuthentication(final ParseObject newHolloutUser, Exception gobe) {
         newHolloutUser.deleteInBackground(new DeleteCallback() {
             @Override
             public void done(ParseException e) {
@@ -629,4 +631,5 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             }
         });
     }
+
 }

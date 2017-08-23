@@ -52,11 +52,11 @@ public class AuthUtil {
         return null;
     }
 
-    public static void updateCurrentLocalUser(final ParseObject updatableProps, final DoneCallback<Boolean>successCallback) {
+    public static void updateCurrentLocalUser(final ParseObject updatableProps, final DoneCallback<Boolean> successCallback) {
         updatableProps.pinInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
-                updateRemoteUserVariant(updatableProps, updatableProps.getString(AppConstants.REAL_OBJECT_ID),successCallback);
+                updateRemoteUserVariant(updatableProps, updatableProps.getString(AppConstants.REAL_OBJECT_ID), successCallback);
             }
         });
     }
@@ -88,7 +88,7 @@ public class AuthUtil {
                     object.saveInBackground(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
-                            successCallback.done(true,null);
+                            successCallback.done(true, null);
                             if (e != null) {
                                 object.saveEventually();
                             }
@@ -102,16 +102,23 @@ public class AuthUtil {
     public static void dissolveAuthenticatedUser(final DoneCallback<Boolean> dissolutionCallback) {
         final ParseObject localObject = getCurrentUser();
         if (localObject != null) {
-            localObject.unpinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS,new DeleteCallback() {
+            localObject.put(AppConstants.APP_USER_ONLINE_STATUS, AppConstants.OFFLINE);
+            localObject.put(AppConstants.APP_USER_LAST_SEEN, System.currentTimeMillis());
+            updateRemoteUserVariant(localObject, localObject.getString(AppConstants.REAL_OBJECT_ID), new DoneCallback<Boolean>() {
                 @Override
-                public void done(ParseException e) {
-                    if (dissolutionCallback != null) {
-                        if (e == null) {
-                            dissolutionCallback.done(true, null);
-                        } else {
-                            dissolutionCallback.done(false, e);
+                public void done(Boolean success, Exception e) {
+                    localObject.unpinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS, new DeleteCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (dissolutionCallback != null) {
+                                if (e == null) {
+                                    dissolutionCallback.done(true, null);
+                                } else {
+                                    dissolutionCallback.done(false, e);
+                                }
+                            }
                         }
-                    }
+                    });
                 }
             });
         }
