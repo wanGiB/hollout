@@ -56,7 +56,7 @@ public class AuthUtil {
         updatableProps.pinInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
-                updateRemoteUserVariant(updatableProps, updatableProps.getString(AppConstants.MASKED_OBJECT_ID),successCallback);
+                updateRemoteUserVariant(updatableProps, updatableProps.getString(AppConstants.REAL_OBJECT_ID),successCallback);
             }
         });
     }
@@ -65,7 +65,7 @@ public class AuthUtil {
         ParseObject newLocalObject = new ParseObject(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         for (String key : remoteObject.keySet()) {
             if (key.equals(AppConstants.OBJECT_ID)) {
-                newLocalObject.put(AppConstants.MASKED_OBJECT_ID, remoteObject.get(key));
+                newLocalObject.put(AppConstants.MASKED_OBJECT_ID, remoteObject.get(AppConstants.OBJECT_ID));
             } else {
                 newLocalObject.put(key, remoteObject.get(key));
             }
@@ -73,9 +73,9 @@ public class AuthUtil {
         newLocalObject.pinInBackground();
     }
 
-    private static void updateRemoteUserVariant(final ParseObject updatableProps, String objectMaskId, final DoneCallback<Boolean> successCallback) {
+    private static void updateRemoteUserVariant(final ParseObject updatableProps, String realObjectId, final DoneCallback<Boolean> successCallback) {
         ParseQuery<ParseObject> personQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        personQuery.whereEqualTo(AppConstants.OBJECT_ID, objectMaskId);
+        personQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, realObjectId);
         personQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(final ParseObject object, ParseException e) {
