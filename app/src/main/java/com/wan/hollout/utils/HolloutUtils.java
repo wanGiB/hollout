@@ -40,6 +40,8 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.hyphenate.util.EMLog;
+import com.hyphenate.util.PathUtil;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
@@ -903,6 +905,13 @@ public class HolloutUtils {
             ageRanges.add(String.valueOf(i));
         }
         return ageRanges;
+    }
+
+    public static String getThumbnailImagePath(String thumbRemoteUrl) {
+        String thumbImageName= thumbRemoteUrl.substring(thumbRemoteUrl.lastIndexOf("/") + 1, thumbRemoteUrl.length());
+        String path = PathUtil.getInstance().getImagePath()+"/"+ "th"+thumbImageName;
+        EMLog.d("msg", "thum image path:" + path);
+        return path;
     }
 
 }

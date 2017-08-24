@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.widgets;
 
 import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -76,7 +77,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         super(context);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.attachment_type_selector, null, true);
+        @SuppressLint("InflateParams") LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.attachment_type_selector, null, true);
         RecentPhotoViewRail recentPhotos = ViewUtil.findById(layout, R.id.recent_photos);
 
         this.listener = listener;
@@ -98,11 +99,6 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.gifButton.setOnClickListener(new PropagatingClickListener(ADD_GIF));
         this.closeButton.setOnClickListener(new CloseClickListener());
         recentPhotos.setListener(new RecentPhotoSelectedListener());
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-            ViewUtil.findById(layout, R.id.location_linear_layout).setVisibility(View.INVISIBLE);
-        }
-
         setContentView(layout);
         setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
         setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -264,7 +260,6 @@ public class AttachmentTypeSelector extends PopupWindow {
         @Override
         public void onItemClicked(Uri uri) {
             animateWindowOutTranslate(getContentView());
-
             if (listener != null) listener.onQuickAttachment(uri);
         }
     }

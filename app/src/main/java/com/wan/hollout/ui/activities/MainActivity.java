@@ -446,7 +446,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                             attemptLogOut();
                             break;
                         case AppConstants.TURN_OFF_ALL_TAB_LAYOUTS:
-                            UiUtils.showView(tabLayout, false);
+                            toggleViews();
                             break;
                     }
                 } else if (o instanceof UnreadFeedsBadge) {
@@ -457,6 +457,11 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 }
             }
         });
+    }
+
+    private void toggleViews() {
+        UiUtils.showView(tabLayout, false);
+        materialSearchView.showSearch(true);
     }
 
     @Override
@@ -538,8 +543,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         ATE.applyMenu(this, getATEKey(), menu);
-        MenuItem item = menu.findItem(R.id.action_search);
-        materialSearchView.setMenuItem(item);
         return true;
     }
 
@@ -555,6 +558,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             return true;
         } else if (id == R.id.filter_people) {
             initPeopleFilterDialog();
+            return true;
+        }else if (id==R.id.action_search){
+            toggleViews();
             return true;
         }
         return super.onOptionsItemSelected(item);

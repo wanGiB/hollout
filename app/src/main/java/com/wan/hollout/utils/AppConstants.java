@@ -192,7 +192,7 @@ public class AppConstants {
     public static final String ROOM_TYPE = "room_type";
     public static final int ENTITY_TYPE_CHATS = 1;
     public static final String ROOM_DESCRIPTION = "room_description";
-    public static final String LAST_UPDATE_TIME = "last_update_time";
+    public static final String LAST_CONVERSATION_TIME_WITH = "last_conversation_time_with_";
     public static final String OBJECT_ID = "objectId";
     public static final String FEED_TYPE_JOIN_GROUP_REQUEST = "feed_type_join_group";
     public static final String GROUP_OR_ROOM = "group_or_room";

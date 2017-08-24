@@ -166,12 +166,12 @@ public class HolloutPreferences {
         getInstance().edit().putString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, message).apply();
     }
 
-    public static Long getLastUpdateTime(String recipient) {
-        return getInstance().getLong(AppConstants.LAST_UPDATE_TIME+"_"+recipient,0);
+    public static Long getLastConversationTime(String recipient) {
+        return getInstance().getLong(AppConstants.LAST_CONVERSATION_TIME_WITH +"_"+recipient,0);
     }
 
-    public static void setConversationUpdateTime(String recipient){
-        getInstance().edit().putLong(AppConstants.LAST_UPDATE_TIME+"_"+recipient,System.currentTimeMillis()).apply();
+    public static void updateConversationTime(String recipient){
+        getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH +"_"+recipient,System.currentTimeMillis()).commit();
     }
 
 }

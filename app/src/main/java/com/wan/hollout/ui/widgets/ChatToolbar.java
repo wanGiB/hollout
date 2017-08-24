@@ -249,18 +249,23 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         if (recipientObject != null) {
             recipientObjectStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
             recipientObjectStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, recipientObject.getString(AppConstants.REAL_OBJECT_ID));
-            SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientObjectStateQuery);
-            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
-                @Override
-                public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            refreshToolbar(object);
-                        }
-                    });
-                }
-            });
+            try {
+                SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(recipientObjectStateQuery);
+                subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
+                    @Override
+                    public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
+                        post(new Runnable() {
+                            @Override
+                            public void run() {
+                                refreshToolbar(object);
+                            }
+                        });
+                    }
+                });
+            }catch (NullPointerException ignored){
+
+            }
+
         }
     }
 

@@ -285,19 +285,23 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
         if (person != null) {
             userStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
             userStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, person.getString(AppConstants.REAL_OBJECT_ID));
-            SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
-            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
-                @Override
-                public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            person = object;
-                            loadParseUser(searchString);
-                        }
-                    });
-                }
-            });
+            try {
+                SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
+                subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
+                    @Override
+                    public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
+                        post(new Runnable() {
+                            @Override
+                            public void run() {
+                                person = object;
+                                loadParseUser(searchString);
+                            }
+                        });
+                    }
+                });
+            } catch (NullPointerException ignored) {
+
+            }
         }
     }
 

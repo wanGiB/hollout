@@ -46,7 +46,6 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int OUTGOING_MESSAGE_WITH_CONTACT = 4;
     private static final int OUTGOING_MESSAGE_WITH_LINK_PREVIEW = 5;
 
-
     private static final int INCOMING_MESSAGE_TEXT_ONLY = 6;
     private static final int INCOMING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO = 7;
     private static final int INCOMING_MESSAGE_WITH_AUDIO = 8;
@@ -132,16 +131,16 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 return -1;
             }
         }
-        if (messageType== EMMessage.Type.VOICE){
-            return messageDirection== EMMessage.Direct.SEND?OUTGOING_MESSAGE_WITH_AUDIO:INCOMING_MESSAGE_WITH_AUDIO;
+        if (messageType == EMMessage.Type.VOICE) {
+            return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_AUDIO : INCOMING_MESSAGE_WITH_AUDIO;
         }
-        if (messageType== EMMessage.Type.TXT){
+        if (messageType == EMMessage.Type.TXT) {
             EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageObject.getBody();
             List<String> links = UiUtils.pullLinks(emTextMessageBody.getMessage());
             if (!links.isEmpty()) {
-                return messageDirection== EMMessage.Direct.SEND?OUTGOING_MESSAGE_WITH_LINK_PREVIEW:INCOMING_MESSAGE_WITH_LINK_PREVIEW;
+                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_LINK_PREVIEW : INCOMING_MESSAGE_WITH_LINK_PREVIEW;
             } else {
-                return messageDirection== EMMessage.Direct.SEND?OUTGOING_MESSAGE_TEXT_ONLY:INCOMING_MESSAGE_TEXT_ONLY;
+                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
             }
         }
         return -1;
@@ -174,8 +173,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public void onBindHeaderViewHolder(MessagedDatesHeaderHolder holder, int position) {
         EMMessage message = messages.get(position);
         if (message != null) {
-            Date createdAT = new Date(message.getMsgTime());
-            holder.bindHeader(DateUtils.getRelativeDate(context, Locale.getDefault(), createdAT.getTime()));
+            Date createdAt = new Date(message.getMsgTime());
+            holder.bindHeader(DateUtils.getRelativeDate(context, Locale.getDefault(), createdAt.getTime()));
         }
     }
 

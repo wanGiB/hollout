@@ -124,7 +124,11 @@ public class ApplicationLoader extends Application {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    parseLiveQueryClient.reconnect();
+                    try {
+                        parseLiveQueryClient.reconnect();
+                    }catch (NullPointerException ignored){
+
+                    }
                 }
             }).start();
         }

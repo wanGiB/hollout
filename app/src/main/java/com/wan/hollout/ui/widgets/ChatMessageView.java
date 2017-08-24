@@ -10,8 +10,12 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMImageMessageBody;
 import com.hyphenate.chat.EMMessage;
+import com.hyphenate.chat.EMMessageBody;
 import com.hyphenate.chat.EMTextMessageBody;
+import com.hyphenate.exceptions.HyphenateException;
 import com.john.waveview.WaveView;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
@@ -29,7 +33,7 @@ import butterknife.ButterKnife;
 /**
  * @author Wan Clem
  */
-@SuppressWarnings("FieldCanBeLocal")
+@SuppressWarnings({"FieldCanBeLocal", "ConstantConditions"})
 public class ChatMessageView extends RelativeLayout implements View.OnClickListener {
 
     @BindView(R.id.message_container)
@@ -141,8 +145,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void setupMessageBody() {
         EMMessage.Type messageType = getMessageType();
+        EMMessageBody messageBody = message.getBody();
         if (messageType == EMMessage.Type.TXT) {
-            EMTextMessageBody emTextMessageBody = (EMTextMessageBody) message.getBody();
+            EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageBody;
             String message = emTextMessageBody.getMessage();
             if (StringUtils.isNotEmpty(message)) {
                 UiUtils.showView(messageBodyView, true);
@@ -156,6 +161,23 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     }
                 }
             }
+            acknowledgeMessageRead();
+        }
+
+        if (messageType == EMMessage.Type.IMAGE) {
+            EMImageMessageBody imgBody = (EMImageMessageBody) messageBody;
+
+        }
+
+    }
+
+    private void acknowledgeMessageRead() {
+        if (message.direct() == EMMessage.Direct.RECEIVE && !message.isAcked() && message.getChatType() == EMMessage.ChatType.Chat) {
+            try {
+                EMClient.getInstance().chatManager().ackMessageRead(message.getFrom(), message.getMsgId());
+            } catch (HyphenateException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -166,10 +188,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (getMessageDirection() == EMMessage.Direct.SEND) {
             if (message.isAcked()) {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.isDelivered()) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_received_white);
             } else if (message.isListened()) {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else if (message.isDelivered()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_received_white);
             } else {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
             }

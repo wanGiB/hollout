@@ -310,5 +310,6 @@
     <string name="age_filter">Age Filter</string>
     <string name="wants_to_chat">Wants to Chat</string>
     <string name="hey_a_while">Hey, it\'s being a while</string>
+    <string name="network_error">Chats retrieval failure (Network error). Tap here to retry</string>
 
 </resources>

@@ -372,7 +372,7 @@ public class HolloutCommunicationsManager {
                 }
 
                 for (EMMessage emMessage : messages) {
-                    HolloutPreferences.setConversationUpdateTime(emMessage.getFrom());
+                    HolloutPreferences.updateConversationTime(emMessage.getFrom());
                 }
 
                 ParseObject signedInUser = AuthUtil.getCurrentUser();

@@ -262,13 +262,15 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     protected boolean haveMoreData = true;
 
     private Comparator<EMMessage>messageComparator = new Comparator<EMMessage>() {
+
         @Override
         public int compare(EMMessage o1, EMMessage o2) {
             if (o1!=null && o2!=null){
-                return Long.valueOf(o1.getMsgTime()).compareTo(o2.getMsgTime());
+                return Long.valueOf(o2.getMsgTime()).compareTo(o1.getMsgTime());
             }
             return 0;
         }
+
     };
 
     @Override
@@ -396,10 +398,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     messages.add(0, emMessage);
                 }
             }
-            Collections.sort(messages,messageComparator);
+            sortMessages();
             messagesAdapter.notifyDataSetChanged();
         }
         invalidateEmptyView();
+    }
+
+    private void sortMessages() {
+        Collections.sort(messages,messageComparator);
     }
 
     private void setupMessagesAdapter() {
@@ -537,6 +543,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         @Override
         public void onQuickAttachment(Uri uri) {
             //Do nothing
+            File file = FileUtils.getFile(ChatActivity.this,uri);
+            if (file.exists()) {
+                previewSinglePickedFile(AppConstants.FILE_TYPE_PHOTO,file.getPath());
+            }
         }
 
     }
@@ -1481,7 +1491,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         messagesRecyclerView.smoothScrollToPosition(0);
         emptyComposeText();
         updateSignedInUserChats();
-        HolloutPreferences.setConversationUpdateTime(recipientId);
+        HolloutPreferences.updateConversationTime(recipientId);
         if (!isAContact()) {
             HolloutCommunicationsManager.getInstance().execute(new Runnable() {
                 @Override

@@ -57,7 +57,7 @@ public class ConversationItem implements Comparable<ConversationItem> {
 
     @Override
     public int compareTo(@NonNull ConversationItem another) {
-        return getLastUpdate().compareTo(another.getLastUpdate());
+        return another.getLastUpdate().compareTo(getLastUpdate());
     }
 
 }

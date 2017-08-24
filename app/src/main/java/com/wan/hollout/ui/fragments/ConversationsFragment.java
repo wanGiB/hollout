@@ -22,6 +22,7 @@ import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
+import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutPreferences;
@@ -56,6 +57,9 @@ public class ConversationsFragment extends Fragment {
 
     @BindView(R.id.content_flipper)
     ViewFlipper contentFlipper;
+
+    @BindView(R.id.no_hollout_users_text_view)
+    HolloutTextView errorTextView;
 
     private ConversationsAdapter conversationsAdapter;
     private List<ConversationItem> conversations = new ArrayList<>();
@@ -116,11 +120,12 @@ public class ConversationsFragment extends Fragment {
     private void loadAdapter(List<ParseObject> users) {
         if (!users.isEmpty()) {
             for (ParseObject parseUser : users) {
-                ConversationItem conversationItem = new ConversationItem(parseUser, HolloutPreferences.getLastUpdateTime(parseUser.getString(AppConstants.REAL_OBJECT_ID)));
+                ConversationItem conversationItem = new ConversationItem(parseUser, HolloutPreferences.getLastConversationTime(parseUser.getString(AppConstants.REAL_OBJECT_ID)));
                 if (!conversations.contains(conversationItem)) {
                     conversations.add(conversationItem);
                 }
             }
+            sortConversations();
         }
         conversationsAdapter.notifyDataSetChanged();
     }
@@ -137,7 +142,6 @@ public class ConversationsFragment extends Fragment {
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
                     if (objects != null && !objects.isEmpty()) {
-                        sortConversations();
                         loadAdapter(objects);
                     }
                     invalidateEmptyView();
@@ -162,7 +166,6 @@ public class ConversationsFragment extends Fragment {
     }
 
     private void fetchConversations(final int skip) {
-
         ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
 
@@ -188,12 +191,35 @@ public class ConversationsFragment extends Fragment {
                                 cacheConversations();
                             }
                         } else {
-                            if (conversations.isEmpty()) {
-                                UiUtils.toggleFlipperState(contentFlipper, 1);
+                            if (skip == 0) {
+                                showConversationEmptyViewAsNecessary(-1);
                             }
                         }
                         invalidateEmptyView();
                         swipeRefreshLayout.setRefreshing(false);
+                    } else {
+                        if (skip == 0) {
+                            showConversationEmptyViewAsNecessary(e.getCode());
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    private void showConversationEmptyViewAsNecessary(int errorCode) {
+        if (conversations.isEmpty()) {
+            UiUtils.toggleFlipperState(contentFlipper, 1);
+        }
+        if (errorCode == ParseException.CONNECTION_FAILED) {
+            errorTextView.setText(getString(R.string.network_error));
+            errorTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (conversations.isEmpty()) {
+                        UiUtils.blinkView(v);
+                        UiUtils.toggleFlipperState(contentFlipper, 0);
+                        fetchConversations(0);
                     }
                 }
             });
@@ -227,6 +253,7 @@ public class ConversationsFragment extends Fragment {
     public void onStart() {
         super.onStart();
         initSignedInUser();
+        invalidateAdapter();
     }
 
     @Override

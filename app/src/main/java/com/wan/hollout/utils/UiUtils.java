@@ -492,18 +492,22 @@ public class UiUtils {
                 refreshUserData(signedInUser, additionalPhotosRecyclerView, photoView, onlineStatusView, startChatView, viewProfileView, usernameView, parseUser, activity);
                 final ParseQuery<ParseObject> userStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
                 userStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, parseUser.getString(AppConstants.REAL_OBJECT_ID));
-                SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
-                subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
-                    @Override
-                    public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                refreshUserData(signedInUser, additionalPhotosRecyclerView, photoView, onlineStatusView, startChatView, viewProfileView, usernameView, object, activity);
-                            }
-                        });
-                    }
-                });
+                try{
+                    SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
+                    subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
+                        @Override
+                        public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    refreshUserData(signedInUser, additionalPhotosRecyclerView, photoView, onlineStatusView, startChatView, viewProfileView, usernameView, object, activity);
+                                }
+                            });
+                        }
+                    });
+                }catch (NullPointerException ignored){
+
+                }
                 sweetAlertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialogInterface) {

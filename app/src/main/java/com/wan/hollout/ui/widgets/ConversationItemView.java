@@ -316,7 +316,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             HolloutLogger.d("LastMessageTracker", "Last Message in conversation is not null");
             UiUtils.showView(msgTimeStampView, true);
             long lastMessageTime = lastMessage.getMsgTime();
-            parseObject.put(AppConstants.LAST_UPDATE_TIME, lastMessageTime);
+            parseObject.put(AppConstants.LAST_CONVERSATION_TIME_WITH, lastMessageTime);
             Date msgDate = new Date(lastMessageTime);
             if (msgDate.equals(new Date())) {
                 //Msg received date = today
@@ -329,7 +329,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             setupLastMessage(lastMessage);
         } else {
             HolloutLogger.d("LastMessageTracker", "Last Message in conversation is null");
-            parseObject.put(AppConstants.LAST_UPDATE_TIME, 0);
+            parseObject.put(AppConstants.LAST_CONVERSATION_TIME_WITH, 0);
             UiUtils.showView(msgTimeStampView, false);
             AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
             if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
@@ -366,19 +366,23 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         if (parseObject != null) {
             objectStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
             objectStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, parseObject.getString(AppConstants.REAL_OBJECT_ID));
-            SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(objectStateQuery);
-            subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
-                @Override
-                public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            parseObject = object;
-                            loadParseObject(searchString);
-                        }
-                    });
-                }
-            });
+            try {
+                SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(objectStateQuery);
+                subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
+                    @Override
+                    public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
+                        post(new Runnable() {
+                            @Override
+                            public void run() {
+                                parseObject = object;
+                                loadParseObject(searchString);
+                            }
+                        });
+                    }
+                });
+            }catch (NullPointerException ignored){
+
+            }
         }
     }
 
