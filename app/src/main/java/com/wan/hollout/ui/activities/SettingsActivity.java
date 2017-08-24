@@ -32,7 +32,7 @@ public class SettingsActivity extends BaseActivity implements ATEActivityThemeCu
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
+        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.settings);

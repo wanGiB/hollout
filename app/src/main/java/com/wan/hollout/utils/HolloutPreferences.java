@@ -9,158 +9,169 @@ import com.wan.hollout.components.ApplicationLoader;
 import static com.wan.hollout.utils.AppConstants.ENTER_SENDS_PREF;
 import static com.wan.hollout.utils.AppConstants.SYSTEM_EMOJI_PREF;
 
-
 /**
  * @author Wan Clem
  */
 @SuppressLint("ApplySharedPref")
 public class HolloutPreferences {
 
-    public static SharedPreferences getHolloutPreferences() {
+    public static SharedPreferences getInstance() {
         return ApplicationLoader.getInstance().getSharedPreferences(AppConstants.HOLLOUT_PREFERENCES, Context.MODE_PRIVATE);
     }
 
     public static boolean canAccessLocation() {
-        return getHolloutPreferences().getBoolean(AppConstants.CAN_ACCESS_LOCATION, false);
+        return getInstance().getBoolean(AppConstants.CAN_ACCESS_LOCATION, false);
     }
 
     @SuppressLint("ApplySharedPref")
     public static void setCanAccessLocation(boolean value) {
-        getHolloutPreferences().edit().putBoolean(AppConstants.CAN_ACCESS_LOCATION, value).commit();
+        getInstance().edit().putBoolean(AppConstants.CAN_ACCESS_LOCATION, value).commit();
     }
 
     public static String getAPreviousUploadFromPreference(String hashedPhotoPath) {
-        SharedPreferences sharedPreferences = getHolloutPreferences();
+        SharedPreferences sharedPreferences = getInstance();
         return sharedPreferences.getString(hashedPhotoPath, hashedPhotoPath);
     }
 
     public static void persistUploadedFile(String hashedPhotoPath, String returnedFileUrl) {
-        SharedPreferences sharedPreferences = getHolloutPreferences();
+        SharedPreferences sharedPreferences = getInstance();
         sharedPreferences.edit().putString(hashedPhotoPath, returnedFileUrl).apply();
     }
 
     public static void saveDocument(String documentUrl, String documentToString) {
-        getHolloutPreferences().edit().putString(documentUrl, documentToString).commit();
+        getInstance().edit().putString(documentUrl, documentToString).commit();
     }
 
     public static String getDocumentString(String documentUrl) {
-        return getHolloutPreferences().getString(documentUrl, null);
+        return getInstance().getString(documentUrl, null);
     }
 
     public static String getATEKey() {
-        return getHolloutPreferences().getBoolean("dark_theme", false) ?
+        return getInstance().getBoolean("dark_theme", false) ?
                 "dark_theme" : "light_theme";
     }
 
     public static void setStartPageIndex(final int index) {
-        getHolloutPreferences().edit().putInt(AppConstants.START_PAGE_INDEX, index).apply();
+        getInstance().edit().putInt(AppConstants.START_PAGE_INDEX, index).apply();
     }
 
     public static int getStartPageIndex() {
-        return getHolloutPreferences().getInt(AppConstants.START_PAGE_INDEX, 0);
+        return getInstance().getInt(AppConstants.START_PAGE_INDEX, 0);
     }
 
     public static void saveCurrentPlaybackTime(String postId, int duration) {
-        getHolloutPreferences().edit().putInt(postId + "_", duration).commit();
+        getInstance().edit().putInt(postId + "_", duration).commit();
         HolloutLogger.d("SavedVideoPosition", duration + "");
     }
 
     public static int getLastPlaybackTime(String postId) {
-        return getHolloutPreferences().getInt(postId + "_", 0);
+        return getInstance().getInt(postId + "_", 0);
     }
 
     public static void setUserWelcomed(boolean value) {
-        getHolloutPreferences().edit().putBoolean(AppConstants.USER_WELCOMED, value).commit();
+        getInstance().edit().putBoolean(AppConstants.USER_WELCOMED, value).commit();
     }
 
     public static boolean isUserWelcomed() {
-        return getHolloutPreferences().getBoolean(AppConstants.USER_WELCOMED, false);
+        return getInstance().getBoolean(AppConstants.USER_WELCOMED, false);
     }
 
     public static long getPostLikes(String globalPostId) {
-        return getHolloutPreferences().getLong(globalPostId, 0);
+        return getInstance().getLong(globalPostId, 0);
     }
 
     public static void savePostLikes(String postId, int count) {
-        getHolloutPreferences().edit().putLong(postId, count).commit();
+        getInstance().edit().putLong(postId, count).commit();
     }
 
     public static boolean authenticated() {
-        return getHolloutPreferences().getBoolean(AppConstants.AUTHENTICATED, false);
+        return getInstance().getBoolean(AppConstants.AUTHENTICATED, false);
     }
 
     public static void setAuthenticated() {
-        getHolloutPreferences().edit().putBoolean(AppConstants.AUTHENTICATED, true).commit();
+        getInstance().edit().putBoolean(AppConstants.AUTHENTICATED, true).commit();
     }
 
     public static String getAvailableUsername() {
-        return getHolloutPreferences().getString(AppConstants.APP_USER_NAME, null);
+        return getInstance().getString(AppConstants.APP_USER_NAME, null);
     }
 
     public static String getAvailablePassword() {
-        return getHolloutPreferences().getString(AppConstants.APP_USER_PASSWORD, null);
+        return getInstance().getString(AppConstants.APP_USER_PASSWORD, null);
     }
 
     public static void persistCredentials(String username, String password) {
-        SharedPreferences.Editor editor = getHolloutPreferences().edit();
+        SharedPreferences.Editor editor = getInstance().edit();
         editor.putString(AppConstants.APP_USER_NAME, username);
         editor.putString(AppConstants.APP_USER_PASSWORD, password);
         editor.commit();
     }
 
     public static void clearPersistedCredentials() {
-        SharedPreferences.Editor editor = getHolloutPreferences().edit();
+        SharedPreferences.Editor editor = getInstance().edit();
         editor.putString(AppConstants.APP_USER_NAME, null);
         editor.putString(AppConstants.APP_USER_PASSWORD, null);
         editor.commit();
     }
 
     public static boolean isSystemEmojiPreferred() {
-        return getHolloutPreferences().getBoolean(SYSTEM_EMOJI_PREF, false);
+        return getInstance().getBoolean(SYSTEM_EMOJI_PREF, false);
     }
 
     public static String getLanguage(String languagePref, String zz) {
-        return getHolloutPreferences().getString(languagePref, zz);
+        return getInstance().getString(languagePref, zz);
     }
 
     public static void defaultToSystemEmojis(String systemEmojiPref, boolean b) {
-        getHolloutPreferences().edit().putBoolean(systemEmojiPref, b).commit();
+        getInstance().edit().putBoolean(systemEmojiPref, b).commit();
     }
 
     public static boolean isEnterSendsEnabled() {
-        return getHolloutPreferences().getBoolean(ENTER_SENDS_PREF, false);
+        return getInstance().getBoolean(ENTER_SENDS_PREF, false);
     }
 
     public static void setLastFileCaption() {
-        getHolloutPreferences().edit().putString(AppConstants.LAST_FILE_CAPTION, null).clear().commit();
+        getInstance().edit().putString(AppConstants.LAST_FILE_CAPTION, null).clear().commit();
     }
 
     public static void setLastFileCaption(String fileCaption) {
-        getHolloutPreferences().edit().putString(AppConstants.LAST_FILE_CAPTION, fileCaption).clear().commit();
+        getInstance().edit().putString(AppConstants.LAST_FILE_CAPTION, fileCaption).clear().commit();
     }
 
     public static String getLastFileCaption() {
-        return getHolloutPreferences().getString(AppConstants.LAST_FILE_CAPTION, "Photo");
+        return getInstance().getString(AppConstants.LAST_FILE_CAPTION, "Photo");
     }
 
     public static long getUnreadMessagesCount() {
-        return getHolloutPreferences().getLong(AppConstants.UNREAD_MESSAGES_COUNT, 0);
+        return getInstance().getLong(AppConstants.UNREAD_MESSAGES_COUNT, 0);
     }
 
     public static void saveUnreadMessagesCount(int unreadMessageCount) {
-        getHolloutPreferences().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT, unreadMessageCount).commit();
+        getInstance().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT, unreadMessageCount).commit();
     }
 
     public static void clearUnreadMessagesCount() {
-        getHolloutPreferences().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT, 0).commit();
+        getInstance().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT, 0).commit();
     }
 
     public static String getLastAttemptedMessage(String recipientId) {
-        return getHolloutPreferences().getString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, null);
+        return getInstance().getString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, null);
+    }
+
+    public static void clearPreviousAttemptedMessage(String recipientId){
+        getInstance().edit().putString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, null).apply();
     }
 
     public static void saveLastAttemptedMsg(String recipientId, String message) {
-        getHolloutPreferences().edit().putString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, message).commit();
+        getInstance().edit().putString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, message).apply();
+    }
+
+    public static Long getLastUpdateTime(String recipient) {
+        return getInstance().getLong(AppConstants.LAST_UPDATE_TIME+"_"+recipient,0);
+    }
+
+    public static void setConversationUpdateTime(String recipient){
+        getInstance().edit().putLong(AppConstants.LAST_UPDATE_TIME+"_"+recipient,System.currentTimeMillis()).apply();
     }
 
 }

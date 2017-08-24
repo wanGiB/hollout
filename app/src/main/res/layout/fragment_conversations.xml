@@ -8,6 +8,14 @@
     android:background="@android:color/white"
     android:orientation="vertical">
 
+    <com.pnikosis.materialishprogress.ProgressWheel
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        app:progressIndeterminate="true"
+        app:barColor="@color/ease_gray"
+        app:rimColor="@color/white"
+        android:layout_gravity="center" />
+
     <LinearLayout
         android:id="@+id/no_feed_view"
         android:layout_width="wrap_content"

@@ -8,7 +8,8 @@ import android.view.ViewGroup;
 
 import com.parse.ParseObject;
 import com.wan.hollout.R;
-import com.wan.hollout.ui.widgets.ConversationView;
+import com.wan.hollout.models.ConversationItem;
+import com.wan.hollout.ui.widgets.ConversationItemView;
 
 import java.util.List;
 
@@ -21,12 +22,12 @@ import butterknife.ButterKnife;
 
 public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<ParseObject> conversations;
+    private List<ConversationItem> conversations;
     private Activity context;
     private LayoutInflater layoutInflater;
     private String searchString;
 
-    public ConversationsAdapter(Activity context, List<ParseObject> conversations) {
+    public ConversationsAdapter(Activity context, List<ConversationItem> conversations) {
         this.context = context;
         this.conversations = conversations;
         this.layoutInflater = LayoutInflater.from(context);
@@ -49,9 +50,9 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ConversationsItemHolder conversationsItemHolder = (ConversationsItemHolder)holder;
-        ParseObject conversation = conversations.get(position);
+        ConversationItem conversation = conversations.get(position);
         if (conversation!=null){
-            conversationsItemHolder.bindData(context,getSearchString(),conversation);
+            conversationsItemHolder.bindData(context,getSearchString(),conversation.getRecipient());
         }
     }
 
@@ -64,7 +65,7 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
     static class ConversationsItemHolder extends RecyclerView.ViewHolder{
 
         @BindView(R.id.conversation_view)
-        ConversationView conversationView;
+        ConversationItemView conversationItemView;
 
         public ConversationsItemHolder(View itemView) {
             super(itemView);
@@ -72,7 +73,7 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
 
         public void bindData(Activity context, String searchString,ParseObject chat){
-            conversationView.bindData(context,searchString,chat);
+            conversationItemView.bindData(context,searchString,chat);
         }
 
     }

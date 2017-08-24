@@ -106,6 +106,8 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -259,9 +261,19 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     protected boolean isFirstLoad = true;
     protected boolean haveMoreData = true;
 
+    private Comparator<EMMessage>messageComparator = new Comparator<EMMessage>() {
+        @Override
+        public int compare(EMMessage o1, EMMessage o2) {
+            if (o1!=null && o2!=null){
+                return Long.valueOf(o1.getMsgTime()).compareTo(o2.getMsgTime());
+            }
+            return 0;
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
+        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_chat);
@@ -271,56 +283,43 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         Bundle intentExtras = getIntent().getExtras();
         initBasicComponents();
         signedInUser = AuthUtil.getCurrentUser();
-
         if (signedInUser == null) {
             Intent splashIntent = new Intent(ChatActivity.this, SplashActivity.class);
             startActivity(splashIntent);
             finish();
             return;
         }
-
         recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
-
         if (recipientProperties != null) {
-
             chatType = recipientProperties.getInt(AppConstants.CHAT_TYPE);
             chatToolbar.initView(recipientId, chatType);
-
             recipientId = recipientProperties.getString(AppConstants.REAL_OBJECT_ID);
-
             setupChatRecipient(recipientProperties);
-
             if (chatType == AppConstants.CHAT_TYPE_ROOM) {
                 messagesEmptyView.setText(getString(R.string.cleaning_up_room));
                 joinRoom();
             }
-
         }
-
-        if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
+        if (HolloutPreferences.getInstance().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
         } else {
             ATE.apply(this, "light_theme");
         }
         initializeViews();
         setupAttachmentManager();
-        initConversation();
         setupMessagesAdapter();
-
-        if (!isAContact()){
-            composeText.setText(getString(R.string.nice_to_meet_you));
-        }else{
-            tryOffloadLastMessage();
-        }
-
+        initConversation();
+        tryOffloadLastMessage();
     }
 
-    private void tryOffloadLastMessage(){
+    private void tryOffloadLastMessage() {
         String lastAttemptedMessageForRecipient = HolloutPreferences.getLastAttemptedMessage(recipientId);
-        if (StringUtils.isNotEmpty(lastAttemptedMessageForRecipient)){
+        if (StringUtils.isNotEmpty(lastAttemptedMessageForRecipient)) {
             composeText.setText(lastAttemptedMessageForRecipient);
-        }else{
-            composeText.setText(getString(R.string.hey_a_while));
+        } else {
+            if (!isAContact()) {
+                composeText.setText(getString(R.string.nice_to_meet_you));
+            }
         }
     }
 
@@ -379,19 +378,26 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         mConversation.markAllMessagesAsRead();
         // the number of messages loaded into mConversation is getChatOptions().getNumberOfMessagesLoaded
         // you can change this number
-        final List<EMMessage> msgs = mConversation.getAllMessages();
-        int msgCount = msgs != null ? msgs.size() : 0;
+        final List<EMMessage> msgs = new ArrayList<>(mConversation.getAllMessages());
+        int msgCount = msgs.size();
         if (msgCount < mConversation.getAllMsgCount() && msgCount < pageSize) {
             String msgId = null;
-            if (msgs != null && msgs.size() > 0) {
+            if (msgs.size() > 0) {
                 msgId = msgs.get(0).getMsgId();
             }
-            mConversation.loadMoreMsgFromDB(msgId, pageSize - msgCount);
-        }
-        if (msgs != null) {
-            if (!messages.containsAll(msgs)) {
-                messages.addAll(0,msgs);
+            List<EMMessage> moreMessages = mConversation.loadMoreMsgFromDB(msgId, pageSize - msgCount);
+            if (moreMessages!=null && !moreMessages.isEmpty()){
+                msgs.addAll(moreMessages);
             }
+        }
+        if (!msgs.isEmpty()) {
+            for (EMMessage emMessage : msgs) {
+                if (!messages.contains(emMessage)) {
+                    messages.add(0, emMessage);
+                }
+            }
+            Collections.sort(messages,messageComparator);
+            messagesAdapter.notifyDataSetChanged();
         }
         invalidateEmptyView();
     }
@@ -1310,8 +1316,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onStop();
         checkAnUnRegEventBus();
         sendChatStateMsg(getString(R.string.idle));
-        if (StringUtils.isNotEmpty(composeText.getText().toString().trim())){
-            HolloutPreferences.saveLastAttemptedMsg(recipientId,composeText.getText().toString().trim());
+        HolloutPreferences.clearPreviousAttemptedMessage(recipientId);
+        if (StringUtils.isNotEmpty(composeText.getText().toString().trim())) {
+            HolloutPreferences.saveLastAttemptedMsg(recipientId, composeText.getText().toString().trim());
         }
     }
 
@@ -1428,7 +1435,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
                 }
             });
-
         }
     }
 
@@ -1472,9 +1478,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         messages.add(0, newMessage);
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
-        messagesRecyclerView.smoothScrollToPosition(messages.size() - 1);
+        messagesRecyclerView.smoothScrollToPosition(0);
         emptyComposeText();
         updateSignedInUserChats();
+        HolloutPreferences.setConversationUpdateTime(recipientId);
         if (!isAContact()) {
             HolloutCommunicationsManager.getInstance().execute(new Runnable() {
                 @Override

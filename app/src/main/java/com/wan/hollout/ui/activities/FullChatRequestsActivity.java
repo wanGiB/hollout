@@ -54,7 +54,7 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
+        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_chat_requests);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);

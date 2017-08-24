@@ -152,10 +152,16 @@ public class HolloutCommunicationsManager {
             initCallOptions();
             //init message notifier
             mNotifier.init(context);
+
             // set debug mode open:true, close:false
             EMClient.getInstance().setDebugMode(true);
             //set events listeners
             setGlobalListener();
+            try {
+                EMClient.getInstance().pushManager().enableOfflinePush();
+            } catch (HyphenateException e) {
+                e.printStackTrace();
+            }
             HolloutLogger.d(TAG, "------- init hyphenate end --------------");
         }
     }
@@ -172,6 +178,7 @@ public class HolloutCommunicationsManager {
         options.setRequireAck(true);
         // set if need delivery ack
         options.setRequireDeliveryAck(true);
+        options.setAutoLogin(true);
         // set auto accept group invitation
         options.setAutoAcceptGroupInvitation(false);
         //set gcm project number
@@ -362,6 +369,10 @@ public class HolloutCommunicationsManager {
 
                 if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0) {
                     HolloutPreferences.saveUnreadMessagesCount(EMClient.getInstance().chatManager().getUnreadMessageCount());
+                }
+
+                for (EMMessage emMessage : messages) {
+                    HolloutPreferences.setConversationUpdateTime(emMessage.getFrom());
                 }
 
                 ParseObject signedInUser = AuthUtil.getCurrentUser();

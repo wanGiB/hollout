@@ -97,7 +97,7 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
+        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.gallery);
@@ -147,7 +147,7 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
             setupTabs();
         }
 
-        if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
+        if (HolloutPreferences.getInstance().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
         } else {
             ATE.apply(this, "light_theme");

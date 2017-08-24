@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -110,7 +109,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
+        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_main);
@@ -145,7 +144,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
         fetchUnreadMessagesCount();
 
-        if (HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false)) {
+        if (HolloutPreferences.getInstance().getBoolean("dark_theme", false)) {
             ATE.apply(this, "dark_theme");
         } else {
             ATE.apply(this, "light_theme");
@@ -170,7 +169,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             @Override
             public void onSearchViewShown() {
                 EventBus.getDefault().post(AppConstants.DISABLE_NESTED_SCROLLING);
-                UiUtils.showView(tabLayout, false);
             }
 
             @Override
@@ -232,7 +230,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
         });
 
-        startEMClientAuthenticationService();
     }
 
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
@@ -240,7 +237,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     private void fetchUnreadMessagesCount() {
         getUnreadMessagesCount();
         if (onSharedPreferenceChangeListener != null) {
-            HolloutPreferences.getHolloutPreferences().unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+            HolloutPreferences.getInstance().unregisterOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
             onSharedPreferenceChangeListener = null;
         }
         onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -251,7 +248,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             }
 
         };
-        HolloutPreferences.getHolloutPreferences().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
+        HolloutPreferences.getInstance().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
 
     private void getUnreadMessagesCount() {
@@ -326,7 +323,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
         invalidateDrawerMenuHeader();
         fetchUnreadMessagesCount();
-        startEMClientAuthenticationService();
     }
 
     private void startEMClientAuthenticationService() {
@@ -391,7 +387,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     protected void onStart() {
         super.onStart();
         checkAndRegEventBus();
-        startEMClientAuthenticationService();
         fetchUnreadMessagesCount();
     }
 
@@ -439,14 +434,20 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             public void run() {
                 if (o instanceof String) {
                     String s = (String) o;
-                    if (s.equals(AppConstants.PLEASE_REQUEST_LOCATION_ACCESSS)) {
-                        if (isLocationEnabled(MainActivity.this)) {
-                            tryAskForPermissions();
-                        } else {
-                            turnOnLocationMessage();
-                        }
-                    } else if (s.equals(AppConstants.ATTEMPT_LOGOUT)) {
-                        attemptLogOut();
+                    switch (s) {
+                        case AppConstants.PLEASE_REQUEST_LOCATION_ACCESSS:
+                            if (isLocationEnabled(MainActivity.this)) {
+                                tryAskForPermissions();
+                            } else {
+                                turnOnLocationMessage();
+                            }
+                            break;
+                        case AppConstants.ATTEMPT_LOGOUT:
+                            attemptLogOut();
+                            break;
+                        case AppConstants.TURN_OFF_ALL_TAB_LAYOUTS:
+                            UiUtils.showView(tabLayout, false);
+                            break;
                     }
                 } else if (o instanceof UnreadFeedsBadge) {
                     UnreadFeedsBadge unreadFeedsBadge = (UnreadFeedsBadge) o;
@@ -465,6 +466,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     private void tryAskForPermissions() {
+
         if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfPermissionForLocation(this)) {
             holloutPermissions.requestLocationPermissions();
             return;
@@ -475,6 +477,12 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             return;
         }
 
+        startAppInstanceDetectionService();
+        startEMClientAuthenticationService();
+
+    }
+
+    private void startAppInstanceDetectionService() {
         Intent mAppInstanceDetectIntent = new Intent(this, AppInstanceDetectionService.class);
         startService(mAppInstanceDetectIntent);
     }

@@ -19,10 +19,12 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
+import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -31,7 +33,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -57,7 +58,7 @@ public class ConversationsFragment extends Fragment {
     ViewFlipper contentFlipper;
 
     private ConversationsAdapter conversationsAdapter;
-    private List<ParseObject> conversations = new ArrayList<>();
+    private List<ConversationItem> conversations = new ArrayList<>();
     private ParseObject signedInUser;
 
     private void initSignedInUser() {
@@ -103,11 +104,11 @@ public class ConversationsFragment extends Fragment {
         UiUtils.setUpRefreshColorSchemes(getActivity(), swipeRefreshLayout);
         checkAndRegEventBus();
         setupAdapter();
-        fetchConversations(0);
+        attemptOffloadConversationsFromCache();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                attemptOffloadConversationsFromCache();
+                fetchConversations(0);
             }
         });
     }
@@ -115,8 +116,9 @@ public class ConversationsFragment extends Fragment {
     private void loadAdapter(List<ParseObject> users) {
         if (!users.isEmpty()) {
             for (ParseObject parseUser : users) {
-                if (!conversations.contains(parseUser)) {
-                    conversations.add(parseUser);
+                ConversationItem conversationItem = new ConversationItem(parseUser, HolloutPreferences.getLastUpdateTime(parseUser.getString(AppConstants.REAL_OBJECT_ID)));
+                if (!conversations.contains(conversationItem)) {
+                    conversations.add(conversationItem);
                 }
             }
         }
@@ -147,9 +149,14 @@ public class ConversationsFragment extends Fragment {
 
     private void cacheConversations() {
         ParseObject.unpinAllInBackground(AppConstants.CONVERSATIONS, new DeleteCallback() {
+
             @Override
             public void done(ParseException e) {
-                ParseObject.pinAllInBackground(AppConstants.CONVERSATIONS, conversations);
+                List<ParseObject> refinedConversations = new ArrayList<>();
+                for (ConversationItem conversationItem : conversations) {
+                    refinedConversations.add(conversationItem.getRecipient());
+                }
+                ParseObject.pinAllInBackground(AppConstants.CONVERSATIONS, refinedConversations);
             }
         });
     }
@@ -180,6 +187,10 @@ public class ConversationsFragment extends Fragment {
                             if (!conversations.isEmpty()) {
                                 cacheConversations();
                             }
+                        } else {
+                            if (conversations.isEmpty()) {
+                                UiUtils.toggleFlipperState(contentFlipper, 1);
+                            }
                         }
                         invalidateEmptyView();
                         swipeRefreshLayout.setRefreshing(false);
@@ -190,11 +201,11 @@ public class ConversationsFragment extends Fragment {
     }
 
     private void sortConversations() {
-        Collections.sort(conversations, new ConversationsComparator());
+        Collections.sort(conversations);
     }
 
     private void invalidateEmptyView() {
-        UiUtils.toggleFlipperState(contentFlipper, conversations.isEmpty() ? 0 : 1);
+        UiUtils.toggleFlipperState(contentFlipper, conversations.isEmpty() ? 0 : 2);
     }
 
     @Override
@@ -202,7 +213,14 @@ public class ConversationsFragment extends Fragment {
         super.onResume();
         initSignedInUser();
         checkAndRegEventBus();
+        invalidateAdapter();
         fetchConversations(0);
+    }
+
+    private void invalidateAdapter() {
+        if (conversationsAdapter != null) {
+            conversationsAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -258,14 +276,4 @@ public class ConversationsFragment extends Fragment {
             }
         });
     }
-
-    private class ConversationsComparator implements Comparator<ParseObject> {
-
-        @Override
-        public int compare(ParseObject firstObject, ParseObject secondObject) {
-            return Long.valueOf(firstObject.getLong(AppConstants.LAST_UPDATE_TIME)).compareTo(secondObject.getLong(AppConstants.LAST_UPDATE_TIME));
-        }
-
-    }
-
 }

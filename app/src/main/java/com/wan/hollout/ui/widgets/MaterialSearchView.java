@@ -38,6 +38,8 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.UiUtils;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -454,6 +456,7 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
         menuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                EventBus.getDefault().post(AppConstants.TURN_OFF_ALL_TAB_LAYOUTS);
                 showSearch();
                 return true;
             }
@@ -535,7 +538,6 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mSearchLayout.setVisibility(View.VISIBLE);
             UiUtils.reveal(mSearchTopBar, animationListener);
-
         } else {
             UiUtils.fadeInView(mSearchLayout, mAnimationDuration, animationListener);
         }

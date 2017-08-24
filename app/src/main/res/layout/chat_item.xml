@@ -159,7 +159,7 @@
                 android:visibility="gone"
                 tools:ignore="ContentDescription" />
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
+            <com.wan.hollout.ui.widgets.ChatMessageTextView
                 android:id="@+id/txt_secondary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

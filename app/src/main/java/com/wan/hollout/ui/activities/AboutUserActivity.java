@@ -31,7 +31,6 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.ui.adapters.InterestsSuggestionAdapter;
@@ -102,7 +101,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
+        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.about_user_layout);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);

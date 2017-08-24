@@ -81,7 +81,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getHolloutPreferences().getBoolean("dark_theme", false);
+        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gender_and_age_layout);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);

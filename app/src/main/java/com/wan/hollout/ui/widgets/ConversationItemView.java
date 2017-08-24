@@ -55,7 +55,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 @SuppressWarnings("FieldCanBeLocal")
-public class ConversationView extends RelativeLayout implements View.OnClickListener, View.OnLongClickListener {
+public class ConversationItemView extends RelativeLayout implements View.OnClickListener, View.OnLongClickListener {
 
     @BindView(R.id.user_online_status)
     ImageView userOnlineStatusView;
@@ -64,7 +64,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
     HolloutTextView usernameEntryView;
 
     @BindView(R.id.txt_secondary)
-    HolloutTextView userStatusOrLastMessageView;
+    ChatMessageTextView userStatusOrLastMessageView;
 
     @BindView(R.id.unread_message_indicator)
     TextView unreadMessagesCountView;
@@ -111,15 +111,15 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
     private ParseObject signedInUserObject;
 
-    public ConversationView(Context context) {
+    public ConversationItemView(Context context) {
         this(context, null);
     }
 
-    public ConversationView(Context context, @Nullable AttributeSet attrs) {
+    public ConversationItemView(Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public ConversationView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public ConversationItemView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         inflate(context, R.layout.chat_item, this);
     }
@@ -235,14 +235,14 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
                     if (chatStates != null) {
                         String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
                         if (chatStateToSignedInUser.contains(activity.getString(R.string.typing))
-                                 && parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS)
+                                && parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS)
                                 .equals(AppConstants.ONLINE)) {
-                            userStatusOrLastMessageView.setTypeface(null,Typeface.BOLD);
+                            userStatusOrLastMessageView.setTypeface(null, Typeface.BOLD);
                             userStatusOrLastMessageView.setText(activity.getString(R.string.typing));
                             userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(getContext(), R.color.hollout_color_one));
-                            UiUtils.showView(deliveryStatusView,false);
+                            UiUtils.showView(deliveryStatusView, false);
                             AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
-                        }else {
+                        } else {
                             doTheOtherThings();
                         }
                     } else {
@@ -293,7 +293,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
                 @Override
                 public void onClick(View view) {
-                    ConversationView.this.performClick();
+                    ConversationItemView.this.performClick();
                 }
 
             });
@@ -302,7 +302,7 @@ public class ConversationView extends RelativeLayout implements View.OnClickList
 
                 @Override
                 public void onClick(View view) {
-                    ConversationView.this.performClick();
+                    ConversationItemView.this.performClick();
                 }
 
             });
