@@ -41,6 +41,7 @@
             android:textColor="@android:color/white"
             android:textSize="12sp"
             android:textStyle="bold"
+            android:maxLines="1"
             android:visibility="gone"
             tools:ignore="RtlHardcoded" />
 
