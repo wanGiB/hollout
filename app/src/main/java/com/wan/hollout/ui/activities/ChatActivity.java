@@ -1372,7 +1372,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     @SuppressLint("CommitPrefEdits")
     protected void sendImageMessage(String imagePath, String caption) {
         String fileCaption;
-        EMMessage message = EMMessage.createImageSendMessage(imagePath, false, getRecipient());
+        EMMessage message = EMMessage.createImageSendMessage(imagePath, true, getRecipient());
         if (StringUtils.isNotEmpty(caption)) {
             HolloutPreferences.setLastFileCaption(caption);
             fileCaption = caption;
