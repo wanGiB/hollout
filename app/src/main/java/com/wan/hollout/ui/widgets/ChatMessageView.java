@@ -18,12 +18,12 @@ import com.hyphenate.chat.EMImageMessageBody;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMMessageBody;
 import com.hyphenate.chat.EMTextMessageBody;
+import com.hyphenate.chat.EMVideoMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.john.waveview.WaveView;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
-import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -160,6 +160,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             setupImageMessage((EMImageMessageBody) messageBody);
         }
 
+        if (messageType == EMMessage.Type.VIDEO) {
+            setupVideoMessage((EMVideoMessageBody) messageBody);
+        }
+
         handleCommonalities();
         refreshViews();
     }
@@ -205,6 +209,43 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             e.printStackTrace();
         }
 
+    }
+
+    public void setupVideoMessage(EMVideoMessageBody upVideoMessage) {
+        String videoThumb = upVideoMessage.getLocalThumb();
+        File localThumbFile = new File(videoThumb);
+        if (localThumbFile.exists()) {
+            videoThumb = upVideoMessage.getLocalThumb();
+        } else {
+            videoThumb = upVideoMessage.getThumbnailUrl();
+            if (StringUtils.isNotEmpty(videoThumb)) {
+                UiUtils.showView(photoVideoProgressView, false);
+            }
+        }
+
+        long videoLength = upVideoMessage.getVideoFileLength();
+
+        UiUtils.loadImage(activity, videoThumb, attachedPhotoOrVideoThumbnailView);
+        UiUtils.showView(fileSizeDurationView, true);
+        AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), true);
+        fileSizeDurationView.setText(UiUtils.getTimeString(videoLength));
+
+        UiUtils.showView(playMediaIfVideoIcon, true);
+        AppConstants.playableVideoPositions.put(getMessageHash(), true);
+
+        try {
+            String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION);
+            if (StringUtils.isNotEmpty(fileCaption)) {
+                UiUtils.showView(messageBodyView, true);
+                messageBodyView.setText(fileCaption);
+                AppConstants.messageBodyPositions.put(getMessageHash(), true);
+            } else {
+                UiUtils.showView(messageBodyView, false);
+                AppConstants.messageBodyPositions.put(getMessageHash(), false);
+            }
+        } catch (HyphenateException e) {
+            e.printStackTrace();
+        }
     }
 
     private void setupTxtMessage(EMTextMessageBody messageBody) {
@@ -321,6 +362,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         UiUtils.showView(fileSizeDurationView, AppConstants.fileSizeOrDurationPositions.get(getMessageHash()));
         UiUtils.showView(photoVideoProgressView, AppConstants.wavePositions.get(getMessageHash()));
         UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageHash()));
+        UiUtils.showView(playMediaIfVideoIcon, AppConstants.playableVideoPositions.get(getMessageHash()));
     }
 
     @Override
