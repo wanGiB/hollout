@@ -39,7 +39,6 @@
             android:id="@+id/upload_progress_wave_view"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/audio_view"
             android:background="#7b000000"
             android:visibility="gone"
             app:above_wave_color="@android:color/white"
