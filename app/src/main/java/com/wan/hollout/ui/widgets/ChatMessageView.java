@@ -155,7 +155,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void setupMessageBody() {
-
         EMMessage.Type messageType = getMessageType();
         EMMessageBody messageBody = message.getBody();
 
@@ -178,7 +177,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
         handleCommonalities();
         refreshViews();
-
     }
 
     private void setupFileMessage(EMFileMessageBody messageBody) {
@@ -186,6 +184,27 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             String fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
             if (fileType.equals(AppConstants.FILE_TYPE_CONTACT)) {
                 setupContactMessage();
+            }
+            if (fileType.equals(AppConstants.FILE_TYPE_AUDIO)) {
+                setupAudioMessage(messageBody);
+            }
+        } catch (HyphenateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupAudioMessage(EMFileMessageBody emFileMessageBody) {
+        try {
+            String audioDuration = message.getStringAttribute(AppConstants.AUDIO_DURATION);
+
+            String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION) != null ?
+                    message.getStringAttribute(AppConstants.FILE_CAPTION) : activity.getString(R.string.audio);
+
+            File localFilePath = new File(emFileMessageBody.getLocalUrl());
+            if (localFilePath.exists()) {
+                audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, audioDuration);
+            } else {
+                audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, audioDuration);
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
@@ -218,7 +237,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     @NonNull
     private String getOutGoingNonBreakingSpace() {
-        return  " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
+        return " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
                 "&#160;&#160;&#160;&#160;&#160;&#160;&#160;";
     }
 
@@ -330,9 +349,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             UiUtils.showView(messageBodyView, true);
             if (messageBodyView != null) {
                 if (getMessageDirection() == EMMessage.Direct.SEND) {
-                    messageBodyView.setText(UiUtils.fromHtml(message +getOutGoingNonBreakingSpace()));
+                    messageBodyView.setText(UiUtils.fromHtml(message + getOutGoingNonBreakingSpace()));
                 } else {
-                    messageBodyView.setText(UiUtils.fromHtml(message +getIncomingNonBreakingSpace()));
+                    messageBodyView.setText(UiUtils.fromHtml(message + getIncomingNonBreakingSpace()));
                 }
             }
         }
@@ -445,6 +464,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        if (audioView!=null){
+            audioView.cleanup();
+        }
     }
 
     @Override

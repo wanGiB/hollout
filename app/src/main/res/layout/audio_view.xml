@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/audio_widget_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -70,13 +69,10 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingStart="10dp"
-        android:text="Mad Over You girl o."
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?conversation_item_sent_text_secondary_color"
         android:textSize="@dimen/conversation_item_date_text_size"
-        android:visibility="gone"
-        app:textStyle="regular"
-        tools:visibility="visible" />
+        app:textStyle="none" />
 
     <com.wan.hollout.ui.widgets.HolloutTextView
         android:id="@+id/timestamp"
@@ -91,12 +87,9 @@
         android:paddingLeft="10dp"
         android:paddingRight="10dp"
         android:paddingStart="10dp"
-        android:text="00:15"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?conversation_item_sent_text_secondary_color"
         android:textSize="@dimen/conversation_item_date_text_size"
-        android:visibility="gone"
-        app:textStyle="regular"
-        tools:visibility="visible" />
+        app:textStyle="none" />
 
 </FrameLayout>
