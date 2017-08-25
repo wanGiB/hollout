@@ -21,11 +21,9 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
-import com.hyphenate.chat.EMImageMessageBody;
 import com.hyphenate.chat.EMLocationMessageBody;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMTextMessageBody;
-import com.hyphenate.chat.EMVideoMessageBody;
 import com.hyphenate.chat.EMVoiceMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.parse.ParseObject;
@@ -508,12 +506,15 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 switch (fileType) {
                     case AppConstants.FILE_TYPE_CONTACT:
                         messageBody = "Contact";
+                        UiUtils.attachDrawableToTextView(activity,userStatusOrLastMessageView,R.drawable.msg_contact, UiUtils.DrawableDirection.LEFT);
                         break;
                     case AppConstants.FILE_TYPE_AUDIO:
                         messageBody = "Music";
+                        UiUtils.attachDrawableToTextView(activity,userStatusOrLastMessageView,R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
                         break;
                     case AppConstants.FILE_TYPE_DOCUMENT:
                         messageBody = "Document";
+                        UiUtils.attachDrawableToTextView(activity,userStatusOrLastMessageView,R.drawable.icon_file_doc_grey_mini, UiUtils.DrawableDirection.LEFT);
                         break;
                 }
                 userStatusOrLastMessageView.setText(messageBody);

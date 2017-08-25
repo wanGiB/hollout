@@ -84,7 +84,7 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
     private int initPosition;
     private String initTitle;
 
-    //When a user is sending out files to another user  it is either images,videos and music files are sent out separately and not together.Let's keep track of the last received file type using this
+    //When a user is sending out files to another user  it is either images,videos or music files are sent out separately and not together.Let's keep track of the last received file type using this
     public String lastReceivedFileType = null;
 
     public boolean isMaximumFileForATransferReached() {

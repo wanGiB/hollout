@@ -95,8 +95,6 @@ public class UserPhotosAdapter extends SectionedRecyclerAdapter<UserPhotosAdapte
 
                 if (HolloutUtils.getFileSizeInMB(mediaEntry.fileSize) <= 10) {
 
-                    EventBus.getDefault().post(new ClearSelectedAudio(true));
-
                     if (UserMusicAdapter.selectedIndices != null) {
                         UserMusicAdapter.selectedIndices.clear();
                         EventBus.getDefault().post(new ClearSelectedAudio(true));

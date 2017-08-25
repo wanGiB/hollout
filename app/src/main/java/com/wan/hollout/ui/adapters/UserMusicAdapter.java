@@ -109,6 +109,7 @@ public class UserMusicAdapter extends RecyclerView.Adapter<UserMusicAdapter.Audi
             public void onClick(View view) {
                 File file = new File(audioFile.getPath());
                 if (file.exists() && HolloutUtils.getFileSizeInMB(file.length()) <= 10) {
+
                     if (UserPhotosAdapter.selectedIndices != null) {
                         UserPhotosAdapter.selectedIndices.clear();
                         EventBus.getDefault().post(new ClearSelectedPhotos(true));

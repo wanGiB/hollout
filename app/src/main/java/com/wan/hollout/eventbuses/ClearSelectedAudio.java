@@ -1,7 +1,7 @@
 package com.wan.hollout.eventbuses;
 
 /**
- * Created by wan on 1/4/17.
+ * @author Wan Clem
  */
 
 public class ClearSelectedAudio {

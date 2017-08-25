@@ -2,9 +2,12 @@ package com.wan.hollout.ui.widgets;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -13,8 +16,10 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMFileMessageBody;
 import com.hyphenate.chat.EMImageMessageBody;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMMessageBody;
@@ -25,7 +30,6 @@ import com.john.waveview.WaveView;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
-import com.wan.hollout.utils.FileUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.UiUtils;
 
@@ -72,7 +76,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     @Nullable
     @BindView(R.id.contact_phone_numbers)
-    HolloutTextView contactPhoneNumbersView;
+    TextView contactPhoneNumbersView;
 
     @Nullable
     @BindView(R.id.document_data_layout)
@@ -151,6 +155,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void setupMessageBody() {
+
         EMMessage.Type messageType = getMessageType();
         EMMessageBody messageBody = message.getBody();
 
@@ -167,8 +172,54 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             setupVideoMessage((EMVideoMessageBody) messageBody);
         }
 
+        if (messageType == EMMessage.Type.FILE) {
+            setupFileMessage((EMFileMessageBody) messageBody);
+        }
+
         handleCommonalities();
         refreshViews();
+
+    }
+
+    private void setupFileMessage(EMFileMessageBody messageBody) {
+        try {
+            String fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
+            if (fileType.equals(AppConstants.FILE_TYPE_CONTACT)) {
+                setupContactMessage();
+            }
+        } catch (HyphenateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupContactMessage() {
+        try {
+            String contactName = message.getStringAttribute(AppConstants.CONTACT_NAME);
+            String contactPhoneNumber = message.getStringAttribute(AppConstants.CONTACT_NUMBER);
+            contactNameView.setText(contactName);
+            String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
+            if (contactPhoneNumbersView != null) {
+                if (getMessageDirection() == EMMessage.Direct.SEND) {
+                    contactPhoneNumbersView.setText(UiUtils.fromHtml(purifiedPhoneNumber + getOutGoingNonBreakingSpace()));
+                } else {
+                    contactPhoneNumbersView.setText(UiUtils.fromHtml(purifiedPhoneNumber
+                            + getIncomingNonBreakingSpace()));
+                }
+            }
+        } catch (HyphenateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @NonNull
+    private String getIncomingNonBreakingSpace() {
+        return " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;";
+    }
+
+    @NonNull
+    private String getOutGoingNonBreakingSpace() {
+        return  " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
+                "&#160;&#160;&#160;&#160;&#160;&#160;&#160;";
     }
 
     private void handleCommonalities() {
@@ -182,9 +233,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void setupImageMessage(EMImageMessageBody messageBody) {
         String filePath = messageBody.getLocalUrl();
-
         File file = new File(filePath);
-
         if (file.exists()) {
             filePath = messageBody.getLocalUrl();
         } else {
@@ -193,11 +242,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                 UiUtils.showView(photoVideoProgressView, false);
             }
         }
-
         UiUtils.loadImage(activity, filePath, attachedPhotoOrVideoThumbnailView);
         UiUtils.showView(fileSizeDurationView, false);
         AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
-
         try {
             String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION);
             if (StringUtils.isNotEmpty(fileCaption)) {
@@ -211,27 +258,27 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         } catch (HyphenateException e) {
             e.printStackTrace();
         }
-
     }
 
     public void setupVideoMessage(final EMVideoMessageBody upVideoMessage) {
-        String videoThumb = upVideoMessage.getLocalThumb();
-        File localThumbFile = new File(videoThumb);
-        if (localThumbFile.exists()) {
-            videoThumb = upVideoMessage.getLocalThumb();
-            HolloutLogger.d("Yope","Video Thumb exists with value = "+localThumbFile);
+        String remoteVideoThumbnailUrl = upVideoMessage.getThumbnailUrl();
+        File localThumbFile = new File(upVideoMessage.getLocalThumb());
+
+        if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
+            HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
+            UiUtils.showView(photoVideoProgressView, false);
+            UiUtils.loadImage(activity, upVideoMessage.getThumbnailUrl(), attachedPhotoOrVideoThumbnailView);
         } else {
-            videoThumb = upVideoMessage.getThumbnailUrl();
-            if (StringUtils.isNotEmpty(videoThumb)) {
-                UiUtils.showView(photoVideoProgressView, false);
+            if (localThumbFile.exists()) {
+                HolloutLogger.d("VideoThumbnailPath", "Local Video Thumb exists with value = " + localThumbFile);
+                loadVideoFromPath(attachedPhotoOrVideoThumbnailView, upVideoMessage.getLocalThumb());
             }
         }
 
-        long videoLength = upVideoMessage.getDuration();
-
-        UiUtils.loadImage(activity, videoThumb, attachedPhotoOrVideoThumbnailView);
         UiUtils.showView(fileSizeDurationView, true);
         AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), true);
+
+        long videoLength = upVideoMessage.getDuration();
         fileSizeDurationView.setText(UiUtils.getTimeString(videoLength));
 
         UiUtils.showView(playMediaIfVideoIcon, true);
@@ -250,13 +297,31 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         } catch (HyphenateException e) {
             e.printStackTrace();
         }
+
         playMediaIfVideoIcon.setOnClickListener(new OnClickListener() {
+
             @Override
             public void onClick(View v) {
                 UiUtils.blinkView(v);
-                FileUtils.openFile(Uri.parse(new File(upVideoMessage.getLocalUrl()).exists()?upVideoMessage.getLocalUrl():upVideoMessage.getRemoteUrl()),"video/*",activity);
+                Intent mViewVideoIntent = new Intent(Intent.ACTION_VIEW);
+                mViewVideoIntent.setDataAndType(Uri.parse(new File(upVideoMessage.getLocalUrl()).exists() ? upVideoMessage.getLocalUrl() : upVideoMessage.getRemoteUrl()), "video/*");
+                activity.startActivity(mViewVideoIntent);
             }
+
         });
+
+    }
+
+    public void loadVideoFromPath(ImageView videoView, String videoPath) {
+        if (videoView != null) {
+            if (Build.VERSION.SDK_INT >= 17) {
+                if (!activity.isDestroyed()) {
+                    Glide.with(activity).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
+                }
+            } else {
+                Glide.with(activity).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
+            }
+        }
     }
 
     private void setupTxtMessage(EMTextMessageBody messageBody) {
@@ -265,11 +330,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             UiUtils.showView(messageBodyView, true);
             if (messageBodyView != null) {
                 if (getMessageDirection() == EMMessage.Direct.SEND) {
-                    messageBodyView.setText(UiUtils.fromHtml(message + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
-                            "&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                    messageBodyView.setText(UiUtils.fromHtml(message +getOutGoingNonBreakingSpace()));
                 } else {
-                    messageBodyView.setText(UiUtils.fromHtml(message
-                            + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                    messageBodyView.setText(UiUtils.fromHtml(message +getIncomingNonBreakingSpace()));
                 }
             }
         }
@@ -366,7 +429,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     public boolean hashDrawable() {
-        return (message.getType() == EMMessage.Type.IMAGE || message.getType() == EMMessage.Type.VIDEO || message.getType() == EMMessage.Type.LOCATION) && message.direct() == EMMessage.Direct.SEND;
+        return (message.getType() == EMMessage.Type.IMAGE
+                || message.getType() == EMMessage.Type.VIDEO
+                || message.getType() == EMMessage.Type.LOCATION)
+                && message.direct() == EMMessage.Direct.SEND;
     }
 
     private void refreshViews() {

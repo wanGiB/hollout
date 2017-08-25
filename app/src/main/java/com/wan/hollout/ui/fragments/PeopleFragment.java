@@ -197,7 +197,7 @@ public class PeopleFragment extends Fragment {
         peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
         peopleRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
-        RecyclerViewUtils.setFooterView(peopleRecyclerView,footerView);
+        RecyclerViewUtils.setFooterView(peopleRecyclerView, footerView);
         UiUtils.showView(footerView, false);
 
         peopleRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -249,17 +249,17 @@ public class PeopleFragment extends Fragment {
 
                     ArrayList<String> newUserChats = new ArrayList<>();
                     ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-                    peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE,AppConstants.OBJECT_TYPE_INDIVIDUAL);
+                    peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
                     if (startAgeValue != null && endAgeValue != null) {
                         List<String> ageRanges = HolloutUtils.computeAgeRanges(startAgeValue, endAgeValue);
                         HolloutLogger.d("AgeRanges", TextUtils.join(",", ageRanges));
                         peopleQuery.whereContainedIn(AppConstants.APP_USER_AGE, ageRanges);
                     }
 
-                    String genderFilter= signedInUser.getString(AppConstants.GENDER_FILTER);
+                    String genderFilter = signedInUser.getString(AppConstants.GENDER_FILTER);
 
-                    if (genderFilter!=null && !genderFilter.equals(AppConstants.Both)){
-                        peopleQuery.whereEqualTo(AppConstants.APP_USER_GENDER,genderFilter);
+                    if (genderFilter != null && !genderFilter.equals(AppConstants.Both)) {
+                        peopleQuery.whereEqualTo(AppConstants.APP_USER_GENDER, genderFilter);
                     }
 
                     if (savedUserChats != null) {
@@ -349,11 +349,15 @@ public class PeopleFragment extends Fragment {
         if (people.isEmpty() && getActivity() != null && signedInUser != null) {
             UiUtils.toggleFlipperState(peopleContentFlipper, 1);
             if (networkError) {
-                noHolloutTextView.setText(getString(R.string.screwed_data_error_message));
-                meetPeopleTextView.setText(getString(R.string.review_network));
+                if (getActivity() != null) {
+                    noHolloutTextView.setText(getString(R.string.screwed_data_error_message));
+                    meetPeopleTextView.setText(getString(R.string.review_network));
+                }
             } else {
-                noHolloutTextView.setText(getString(R.string.people_unavailable));
-                meetPeopleTextView.setText(getString(R.string.meet_more_people));
+                if (getActivity() != null) {
+                    noHolloutTextView.setText(getString(R.string.people_unavailable));
+                    meetPeopleTextView.setText(getString(R.string.meet_more_people));
+                }
             }
         }
     }
@@ -362,7 +366,7 @@ public class PeopleFragment extends Fragment {
         peopleAdapter.setSearchString(searchString);
         ParseQuery<ParseObject> parseUserParseQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         parseUserParseQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
-        parseUserParseQuery.whereEqualTo(AppConstants.OBJECT_TYPE,AppConstants.OBJECT_TYPE_INDIVIDUAL);
+        parseUserParseQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
         if (signedInUser != null) {
             parseUserParseQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
         }

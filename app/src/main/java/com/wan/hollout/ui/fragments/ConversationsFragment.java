@@ -211,7 +211,7 @@ public class ConversationsFragment extends Fragment {
         if (conversations.isEmpty()) {
             UiUtils.toggleFlipperState(contentFlipper, 1);
         }
-        if (errorCode == ParseException.CONNECTION_FAILED) {
+        if (errorCode == ParseException.CONNECTION_FAILED && getActivity()!=null) {
             errorTextView.setText(getString(R.string.network_error));
             errorTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
