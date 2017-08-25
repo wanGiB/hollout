@@ -40,7 +40,7 @@
                 android:layout_height="200dp"
                 android:padding="2dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/splash_background_image" />
+                android:src="@drawable/ease_default_image" />
 
             <ImageView
                 android:id="@+id/play_media_if_video_icon"
@@ -59,6 +59,7 @@
                 android:padding="10dp"
                 android:textColor="@color/white"
                 android:textSize="13sp"
+                android:visibility="gone"
                 app:textStyle="medium" />
 
             <com.john.waveview.WaveView

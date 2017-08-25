@@ -310,6 +310,9 @@ public class AppConstants {
     public static SparseBooleanArray lastMessageAvailablePositions = new SparseBooleanArray();
     public static SparseBooleanArray parseUserAvailableOnlineStatusPositions = new SparseBooleanArray();
     public static SparseBooleanArray onlinePositions = new SparseBooleanArray();
+    public static SparseBooleanArray fileSizeOrDurationPositions = new SparseBooleanArray();
+    public static SparseBooleanArray wavePositions = new SparseBooleanArray();
+
     public static int NEARBY_KIND_NOTIFICATION_COUNT = 0;
 
     public static final String MALE = "Male";

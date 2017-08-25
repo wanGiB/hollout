@@ -2,6 +2,8 @@ package com.wan.hollout.ui.widgets;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -10,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMImageMessageBody;
 import com.hyphenate.chat.EMMessage;
@@ -17,7 +20,6 @@ import com.hyphenate.chat.EMMessageBody;
 import com.hyphenate.chat.EMTextMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.john.waveview.WaveView;
-import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
@@ -25,6 +27,7 @@ import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.util.Date;
 
 import butterknife.BindView;
@@ -41,7 +44,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     @Nullable
     @BindView(R.id.attached_photo_or_video_thumbnail)
-    RoundedImageView attachedPhotoOrVideoThumbnailView;
+    ImageView attachedPhotoOrVideoThumbnailView;
 
     @Nullable
     @BindView(R.id.play_media_if_video_icon)
@@ -104,6 +107,11 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private EMMessage message;
     private Activity activity;
 
+    protected EMCallBack messageSendCallback;
+    protected EMCallBack messageReceiveCallback;
+
+    protected Handler handler = new Handler(Looper.getMainLooper());
+
     public ChatMessageView(Context context) {
         super(context);
     }
@@ -131,10 +139,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         ButterKnife.bind(this);
     }
 
-    private String getSenderId(ParseObject message) {
-        return message.getString(AppConstants.SENDER_ID);
-    }
-
     private EMMessage.Type getMessageType() {
         return message.getType();
     }
@@ -147,28 +151,152 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         EMMessage.Type messageType = getMessageType();
         EMMessageBody messageBody = message.getBody();
         if (messageType == EMMessage.Type.TXT) {
-            EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageBody;
-            String message = emTextMessageBody.getMessage();
-            if (StringUtils.isNotEmpty(message)) {
-                UiUtils.showView(messageBodyView, true);
-                if (messageBodyView != null) {
-                    if (getMessageDirection() == EMMessage.Direct.SEND) {
-                        messageBodyView.setText(UiUtils.fromHtml(message + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
-                                "&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
-                    } else {
-                        messageBodyView.setText(UiUtils.fromHtml(message
-                                + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
-                    }
-                }
-            }
-            acknowledgeMessageRead();
+            AppConstants.messageBodyPositions.put(getMessageHash(),true);
+            setupTxtMessage((EMTextMessageBody) messageBody);
         }
 
         if (messageType == EMMessage.Type.IMAGE) {
-            EMImageMessageBody imgBody = (EMImageMessageBody) messageBody;
+            setupImageMessage((EMImageMessageBody) messageBody);
+        }
+
+        handleCommonalities();
+        refreshViews();
+    }
+
+    private void handleCommonalities() {
+        handleMessageReadOnClickOfImageView();
+        setMessageSendCallback();
+        setMessageReceiveCallback();
+    }
+
+    public int getMessageHash(){
+        return message.getMsgId().hashCode();
+    }
+
+    private void setupImageMessage(EMImageMessageBody messageBody) {
+        String filePath = messageBody.getLocalUrl();
+        File file = new File(filePath);
+        if (file.exists()) {
+            filePath = messageBody.getLocalUrl();
+        } else {
+            filePath = messageBody.getRemoteUrl();
+            if (StringUtils.isNotEmpty(messageBody.getRemoteUrl())){
+                UiUtils.showView(photoVideoProgressView,false);
+            }
+        }
+        UiUtils.loadImage(activity, filePath, attachedPhotoOrVideoThumbnailView);
+        UiUtils.showView(fileSizeDurationView,false);
+        AppConstants.fileSizeOrDurationPositions.put(getMessageHash(),false);
+
+        try {
+            String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION);
+            if (StringUtils.isNotEmpty(fileCaption)){
+                UiUtils.showView(messageBodyView,true);
+                messageBodyView.setText(fileCaption);
+                AppConstants.messageBodyPositions.put(getMessageHash(),true);
+            }else{
+                UiUtils.showView(messageBodyView,false);
+                AppConstants.messageBodyPositions.put(getMessageHash(),false);
+            }
+        } catch (HyphenateException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void setupTxtMessage(EMTextMessageBody messageBody) {
+        String message = messageBody.getMessage();
+        if (StringUtils.isNotEmpty(message)) {
+            UiUtils.showView(messageBodyView, true);
+            if (messageBodyView != null) {
+                if (getMessageDirection() == EMMessage.Direct.SEND) {
+                    messageBodyView.setText(UiUtils.fromHtml(message + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
+                            "&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                } else {
+                    messageBodyView.setText(UiUtils.fromHtml(message
+                            + " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;"));
+                }
+            }
+        }
+        acknowledgeMessageRead();
+    }
+
+    private void handleMessageReadOnClickOfImageView() {
+        if (attachedPhotoOrVideoThumbnailView != null) {
+            attachedPhotoOrVideoThumbnailView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    acknowledgeMessageRead();
+                }
+            });
+        }
+    }
+
+    /**
+     * set callback for sending message
+     */
+    protected void setMessageSendCallback() {
+        if (messageSendCallback == null) {
+            messageSendCallback = new EMCallBack() {
+
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onProgress(final int progress, String status) {
+                    if (message.getType() == EMMessage.Type.IMAGE) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                photoVideoProgressView.setProgress(progress);
+                                if (progress>=100){
+                                    UiUtils.showView(photoVideoProgressView,false);
+                                    AppConstants.wavePositions.put(getMessageHash(),false);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onError(int code, String error) {
+
+                }
+
+            };
 
         }
 
+        message.setMessageStatusCallback(messageSendCallback);
+
+    }
+
+    /**
+     * set callback for receiving message
+     */
+    protected void setMessageReceiveCallback() {
+        if (messageReceiveCallback == null) {
+
+            messageReceiveCallback = new EMCallBack() {
+
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onProgress(final int progress, String status) {
+                }
+
+                @Override
+                public void onError(int code, String error) {
+
+                }
+
+            };
+        }
+        message.setMessageStatusCallback(messageReceiveCallback);
     }
 
     private void acknowledgeMessageRead() {
@@ -199,7 +327,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void refreshViews() {
-
+        UiUtils.showView(fileSizeDurationView,AppConstants.fileSizeOrDurationPositions.get(getMessageHash()));
+        UiUtils.showView(photoVideoProgressView,AppConstants.wavePositions.get(getMessageHash()));
+        UiUtils.showView(messageBodyView,AppConstants.messageBodyPositions.get(getMessageHash()));
     }
 
     @Override
