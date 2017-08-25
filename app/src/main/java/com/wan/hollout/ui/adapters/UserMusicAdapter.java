@@ -118,6 +118,7 @@ public class UserMusicAdapter extends RecyclerView.Adapter<UserMusicAdapter.Audi
                     HolloutFile newHolloutFile = new HolloutFile();
                     newHolloutFile.setFileType(AppConstants.FILE_TYPE_AUDIO);
                     newHolloutFile.setLocalFilePath(audioFile.getPath());
+                    newHolloutFile.setFileName(audioFile.getTitle());
 
                     if (finalUri != null) {
                         newHolloutFile.setFileUri(finalUri);

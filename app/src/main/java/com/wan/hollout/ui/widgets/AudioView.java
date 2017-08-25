@@ -91,7 +91,6 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
         this.audioSlidePlayer = AudioSlidePlayer.createFor(getContext(), audioFilePath, this);
         this.timestamp.setText(audioDuration);
         this.audioTitleView.setText(audioTitle);
-        UiUtils.showSafeToast("Audio Title = "+audioTitle);
     }
 
     public void cleanup() {
