@@ -151,7 +151,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         EMMessage.Type messageType = getMessageType();
         EMMessageBody messageBody = message.getBody();
         if (messageType == EMMessage.Type.TXT) {
-            AppConstants.messageBodyPositions.put(getMessageHash(),true);
+            AppConstants.messageBodyPositions.put(getMessageHash(), true);
             setupTxtMessage((EMTextMessageBody) messageBody);
         }
 
@@ -169,7 +169,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         setMessageReceiveCallback();
     }
 
-    public int getMessageHash(){
+    public int getMessageHash() {
         return message.getMsgId().hashCode();
     }
 
@@ -180,23 +180,24 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             filePath = messageBody.getLocalUrl();
         } else {
             filePath = messageBody.getRemoteUrl();
-            if (StringUtils.isNotEmpty(messageBody.getRemoteUrl())){
-                UiUtils.showView(photoVideoProgressView,false);
+            if (StringUtils.isNotEmpty(messageBody.getRemoteUrl())) {
+                UiUtils.showView(photoVideoProgressView, false);
             }
         }
+
         UiUtils.loadImage(activity, filePath, attachedPhotoOrVideoThumbnailView);
-        UiUtils.showView(fileSizeDurationView,false);
-        AppConstants.fileSizeOrDurationPositions.put(getMessageHash(),false);
+        UiUtils.showView(fileSizeDurationView, false);
+        AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
 
         try {
             String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION);
-            if (StringUtils.isNotEmpty(fileCaption)){
-                UiUtils.showView(messageBodyView,true);
+            if (StringUtils.isNotEmpty(fileCaption)) {
+                UiUtils.showView(messageBodyView, true);
                 messageBodyView.setText(fileCaption);
-                AppConstants.messageBodyPositions.put(getMessageHash(),true);
-            }else{
-                UiUtils.showView(messageBodyView,false);
-                AppConstants.messageBodyPositions.put(getMessageHash(),false);
+                AppConstants.messageBodyPositions.put(getMessageHash(), true);
+            } else {
+                UiUtils.showView(messageBodyView, false);
+                AppConstants.messageBodyPositions.put(getMessageHash(), false);
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
@@ -245,14 +246,14 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
                 @Override
                 public void onProgress(final int progress, String status) {
-                    if (message.getType() == EMMessage.Type.IMAGE) {
+                    if (message.getType() != EMMessage.Type.TXT && photoVideoProgressView != null) {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
                                 photoVideoProgressView.setProgress(progress);
-                                if (progress>=100){
-                                    UiUtils.showView(photoVideoProgressView,false);
-                                    AppConstants.wavePositions.put(getMessageHash(),false);
+                                if (progress >= 100) {
+                                    UiUtils.showView(photoVideoProgressView, false);
+                                    AppConstants.wavePositions.put(getMessageHash(), false);
                                 }
                             }
                         });
@@ -327,9 +328,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void refreshViews() {
-        UiUtils.showView(fileSizeDurationView,AppConstants.fileSizeOrDurationPositions.get(getMessageHash()));
-        UiUtils.showView(photoVideoProgressView,AppConstants.wavePositions.get(getMessageHash()));
-        UiUtils.showView(messageBodyView,AppConstants.messageBodyPositions.get(getMessageHash()));
+        UiUtils.showView(fileSizeDurationView, AppConstants.fileSizeOrDurationPositions.get(getMessageHash()));
+        UiUtils.showView(photoVideoProgressView, AppConstants.wavePositions.get(getMessageHash()));
+        UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageHash()));
     }
 
     @Override
