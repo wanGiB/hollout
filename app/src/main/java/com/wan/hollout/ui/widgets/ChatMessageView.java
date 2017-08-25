@@ -23,6 +23,7 @@ import com.john.waveview.WaveView;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -107,8 +108,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private EMMessage message;
     private Activity activity;
 
-    protected EMCallBack messageSendCallback;
-    protected EMCallBack messageReceiveCallback;
+    protected EMCallBack messageStatusCallback;
 
     protected Handler handler = new Handler(Looper.getMainLooper());
 
@@ -150,6 +150,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void setupMessageBody() {
         EMMessage.Type messageType = getMessageType();
         EMMessageBody messageBody = message.getBody();
+
         if (messageType == EMMessage.Type.TXT) {
             AppConstants.messageBodyPositions.put(getMessageHash(), true);
             setupTxtMessage((EMTextMessageBody) messageBody);
@@ -165,8 +166,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void handleCommonalities() {
         handleMessageReadOnClickOfImageView();
-        setMessageSendCallback();
-        setMessageReceiveCallback();
+        setMessageStatusCallback();
     }
 
     public int getMessageHash() {
@@ -204,6 +204,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         } catch (HyphenateException e) {
             e.printStackTrace();
         }
+
     }
 
     private void setupTxtMessage(EMTextMessageBody messageBody) {
@@ -237,13 +238,22 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     /**
      * set callback for sending message
      */
-    protected void setMessageSendCallback() {
-        if (messageSendCallback == null) {
-            messageSendCallback = new EMCallBack() {
+    protected void setMessageStatusCallback() {
+        if (messageStatusCallback == null) {
+
+            messageStatusCallback = new EMCallBack() {
 
                 @Override
                 public void onSuccess() {
-
+                    if (message.getType() != EMMessage.Type.TXT && photoVideoProgressView != null) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                UiUtils.showView(photoVideoProgressView, false);
+                                AppConstants.wavePositions.put(getMessageHash(), false);
+                            }
+                        });
+                    }
                 }
 
                 @Override
@@ -252,9 +262,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                UiUtils.showView(photoVideoProgressView,true);
+                                UiUtils.showView(photoVideoProgressView, true);
                                 photoVideoProgressView.setProgress(progress);
-                                if (progress >= 100) {
+                                if (progress >= 99) {
                                     UiUtils.showView(photoVideoProgressView, false);
                                     AppConstants.wavePositions.put(getMessageHash(), false);
                                 }
@@ -272,35 +282,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
         }
 
-        message.setMessageStatusCallback(messageSendCallback);
+        message.setMessageStatusCallback(messageStatusCallback);
 
-    }
-
-    /**
-     * set callback for receiving message
-     */
-    protected void setMessageReceiveCallback() {
-        if (messageReceiveCallback == null) {
-
-            messageReceiveCallback = new EMCallBack() {
-
-                @Override
-                public void onSuccess() {
-
-                }
-
-                @Override
-                public void onProgress(final int progress, String status) {
-                }
-
-                @Override
-                public void onError(int code, String error) {
-
-                }
-
-            };
-        }
-        message.setMessageStatusCallback(messageReceiveCallback);
     }
 
     private void acknowledgeMessageRead() {
