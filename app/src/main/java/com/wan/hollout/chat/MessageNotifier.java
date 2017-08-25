@@ -62,7 +62,7 @@ public class MessageNotifier {
         return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
-    void onNewMsg(List<EMMessage> emMessages) {
+    public void onNewMsg(List<EMMessage> emMessages) {
         if (!emMessages.isEmpty()) {
             if (emMessages.size() == 1) {
                 Intent userInfoIntent = new Intent(appContext, FetchUserInfoService.class);

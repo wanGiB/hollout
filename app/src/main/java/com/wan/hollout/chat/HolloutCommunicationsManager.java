@@ -41,6 +41,7 @@ import com.wan.hollout.utils.HolloutPreferences;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -367,12 +368,17 @@ public class HolloutCommunicationsManager {
             @Override
             public void onMessageReceived(List<EMMessage> messages) {
 
-                if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0) {
-                    HolloutPreferences.saveUnreadMessagesCount(EMClient.getInstance().chatManager().getUnreadMessageCount());
-                }
+                List<String>unreadConversationItems = new ArrayList<>();
 
                 for (EMMessage emMessage : messages) {
+                    if (!unreadConversationItems.contains(emMessage.getFrom())){
+                        unreadConversationItems.add(emMessage.getFrom());
+                    }
                     HolloutPreferences.updateConversationTime(emMessage.getFrom());
+                }
+
+                if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0) {
+                    HolloutPreferences.saveUnreadMessagesCount(unreadConversationItems.size());
                 }
 
                 ParseObject signedInUser = AuthUtil.getCurrentUser();
