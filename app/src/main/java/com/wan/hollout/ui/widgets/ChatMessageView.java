@@ -196,7 +196,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void setupAudioMessage(EMFileMessageBody emFileMessageBody) {
         try {
             String audioDuration = message.getStringAttribute(AppConstants.AUDIO_DURATION);
-
             String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION) != null ?
                     message.getStringAttribute(AppConstants.FILE_CAPTION) : activity.getString(R.string.audio);
 

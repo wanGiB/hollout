@@ -747,7 +747,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     //Send file message with file type audio
                     HashMap<String, String> moreMessageProps = new HashMap<>();
                     moreMessageProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_AUDIO);
-                    moreMessageProps.put(AppConstants.AUDIO_DURATION, String.valueOf(HolloutUtils.getVideoDuration(holloutFile.getLocalFilePath())));
+                    moreMessageProps.put(AppConstants.AUDIO_DURATION, UiUtils.getTimeString(HolloutUtils.getVideoDuration(holloutFile.getLocalFilePath())));
                     moreMessageProps.put(AppConstants.FILE_CAPTION,holloutFile.getFileName());
                     sendFileMessage(holloutFile.getLocalFilePath(), moreMessageProps);
                     break;

@@ -12,7 +12,6 @@ import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
-
 import com.wan.hollout.R;
 import com.wan.hollout.ui.utils.Optional;
 import com.wan.hollout.utils.UiUtils;
@@ -39,7 +38,6 @@ public class AudioSlidePlayer {
   WeakReference<Listener> listener;
   private @Nullable
   MediaPlayer mediaPlayer;
-
 
   public synchronized static AudioSlidePlayer createFor(@NonNull Context context,
                                                         @NonNull String slide,
@@ -222,9 +220,9 @@ public class AudioSlidePlayer {
   }
 
   public interface Listener {
-    public void onStart();
-    public void onStop();
-    public void onProgress(double progress, long millis);
+    void onStart();
+    void onStop();
+    void onProgress(double progress, long millis);
   }
 
   private static class ProgressEventHandler extends Handler {

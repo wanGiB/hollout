@@ -18,12 +18,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.wan.hollout.R;
-import com.wan.hollout.eventbuses.PartProgressEvent;
 import com.wan.hollout.utils.UiUtils;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -86,18 +81,7 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
             this.playButton.setImageDrawable(context.getDrawable(R.drawable.play_icon));
             this.pauseButton.setImageDrawable(context.getDrawable(R.drawable.pause_icon));
         }
-    }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        if (!EventBus.getDefault().isRegistered(this)) EventBus.getDefault().register(this);
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        EventBus.getDefault().unregister(this);
     }
 
     public void setAudio(final @NonNull String audioFilePath, String audioTitle, String audioDuration) {
@@ -107,6 +91,7 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
         this.audioSlidePlayer = AudioSlidePlayer.createFor(getContext(), audioFilePath, this);
         this.timestamp.setText(audioDuration);
         this.audioTitleView.setText(audioTitle);
+        UiUtils.showSafeToast("Audio Title = "+audioTitle);
     }
 
     public void cleanup() {
@@ -238,6 +223,7 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
     }
 
     private class SeekBarModifiedListener implements SeekBar.OnSeekBarChangeListener {
+
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         }
@@ -267,19 +253,6 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             return true;
-        }
-    }
-
-    @SuppressWarnings("unused")
-    @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
-    public void onEventAsync(final PartProgressEvent event) {
-        if (audioSlidePlayer != null && event.attachment.equals(this.audioSlidePlayer.getAudioSlide())) {
-            UiUtils.runOnMain(new Runnable() {
-                @Override
-                public void run() {
-
-                }
-            });
         }
     }
 
