@@ -380,7 +380,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                         });
                     }
                 });
-            }catch (NullPointerException ignored){
+            } catch (NullPointerException ignored) {
 
             }
         }
@@ -454,24 +454,31 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
         if (messageType == EMMessage.Type.IMAGE) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_cam, UiUtils.DrawableDirection.LEFT);
-            EMImageMessageBody emImageMessageBody = (EMImageMessageBody) message.getBody();
-            String messageBody = emImageMessageBody.getFileName();
-            if (StringUtils.isNotEmpty(messageBody)) {
-                userStatusOrLastMessageView.setText(messageBody);
-            } else {
-                userStatusOrLastMessageView.setText(activity.getString(R.string.photo));
+            try {
+                String messageBody = message.getStringAttribute(AppConstants.FILE_CAPTION);
+                if (StringUtils.isNotEmpty(messageBody)) {
+                    userStatusOrLastMessageView.setText(messageBody);
+                } else {
+                    userStatusOrLastMessageView.setText(activity.getString(R.string.photo));
+                }
+            } catch (HyphenateException e) {
+                e.printStackTrace();
             }
         }
 
         if (messageType == EMMessage.Type.VIDEO) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_video, UiUtils.DrawableDirection.LEFT);
-            EMVideoMessageBody emVideoMessageBody = (EMVideoMessageBody) message.getBody();
-            String messageBody = emVideoMessageBody.getFileName();
-            if (StringUtils.isNotEmpty(messageBody)) {
-                userStatusOrLastMessageView.setText(messageBody);
-            } else {
-                userStatusOrLastMessageView.setText(activity.getString(R.string.video));
+            try {
+                String messageBody = message.getStringAttribute(AppConstants.FILE_CAPTION);
+                if (StringUtils.isNotEmpty(messageBody)) {
+                    userStatusOrLastMessageView.setText(messageBody);
+                } else {
+                    userStatusOrLastMessageView.setText(activity.getString(R.string.video));
+                }
+            } catch (HyphenateException e) {
+                e.printStackTrace();
             }
+
         }
 
         if (messageType == EMMessage.Type.LOCATION) {

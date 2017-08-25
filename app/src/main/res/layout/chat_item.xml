@@ -167,6 +167,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:paddingEnd="16dp"
+                android:drawablePadding="5dp"
                 android:layout_gravity="center_vertical"
                 android:paddingRight="16dp"
                 android:textColor="@color/message"

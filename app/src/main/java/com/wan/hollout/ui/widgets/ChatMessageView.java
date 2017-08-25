@@ -175,7 +175,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void setupImageMessage(EMImageMessageBody messageBody) {
         String filePath = messageBody.getLocalUrl();
+
         File file = new File(filePath);
+
         if (file.exists()) {
             filePath = messageBody.getLocalUrl();
         } else {
@@ -250,6 +252,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
+                                UiUtils.showView(photoVideoProgressView,true);
                                 photoVideoProgressView.setProgress(progress);
                                 if (progress >= 100) {
                                     UiUtils.showView(photoVideoProgressView, false);
@@ -320,11 +323,15 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             } else if (message.isListened()) {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
             } else if (message.isDelivered()) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_received_white);
+                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_client_received_white : R.drawable.msg_status_client_received);
             } else {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
+                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_server_received_white : R.drawable.msg_status_server_receive);
             }
         }
+    }
+
+    public boolean hashDrawable() {
+        return (message.getType() == EMMessage.Type.IMAGE || message.getType() == EMMessage.Type.VIDEO || message.getType() == EMMessage.Type.LOCATION) && message.direct() == EMMessage.Direct.SEND;
     }
 
     private void refreshViews() {
