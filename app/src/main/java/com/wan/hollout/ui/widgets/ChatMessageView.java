@@ -2,6 +2,7 @@ package com.wan.hollout.ui.widgets;
 
 import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
@@ -24,6 +25,8 @@ import com.john.waveview.WaveView;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.FileUtils;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -211,11 +214,12 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     }
 
-    public void setupVideoMessage(EMVideoMessageBody upVideoMessage) {
+    public void setupVideoMessage(final EMVideoMessageBody upVideoMessage) {
         String videoThumb = upVideoMessage.getLocalThumb();
         File localThumbFile = new File(videoThumb);
         if (localThumbFile.exists()) {
             videoThumb = upVideoMessage.getLocalThumb();
+            HolloutLogger.d("Yope","Video Thumb exists with value = "+localThumbFile);
         } else {
             videoThumb = upVideoMessage.getThumbnailUrl();
             if (StringUtils.isNotEmpty(videoThumb)) {
@@ -223,7 +227,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             }
         }
 
-        long videoLength = upVideoMessage.getVideoFileLength();
+        long videoLength = upVideoMessage.getDuration();
 
         UiUtils.loadImage(activity, videoThumb, attachedPhotoOrVideoThumbnailView);
         UiUtils.showView(fileSizeDurationView, true);
@@ -246,6 +250,13 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         } catch (HyphenateException e) {
             e.printStackTrace();
         }
+        playMediaIfVideoIcon.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UiUtils.blinkView(v);
+                FileUtils.openFile(Uri.parse(new File(upVideoMessage.getLocalUrl()).exists()?upVideoMessage.getLocalUrl():upVideoMessage.getRemoteUrl()),"video/*",activity);
+            }
+        });
     }
 
     private void setupTxtMessage(EMTextMessageBody messageBody) {
@@ -277,7 +288,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     /**
-     * set callback for sending message
+     * set callback for  message
      */
     protected void setMessageStatusCallback() {
         if (messageStatusCallback == null) {
