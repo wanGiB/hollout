@@ -1278,6 +1278,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     if (emMessage != null) {
                         messages.add(emMessage);
                         messagesAdapter.notifyDataSetChanged();
+                        UiUtils.bangSound(ChatActivity.this,R.raw.iapetus);
                     }
                 } else if (o instanceof MessageDeliveredEvent) {
                     MessageDeliveredEvent messageDeliveredEvent = (MessageDeliveredEvent) o;
@@ -1294,6 +1295,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     if (indexOfMessage != -1) {
                         messages.set(indexOfMessage, emMessage);
                         messagesAdapter.notifyDataSetChanged();
+                        UiUtils.bangSound(ChatActivity.this,R.raw.pop);
                     }
                 }
             }

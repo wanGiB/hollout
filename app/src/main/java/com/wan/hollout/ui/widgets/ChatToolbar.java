@@ -208,6 +208,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                         contactSubTitle.setText(StringUtils.strip(mContext.getString(R.string.typing_), "…"));
                         contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                         UiUtils.showView(typingIndicator, true);
+                        UiUtils.bangSound(getContext(),R.raw.typing);
                     } else {
                         if (userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
                             contactSubTitle.setText(mContext.getString(R.string.online));

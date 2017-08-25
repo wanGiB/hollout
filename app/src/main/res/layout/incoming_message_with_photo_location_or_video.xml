@@ -85,12 +85,13 @@
                 android:gravity="bottom"
                 android:paddingBottom="6dp"
                 android:textColor="@color/whitesmoke"
+                android:background="#7b000000"
                 android:textSize="12sp"
                 app:textStyle="medium" />
 
         </FrameLayout>
 
-        <com.wan.hollout.ui.widgets.HolloutTextView
+        <com.wan.hollout.ui.widgets.ChatMessageTextView
             android:id="@+id/message_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
