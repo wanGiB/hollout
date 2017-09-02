@@ -266,16 +266,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 TextView tabCountView = (TextView) tabView.findViewById(R.id.tab_count);
                 if (tabCountView != null) {
                     UiUtils.showView(tabCountView, true);
-                    String textInTab = tabCountView.getText().toString().trim();
-                    if (StringUtils.isNotEmpty(textInTab)) {
-                        long existingValue = Long.parseLong(tabCountView.getText().toString().trim());
-                        if (existingValue != 0) {
-                            existingValue = existingValue + incrementValue;
-                        }
-                        tabCountView.setText(String.valueOf(existingValue));
-                    } else {
-                        tabCountView.setText(String.valueOf(incrementValue));
-                    }
+                    tabCountView.setText(String.valueOf(incrementValue));
                 }
             }
         }
