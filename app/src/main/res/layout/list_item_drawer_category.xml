@@ -27,7 +27,7 @@
             android:layout_weight="1"
             android:drawablePadding="8dp"
             android:textSize="20sp"
-            app:textStyle="medium"
+            app:textStyle="regular"
             tools:text="Just arrived"/>
 
         <ImageView
