@@ -148,6 +148,8 @@ public class ConversationsFragment extends Fragment {
                     fetchConversations(0);
                 }
             });
+        }else{
+            fetchConversations(0);
         }
     }
 
@@ -168,7 +170,6 @@ public class ConversationsFragment extends Fragment {
     private void fetchConversations(final int skip) {
         ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
             peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
@@ -177,7 +178,6 @@ public class ConversationsFragment extends Fragment {
                 peopleAndGroupsQuery.setSkip(skip);
             }
             peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
-
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
                     if (e == null) {
