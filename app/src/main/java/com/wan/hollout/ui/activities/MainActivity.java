@@ -107,6 +107,8 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     private HolloutPermissions holloutPermissions;
     private DrawerFragment drawerFragment;
 
+    private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
@@ -221,8 +223,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         });
 
     }
-
-    private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
 
     private void fetchUnreadMessagesCount() {
         getUnreadMessagesCount();

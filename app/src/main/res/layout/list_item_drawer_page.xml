@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/drawer_list_item_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/whitesmoke">
 
-    <TextView
+    <com.wan.hollout.ui.widgets.HolloutTextView
         android:id="@+id/drawer_list_item_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,10 +17,11 @@
         android:layout_marginStart="15dp"
         android:layout_marginTop="12dp"
         android:textSize="18sp"
-        android:textStyle="normal"/>
+        app:textStyle="medium" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="?attr/selectableItemBackground"/>
+        android:background="?attr/selectableItemBackground" />
+
 </FrameLayout>

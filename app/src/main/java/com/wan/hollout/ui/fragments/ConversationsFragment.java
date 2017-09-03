@@ -149,7 +149,7 @@ public class ConversationsFragment extends Fragment {
                 }
             });
         }else{
-            fetchConversations(0);
+            UiUtils.toggleFlipperState(contentFlipper,1);
         }
     }
 
@@ -178,6 +178,7 @@ public class ConversationsFragment extends Fragment {
                 peopleAndGroupsQuery.setSkip(skip);
             }
             peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
+
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
                     if (e == null) {
@@ -203,7 +204,10 @@ public class ConversationsFragment extends Fragment {
                         }
                     }
                 }
+
             });
+        }else {
+            UiUtils.toggleFlipperState(contentFlipper,1);
         }
     }
 
@@ -303,4 +307,5 @@ public class ConversationsFragment extends Fragment {
             }
         });
     }
+
 }
