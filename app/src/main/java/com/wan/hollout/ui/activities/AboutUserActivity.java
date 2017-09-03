@@ -134,7 +134,6 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     public boolean onPrepareOptionsMenu(Menu menu) {
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
-
         searchItem.setVisible(false);
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
@@ -144,11 +143,8 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
         invitePeopleMenuItem.setVisible(false);
         createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
-
         supportInvalidateOptionsMenu();
-
         return super.onPrepareOptionsMenu(menu);
-
     }
 
     private void attemptToOffloadPersistedInfoAboutUser() {

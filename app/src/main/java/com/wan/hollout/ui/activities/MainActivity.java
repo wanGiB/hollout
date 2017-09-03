@@ -116,16 +116,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        Bundle intentExtras = getIntent().getExtras();
-
-        if (intentExtras != null) {
-            boolean accountConflict = intentExtras.getBoolean(AppConstants.ACCOUNT_CONFLICT, false);
-            if (accountConflict) {
-                resolveAuthenticationConflict();
-                return;
-            }
-        }
-
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         final ActionBar ab = getSupportActionBar();
 
@@ -268,31 +258,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                     UiUtils.showView(tabCountView, true);
                     tabCountView.setText(String.valueOf(incrementValue));
                 }
-            }
-        }
-    }
-
-    private void resolveAuthenticationConflict() {
-        final AlertDialog.Builder accountConflictDialog = new AlertDialog.Builder(this);
-        accountConflictDialog.setCancelable(false);
-        accountConflictDialog.setTitle("Another Device detected!");
-        accountConflictDialog.setMessage("This account was logged in to on another device. You'll be logged out here.");
-        accountConflictDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-                attemptLogOut();
-            }
-        });
-        accountConflictDialog.create().show();
-    }
-
-    private void checkIsSessionValid() {
-        Bundle intentExtras = getIntent().getExtras();
-        if (intentExtras != null) {
-            boolean accountConflict = intentExtras.getBoolean(AppConstants.ACCOUNT_CONFLICT, false);
-            if (accountConflict) {
-                resolveAuthenticationConflict();
             }
         }
     }
@@ -674,7 +639,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-
                                     HolloutCommunicationsManager.getInstance().signOut(true, new EMCallBack() {
                                         @Override
                                         public void onSuccess() {
@@ -691,7 +655,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                                         public void onError(int code, String error) {
                                             UiUtils.dismissProgressDialog();
                                             UiUtils.showSafeToast("Failed to sign you out.Please try again");
-                                            checkIsSessionValid();
                                         }
 
                                         @Override
@@ -704,14 +667,12 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                                 } else {
                                     UiUtils.dismissProgressDialog();
                                     UiUtils.showSafeToast("Failed to sign you out.Please try again");
-                                    checkIsSessionValid();
                                 }
                             }
                         });
                     } else {
                         UiUtils.dismissProgressDialog();
                         UiUtils.showSafeToast("Failed to sign you out.Please try again");
-                        checkIsSessionValid();
                     }
                 }
             });

@@ -838,7 +838,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
         builder.setAutoCancel(true);
         builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
 
-        builder.setContentText("Tap here to go back to call");
+        builder.setContentText("Tap here to return back to call");
         builder.setContentTitle(getString(R.string.app_name));
         Intent intent = new Intent(mActivity, VideoCallActivity.class);
         PendingIntent pIntent =

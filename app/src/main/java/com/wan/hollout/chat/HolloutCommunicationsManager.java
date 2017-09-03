@@ -287,10 +287,7 @@ public class HolloutCommunicationsManager {
      * user has logged into another device
      */
     private void onConnectionConflict() {
-        Intent intent = new Intent(mContext, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(AppConstants.ACCOUNT_CONFLICT, true);
-        mContext.startActivity(intent);
+
     }
 
     /**

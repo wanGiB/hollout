@@ -24,6 +24,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
+        multiDexEnabled true //important
     }
 
     signingConfigs {
@@ -42,6 +43,7 @@ android {
             signingConfig signingConfigs.release
         }
     }
+
     dexOptions {
         jumboMode = true
     }

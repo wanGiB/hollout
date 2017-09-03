@@ -2,6 +2,7 @@ package com.wan.hollout.ui.widgets;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -9,8 +10,11 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.crashlytics.android.Crashlytics;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
+import com.wan.hollout.ui.activities.FullChatRequestsActivity;
+import com.wan.hollout.utils.UiUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +90,7 @@ public class ChatRequestsAdapterView extends LinearLayout {
         try {
             chatRequests.remove(removableParseObject);
         } catch (Exception ignored) {
-
+            Crashlytics.logException(ignored);
         }
         loadRequests();
     }
@@ -99,7 +103,7 @@ public class ChatRequestsAdapterView extends LinearLayout {
             return;
         }
         seeAllConnectionRequestsView.setTextColor(ContextCompat.getColor(activity, R.color.colorPrimary));
-        seeAllConnectionRequestsView.setText(activity.getString(R.string.see_all));
+        seeAllConnectionRequestsView.setText(activity.getString(R.string.see_all) + "(" + chatRequests.size() + ")");
         if (chatRequests.size() == 1) {
             try {
                 ParseObject singleChatRequest = chatRequests.get(0);
@@ -121,6 +125,14 @@ public class ChatRequestsAdapterView extends LinearLayout {
 
             }
         }
+        seeAllConnectionRequestsView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UiUtils.blinkView(v);
+                Intent mFullChatRequestsIntent = new Intent(activity, FullChatRequestsActivity.class);
+                activity.startActivity(mFullChatRequestsIntent);
+            }
+        });
     }
 
     private void notifyDataSetChanged() {

@@ -737,7 +737,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
     }
 
-
     public void iterateThroughPickedMediaAndSendEach() {
         for (HolloutFile holloutFile : pickedMediaFiles) {
             switch (holloutFile.getFileType()) {
@@ -1135,15 +1134,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 }
             }
         } else if (requestCode == REQUEST_CODE_CONTACT_SHARE && resultCode == RESULT_OK) {
-
             File vCradFile;
-
             try {
-
                 vCradFile = new ContactService(ChatActivity.this).vCard(data.getData());
-
                 if (vCradFile != null) {
-
                     HolloutFile contactFile = new HolloutFile();
                     contactFile.setLocalFilePath(vCradFile.getPath());
                     contactFile.setLocalFilePath(AppConstants.FILE_TYPE_CONTACT);

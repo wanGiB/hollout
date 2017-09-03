@@ -60,11 +60,9 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     TextView declineRequestView;
 
     private ParseObject signedInUser;
-
     private ParseObject requestOriginator;
     
     private Activity activity;
-
     private ParseObject feedObject;
 
     public ChatRequestView(Context context) {

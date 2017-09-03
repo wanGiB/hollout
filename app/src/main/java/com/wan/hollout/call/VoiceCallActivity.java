@@ -518,7 +518,7 @@ public class VoiceCallActivity extends CallActivity {
         builder.setAutoCancel(true);
         builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);
 
-        builder.setContentText("While the video call is in progress, tap Resume");
+        builder.setContentText("Tap here to return back to call");
 
         builder.setContentTitle(getString(R.string.app_name));
         Intent intent = new Intent(mActivity, VoiceCallActivity.class);
