@@ -42,6 +42,7 @@
     <permission
         android:name="com.wan.hollout.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+
     <permission
         android:name="com.wan.hollout.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
@@ -57,26 +58,42 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:icon,android:allowBackup, android:label">
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="ad592a04b832e238a390d851afaba5226e6f6632" />
+
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
+        <!-- set your API key -->
+        <meta-data
+            android:name="EASEMOB_APPKEY"
+            android:value="1503170817002326#connectwithme" />
+        <meta-data
+            android:name="Hyphenate_AppKey"
+            android:value="1503170817002326#connectwithme" />
 
         <!-- gcm start -->
         <receiver
             android:name="com.hyphenate.chat.EMGCMBroadcastReceiver"
             android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND">
+
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-
                 <category android:name="com.hyphenate.chatuidemo" />
             </intent-filter>
+
         </receiver>
 
         <service
@@ -92,14 +109,6 @@
                 <category android:name="com.hyphenate.chatuidemo" />
             </intent-filter>
         </receiver>
-
-        <!-- set your API key -->
-        <meta-data
-            android:name="EASEMOB_APPKEY"
-            android:value="1503170817002326#connectwithme" />
-        <meta-data
-            android:name="Hyphenate_AppKey"
-            android:value="1503170817002326#connectwithme" />
 
         <!-- SDK service -->
         <service
@@ -249,20 +258,18 @@
             android:name=".ui.activities.SlidePagerActivity"
             android:configChanges="orientation|screenLayout|screenSize"
             android:theme="@style/FullscreenTheme" />
+
         <activity
             android:name=".ui.activities.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/profile"
             android:theme="@style/AppTheme.FullScreen.Light"
             android:windowSoftInputMode="stateHidden" />
+
         <activity
             android:name=".ui.activities.FullChatRequestsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:theme="@style/AppTheme.FullScreen.Light" />
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
 
     </application>
 

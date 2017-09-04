@@ -476,10 +476,10 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             } catch (HyphenateException e) {
                 e.printStackTrace();
             }
-
         }
 
         if (messageType == EMMessage.Type.LOCATION) {
+            UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_location, UiUtils.DrawableDirection.LEFT);
             EMLocationMessageBody emLocationMessageBody = (EMLocationMessageBody) message.getBody();
             String messageBody = emLocationMessageBody.getAddress();
             if (StringUtils.isNotEmpty(messageBody)) {
@@ -522,12 +522,11 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 e.printStackTrace();
             }
         }
+
     }
 
     protected void setMessageSendCallback() {
-
         if (messageSendCallback == null) {
-
             messageSendCallback = new EMCallBack() {
 
                 @Override
@@ -557,7 +556,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
      * set callback for receiving message
      */
     protected void setMessageReceiveCallback() {
-
         if (messageReceiveCallback == null) {
 
             messageReceiveCallback = new EMCallBack() {
@@ -581,7 +579,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         }
 
         lastMessage.setMessageStatusCallback(messageReceiveCallback);
-
     }
 
     private void setupMessageReadStatus(EMMessage message) {

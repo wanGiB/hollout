@@ -199,8 +199,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (StringUtils.isNotEmpty(locationName)) {
             UiUtils.showView(messageBodyView, true);
             messageBodyView.setText(locationName);
+            AppConstants.messageBodyPositions.put(getMessageHash(),true);
         } else {
             UiUtils.showView(messageBodyView, false);
+            AppConstants.messageBodyPositions.put(getMessageHash(),false);
         }
         String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(messageBody.getLatitude()),
                 String.valueOf(messageBody.getLongitude()));
