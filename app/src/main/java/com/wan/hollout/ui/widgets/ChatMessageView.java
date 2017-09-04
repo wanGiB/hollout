@@ -33,9 +33,12 @@ import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Date;
@@ -120,6 +123,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private Activity activity;
 
     protected EMCallBack messageStatusCallback;
+
     protected Handler handler = new Handler(Looper.getMainLooper());
 
     public ChatMessageView(Context context) {
@@ -186,10 +190,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (messageType == EMMessage.Type.LOCATION) {
             setupLocationMessage((EMLocationMessageBody) messageBody);
         }
-
         handleCommonalities();
         refreshViews();
-
     }
 
     private void setupLocationMessage(EMLocationMessageBody messageBody) {
@@ -199,6 +201,13 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             messageBodyView.setText(locationName);
         } else {
             UiUtils.showView(messageBodyView, false);
+        }
+        String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(messageBody.getLatitude()),
+                String.valueOf(messageBody.getLongitude()));
+        if (StringUtils.isNotEmpty(locationStaticMap)) {
+            UiUtils.showView(fileSizeDurationView, false);
+            AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
+            UiUtils.loadImage(activity,locationStaticMap,attachedPhotoOrVideoThumbnailView);
         }
     }
 
