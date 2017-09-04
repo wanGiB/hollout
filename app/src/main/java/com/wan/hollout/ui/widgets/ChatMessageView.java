@@ -21,10 +21,12 @@ import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMFileMessageBody;
 import com.hyphenate.chat.EMImageMessageBody;
+import com.hyphenate.chat.EMLocationMessageBody;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMMessageBody;
 import com.hyphenate.chat.EMTextMessageBody;
 import com.hyphenate.chat.EMVideoMessageBody;
+import com.hyphenate.chat.EMVoiceMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.john.waveview.WaveView;
 import com.wan.hollout.R;
@@ -46,6 +48,8 @@ import butterknife.ButterKnife;
  */
 @SuppressWarnings({"FieldCanBeLocal", "ConstantConditions"})
 public class ChatMessageView extends RelativeLayout implements View.OnClickListener {
+
+    public static String TAG = "ChatMessageView";
 
     @BindView(R.id.message_container)
     MessageBubbleLayout messageBubbleLayout;
@@ -116,7 +120,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private Activity activity;
 
     protected EMCallBack messageStatusCallback;
-
     protected Handler handler = new Handler(Looper.getMainLooper());
 
     public ChatMessageView(Context context) {
@@ -155,6 +158,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void setupMessageBody() {
+
         EMMessage.Type messageType = getMessageType();
         EMMessageBody messageBody = message.getBody();
 
@@ -175,8 +179,43 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             setupFileMessage((EMFileMessageBody) messageBody);
         }
 
+        if (messageType == EMMessage.Type.VOICE) {
+            setupVoiceMessage((EMVoiceMessageBody) messageBody);
+        }
+
+        if (messageType == EMMessage.Type.LOCATION) {
+            setupLocationMessage((EMLocationMessageBody) messageBody);
+        }
+
         handleCommonalities();
         refreshViews();
+
+    }
+
+    private void setupLocationMessage(EMLocationMessageBody messageBody) {
+        String locationName = messageBody.getAddress();
+        if (StringUtils.isNotEmpty(locationName)) {
+            UiUtils.showView(messageBodyView, true);
+            messageBodyView.setText(locationName);
+        } else {
+            UiUtils.showView(messageBodyView, false);
+        }
+    }
+
+    private void setupVoiceMessage(EMVoiceMessageBody emFileMessageBody) {
+        try {
+            String audioDuration = message.getStringAttribute(AppConstants.AUDIO_DURATION);
+            String fileCaption = "Voice Note";
+            File localFilePath = new File(emFileMessageBody.getLocalUrl());
+            if (localFilePath.exists()) {
+                audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, audioDuration);
+            } else {
+                audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, audioDuration);
+            }
+        } catch (HyphenateException e) {
+            e.printStackTrace();
+            HolloutLogger.e(TAG, e.getMessage());
+        }
     }
 
     private void setupFileMessage(EMFileMessageBody messageBody) {
@@ -190,6 +229,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
+            HolloutLogger.e(TAG, e.getMessage());
         }
     }
 
@@ -207,6 +247,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
+            HolloutLogger.e(TAG, e.getMessage());
         }
     }
 
@@ -226,6 +267,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
+            HolloutLogger.e(TAG, e.getMessage());
         }
     }
 
@@ -275,6 +317,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
+            HolloutLogger.e(TAG, e.getMessage());
         }
     }
 
@@ -314,6 +357,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
+            HolloutLogger.e(TAG, e.getMessage());
         }
 
         playMediaIfVideoIcon.setOnClickListener(new OnClickListener() {
@@ -463,7 +507,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        if (audioView!=null){
+        if (audioView != null) {
             audioView.cleanup();
         }
     }
