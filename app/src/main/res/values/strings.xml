@@ -311,5 +311,6 @@
     <string name="wants_to_chat">Wants to Chat</string>
     <string name="hey_a_while">Hey, it\'s being a while</string>
     <string name="network_error">Chats retrieval failure (Network error). Tap here to retry</string>
+    <string name="title_activity_maps">Map</string>
 
 </resources>
