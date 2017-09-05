@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -53,6 +54,8 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
     @Nullable
     private String audioSlide;
 
+    private Context context;
+
     public AudioView(Context context) {
         this(context, null);
     }
@@ -61,9 +64,13 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
         this(context, attrs, 0);
     }
 
+    private void initContext(Context context){
+        this.context = context;
+    }
+
     public AudioView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-
+        initContext(context);
         inflate(context, R.layout.audio_view, this);
 
         this.controlToggle = (AnimatingToggle) findViewById(R.id.control_toggle);
@@ -96,6 +103,7 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
     public void cleanup() {
         if (this.audioSlidePlayer != null && pauseButton.getVisibility() == View.VISIBLE) {
             this.audioSlidePlayer.stop();
+            this.playButton.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.play_icon));
         }
     }
 
