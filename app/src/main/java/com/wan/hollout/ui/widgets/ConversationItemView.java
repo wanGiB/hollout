@@ -490,6 +490,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         }
 
         if (messageType == EMMessage.Type.VOICE) {
+            UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
             EMVoiceMessageBody emVoiceMessageBody = (EMVoiceMessageBody) message.getBody();
             String messageBody = emVoiceMessageBody.getFileName();
             if (StringUtils.isNotEmpty(messageBody)) {

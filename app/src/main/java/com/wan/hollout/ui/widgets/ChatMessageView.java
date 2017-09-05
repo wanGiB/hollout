@@ -214,18 +214,13 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void setupVoiceMessage(EMVoiceMessageBody emFileMessageBody) {
-        try {
-            String audioDuration = message.getStringAttribute(AppConstants.AUDIO_DURATION);
-            String fileCaption = "Voice Note";
-            File localFilePath = new File(emFileMessageBody.getLocalUrl());
-            if (localFilePath.exists()) {
-                audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, audioDuration);
-            } else {
-                audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, audioDuration);
-            }
-        } catch (HyphenateException e) {
-            e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
+        String audioDuration = UiUtils.getTimeString(emFileMessageBody.getLength());
+        String fileCaption = "Voice Note";
+        File localFilePath = new File(emFileMessageBody.getLocalUrl());
+        if (localFilePath.exists()) {
+            audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, audioDuration);
+        } else {
+            audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, audioDuration);
         }
     }
 
@@ -247,7 +242,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void setupAudioMessage(EMFileMessageBody emFileMessageBody) {
         try {
             String audioDuration = message.getStringAttribute(AppConstants.AUDIO_DURATION);
-            String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION) != null ?
+            String fileCaption =StringUtils.isNotEmpty(message.getStringAttribute(AppConstants.FILE_CAPTION))?
                     message.getStringAttribute(AppConstants.FILE_CAPTION) : activity.getString(R.string.audio);
 
             File localFilePath = new File(emFileMessageBody.getLocalUrl());
