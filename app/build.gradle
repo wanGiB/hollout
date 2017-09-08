@@ -29,7 +29,7 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("C:\\Users\\Chiefo\\StudioProjects\\Hollout\\Store\\release_key.jks")
+            storeFile file("/home/wan/StudioProjects/Hollout/Store/release_key.jks")
             storePassword "descriptor"
             keyAlias "Wan"
             keyPassword "descriptor"

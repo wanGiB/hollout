@@ -37,8 +37,6 @@ import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.util.Date;
@@ -199,17 +197,17 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (StringUtils.isNotEmpty(locationName)) {
             UiUtils.showView(messageBodyView, true);
             messageBodyView.setText(locationName);
-            AppConstants.messageBodyPositions.put(getMessageHash(),true);
+            AppConstants.messageBodyPositions.put(getMessageHash(), true);
         } else {
             UiUtils.showView(messageBodyView, false);
-            AppConstants.messageBodyPositions.put(getMessageHash(),false);
+            AppConstants.messageBodyPositions.put(getMessageHash(), false);
         }
         String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(messageBody.getLatitude()),
                 String.valueOf(messageBody.getLongitude()));
         if (StringUtils.isNotEmpty(locationStaticMap)) {
             UiUtils.showView(fileSizeDurationView, false);
             AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
-            UiUtils.loadImage(activity,locationStaticMap,attachedPhotoOrVideoThumbnailView);
+            UiUtils.loadImage(activity, locationStaticMap, attachedPhotoOrVideoThumbnailView);
         }
     }
 
@@ -242,18 +240,19 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void setupAudioMessage(EMFileMessageBody emFileMessageBody) {
         try {
             String audioDuration = message.getStringAttribute(AppConstants.AUDIO_DURATION);
-            String fileCaption =StringUtils.isNotEmpty(message.getStringAttribute(AppConstants.FILE_CAPTION))?
+            String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION) != null ?
                     message.getStringAttribute(AppConstants.FILE_CAPTION) : activity.getString(R.string.audio);
 
             File localFilePath = new File(emFileMessageBody.getLocalUrl());
             if (localFilePath.exists()) {
+                //Local File exists
                 audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, audioDuration);
             } else {
                 audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, audioDuration);
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
+            HolloutLogger.e(TAG, "Audio Exception = " + e.getMessage());
         }
     }
 

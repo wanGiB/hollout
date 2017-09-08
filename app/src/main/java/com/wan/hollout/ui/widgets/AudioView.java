@@ -19,8 +19,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.wan.hollout.R;
-import com.wan.hollout.utils.UiUtils;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
