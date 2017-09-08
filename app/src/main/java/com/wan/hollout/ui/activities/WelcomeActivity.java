@@ -116,7 +116,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             "People who share in your passion",
             "People who share in your interests",
             "People who share in your concerns",
-            "People people of like minds",
+            "People of like minds",
             "Any one like you!!!"
     };
 
