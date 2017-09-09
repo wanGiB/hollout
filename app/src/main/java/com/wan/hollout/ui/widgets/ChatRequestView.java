@@ -32,7 +32,6 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -41,23 +40,12 @@ import butterknife.ButterKnife;
 
 public class ChatRequestView extends LinearLayout implements View.OnClickListener, View.OnLongClickListener {
 
-    @BindView(R.id.requester_photo)
-    CircleImageView requesterPhotoView;
-
-    @BindView(R.id.requester_name)
-    HolloutTextView requesterNameView;
-
-    @BindView(R.id.about_requester)
-    HolloutTextView aboutRequesterView;
-
-    @BindView(R.id.distance_to_requester)
-    HolloutTextView distanceToRequesterView;
-
-    @BindView(R.id.accept_request)
-    TextView acceptRequestTextView;
-
-    @BindView(R.id.decline_request)
-    TextView declineRequestView;
+    private CircleImageView requesterPhotoView;
+    private HolloutTextView requesterNameView;
+    private HolloutTextView aboutRequesterView;
+    private HolloutTextView distanceToRequesterView;
+    private TextView acceptRequestTextView;
+    private TextView declineRequestView;
 
     private ParseObject signedInUser;
     private ParseObject requestOriginator;
@@ -249,6 +237,16 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     private void init() {
         setOnClickListener(this);
         setOnLongClickListener(this);
+        initViews();
+    }
+
+    private void initViews(){
+        requesterPhotoView = (CircleImageView)findViewById(R.id.requester_photo);
+        requesterNameView = (HolloutTextView)findViewById(R.id.requester_name);
+        aboutRequesterView = (HolloutTextView)findViewById(R.id.about_requester);
+        distanceToRequesterView = (HolloutTextView)findViewById(R.id.distance_to_requester);
+        acceptRequestTextView = (TextView)findViewById(R.id.accept_request);
+        declineRequestView = (TextView)findViewById(R.id.decline_request);
     }
 
     @Override
