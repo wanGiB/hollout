@@ -128,6 +128,7 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
             if (skip != 0) {
                 chatRequestsQuery.setSkip(skip);
             }
+            chatRequestsQuery.include(AppConstants.FEED_CREATOR);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             chatRequestsQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
@@ -139,12 +140,17 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
                         UiUtils.showView(nothingToLoadView, false);
                         UiUtils.showView(progressWheel, false);
                         UiUtils.showView(chatRequestsRecyclerView, true);
-                        chatRequests.add(new ParseObject(AppConstants.HOLLOUT_FEED));
+                        chatRequests.add(0,new ParseObject(AppConstants.HOLLOUT_FEED));
                         chatRequestsAdapter.notifyDataSetChanged();
+                        loadAdapter();
                     }
                 }
             });
         }
+    }
+
+    private void loadAdapter(){
+
     }
 
     @SuppressWarnings("unused")

@@ -96,14 +96,14 @@ public class ChatRequestsAdapterView extends LinearLayout {
     }
 
     private void loadRequests() {
-        chatRequestsHeaderView.setText(activity.getString(R.string.chat_requests) + "(" + chatRequests.size() + ")");
+        chatRequestsHeaderView.setText(activity.getString(R.string.chat_requests));
         if (chatRequests.isEmpty()) {
             seeAllConnectionRequestsView.setTextColor(ContextCompat.getColor(activity, R.color.grey500));
             seeAllConnectionRequestsView.setText(activity.getString(R.string.thats_all_for_now));
             return;
         }
         seeAllConnectionRequestsView.setTextColor(ContextCompat.getColor(activity, R.color.colorPrimary));
-        seeAllConnectionRequestsView.setText(activity.getString(R.string.see_all) + "(" + chatRequests.size() + ")");
+        seeAllConnectionRequestsView.setText(UiUtils.fromHtml(activity.getString(R.string.see_all) + "<b>" + chatRequests.size() + "</b>"));
         if (chatRequests.size() == 1) {
             try {
                 ParseObject singleChatRequest = chatRequests.get(0);
