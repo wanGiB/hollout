@@ -103,7 +103,7 @@ public class ChatRequestsAdapterView extends LinearLayout {
             return;
         }
         seeAllConnectionRequestsView.setTextColor(ContextCompat.getColor(activity, R.color.colorPrimary));
-        seeAllConnectionRequestsView.setText(UiUtils.fromHtml(activity.getString(R.string.see_all) + "<b>" + chatRequests.size() + "</b>"));
+        seeAllConnectionRequestsView.setText(UiUtils.fromHtml(activity.getString(R.string.see_all) + " <b>" + chatRequests.size() + "</b>"));
         if (chatRequests.size() == 1) {
             try {
                 ParseObject singleChatRequest = chatRequests.get(0);

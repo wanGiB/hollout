@@ -348,6 +348,15 @@ public class HolloutCommunicationsManager {
 
     }
 
+    private boolean isAContact(ParseObject signedInUser, String recipientId) {
+        if (signedInUser!=null){
+            List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+            return signedInUserChats != null && signedInUserChats.contains(recipientId);
+        }else {
+            return false;
+        }
+    }
+
     /**
      * new messages listener
      * If this event already handled by an activity, you don't need handle it again
@@ -365,20 +374,21 @@ public class HolloutCommunicationsManager {
             @Override
             public void onMessageReceived(List<EMMessage> messages) {
 
-                List<String>unreadConversationItems = new ArrayList<>();
+                List<String> unreadConversationItems = new ArrayList<>();
 
                 for (EMMessage emMessage : messages) {
-                    if (!unreadConversationItems.contains(emMessage.getFrom())){
+                    if (!unreadConversationItems.contains(emMessage.getFrom()) && isAContact(AuthUtil.getCurrentUser(),emMessage.getFrom())) {
                         unreadConversationItems.add(emMessage.getFrom());
+                        HolloutPreferences.updateConversationTime(emMessage.getFrom());
                     }
-                    HolloutPreferences.updateConversationTime(emMessage.getFrom());
                 }
 
-                if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0) {
+                if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0 && !unreadConversationItems.isEmpty()) {
                     HolloutPreferences.saveUnreadMessagesCount(unreadConversationItems.size());
                 }
 
                 ParseObject signedInUser = AuthUtil.getCurrentUser();
+
                 if (signedInUser != null) {
                     String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                     if (!signedInUserStatus.equals(AppConstants.ONLINE)) {
