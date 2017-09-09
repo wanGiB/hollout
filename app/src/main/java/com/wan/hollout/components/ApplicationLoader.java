@@ -45,12 +45,14 @@ public class ApplicationLoader extends Application {
     private static ParseLiveQueryClient parseLiveQueryClient;
 
     BroadcastReceiver connectivityChangedReceiver = new BroadcastReceiver() {
+
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 EventBus.getDefault().post(new ConnectivityChangedAction(true));
             }
         }
+
     };
 
     @Override

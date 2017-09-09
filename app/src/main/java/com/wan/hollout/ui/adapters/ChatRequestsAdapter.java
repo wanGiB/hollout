@@ -25,6 +25,8 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private Activity activity;
     private LayoutInflater layoutInflater;
 
+    private final int REAL_FEED = 0;
+
     public ChatRequestsAdapter(Activity activity, List<ParseObject> chatRequests) {
         this.activity = activity;
         this.chatRequests = chatRequests;
@@ -33,7 +35,9 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new ChatRequestsHolder(layoutInflater.inflate(R.layout.chat_request_recycler_view_item, parent, false));
+        View convertView = layoutInflater.inflate(viewType == REAL_FEED ? R.layout.chat_request_recycler_view_item
+                : R.layout.padded_empty_view, parent, false);
+        return new ChatRequestsHolder(convertView);
     }
 
     @Override
@@ -42,6 +46,16 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ParseObject chatRequest = chatRequests.get(position);
         if (chatRequest!=null){
             chatRequestsHolder.bindData(activity,chatRequest);
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        ParseObject feedObject = chatRequests.get(position);
+        if (!feedObject.keySet().isEmpty()) {
+            return REAL_FEED;
+        } else {
+            return 1;
         }
     }
 
@@ -64,6 +78,7 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         public void bindData(Activity activity,ParseObject chatRequest){
             chatRequestView.bindData(activity,null,chatRequest);
         }
+
     }
 
 }
