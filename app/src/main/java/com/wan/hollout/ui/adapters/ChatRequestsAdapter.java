@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,6 +68,7 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @SuppressWarnings("WeakerAccess")
     static class ChatRequestsHolder extends RecyclerView.ViewHolder {
 
+        @Nullable
         @BindView(R.id.chat_request_view)
         ChatRequestView chatRequestView;
 
@@ -76,7 +78,9 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
 
         public void bindData(Activity activity,ParseObject chatRequest){
-            chatRequestView.bindData(activity,null,chatRequest);
+            if (chatRequestView != null) {
+                chatRequestView.bindData(activity,null,chatRequest);
+            }
         }
 
     }
