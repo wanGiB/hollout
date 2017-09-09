@@ -135,6 +135,7 @@ public class FeedFragment extends Fragment {
         if (signedInUser != null) {
             ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            chatRequestsQuery.include(AppConstants.FEED_CREATOR);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             chatRequestsQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
