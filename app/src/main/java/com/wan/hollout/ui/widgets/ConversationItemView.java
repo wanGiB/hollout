@@ -24,7 +24,6 @@ import com.hyphenate.chat.EMConversation;
 import com.hyphenate.chat.EMLocationMessageBody;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMTextMessageBody;
-import com.hyphenate.chat.EMVoiceMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -141,7 +140,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                                 ? AppConstants.CHAT_TYPE_GROUP : AppConstants.CHAT_TYPE_ROOM), true);
 
         init();
-        loadParseObject(searchString);
+        setupConversation(searchString);
         invalidateViewOnScroll();
     }
 
@@ -194,7 +193,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         return parseObject.getObjectId().hashCode();
     }
 
-    public void loadParseObject(String searchString) {
+    public void setupConversation(String searchString) {
         if (parseObject != null) {
             String userName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL) ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
             String userProfilePhoto = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL) ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
@@ -213,7 +212,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             applyIconAnimation();
             if (emConversation != null) {
                 int unreadMessagesCount = emConversation.getUnreadMsgCount();
-
                 if (unreadMessagesCount > 0) {
                     UiUtils.showView(unreadMessagesCountView, true);
                     unreadMessagesCountView.setText(String.valueOf(unreadMessagesCount));
@@ -241,13 +239,13 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                             UiUtils.showView(deliveryStatusView, false);
                             AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
                         } else {
-                            doTheOtherThings();
+                            setupDefaults();
                         }
                     } else {
-                        doTheOtherThings();
+                        setupDefaults();
                     }
                 } else {
-                    doTheOtherThings();
+                    setupDefaults();
                 }
             } else {
                 HolloutLogger.d("LastMessageTracker", "Sorry, conversation does not even exist. Lolz.");
@@ -309,7 +307,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     }
 
-    private void doTheOtherThings() {
+    private void setupDefaults() {
         if (lastMessage != null) {
             HolloutLogger.d("LastMessageTracker", "Last Message in conversation is not null");
             UiUtils.showView(msgTimeStampView, true);
@@ -373,7 +371,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                             @Override
                             public void run() {
                                 parseObject = object;
-                                loadParseObject(searchString);
+                                setupConversation(searchString);
                             }
                         });
                     }
@@ -491,13 +489,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
         if (messageType == EMMessage.Type.VOICE) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
-            EMVoiceMessageBody emVoiceMessageBody = (EMVoiceMessageBody) message.getBody();
-            String messageBody = emVoiceMessageBody.getFileName();
-            if (StringUtils.isNotEmpty(messageBody)) {
-                userStatusOrLastMessageView.setText(messageBody);
-            } else {
-                userStatusOrLastMessageView.setText(activity.getString(R.string.voice));
-            }
+            userStatusOrLastMessageView.setText(activity.getString(R.string.voice));
         }
 
         if (messageType == EMMessage.Type.FILE) {
@@ -507,15 +499,15 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 switch (fileType) {
                     case AppConstants.FILE_TYPE_CONTACT:
                         messageBody = "Contact";
-                        UiUtils.attachDrawableToTextView(activity,userStatusOrLastMessageView,R.drawable.msg_contact, UiUtils.DrawableDirection.LEFT);
+                        UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_contact, UiUtils.DrawableDirection.LEFT);
                         break;
                     case AppConstants.FILE_TYPE_AUDIO:
                         messageBody = "Music";
-                        UiUtils.attachDrawableToTextView(activity,userStatusOrLastMessageView,R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
+                        UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
                         break;
                     case AppConstants.FILE_TYPE_DOCUMENT:
                         messageBody = "Document";
-                        UiUtils.attachDrawableToTextView(activity,userStatusOrLastMessageView,R.drawable.icon_file_doc_grey_mini, UiUtils.DrawableDirection.LEFT);
+                        UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.icon_file_doc_grey_mini, UiUtils.DrawableDirection.LEFT);
                         break;
                 }
                 userStatusOrLastMessageView.setText(messageBody);
@@ -532,7 +524,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
                 @Override
                 public void onSuccess() {
-                    loadParseObject(searchString);
+                    setupConversation(searchString);
                 }
 
                 @Override
@@ -563,7 +555,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
                 @Override
                 public void onSuccess() {
-                    loadParseObject(searchString);
+                    setupConversation(searchString);
                 }
 
                 @Override
