@@ -62,6 +62,7 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Chat Requests");
         }
         signedInUser = AuthUtil.getCurrentUser();
         initFeedAdapter();
@@ -137,20 +138,33 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
                         chatRequests.clear();
                     }
                     if (e == null && objects != null && !objects.isEmpty()) {
-                        UiUtils.showView(nothingToLoadView, false);
-                        UiUtils.showView(progressWheel, false);
-                        UiUtils.showView(chatRequestsRecyclerView, true);
-                        chatRequests.add(0,new ParseObject(AppConstants.HOLLOUT_FEED));
-                        chatRequestsAdapter.notifyDataSetChanged();
-                        loadAdapter();
+                        loadAdapter(objects);
                     }
                 }
             });
         }
     }
 
-    private void loadAdapter(){
+    private void loadAdapter(List<ParseObject> objects){
 
+        for (ParseObject parseObject:objects){
+            if (!chatRequests.contains(parseObject)){
+                chatRequests.add(parseObject);
+            }
+        }
+
+        chatRequestsAdapter.notifyDataSetChanged();
+
+        if (!chatRequests.isEmpty()){
+            hideEmptyViewsAndShowRecyclerView();
+        }
+
+    }
+
+    private void hideEmptyViewsAndShowRecyclerView(){
+        UiUtils.showView(nothingToLoadView, false);
+        UiUtils.showView(progressWheel, false);
+        UiUtils.showView(chatRequestsRecyclerView, true);
     }
 
     @SuppressWarnings("unused")
