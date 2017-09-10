@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
 import android.view.MenuItem;
 
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
@@ -68,6 +69,22 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
         initFeedAdapter();
         fetchChatRequests(0);
         checkAndRegEventBus();
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        searchItem.setVisible(false);
+
+        MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
+        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
+        MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
+
+        invitePeopleMenuItem.setVisible(false);
+        createNewGroupItem.setVisible(false);
+        filterPeopleMenuItem.setVisible(false);
+        supportInvalidateOptionsMenu();
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override

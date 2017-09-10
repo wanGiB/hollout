@@ -107,6 +107,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @BindView(R.id.message_body)
     TextView messageBodyView;
 
+    @Nullable
     @BindView(R.id.textview_time)
     TextView timeTextView;
 
@@ -287,7 +288,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     @NonNull
     private String getIncomingNonBreakingSpace() {
-        return " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;";
+        return " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;";
     }
 
     @NonNull
@@ -495,16 +496,20 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void setupMessageTimeAndDeliveryStatus() {
         Date messageDate = new Date(message.getMsgTime());
         String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
-        timeTextView.setText(messageTime);
+        if (timeTextView != null) {
+            timeTextView.setText(messageTime);
+        }
         if (getMessageDirection() == EMMessage.Direct.SEND) {
-            if (message.isAcked()) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.isListened()) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.isDelivered()) {
-                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_client_received_white : R.drawable.msg_status_client_received);
-            } else {
-                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_server_received_white : R.drawable.msg_status_server_receive);
+            if (deliveryStatusView != null) {
+                if (message.isAcked()) {
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+                } else if (message.isListened()) {
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+                } else if (message.isDelivered()) {
+                    deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_client_received_white : R.drawable.msg_status_client_received);
+                } else {
+                    deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_server_received_white : R.drawable.msg_status_server_receive);
+                }
             }
         }
     }

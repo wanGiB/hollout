@@ -62,12 +62,12 @@ public class ReactionView extends View {
         setLayerType(LAYER_TYPE_SOFTWARE, null);
 
         emotions = Arrays.asList(
-                new Emotion(getContext(), "Like", "Like.json"),
-                new Emotion(getContext(), "Love", "Love.json"),
-                new Emotion(getContext(), "Haha", "Haha.json"),
-                new Emotion(getContext(), "Wow", "Wow.json"),
-                new Emotion(getContext(), "Sorry", "Sorry.json"),
-                new Emotion(getContext(), "Angry", "Anger.json"));
+                new Emotion(getContext(), "Like", "reactions/Like.json"),
+                new Emotion(getContext(), "Love", "reactions/Love.json"),
+                new Emotion(getContext(), "Haha", "reactions/Haha.json"),
+                new Emotion(getContext(), "Wow", "reactions/Wow.json"),
+                new Emotion(getContext(), "Sorry", "reactions/Sorry.json"),
+                new Emotion(getContext(), "Angry", "reactions/Anger.json"));
 
         selectingAnimation = new SelectingAnimation();
 

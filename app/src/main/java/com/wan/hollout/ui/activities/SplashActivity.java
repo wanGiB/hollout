@@ -128,7 +128,7 @@ public class SplashActivity extends AppCompatActivity {
     public String readInterestsJSON() {
         String json;
         try {
-            InputStream is = getAssets().open("interests.json");
+            InputStream is = getAssets().open("reactions/interests.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);

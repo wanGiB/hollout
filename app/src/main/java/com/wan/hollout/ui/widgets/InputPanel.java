@@ -18,7 +18,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-
 import com.wan.hollout.R;
 import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.emoji.EmojiToggle;
@@ -193,7 +192,7 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
             handler.postDelayed(this, TimeUnit.SECONDS.toMillis(1));
         }
 
-        public long hide() {
+        long hide() {
             long elapsedtime = System.currentTimeMillis() - startTime.get();
             this.startTime.set(0);
             ViewUtil.fadeOut(this.recordTimeView, FADE_TIME, View.INVISIBLE);

@@ -334,7 +334,7 @@ public class FeedView extends FrameLayout {
 //                    }
 //                });
             } else {
-                likeFeed(postId, "Like.json");
+                likeFeed(postId, "reactions/Like.json");
             }
         }
     }
@@ -775,7 +775,7 @@ public class FeedView extends FrameLayout {
         setUpReactions(reactions);
         UiUtils.showView(feedLikesCountView, true);
         if (signedInUserLikesPost) {
-            if (!signedInUserReactionValue.equals("Like.json")) {
+            if (!signedInUserReactionValue.equals("reactions/Like.json")) {
                 likeFeedView.setText(StringUtils.strip(signedInUserReactionValue, ".json"));
             } else {
                 likeFeedView.setText(activity.getString(R.string.unlike));
@@ -807,7 +807,7 @@ public class FeedView extends FrameLayout {
                 @Override
                 public void onClick(View view) {
                     UiUtils.blinkView(view);
-                    likeFeed(globalPostId, "Like.json");
+                    likeFeed(globalPostId, "reactions/Like.json");
                 }
             });
         }

@@ -112,8 +112,8 @@
                 android:layout_height="20dp"
                 android:layout_alignEnd="@id/user_profile_photo_view"
                 android:layout_alignRight="@id/user_profile_photo_view"
-                android:layout_marginLeft="27dp"
-                android:layout_marginStart="270dp"
+                android:layout_marginLeft="250dp"
+                android:layout_marginStart="250dp"
                 android:layout_marginTop="282dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
@@ -211,41 +211,43 @@
                     android:textSize="15sp"
                     app:textStyle="medium" />
 
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:id="@+id/user_status"
+                <FrameLayout
+                    android:id="@+id/user_status_frame"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/user_location_and_distance"
-                    android:layout_centerHorizontal="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:background="#f6f6f6"
-                    android:gravity="center_horizontal"
-                    android:paddingBottom="10dp"
-                    android:paddingEnd="20dp"
-                    android:drawableLeft="@drawable/ic_open_quote"
-                    android:drawableStart="@drawable/ic_open_quote"
-                    android:drawableEnd="@drawable/ic_close_quote"
-                    android:drawableRight="@drawable/ic_close_quote"
-                    android:drawablePadding="5dp"
-                    android:paddingLeft="20dp"
-                    android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
-                    android:paddingRight="20dp"
-                    android:paddingStart="20dp"
-                    android:paddingTop="16dp"
-                    android:textColor="@color/grey500"
-                    android:text="@string/hey_there_holla_me_on_hollout"
-                    android:textSize="17sp"
-                    app:textStyle="medium" />
+                    android:layout_marginTop="8dp"
+                    android:background="#f4f4f4">
+
+                    <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/user_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:clickable="true"
+                        android:drawableEnd="@drawable/ic_close_quote"
+                        android:drawableLeft="@drawable/ic_open_quote"
+                        android:drawablePadding="5dp"
+                        android:drawableRight="@drawable/ic_close_quote"
+                        android:drawableStart="@drawable/ic_open_quote"
+                        android:background="?attr/selectableItemBackground"
+                        android:gravity="center_horizontal"
+                        android:layout_gravity="center_horizontal"
+                        android:padding="16dp"
+                        android:text="@string/hey_there_holla_me_on_hollout"
+                        android:textColor="@color/grey500"
+                        android:textSize="18sp"
+                        app:textStyle="medium" />
+
+                </FrameLayout>
 
                 <com.wan.hollout.ui.widgets.ChatRequestView
                     android:id="@+id/chat_request_view"
-                    android:visibility="gone"
-                    android:layout_gravity="top"
                     android:layout_width="match_parent"
-                    android:layout_below="@+id/user_status"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/user_status_frame"
+                    android:layout_gravity="top"
+                    android:visibility="gone" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/featured_photos_header"

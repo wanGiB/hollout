@@ -132,7 +132,6 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchItem.setVisible(false);
 

@@ -4,8 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +35,7 @@ public class ReactionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private int lastAnimatedPosition = -1;
     private boolean animationsLocked = false;
 
-    private String[] reactions = new String[]{"Like.json", "Love.json", "Haha.json", "Wow.json", "Sorry.json", "Anger.json"};
+    private String[] reactions = new String[]{"reactions/Like.json", "reactions/Love.json", "reactions/Haha.json", "reactions/Wow.json", "reactions/Sorry.json", "reactions/Anger.json"};
     private LayoutInflater layoutInflater;
     private Context context;
 
