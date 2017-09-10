@@ -42,6 +42,7 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
     private RecentEmojiPageModel recentModel;
     private EmojiEventListener listener;
     private EmojiDrawerListener drawerListener;
+    private View upperView;
 
     public EmojiDrawer(Context context) {
         this(context, null);
@@ -71,6 +72,7 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
         Log.w("EmojiDrawer", "initializeResources()");
         this.pager = (ViewPager) v.findViewById(R.id.emoji_pager);
         this.strip = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
+        upperView = v.findViewById(R.id.upper_view);
 
         RepeatableImageKey backspace = (RepeatableImageKey) v.findViewById(R.id.backspace);
         reactionsInvoker = (ImageView) v.findViewById(R.id.reactions_invoker);
@@ -93,9 +95,11 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
                 if (emojiFlipper.getDisplayedChild() == 0) {
                     emojiFlipper.setDisplayedChild(1);
                     reactionsInvoker.setImageResource(R.drawable.input_emoji);
+                    upperView.setVisibility(GONE);
                 } else {
                     reactionsInvoker.setImageResource(R.drawable.hdp);
                     emojiFlipper.setDisplayedChild(0);
+                    upperView.setVisibility(VISIBLE);
                 }
             }
 

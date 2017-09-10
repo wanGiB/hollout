@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
@@ -29,12 +30,14 @@
             android:layout_height="match_parent"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginStart="2dp"
             android:background="?emoji_tab_seperator" />
 
         <com.wan.hollout.ui.widgets.RepeatableImageKey
             android:id="@+id/backspace"
             android:layout_width="wrap_content"
-            android:layout_height="24dp"
+            android:layout_height="20dp"
             android:layout_gravity="center_vertical"
             android:background="?emoji_tab_strip_background"
             android:paddingLeft="10dp"
@@ -70,8 +73,8 @@
 
         <ImageView
             android:id="@+id/reactions_invoker"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/hdp"
