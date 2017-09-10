@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputView {
+
     private static final KeyEvent DELETE_KEY_EVENT = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
 
     private ViewFlipper emojiFlipper;
