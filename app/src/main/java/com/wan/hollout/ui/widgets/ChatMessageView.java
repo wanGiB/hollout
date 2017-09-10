@@ -110,6 +110,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @BindView(R.id.textview_time)
     TextView timeTextView;
 
+    @Nullable
     @BindView(R.id.delivery_status_view)
     ImageView deliveryStatusView;
 
@@ -162,6 +163,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void setupMessageBody() {
 
         EMMessage.Type messageType = getMessageType();
+
         EMMessageBody messageBody = message.getBody();
 
         if (messageType == EMMessage.Type.TXT) {
@@ -188,12 +190,16 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (messageType == EMMessage.Type.LOCATION) {
             setupLocationMessage((EMLocationMessageBody) messageBody);
         }
+
         handleCommonalities();
+
         refreshViews();
+
     }
 
     private void setupLocationMessage(EMLocationMessageBody messageBody) {
         String locationName = messageBody.getAddress();
+
         if (StringUtils.isNotEmpty(locationName)) {
             UiUtils.showView(messageBodyView, true);
             messageBodyView.setText(locationName);
@@ -202,13 +208,16 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             UiUtils.showView(messageBodyView, false);
             AppConstants.messageBodyPositions.put(getMessageHash(), false);
         }
+
         String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(messageBody.getLatitude()),
                 String.valueOf(messageBody.getLongitude()));
+
         if (StringUtils.isNotEmpty(locationStaticMap)) {
             UiUtils.showView(fileSizeDurationView, false);
             AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
             UiUtils.loadImage(activity, locationStaticMap, attachedPhotoOrVideoThumbnailView);
         }
+
     }
 
     private void setupVoiceMessage(EMVoiceMessageBody emFileMessageBody) {
@@ -422,7 +431,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
      */
     protected void setMessageStatusCallback() {
         if (messageStatusCallback == null) {
-
+            //Outgoing and incoming message callback....As per say to ask if the message has being delivered or a new message has being received
             messageStatusCallback = new EMCallBack() {
 
                 @Override
@@ -451,12 +460,17 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                                     AppConstants.wavePositions.put(getMessageHash(), false);
                                 }
                             }
+
                         });
+
                     }
+
                 }
 
                 @Override
                 public void onError(int code, String error) {
+
+                    //Yabi!!! Lai Lai egberi page ti o
 
                 }
 
