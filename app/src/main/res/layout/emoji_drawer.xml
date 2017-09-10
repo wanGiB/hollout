@@ -61,6 +61,8 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/reactions_recycler_view"
             android:layout_width="match_parent"
+            android:clipToPadding="false"
+            android:clipChildren="false"
             android:layout_height="match_parent" />
 
     </ViewFlipper>
@@ -73,9 +75,10 @@
 
         <ImageView
             android:id="@+id/reactions_invoker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_centerInParent="true"
+            android:scaleType="centerCrop"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/hdp"
             tools:ignore="ContentDescription" />
