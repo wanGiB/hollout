@@ -584,7 +584,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         if (attachmentTypeSelector == null) {
             attachmentTypeSelector = new AttachmentTypeSelector(this, getSupportLoaderManager(), new AttachmentTypeListener());
         }
-        attachmentTypeSelector.show(this, attachButton);
+        attachmentTypeSelector.show(attachButton);
     }
 
     private void initializeViews() {

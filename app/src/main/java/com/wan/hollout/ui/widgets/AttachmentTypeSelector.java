@@ -11,6 +11,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,6 +29,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ViewFlipper;
 
+import com.esotericsoftware.kryo.NotNull;
+import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.listeners.OnSingleClickListener;
@@ -78,15 +81,19 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     private
     @NonNull
-    ImageView dummySearchGifImageView;
-
-    private
-    @NonNull
     EditText gifSearchBox;
 
     private
     @NonNull
     ViewFlipper contentFlipper;
+
+    private
+    @NotNull
+    RecyclerView gifRecyclerView;
+
+    private
+    @NonNull
+    ProgressWheel gifLoadingProgressWheel;
 
     private
     @Nullable
@@ -112,10 +119,13 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.locationButton = ViewUtil.findById(layout, R.id.location_button);
         this.gifButton = ViewUtil.findById(layout, R.id.giphy_button);
         this.closeButton = ViewUtil.findById(layout, R.id.close_button);
-        this.contentFlipper = ViewUtil.findById(layout,R.id.content_flipper);
+        this.contentFlipper = ViewUtil.findById(layout, R.id.content_flipper);
 
-        this.dummySearchGifImageView = ViewUtil.findById(layout,R.id.dummy_search_image_view);
-        this.gifSearchBox = ViewUtil.findById(layout,R.id.gif_search_box);
+        ImageView dummySearchGifImageView = ViewUtil.findById(layout, R.id.dummy_search_image_view);
+
+        this.gifSearchBox = ViewUtil.findById(layout, R.id.gif_search_box);
+        this.gifRecyclerView = ViewUtil.findById(layout, R.id.gif_recycler_view);
+        this.gifLoadingProgressWheel = ViewUtil.findById(layout, R.id.gif_progress_wheel);
 
         this.imageButton.setOnClickListener(new PropagatingClickListener(ADD_IMAGE));
         this.galleryButton.setOnClickListener(new PropagatingClickListener(OPEN_GALLERY));
@@ -126,7 +136,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.gifButton.setOnClickListener(new PropagatingClickListener(ADD_GIF));
         this.closeButton.setOnClickListener(new CloseClickListener());
 
-        this.dummySearchGifImageView.setOnClickListener(new OnSingleClickListener() {
+        dummySearchGifImageView.setOnClickListener(new OnSingleClickListener() {
 
             @Override
             public void onSingleClick(View view) {
@@ -150,22 +160,23 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     }
 
-    public void show(@NonNull Activity activity, final @NonNull View anchor) {
+    public void show(final @NonNull View anchor) {
         this.currentAnchor = anchor;
 
         showAtLocation(anchor, Gravity.BOTTOM, 0, 0);
 
         getContentView().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+
             @Override
             public void onGlobalLayout() {
-                getContentView().getViewTreeObserver().removeGlobalOnLayoutListener(this);
-
+                getContentView().getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     animateWindowInCircular(anchor, getContentView());
                 } else {
                     animateWindowInTranslate(getContentView());
                 }
             }
+
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -297,12 +308,17 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     }
 
-    public void loadGifs(Activity activity) {
-        UiUtils.toggleFlipperState(contentFlipper,1);
+    public void loadGifs(final Activity activity) {
+        UiUtils.toggleFlipperState(contentFlipper, 1);
         ApiUtils.fetchTrendingGifs(new DoneCallback<List<JSONObject>>() {
             @Override
             public void done(List<JSONObject> result, Exception e) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 
+                    }
+                });
             }
         });
     }
@@ -325,7 +341,7 @@ public class AttachmentTypeSelector extends PopupWindow {
 
         @Override
         public void onClick(View v) {
-            if (v.getId()!=R.id.giphy_button){
+            if (v.getId() != R.id.giphy_button) {
                 animateWindowOutTranslate(getContentView());
             }
             if (listener != null) listener.onClick(type);
@@ -333,7 +349,8 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     }
 
-    public ViewFlipper getContentFlipper(){
+    @NonNull
+    public ViewFlipper getContentFlipper() {
         return contentFlipper;
     }
 
@@ -349,6 +366,7 @@ public class AttachmentTypeSelector extends PopupWindow {
     public interface AttachmentClickedListener {
 
         void onClick(int type);
+
         void onQuickAttachment(Uri uri);
 
     }

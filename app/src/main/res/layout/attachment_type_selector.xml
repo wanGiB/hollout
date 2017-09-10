@@ -305,22 +305,37 @@
         </LinearLayout>
 
         <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/powered_by_giphy_footer_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:background="#eaeaea"
             android:padding="16dp"
             android:text="@string/powered_by_giphy"
-            android:id="@+id/powered_by_giphy_footer_view"
             android:textColor="@color/grey500"
             app:textStyle="medium" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
+        <FrameLayout
             android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_above="@id/powered_by_giphy_footer_view"
-            android:layout_below="@+id/giphy_top_view"
-            android:layout_height="wrap_content" />
+            android:layout_below="@+id/giphy_top_view">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/gif_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <com.pnikosis.materialishprogress.ProgressWheel
+                android:id="@+id/gif_progress_wheel"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                app:barColor="@color/ease_gray"
+                app:progressIndeterminate="true"
+                app:rimColor="@color/white" />
+
+        </FrameLayout>
 
     </RelativeLayout>
 
