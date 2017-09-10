@@ -8,7 +8,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="50dp"
         android:id="@+id/upper_view"
         android:background="?emoji_tab_strip_background"
         android:orientation="horizontal">
@@ -39,7 +39,8 @@
             android:layout_width="wrap_content"
             android:layout_height="20dp"
             android:layout_gravity="center_vertical"
-            android:background="?emoji_tab_strip_background"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:src="@drawable/ic_backspace_grey600_24dp" />
