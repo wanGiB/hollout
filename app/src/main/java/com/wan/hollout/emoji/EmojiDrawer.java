@@ -1,6 +1,7 @@
 package com.wan.hollout.emoji;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
@@ -19,12 +20,18 @@ import android.widget.LinearLayout;
 import android.widget.ViewFlipper;
 
 import com.wan.hollout.R;
+import com.wan.hollout.animations.KeyframesDrawable;
+import com.wan.hollout.animations.KeyframesDrawableBuilder;
+import com.wan.hollout.animations.deserializers.KFImageDeserializer;
+import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.ui.adapters.ReactionsAdapter;
 import com.wan.hollout.ui.widgets.InputAwareLayout;
 import com.wan.hollout.ui.widgets.PagerSlidingTabStrip;
 import com.wan.hollout.ui.widgets.RepeatableImageKey;
 import com.wan.hollout.utils.ResUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,6 +50,8 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
     private EmojiEventListener listener;
     private EmojiDrawerListener drawerListener;
     private View upperView;
+
+    private static InputStream stream;
 
     public EmojiDrawer(Context context) {
         this(context, null);
@@ -76,6 +85,7 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
 
         RepeatableImageKey backspace = (RepeatableImageKey) v.findViewById(R.id.backspace);
         reactionsInvoker = (ImageView) v.findViewById(R.id.reactions_invoker);
+        loadHahaToReactionsInvoker();
         reactionsRecyclerView = (RecyclerView) v.findViewById(R.id.reactions_recycler_view);
         emojiFlipper = (ViewFlipper) v.findViewById(R.id.emoji_flipper);
 
@@ -97,7 +107,7 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
                     reactionsInvoker.setImageResource(R.drawable.input_emoji);
                     upperView.setVisibility(GONE);
                 } else {
-                    reactionsInvoker.setImageResource(R.drawable.hdp);
+                    loadHahaToReactionsInvoker();
                     emojiFlipper.setDisplayedChild(0);
                     upperView.setVisibility(VISIBLE);
                 }
@@ -106,16 +116,36 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
         });
 
         initReactionsAdapter();
+
     }
 
-    private void initReactionsAdapter(){
+    private KFImage getKFImage(Context context, String fileName) {
+        AssetManager assetManager = context.getAssets();
+        KFImage kfImage = null;
+        try {
+            stream = assetManager.open(fileName);
+            kfImage = KFImageDeserializer.deserialize(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return kfImage;
+    }
+
+    private void loadHahaToReactionsInvoker() {
+        String hahaReactions = "reactions/Haha.json";
+        KeyframesDrawable imageDrawable = new KeyframesDrawableBuilder().withImage(getKFImage(getContext(), hahaReactions)).build();
+        reactionsInvoker.setImageDrawable(imageDrawable);
+        imageDrawable.startAnimation();
+    }
+
+    private void initReactionsAdapter() {
         ReactionsAdapter reactionsAdapter = new ReactionsAdapter(getContext(), new ReactionsAdapter.ReactionSelectedListener() {
             @Override
             public void onReactionSelected(String reaction) {
 
             }
         });
-        GridLayoutManager gridLayoutManager=new GridLayoutManager(getContext(),3);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 3);
         reactionsRecyclerView.setLayoutManager(gridLayoutManager);
         reactionsRecyclerView.setAdapter(reactionsAdapter);
     }
@@ -144,6 +174,13 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
             setVisibility(GONE);
             if (drawerListener != null) drawerListener.onHidden();
             Log.w("EmojiDrawer", "hide()");
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -233,6 +270,7 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
     }
 
     interface EmojiDrawerListener {
+
         void onShown();
 
         void onHidden();
