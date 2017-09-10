@@ -93,6 +93,9 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     @BindView(R.id.parent_layout)
     View parentView;
 
+    @BindView(R.id.reactions_indicator)
+    ImageView reactionsIndicatorView;
+
     protected EMCallBack messageSendCallback;
     protected EMCallBack messageReceiveCallback;
 

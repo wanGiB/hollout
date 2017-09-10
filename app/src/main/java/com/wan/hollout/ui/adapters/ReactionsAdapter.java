@@ -48,7 +48,6 @@ public class ReactionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private static KeyframesDrawable imageDrawable;
     private static InputStream stream;
 
-
     public interface ReactionSelectedListener {
         void onReactionSelected(String reaction);
     }

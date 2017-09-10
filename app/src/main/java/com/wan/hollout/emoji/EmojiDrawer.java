@@ -24,12 +24,15 @@ import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
+import com.wan.hollout.eventbuses.ReactionMessageEvent;
 import com.wan.hollout.ui.adapters.ReactionsAdapter;
 import com.wan.hollout.ui.widgets.InputAwareLayout;
 import com.wan.hollout.ui.widgets.PagerSlidingTabStrip;
 import com.wan.hollout.ui.widgets.RepeatableImageKey;
 import com.wan.hollout.utils.ResUtil;
 import com.wan.hollout.utils.UiUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -144,7 +147,7 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
         ReactionsAdapter reactionsAdapter = new ReactionsAdapter(getContext(), new ReactionsAdapter.ReactionSelectedListener() {
             @Override
             public void onReactionSelected(String reaction) {
-
+                EventBus.getDefault().post(new ReactionMessageEvent(reaction));
             }
         });
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 3);

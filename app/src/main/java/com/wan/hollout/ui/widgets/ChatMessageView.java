@@ -3,6 +3,7 @@ package com.wan.hollout.ui.widgets;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -30,6 +31,10 @@ import com.hyphenate.chat.EMVoiceMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.john.waveview.WaveView;
 import com.wan.hollout.R;
+import com.wan.hollout.animations.KeyframesDrawable;
+import com.wan.hollout.animations.KeyframesDrawableBuilder;
+import com.wan.hollout.animations.deserializers.KFImageDeserializer;
+import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
@@ -39,6 +44,8 @@ import com.wan.hollout.utils.UiUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 import butterknife.BindView;
@@ -123,8 +130,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private Activity activity;
 
     protected EMCallBack messageStatusCallback;
-
     protected Handler handler = new Handler(Looper.getMainLooper());
+
+    private static KeyframesDrawable imageDrawable;
+    private static InputStream stream;
 
     public ChatMessageView(Context context) {
         super(context);
@@ -193,7 +202,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         }
 
         handleCommonalities();
-
         refreshViews();
 
     }
@@ -241,9 +249,40 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             if (fileType.equals(AppConstants.FILE_TYPE_AUDIO)) {
                 setupAudioMessage(messageBody);
             }
+            if (fileType.endsWith(AppConstants.FILE_TYPE_REACTION)){
+                setupReactionMessage(messageBody);
+            }
         } catch (HyphenateException e) {
             e.printStackTrace();
             HolloutLogger.e(TAG, e.getMessage());
+        }
+    }
+
+    private void loadDrawables(Context context, ImageView emojiView, String reactionTag) {
+        imageDrawable = new KeyframesDrawableBuilder().withImage(getKFImage(context, reactionTag)).build();
+        emojiView.setImageDrawable(imageDrawable);
+        imageDrawable.startAnimation();
+    }
+
+    private KFImage getKFImage(Context context, String fileName) {
+        AssetManager assetManager = context.getAssets();
+        KFImage kfImage = null;
+        try {
+            stream = assetManager.open(fileName);
+            kfImage = KFImageDeserializer.deserialize(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return kfImage;
+    }
+    private void setupReactionMessage(EMFileMessageBody messageBody) {
+        UiUtils.showView(fileSizeDurationView, false);
+        UiUtils.showView(messageBodyView,false);
+        AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
+        AppConstants.messageBodyPositions.put(getMessageHash(),false);
+        String filePath = messageBody.getFileName();
+        if (StringUtils.isNotEmpty(filePath)){
+            loadDrawables(activity,attachedPhotoOrVideoThumbnailView,filePath);
         }
     }
 

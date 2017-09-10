@@ -224,6 +224,7 @@ public class AppConstants {
     public static final String AUTHENTICATED_USER_DETAILS = "authenticated_user_details";
     public static final String LAST_ATTEMPTED_MESSAGE_FOR = "last_attempted_msg_for_";
     public static final String TURN_OFF_ALL_TAB_LAYOUTS = "turn_off_all_tablayouts";
+    public static final String FILE_TYPE_REACTION = "file_type_reaction";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

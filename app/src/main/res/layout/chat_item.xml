@@ -159,6 +159,17 @@
                 android:visibility="gone"
                 tools:ignore="ContentDescription" />
 
+            <ImageView
+                android:id="@+id/reactions_indicator"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/hdp"
+                tools:ignore="ContentDescription" />
+
             <com.wan.hollout.ui.widgets.ChatMessageTextView
                 android:id="@+id/txt_secondary"
                 android:layout_width="0dp"

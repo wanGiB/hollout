@@ -11,7 +11,6 @@ public class EmojiToggle extends android.support.v7.widget.AppCompatImageView im
 
     private Drawable emojiToggle;
     private Drawable imeToggle;
-    private EmojiDrawer emojiDrawer;
 
     public EmojiToggle(Context context) {
         super(context);
@@ -49,7 +48,6 @@ public class EmojiToggle extends android.support.v7.widget.AppCompatImageView im
     }
 
     public void attach(EmojiDrawer drawer) {
-        this.emojiDrawer = drawer;
         drawer.setDrawerListener(this);
     }
 
@@ -61,10 +59,6 @@ public class EmojiToggle extends android.support.v7.widget.AppCompatImageView im
     @Override
     public void onHidden() {
         setToEmoji();
-    }
-
-    public EmojiDrawer.EmojiDrawerListener getEmojiDrawerListener(){
-        return this;
     }
 
 }

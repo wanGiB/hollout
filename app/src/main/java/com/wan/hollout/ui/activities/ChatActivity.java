@@ -63,6 +63,7 @@ import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.eventbuses.MessageDeliveredEvent;
 import com.wan.hollout.eventbuses.MessageReadEvent;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
+import com.wan.hollout.eventbuses.ReactionMessageEvent;
 import com.wan.hollout.language.DynamicLanguage;
 import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
 import com.wan.hollout.ui.adapters.MessagesAdapter;
@@ -1298,6 +1299,12 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         messagesAdapter.notifyDataSetChanged();
                         UiUtils.bangSound(ChatActivity.this, R.raw.pop);
                     }
+                }else if (o instanceof ReactionMessageEvent){
+                    ReactionMessageEvent reactionMessageEvent = (ReactionMessageEvent) o;
+                    String reaction = reactionMessageEvent.getReaction();
+                    HashMap<String,String>fileProps = new HashMap<>();
+                    fileProps.put(AppConstants.FILE_TYPE,AppConstants.FILE_TYPE_REACTION);
+                    sendFileMessage(reaction,fileProps);
                 }
             }
         });
