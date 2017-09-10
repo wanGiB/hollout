@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -14,8 +16,10 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
+import android.widget.ViewFlipper;
 
 import com.wan.hollout.R;
+import com.wan.hollout.ui.adapters.ReactionsAdapter;
 import com.wan.hollout.ui.widgets.InputAwareLayout;
 import com.wan.hollout.ui.widgets.PagerSlidingTabStrip;
 import com.wan.hollout.ui.widgets.RepeatableImageKey;
@@ -27,7 +31,11 @@ import java.util.List;
 public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputView {
     private static final KeyEvent DELETE_KEY_EVENT = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
 
+    private ViewFlipper emojiFlipper;
     private ViewPager pager;
+    private ImageView reactionsInvoker;
+    private RecyclerView reactionsRecyclerView;
+
     private List<EmojiPageModel> models;
     private PagerSlidingTabStrip strip;
     private RecentEmojiPageModel recentModel;
@@ -64,12 +72,47 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
         this.strip = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
 
         RepeatableImageKey backspace = (RepeatableImageKey) v.findViewById(R.id.backspace);
+        reactionsInvoker = (ImageView) v.findViewById(R.id.reactions_invoker);
+        reactionsRecyclerView = (RecyclerView) v.findViewById(R.id.reactions_recycler_view);
+        emojiFlipper = (ViewFlipper) v.findViewById(R.id.emoji_flipper);
+
         backspace.setOnKeyEventListener(new RepeatableImageKey.KeyEventListener() {
+
             @Override
             public void onKeyEvent() {
                 if (listener != null) listener.onKeyEvent(DELETE_KEY_EVENT);
             }
+
         });
+
+        reactionsInvoker.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                if (emojiFlipper.getDisplayedChild() == 0) {
+                    emojiFlipper.setDisplayedChild(1);
+                    reactionsInvoker.setImageResource(R.drawable.input_emoji);
+                } else {
+                    reactionsInvoker.setImageResource(R.drawable.hdp);
+                    emojiFlipper.setDisplayedChild(0);
+                }
+            }
+
+        });
+
+        initReactionsAdapter();
+    }
+
+    private void initReactionsAdapter(){
+        ReactionsAdapter reactionsAdapter = new ReactionsAdapter(getContext(), new ReactionsAdapter.ReactionSelectedListener() {
+            @Override
+            public void onReactionSelected(String reaction) {
+
+            }
+        });
+        GridLayoutManager gridLayoutManager=new GridLayoutManager(getContext(),3);
+        reactionsRecyclerView.setLayoutManager(gridLayoutManager);
+        reactionsRecyclerView.setAdapter(reactionsAdapter);
     }
 
     @Override
@@ -90,9 +133,13 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
 
     @Override
     public void hide(boolean immediate) {
-        setVisibility(GONE);
-        if (drawerListener != null) drawerListener.onHidden();
-        Log.w("EmojiDrawer", "hide()");
+        if (emojiFlipper.getDisplayedChild() == 1) {
+            reactionsInvoker.performClick();
+        } else {
+            setVisibility(GONE);
+            if (drawerListener != null) drawerListener.onHidden();
+            Log.w("EmojiDrawer", "hide()");
+        }
     }
 
     private void initializeEmojiGrid() {
@@ -120,15 +167,15 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
         this.models.addAll(EmojiPages.PAGES);
     }
 
-    public static class EmojiPagerAdapter extends PagerAdapter
+    private static class EmojiPagerAdapter extends PagerAdapter
             implements PagerSlidingTabStrip.CustomTabProvider {
         private Context context;
         private List<EmojiPageModel> pages;
         private EmojiPageView.EmojiSelectionListener listener;
 
-        public EmojiPagerAdapter(@NonNull Context context,
-                                 @NonNull List<EmojiPageModel> pages,
-                                 @Nullable EmojiPageView.EmojiSelectionListener listener) {
+        EmojiPagerAdapter(@NonNull Context context,
+                          @NonNull List<EmojiPageModel> pages,
+                          @Nullable EmojiPageView.EmojiSelectionListener listener) {
             super();
             this.context = context;
             this.pages = pages;
@@ -180,9 +227,11 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
         void onKeyEvent(KeyEvent keyEvent);
     }
 
-    public interface EmojiDrawerListener {
+    interface EmojiDrawerListener {
         void onShown();
 
         void onHidden();
+
     }
+
 }

@@ -35,7 +35,13 @@ public class ReactionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private int lastAnimatedPosition = -1;
     private boolean animationsLocked = false;
 
-    private String[] reactions = new String[]{"reactions/Like.json", "reactions/Love.json", "reactions/Haha.json", "reactions/Wow.json", "reactions/Sorry.json", "reactions/Anger.json"};
+    private String[] reactions = new String[]{"reactions/Like.json",
+            "reactions/Love.json",
+            "reactions/Haha.json",
+            "reactions/Wow.json",
+            "reactions/Sorry.json",
+            "reactions/Anger.json"};
+
     private LayoutInflater layoutInflater;
     private Context context;
 

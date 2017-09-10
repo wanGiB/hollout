@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,8 +30,8 @@
 
         <com.wan.hollout.ui.widgets.RepeatableImageKey
             android:id="@+id/backspace"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:background="?emoji_tab_strip_background"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
@@ -38,11 +39,38 @@
 
     </LinearLayout>
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/emoji_pager"
+    <ViewFlipper
+        android:id="@+id/emoji_flipper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/hollout_material_grey_100"
-        android:visibility="visible" />
+        android:background="@color/hollout_material_grey_100">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/emoji_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/reactions_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </ViewFlipper>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#f6f6f6">
+
+        <ImageView
+            android:id="@+id/reactions_invoker"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/hdp"
+            tools:ignore="ContentDescription" />
+
+    </RelativeLayout>
 
 </merge>

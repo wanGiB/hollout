@@ -1,6 +1,5 @@
 package com.wan.hollout.emoji;
 
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -8,11 +7,11 @@ import android.util.AttributeSet;
 
 import com.wan.hollout.R;
 
-
 public class EmojiToggle extends android.support.v7.widget.AppCompatImageView implements EmojiDrawer.EmojiDrawerListener {
 
     private Drawable emojiToggle;
     private Drawable imeToggle;
+    private EmojiDrawer emojiDrawer;
 
     public EmojiToggle(Context context) {
         super(context);
@@ -50,6 +49,7 @@ public class EmojiToggle extends android.support.v7.widget.AppCompatImageView im
     }
 
     public void attach(EmojiDrawer drawer) {
+        this.emojiDrawer = drawer;
         drawer.setDrawerListener(this);
     }
 
@@ -62,4 +62,9 @@ public class EmojiToggle extends android.support.v7.widget.AppCompatImageView im
     public void onHidden() {
         setToEmoji();
     }
+
+    public EmojiDrawer.EmojiDrawerListener getEmojiDrawerListener(){
+        return this;
+    }
+
 }

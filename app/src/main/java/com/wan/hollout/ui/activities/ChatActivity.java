@@ -613,15 +613,16 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     @Override
     public void onBackPressed() {
-        if (container.isInputOpen()) container.hideCurrentInput(composeText);
-        else {
+        if (container.isInputOpen()) {
+            container.hideCurrentInput(composeText);
+        } else {
             super.onBackPressed();
         }
     }
 
     private class ComposeKeyPressedListener implements View.OnKeyListener, View.OnClickListener, TextWatcher, View.OnFocusChangeListener {
 
-        int beforeLength;
+        private int beforeLength;
 
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -637,7 +638,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
         @Override
         public void onClick(View v) {
-            container.showSoftkey(composeText);
+            container.showSoftKey(composeText);
         }
 
         @Override
@@ -871,7 +872,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             emojiDrawerStub.get().setEmojiEventListener(inputPanel);
         }
         if (container.getCurrentInput() == emojiDrawerStub.get()) {
-            container.showSoftkey(composeText);
+            container.showSoftKey(composeText);
         } else {
             container.show(composeText, emojiDrawerStub.get());
         }

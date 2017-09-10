@@ -65,7 +65,7 @@ public class InputAwareLayout extends KeyboardAwareLinearLayout implements Keybo
         return (isKeyboardOpen() || (current != null && current.isShowing()));
     }
 
-    public void showSoftkey(final EditText inputTarget) {
+    public void showSoftKey(final EditText inputTarget) {
         postOnKeyboardOpen(new Runnable() {
             @Override
             public void run() {
@@ -95,5 +95,6 @@ public class InputAwareLayout extends KeyboardAwareLinearLayout implements Keybo
 
         boolean isShowing();
     }
+
 }
 

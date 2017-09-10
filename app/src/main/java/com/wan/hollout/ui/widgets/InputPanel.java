@@ -28,6 +28,9 @@ import com.wan.hollout.utils.ViewUtil;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * @author Wan Clem
+ ***/
 public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayout.OnKeyboardShownListener, EmojiDrawer.EmojiEventListener {
 
     private static final int FADE_TIME = 150;
@@ -93,10 +96,12 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
         mFadeInFadeOutAnimation.setDuration(200);
 
         slideToCancel.setOnClickListener(new OnClickListener() {
+
             @Override
             public void onClick(View v) {
                 cancelRecording();
             }
+
         });
 
     }
