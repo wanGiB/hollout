@@ -3,6 +3,7 @@ package com.wan.hollout.ui.widgets;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -21,6 +22,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
+import com.hyphenate.chat.EMFileMessageBody;
 import com.hyphenate.chat.EMLocationMessageBody;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMTextMessageBody;
@@ -29,6 +31,10 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
+import com.wan.hollout.animations.KeyframesDrawable;
+import com.wan.hollout.animations.KeyframesDrawableBuilder;
+import com.wan.hollout.animations.deserializers.KFImageDeserializer;
+import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.ChatActivity;
@@ -43,6 +49,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Date;
 
 import butterknife.BindView;
@@ -110,6 +118,9 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     private EMMessage lastMessage;
 
     private ParseObject signedInUserObject;
+
+    private static KeyframesDrawable imageDrawable;
+    private static InputStream stream;
 
     public ConversationItemView(Context context) {
         this(context, null);
@@ -359,6 +370,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         } else {
             UiUtils.showView(deliveryStatusView, false);
         }
+        UiUtils.showView(userStatusOrLastMessageView,!AppConstants.reactionsOpenPositions.get(getMessageId()));
+        UiUtils.showView(reactionsIndicatorView,AppConstants.reactionsOpenPositions.get(getMessageId()));
     }
 
     private void subscribeToUserChanges() {
@@ -496,29 +509,62 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         }
 
         if (messageType == EMMessage.Type.FILE) {
-            String messageBody = null;
+
+            String messageBody;
+
             try {
+
                 String fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
+
                 switch (fileType) {
                     case AppConstants.FILE_TYPE_CONTACT:
                         messageBody = "Contact";
                         UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_contact, UiUtils.DrawableDirection.LEFT);
+                        userStatusOrLastMessageView.setText(messageBody);
                         break;
                     case AppConstants.FILE_TYPE_AUDIO:
                         messageBody = "Music";
                         UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
+                        userStatusOrLastMessageView.setText(messageBody);
                         break;
                     case AppConstants.FILE_TYPE_DOCUMENT:
                         messageBody = "Document";
                         UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.icon_file_doc_grey_mini, UiUtils.DrawableDirection.LEFT);
+                        userStatusOrLastMessageView.setText(messageBody);
+                        break;
+                    case AppConstants.FILE_TYPE_REACTION:
+                        UiUtils.showView(reactionsIndicatorView, true);
+                        AppConstants.reactionsOpenPositions.put(getMessageId(), true);
+                        UiUtils.showView(userStatusOrLastMessageView, false);
+                        EMFileMessageBody emFileMessageBody = (EMFileMessageBody)message.getBody();
+                        loadDrawables(activity,reactionsIndicatorView,emFileMessageBody.getFileName());
                         break;
                 }
-                userStatusOrLastMessageView.setText(messageBody);
+
             } catch (HyphenateException e) {
                 e.printStackTrace();
             }
+
         }
 
+    }
+
+    private void loadDrawables(Context context, ImageView emojiView, String reactionTag) {
+        imageDrawable = new KeyframesDrawableBuilder().withImage(getKFImage(context, reactionTag)).build();
+        emojiView.setImageDrawable(imageDrawable);
+        imageDrawable.startAnimation();
+    }
+
+    private KFImage getKFImage(Context context, String fileName) {
+        AssetManager assetManager = context.getAssets();
+        KFImage kfImage = null;
+        try {
+            stream = assetManager.open(fileName);
+            kfImage = KFImageDeserializer.deserialize(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return kfImage;
     }
 
     protected void setMessageSendCallback() {

@@ -275,6 +275,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         }
         return kfImage;
     }
+
     private void setupReactionMessage(EMFileMessageBody messageBody) {
         UiUtils.showView(fileSizeDurationView, false);
         UiUtils.showView(messageBodyView,false);
