@@ -29,6 +29,7 @@ import com.wan.hollout.ui.widgets.InputAwareLayout;
 import com.wan.hollout.ui.widgets.PagerSlidingTabStrip;
 import com.wan.hollout.ui.widgets.RepeatableImageKey;
 import com.wan.hollout.utils.ResUtil;
+import com.wan.hollout.utils.UiUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +84,7 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
         this.strip = (PagerSlidingTabStrip) v.findViewById(R.id.tabs);
         upperView = v.findViewById(R.id.upper_view);
 
-        RepeatableImageKey backspace = (RepeatableImageKey) v.findViewById(R.id.backspace);
+        final RepeatableImageKey backspace = (RepeatableImageKey) v.findViewById(R.id.backspace);
         reactionsInvoker = (ImageView) v.findViewById(R.id.reactions_invoker);
         loadHahaToReactionsInvoker();
         reactionsRecyclerView = (RecyclerView) v.findViewById(R.id.reactions_recycler_view);
@@ -93,6 +94,7 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
 
             @Override
             public void onKeyEvent() {
+                UiUtils.blinkView(backspace);
                 if (listener != null) listener.onKeyEvent(DELETE_KEY_EVENT);
             }
 
