@@ -43,7 +43,7 @@
             android:clickable="true"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:src="@drawable/ic_backspace_grey600_24dp" />
+            android:src="@drawable/emoji_x" />
 
     </LinearLayout>
 

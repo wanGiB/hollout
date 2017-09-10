@@ -22,12 +22,22 @@ import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.ViewFlipper;
 
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.listeners.OnSingleClickListener;
+import com.wan.hollout.utils.ApiUtils;
+import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.ViewUtil;
+
+import org.json.JSONObject;
+
+import java.util.List;
 
 public class AttachmentTypeSelector extends PopupWindow {
 
@@ -67,8 +77,21 @@ public class AttachmentTypeSelector extends PopupWindow {
     ImageView closeButton;
 
     private
+    @NonNull
+    ImageView dummySearchGifImageView;
+
+    private
+    @NonNull
+    EditText gifSearchBox;
+
+    private
+    @NonNull
+    ViewFlipper contentFlipper;
+
+    private
     @Nullable
     View currentAnchor;
+
     private
     @Nullable
     AttachmentClickedListener listener;
@@ -89,6 +112,10 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.locationButton = ViewUtil.findById(layout, R.id.location_button);
         this.gifButton = ViewUtil.findById(layout, R.id.giphy_button);
         this.closeButton = ViewUtil.findById(layout, R.id.close_button);
+        this.contentFlipper = ViewUtil.findById(layout,R.id.content_flipper);
+
+        this.dummySearchGifImageView = ViewUtil.findById(layout,R.id.dummy_search_image_view);
+        this.gifSearchBox = ViewUtil.findById(layout,R.id.gif_search_box);
 
         this.imageButton.setOnClickListener(new PropagatingClickListener(ADD_IMAGE));
         this.galleryButton.setOnClickListener(new PropagatingClickListener(OPEN_GALLERY));
@@ -98,7 +125,18 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.locationButton.setOnClickListener(new PropagatingClickListener(ADD_LOCATION));
         this.gifButton.setOnClickListener(new PropagatingClickListener(ADD_GIF));
         this.closeButton.setOnClickListener(new CloseClickListener());
+
+        this.dummySearchGifImageView.setOnClickListener(new OnSingleClickListener() {
+
+            @Override
+            public void onSingleClick(View view) {
+                gifSearchBox.requestFocus();
+            }
+
+        });
+
         recentPhotos.setListener(new RecentPhotoSelectedListener());
+
         setContentView(layout);
         setWidth(LinearLayout.LayoutParams.MATCH_PARENT);
         setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -109,6 +147,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         setTouchable(true);
 
         loaderManager.initLoader(1, null, recentPhotos);
+
     }
 
     public void show(@NonNull Activity activity, final @NonNull View anchor) {
@@ -140,6 +179,7 @@ public class AttachmentTypeSelector extends PopupWindow {
             animateButtonIn(contactButton, 0);
             animateButtonIn(closeButton, 0);
         }
+
     }
 
     @Override
@@ -254,6 +294,17 @@ public class AttachmentTypeSelector extends PopupWindow {
         int y = anchorCoordinates[1] - contentCoordinates[1];
 
         return new Pair<>(x, y);
+
+    }
+
+    public void loadGifs(Activity activity) {
+        UiUtils.toggleFlipperState(contentFlipper,1);
+        ApiUtils.fetchTrendingGifs(new DoneCallback<List<JSONObject>>() {
+            @Override
+            public void done(List<JSONObject> result, Exception e) {
+
+            }
+        });
     }
 
     private class RecentPhotoSelectedListener implements RecentPhotoViewRail.OnItemClickedListener {
@@ -274,24 +325,32 @@ public class AttachmentTypeSelector extends PopupWindow {
 
         @Override
         public void onClick(View v) {
-            animateWindowOutTranslate(getContentView());
-
+            if (v.getId()!=R.id.giphy_button){
+                animateWindowOutTranslate(getContentView());
+            }
             if (listener != null) listener.onClick(type);
         }
 
     }
 
+    public ViewFlipper getContentFlipper(){
+        return contentFlipper;
+    }
+
     private class CloseClickListener implements View.OnClickListener {
+
         @Override
         public void onClick(View v) {
             dismiss();
         }
+
     }
 
     public interface AttachmentClickedListener {
-        public void onClick(int type);
 
-        public void onQuickAttachment(Uri uri);
+        void onClick(int type);
+        void onQuickAttachment(Uri uri);
+
     }
 
 }

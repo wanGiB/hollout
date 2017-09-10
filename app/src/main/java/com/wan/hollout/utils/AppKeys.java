@@ -14,4 +14,7 @@ public class AppKeys {
     public static String GOOGLE_API_KEY = "AIzaSyBgj4cHfIu6eSPLezCK6K4a9ba5w1kwWZQ";
     public static String GENERAL_BLOG_ID = "398008235177173072";
 
+    public static String GIPHY_DEV_KEY = "88585b2bc3204e4caead0d75ad206972";
+    public static final String GIPHY_PRODUCTION_KEY = "88585b2bc3204e4caead0d75ad206972";
+
 }

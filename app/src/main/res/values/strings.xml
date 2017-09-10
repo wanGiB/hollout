@@ -313,5 +313,8 @@
     <string name="network_error">Chats retrieval failure (Network error). Tap here to retry</string>
     <string name="title_activity_maps">Map</string>
     <string name="voice_note">Voice Note</string>
+    <string name="empty_content" />
+    <string name="search_gifs">Search Gifs</string>
+    <string name="powered_by_giphy">Powered By GIPHY</string>
 
 </resources>

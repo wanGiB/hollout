@@ -575,7 +575,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 checkAccessToGalleryAndOpen();
                 break;
             case ADD_GIF:
-                //TODO: Look for a way to add gif support here
+                attachmentTypeSelector.loadGifs(this);
                 break;
         }
     }
@@ -616,6 +616,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (container.isInputOpen()) {
             container.hideCurrentInput(composeText);
+        } else if (attachmentTypeSelector.getContentFlipper() != null && attachmentTypeSelector.getContentFlipper().getDisplayedChild() != 0) {
+            attachmentTypeSelector.getContentFlipper().setDisplayedChild(0);
         } else {
             super.onBackPressed();
         }
@@ -1299,12 +1301,12 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         messagesAdapter.notifyDataSetChanged();
                         UiUtils.bangSound(ChatActivity.this, R.raw.pop);
                     }
-                }else if (o instanceof ReactionMessageEvent){
+                } else if (o instanceof ReactionMessageEvent) {
                     ReactionMessageEvent reactionMessageEvent = (ReactionMessageEvent) o;
                     String reaction = reactionMessageEvent.getReaction();
-                    HashMap<String,String>fileProps = new HashMap<>();
-                    fileProps.put(AppConstants.FILE_TYPE,AppConstants.FILE_TYPE_REACTION);
-                    sendFileMessage(reaction,fileProps);
+                    HashMap<String, String> fileProps = new HashMap<>();
+                    fileProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_REACTION);
+                    sendFileMessage(reaction, fileProps);
                 }
             }
         });
