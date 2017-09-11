@@ -96,6 +96,10 @@ public class AttachmentTypeSelector extends PopupWindow {
     ProgressWheel gifLoadingProgressWheel;
 
     private
+    @NonNull
+    ImageView closeGifWindow;
+
+    private
     @Nullable
     View currentAnchor;
 
@@ -119,6 +123,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.locationButton = ViewUtil.findById(layout, R.id.location_button);
         this.gifButton = ViewUtil.findById(layout, R.id.giphy_button);
         this.closeButton = ViewUtil.findById(layout, R.id.close_button);
+        this.closeGifWindow = ViewUtil.findById(layout,R.id.close_giphy);
         this.contentFlipper = ViewUtil.findById(layout, R.id.content_flipper);
 
         ImageView dummySearchGifImageView = ViewUtil.findById(layout, R.id.dummy_search_image_view);
@@ -155,6 +160,15 @@ public class AttachmentTypeSelector extends PopupWindow {
         setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
         setFocusable(true);
         setTouchable(true);
+
+        closeGifWindow.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                UiUtils.toggleFlipperState(contentFlipper,0);
+            }
+
+        });
 
         loaderManager.initLoader(1, null, recentPhotos);
 
