@@ -178,9 +178,9 @@ public class AttachmentTypeSelector extends PopupWindow {
         setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
         setBackgroundDrawable(new BitmapDrawable());
         setAnimationStyle(0);
-        setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
         setFocusable(true);
         setTouchable(true);
+        update();
 
         closeGifWindow.setOnClickListener(new View.OnClickListener() {
 
@@ -206,7 +206,7 @@ public class AttachmentTypeSelector extends PopupWindow {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (StringUtils.isNotEmpty(charSequence.toString())) {
-                    loadGifs(activity, charSequence.toString().trim(), PAGE);
+                    loadGifs(activity, charSequence.toString().trim(), 0);
                 }
             }
 
@@ -225,7 +225,6 @@ public class AttachmentTypeSelector extends PopupWindow {
     }
 
     public void show(final @NonNull View anchor) {
-        setFocusable(true);
         this.currentAnchor = anchor;
         showAtLocation(anchor, Gravity.BOTTOM, 0, 0);
         getContentView().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -240,7 +239,6 @@ public class AttachmentTypeSelector extends PopupWindow {
                 } else {
                     animateWindowInTranslate(getContentView());
                 }
-
             }
 
         });
