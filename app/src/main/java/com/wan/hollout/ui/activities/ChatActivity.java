@@ -616,7 +616,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (container.isInputOpen()) {
             container.hideCurrentInput(composeText);
-        } else if (attachmentTypeSelector != null && attachmentTypeSelector.isShowing() && attachmentTypeSelector.isGiphyWindowOpen()) {
+        } else if (attachmentTypeSelector != null /*&& attachmentTypeSelector.isShowing() && attachmentTypeSelector.isGiphyWindowOpen()*/) {
             UiUtils.showSafeToast("Yope");
             attachmentTypeSelector.closeGiphyWindow();
         } else {
@@ -740,6 +740,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             }
             return false;
         }
+
     }
 
     public void iterateThroughPickedMediaAndSendEach() {
@@ -766,15 +767,20 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     private class AttachButtonListener implements View.OnClickListener {
+
         @Override
         public void onClick(View v) {
+
             if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfForStoragePermission(ChatActivity.this)) {
                 holloutPermissions.requestStoragePermissions();
                 setLastPermissionInitiationAction(AppConstants.REQUEST_STORAGE_ACCESS_FOR_GALLERY);
                 return;
             }
+
             handleAddAttachment();
+
         }
+
     }
 
     public void snackOutMessageReplyView(final View view) {

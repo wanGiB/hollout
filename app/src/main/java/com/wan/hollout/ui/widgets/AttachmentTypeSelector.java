@@ -276,6 +276,11 @@ public class AttachmentTypeSelector extends PopupWindow {
         }
     }
 
+    @Override
+    public boolean isShowing() {
+        return super.isShowing();
+    }
+
     public void setListener(@Nullable AttachmentClickedListener listener) {
         this.listener = listener;
     }
