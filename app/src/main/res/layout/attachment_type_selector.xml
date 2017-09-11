@@ -293,7 +293,7 @@
                 android:src="@drawable/ic_search_grey_48dp"
                 tools:ignore="ContentDescription" />
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
+            <com.wan.hollout.ui.widgets.HolloutEditText
                 android:id="@+id/gif_search_box"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
