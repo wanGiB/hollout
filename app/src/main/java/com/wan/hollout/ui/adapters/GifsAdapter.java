@@ -6,14 +6,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.wan.hollout.R;
-import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.ui.widgets.LoadingImageView;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
 
 import java.util.List;
 
@@ -26,10 +27,10 @@ import butterknife.ButterKnife;
 public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Activity activity;
-    private List<JSONObject> gifs;
+    private List<String> gifs;
     private LayoutInflater layoutInflater;
 
-    public GifsAdapter(Activity activity, List<JSONObject> gifs) {
+    public GifsAdapter(Activity activity, List<String> gifs) {
         this.activity = activity;
         this.gifs = gifs;
         this.layoutInflater = LayoutInflater.from(activity);
@@ -44,9 +45,9 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         GifItemHolder gifItemHolder = (GifItemHolder) holder;
-        JSONObject gifObject = gifs.get(position);
-        if (gifObject != null) {
-            gifItemHolder.bindGif(activity, gifObject);
+        String gifObjectUrl = gifs.get(position);
+        if (gifObjectUrl != null) {
+            gifItemHolder.bindGif(activity, gifObjectUrl);
         }
     }
 
@@ -59,24 +60,50 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     static class GifItemHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.giphy_item_image)
-        ImageView giphyImageView;
+        LoadingImageView giphyImageView;
 
         public GifItemHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
 
-        void bindGif(Activity activity, JSONObject gifObject) {
-            String gifUrl = HolloutUtils.getGifUrl(gifObject);
+        void bindGif(Activity activity, String gifUrl) {
             if (Build.VERSION.SDK_INT >= 17) {
                 if (!activity.isDestroyed()) {
                     if (StringUtils.isNotEmpty(gifUrl)) {
-                        Glide.with(activity).load(gifUrl).asGif().into(giphyImageView);
+                        giphyImageView.startLoading();
+                        Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+                            @Override
+                            public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                giphyImageView.stopLoading();
+                                return false;
+
+                            }
+                        }).into(giphyImageView);
                     }
                 }
             } else {
                 if (StringUtils.isNotEmpty(gifUrl)) {
-                    Glide.with(activity).load(gifUrl).asGif().into(giphyImageView);
+                    giphyImageView.startLoading();
+                    Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+
+                        @Override
+                        public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            giphyImageView.stopLoading();
+                            return false;
+
+                        }
+                    }).into(giphyImageView);
                 }
             }
 

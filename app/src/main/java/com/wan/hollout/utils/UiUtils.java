@@ -270,6 +270,7 @@ public class UiUtils {
                                 public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                                     return false;
                                 }
+
                             }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(imageView);
                             imageView.invalidate();
                         }

@@ -41,6 +41,7 @@ import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.listeners.OnSingleClickListener;
 import com.wan.hollout.ui.adapters.GifsAdapter;
 import com.wan.hollout.utils.ApiUtils;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.ViewUtil;
 
@@ -50,6 +51,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("deprecation")
 public class AttachmentTypeSelector extends PopupWindow {
 
     public static final int ADD_IMAGE = 1;
@@ -122,7 +124,7 @@ public class AttachmentTypeSelector extends PopupWindow {
     private static int PAGE = 0;
 
     private GifsAdapter gifsAdapter;
-    private List<JSONObject> gifs = new ArrayList<>();
+    private List<String> gifs = new ArrayList<>();
     private Activity activity;
     private View footerView;
 
@@ -194,6 +196,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         loaderManager.initLoader(1, null, recentPhotos);
         setupGifsFooterLoader();
         setupGifsAdapter();
+
         gifSearchBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -202,8 +205,8 @@ public class AttachmentTypeSelector extends PopupWindow {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (StringUtils.isNotEmpty(charSequence.toString())){
-                    loadGifs(activity,charSequence.toString().trim(),PAGE);
+                if (StringUtils.isNotEmpty(charSequence.toString())) {
+                    loadGifs(activity, charSequence.toString().trim(), PAGE);
                 }
             }
 
@@ -211,7 +214,9 @@ public class AttachmentTypeSelector extends PopupWindow {
             public void afterTextChanged(Editable editable) {
 
             }
+
         });
+
     }
 
     @SuppressLint("InflateParams")
@@ -234,6 +239,7 @@ public class AttachmentTypeSelector extends PopupWindow {
                 } else {
                     animateWindowInTranslate(getContentView());
                 }
+
             }
 
         });
@@ -330,7 +336,9 @@ public class AttachmentTypeSelector extends PopupWindow {
 
             @Override
             public void onAnimationRepeat(Animator animation) {
+
             }
+
         });
 
         animator.start();
@@ -401,7 +409,7 @@ public class AttachmentTypeSelector extends PopupWindow {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 if (!gifs.isEmpty()) {
-                    UiUtils.showView(footerView,true);
+                    UiUtils.showView(footerView, true);
                     loadGifs(activity, gifSearchBox.getText().toString().trim(), PAGE);
                 }
             }
@@ -436,11 +444,16 @@ public class AttachmentTypeSelector extends PopupWindow {
                             UiUtils.showView(footerView, false);
 
                             if (result != null && !result.isEmpty()) {
-                                gifs.addAll(result);
+                                for (JSONObject jsonObject : result) {
+                                    String gifUrl = HolloutUtils.getGifUrl(jsonObject);
+                                    if (!gifs.contains(gifUrl)) {
+                                        gifs.add(gifUrl);
+                                    }
+                                }
                                 gifsAdapter.notifyDataSetChanged();
+                                PAGE++;
                             }
 
-                            PAGE++;
                         }
 
                     });
@@ -460,15 +473,23 @@ public class AttachmentTypeSelector extends PopupWindow {
 
                         @Override
                         public void run() {
+
                             UiUtils.showView(gifLoadingProgressWheel, false);
                             UiUtils.showView(footerView, false);
 
                             if (result != null && !result.isEmpty()) {
-                                gifs.addAll(result);
+
+                                for (JSONObject jsonObject : result) {
+                                    String gifUrl = HolloutUtils.getGifUrl(jsonObject);
+                                    if (!gifs.contains(gifUrl)) {
+                                        gifs.add(gifUrl);
+                                    }
+                                }
+
                                 gifsAdapter.notifyDataSetChanged();
+                                PAGE++;
                             }
 
-                            PAGE++;
                         }
 
                     });
