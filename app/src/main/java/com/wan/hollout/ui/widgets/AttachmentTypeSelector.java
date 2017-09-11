@@ -107,7 +107,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         super(context);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        @SuppressLint("InflateParams") LinearLayout layout = (LinearLayout) inflater.inflate(R.layout.attachment_type_selector, null, true);
+        @SuppressLint("InflateParams") View layout = inflater.inflate(R.layout.attachment_type_selector, null, true);
         RecentPhotoViewRail recentPhotos = ViewUtil.findById(layout, R.id.recent_photos);
 
         this.listener = listener;
