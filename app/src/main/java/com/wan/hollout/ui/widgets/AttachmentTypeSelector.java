@@ -193,6 +193,13 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     }
 
+    public boolean isGiphyOpen(){
+        return contentFlipper.getDisplayedChild() == 1;
+    }
+
+    public void closeGiphy(){
+        contentFlipper.setDisplayedChild(0);
+    }
     @Override
     public void dismiss() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -347,11 +354,6 @@ public class AttachmentTypeSelector extends PopupWindow {
             if (listener != null) listener.onClick(type);
         }
 
-    }
-
-    @NonNull
-    public ViewFlipper getContentFlipper() {
-        return contentFlipper;
     }
 
     private class CloseClickListener implements View.OnClickListener {

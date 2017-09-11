@@ -616,8 +616,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (container.isInputOpen()) {
             container.hideCurrentInput(composeText);
-        } else if (attachmentTypeSelector.getContentFlipper() != null && attachmentTypeSelector.getContentFlipper().getDisplayedChild() != 0) {
-            attachmentTypeSelector.getContentFlipper().setDisplayedChild(0);
+        } else if (attachmentTypeSelector.isGiphyOpen()) {
+            attachmentTypeSelector.closeGiphy();
         } else {
             super.onBackPressed();
         }

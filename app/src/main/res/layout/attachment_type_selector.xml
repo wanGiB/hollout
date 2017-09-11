@@ -317,7 +317,7 @@
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_above="@id/powered_by_giphy_footer_view"
             android:layout_below="@+id/giphy_top_view">
 
