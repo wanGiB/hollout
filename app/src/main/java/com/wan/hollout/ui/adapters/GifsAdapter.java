@@ -15,7 +15,6 @@ import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.LoadingImageView;
 
 import org.apache.commons.lang3.StringUtils;
-
 import java.util.List;
 
 import butterknife.BindView;

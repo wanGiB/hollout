@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
@@ -198,6 +199,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         setupGifsAdapter();
 
         gifSearchBox.addTextChangedListener(new TextWatcher() {
+
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -226,14 +228,16 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     public void show(final @NonNull View anchor) {
         this.currentAnchor = anchor;
-
+        setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         showAtLocation(anchor, Gravity.BOTTOM, 0, 0);
 
         getContentView().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
             @Override
             public void onGlobalLayout() {
+
                 getContentView().getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     animateWindowInCircular(anchor, getContentView());
                 } else {
@@ -245,6 +249,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
             animateButtonIn(imageButton, ANIMATION_DURATION / 2);
             animateButtonIn(documentButton, ANIMATION_DURATION / 2);
 
@@ -254,6 +259,7 @@ public class AttachmentTypeSelector extends PopupWindow {
             animateButtonIn(gifButton, ANIMATION_DURATION / 4);
             animateButtonIn(contactButton, 0);
             animateButtonIn(closeButton, 0);
+
         }
 
     }
@@ -422,24 +428,26 @@ public class AttachmentTypeSelector extends PopupWindow {
     }
 
     public void loadGifs(final Activity activity, String searchKey, int page) {
-
         if (page == 0) {
+            UiUtils.showView(gifLoadingProgressWheel,true);
             gifs.clear();
             PAGE = 0;
         }
-
         UiUtils.showView(giphyWindow, true);
         UiUtils.showView(attachmentWindow, false);
+
         if (StringUtils.isNotEmpty(searchKey)) {
 
             ApiUtils.searchGif(searchKey, page, new DoneCallback<List<JSONObject>>() {
 
                 @Override
                 public void done(final List<JSONObject> result, Exception e) {
+
                     activity.runOnUiThread(new Runnable() {
 
                         @Override
                         public void run() {
+
                             UiUtils.showView(gifLoadingProgressWheel, false);
                             UiUtils.showView(footerView, false);
 
