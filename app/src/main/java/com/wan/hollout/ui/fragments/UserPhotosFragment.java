@@ -98,7 +98,6 @@ public class UserPhotosFragment extends Fragment {
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 3);
         userPhotosAdapter.setGridLayoutManager(gridLayoutManager);
-
         userPhotosRecyclerView.setLayoutManager(gridLayoutManager);
 
         userPhotosRecyclerView.setAdapter(userPhotosAdapter);

@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ImageView
+        android:id="@+id/bb_bottom_bar_shadow"
+        android:layout_height="4dp"
+        android:layout_width="match_parent"
+        android:src="@drawable/bb_bottom_bar_top_shadow"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:id="@+id/attachment_window"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:orientation="vertical">
+
+        <com.wan.hollout.ui.widgets.RecentPhotoViewRail
+            android:id="@+id/recent_photos"
+            android:layout_height="90dp"
+            android:layout_width="match_parent"
+            android:padding="4dp" />
+
+        <View
+            android:background="#e3e3e3"
+            android:layout_height="1dp"
+            android:layout_marginBottom="3dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="3dp"
+            android:layout_width="match_parent" />
+
+        <LinearLayout
+            android:baselineAligned="false"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="4">
+
+            <LinearLayout
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:contentDescription="@string/attachment_type_selector__image_description"
+                    android:id="@+id/photo_button"
+                    android:layout_height="wrap_content"
+                    android:layout_width="60dp"
+                    android:scaleType="center"
+                    android:src="@drawable/attach_camera" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    style="@style/AttachmentTypeLabel"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:text="@string/photo"
+                    app:textStyle="medium" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:contentDescription="@string/attachment_type_selector__audio_description"
+                    android:id="@+id/video_button"
+                    android:layout_height="60dp"
+                    android:layout_width="60dp"
+                    android:scaleType="center"
+                    android:src="@drawable/attach_video" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    style="@style/AttachmentTypeLabel"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:text="@string/video"
+                    app:textStyle="medium" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:contentDescription="@string/attachment_type_selector__video_description"
+                    android:id="@+id/gallery_button"
+                    android:layout_height="60dp"
+                    android:layout_width="60dp"
+                    android:scaleType="center"
+                    android:src="@drawable/attach_gallery" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    style="@style/AttachmentTypeLabel"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:text="@string/gallery"
+                    app:textStyle="medium" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:contentDescription="@string/attachment_type_selector__camera_description"
+                    android:id="@+id/contact_button"
+                    android:layout_height="60dp"
+                    android:layout_width="60dp"
+                    android:scaleType="center"
+                    android:src="@drawable/attach_contact" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    style="@style/AttachmentTypeLabel"
+                    android:gravity="center"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:text="@string/contact"
+                    app:textStyle="medium" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:baselineAligned="false"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:weightSum="4">
+
+            <LinearLayout
+                android:gravity="center"
+                android:id="@+id/document_linear_layout"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:contentDescription="@string/attachment_type_selector__location_description"
+                    android:id="@+id/document_button"
+                    android:layout_height="60dp"
+                    android:layout_width="60dp"
+                    android:scaleType="center"
+                    android:src="@drawable/attach_file" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    style="@style/AttachmentTypeLabel"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:text="@string/attachment_document"
+                    app:textStyle="medium" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:gravity="center"
+                android:id="@+id/location_linear_layout"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:contentDescription="@string/attachment_type_selector__location_description"
+                    android:id="@+id/location_button"
+                    android:layout_height="60dp"
+                    android:layout_width="60dp"
+                    android:scaleType="center"
+                    android:src="@drawable/attach_location" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    style="@style/AttachmentTypeLabel"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:text="@string/attachment_type_selector__location"
+                    app:textStyle="medium" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <com.wan.hollout.ui.widgets.CircleColorImageView
+                    android:contentDescription="@string/attachment_type_selector__gif_description"
+                    android:id="@+id/giphy_button"
+                    android:layout_height="55dp"
+                    android:layout_width="55dp"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_gif_white_36dp"
+                    app:circleColor="@color/cyan_400" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    style="@style/AttachmentTypeLabel"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:text="@string/attachment_type_selector__gif"
+                    app:textStyle="medium" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:gravity="center"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:orientation="vertical">
+
+                <com.wan.hollout.ui.widgets.CircleColorImageView
+                    android:contentDescription="@string/attachment_type_selector__drawer_description"
+                    android:id="@+id/close_button"
+                    android:layout_height="55dp"
+                    android:layout_width="55dp"
+                    android:scaleType="center"
+                    android:src="@drawable/ic_keyboard_arrow_down_white_36dp"
+                    app:circleColor="@color/gray50" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    style="@style/AttachmentTypeLabel"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:text="@string/empty_content"
+                    app:textStyle="medium" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/giphy_window"
+        android:layout_height="350dp"
+        android:layout_width="match_parent"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:background="@drawable/gif_background"
+            android:id="@+id/giphy_top_view"
+            android:layout_alignParentTop="true"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_width="match_parent"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/dummy_search_image_view"
+                android:layout_gravity="center_vertical"
+                android:layout_height="22dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_width="22dp"
+                android:src="@drawable/ic_search_grey_48dp"
+                tools:ignore="ContentDescription" />
+
+            <com.wan.hollout.ui.widgets.HolloutEditText
+                android:background="@android:color/transparent"
+                android:hint="@string/search_gifs"
+                android:id="@+id/gif_search_box"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:padding="10dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:clickable="true"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:background="#eaeaea"
+            android:gravity="end"
+            android:id="@+id/powered_by_giphy_footer_view"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_width="match_parent"
+            android:padding="16dp"
+            android:text="@string/powered_by_giphy"
+            android:textColor="@color/grey500"
+            app:textStyle="medium" />
+
+        <ImageView
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:id="@+id/close_giphy"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_height="24dp"
+            android:layout_margin="10dp"
+            android:layout_width="24dp"
+            android:src="@drawable/ic_arrow_back_black_24dp"
+            tools:ignore="ContentDescription" />
+
+        <FrameLayout
+            android:layout_above="@id/powered_by_giphy_footer_view"
+            android:layout_below="@+id/giphy_top_view"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/gif_recycler_view"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent" />
+
+            <com.pnikosis.materialishprogress.ProgressWheel
+                android:id="@+id/gif_progress_wheel"
+                android:layout_gravity="center"
+                android:layout_height="60dp"
+                android:layout_width="60dp"
+                app:barColor="@color/ease_gray"
+                app:progressIndeterminate="true"
+                app:rimColor="@color/white" />
+
+        </FrameLayout>
+
+    </RelativeLayout>
+
+</merge>

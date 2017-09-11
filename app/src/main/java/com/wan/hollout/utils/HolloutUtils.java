@@ -679,6 +679,13 @@ public class HolloutUtils {
         return null;
     }
 
+    public static String getGifUrl(JSONObject gifObject) {
+        JSONObject originalGifProps = gifObject
+                .optJSONObject("images")
+                .optJSONObject("original");
+        return originalGifProps.optString("url");
+    }
+
     public static class MediaEntry {
         int bucketId;
         int imageId;

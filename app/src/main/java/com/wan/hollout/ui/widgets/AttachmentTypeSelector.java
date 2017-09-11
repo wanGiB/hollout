@@ -11,7 +11,10 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,19 +30,24 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.ViewFlipper;
 
 import com.esotericsoftware.kryo.NotNull;
+import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
+import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.listeners.OnSingleClickListener;
+import com.wan.hollout.ui.adapters.GifsAdapter;
 import com.wan.hollout.utils.ApiUtils;
 import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.ViewUtil;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AttachmentTypeSelector extends PopupWindow {
@@ -85,7 +93,11 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     private
     @NonNull
-    ViewFlipper contentFlipper;
+    View attachmentWindow;
+
+    private
+    @NonNull
+    View giphyWindow;
 
     private
     @NotNull
@@ -107,9 +119,16 @@ public class AttachmentTypeSelector extends PopupWindow {
     @Nullable
     AttachmentClickedListener listener;
 
+    private static int PAGE = 0;
+
+    private GifsAdapter gifsAdapter;
+    private List<JSONObject> gifs = new ArrayList<>();
+    private Activity activity;
+    private View footerView;
+
     public AttachmentTypeSelector(@NonNull Context context, @NonNull LoaderManager loaderManager, @Nullable AttachmentClickedListener listener) {
         super(context);
-
+        this.activity = (Activity) context;
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         @SuppressLint("InflateParams") View layout = inflater.inflate(R.layout.attachment_type_selector, null, true);
         RecentPhotoViewRail recentPhotos = ViewUtil.findById(layout, R.id.recent_photos);
@@ -123,8 +142,9 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.locationButton = ViewUtil.findById(layout, R.id.location_button);
         this.gifButton = ViewUtil.findById(layout, R.id.giphy_button);
         this.closeButton = ViewUtil.findById(layout, R.id.close_button);
-        this.closeGifWindow = ViewUtil.findById(layout,R.id.close_giphy);
-        this.contentFlipper = ViewUtil.findById(layout, R.id.content_flipper);
+        this.closeGifWindow = ViewUtil.findById(layout, R.id.close_giphy);
+        this.attachmentWindow = ViewUtil.findById(layout, R.id.attachment_window);
+        this.giphyWindow = ViewUtil.findById(layout, R.id.giphy_window);
 
         ImageView dummySearchGifImageView = ViewUtil.findById(layout, R.id.dummy_search_image_view);
 
@@ -165,13 +185,38 @@ public class AttachmentTypeSelector extends PopupWindow {
 
             @Override
             public void onClick(View view) {
-                UiUtils.toggleFlipperState(contentFlipper,0);
+                UiUtils.showView(attachmentWindow, true);
+                UiUtils.showView(giphyWindow, false);
             }
 
         });
 
         loaderManager.initLoader(1, null, recentPhotos);
+        setupGifsFooterLoader();
+        setupGifsAdapter();
+        gifSearchBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (StringUtils.isNotEmpty(charSequence.toString())){
+                    loadGifs(activity,charSequence.toString().trim(),PAGE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+    }
+
+    @SuppressLint("InflateParams")
+    private void setupGifsFooterLoader() {
+        footerView = LayoutInflater.from(activity).inflate(R.layout.loading_footer, null);
     }
 
     public void show(final @NonNull View anchor) {
@@ -207,12 +252,12 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     }
 
-    public boolean isGiphyOpen(){
-        return contentFlipper.getDisplayedChild() == 1;
+    public boolean isGiphyWindowOpen() {
+        return giphyWindow.getVisibility() == View.VISIBLE;
     }
 
-    public void closeGiphy(){
-        contentFlipper.setDisplayedChild(0);
+    public void closeGiphyWindow() {
+        closeGifWindow.performClick();
     }
 
     @Override
@@ -330,27 +375,120 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     }
 
-    public void loadGifs(final Activity activity) {
-        UiUtils.toggleFlipperState(contentFlipper, 1);
-        ApiUtils.fetchTrendingGifs(new DoneCallback<List<JSONObject>>() {
-            @Override
-            public void done(List<JSONObject> result, Exception e) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
+    private void setupGifsAdapter() {
 
-                    }
-                });
+        gifsAdapter = new GifsAdapter(activity, gifs);
+
+        HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(gifsAdapter);
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(activity, 3);
+
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+
+            @Override
+            public int getSpanSize(int position) {
+                return 1;
             }
+
         });
+
+        gifRecyclerView.setLayoutManager(gridLayoutManager);
+
+        gifRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
+
+        gifRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
+
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                if (!gifs.isEmpty()) {
+                    UiUtils.showView(footerView,true);
+                    loadGifs(activity, gifSearchBox.getText().toString().trim(), PAGE);
+                }
+            }
+
+        });
+
+        RecyclerViewUtils.setFooterView(gifRecyclerView, footerView);
+        UiUtils.showView(footerView, false);
+
+    }
+
+    public void loadGifs(final Activity activity, String searchKey, int page) {
+
+        if (page == 0) {
+            gifs.clear();
+            PAGE = 0;
+        }
+
+        UiUtils.showView(giphyWindow, true);
+        UiUtils.showView(attachmentWindow, false);
+        if (StringUtils.isNotEmpty(searchKey)) {
+
+            ApiUtils.searchGif(searchKey, page, new DoneCallback<List<JSONObject>>() {
+
+                @Override
+                public void done(final List<JSONObject> result, Exception e) {
+                    activity.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            UiUtils.showView(gifLoadingProgressWheel, false);
+                            UiUtils.showView(footerView, false);
+
+                            if (result != null && !result.isEmpty()) {
+                                gifs.addAll(result);
+                                gifsAdapter.notifyDataSetChanged();
+                            }
+
+                            PAGE++;
+                        }
+
+                    });
+
+                }
+
+            });
+
+        } else {
+
+            ApiUtils.fetchTrendingGifs(page, new DoneCallback<List<JSONObject>>() {
+
+                @Override
+                public void done(final List<JSONObject> result, Exception e) {
+
+                    activity.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            UiUtils.showView(gifLoadingProgressWheel, false);
+                            UiUtils.showView(footerView, false);
+
+                            if (result != null && !result.isEmpty()) {
+                                gifs.addAll(result);
+                                gifsAdapter.notifyDataSetChanged();
+                            }
+
+                            PAGE++;
+                        }
+
+                    });
+
+                }
+
+            });
+
+        }
+
     }
 
     private class RecentPhotoSelectedListener implements RecentPhotoViewRail.OnItemClickedListener {
+
         @Override
         public void onItemClicked(Uri uri) {
             animateWindowOutTranslate(getContentView());
             if (listener != null) listener.onQuickAttachment(uri);
         }
+
     }
 
     private class PropagatingClickListener implements View.OnClickListener {

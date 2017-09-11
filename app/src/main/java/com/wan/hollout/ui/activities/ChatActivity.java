@@ -575,7 +575,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 checkAccessToGalleryAndOpen();
                 break;
             case ADD_GIF:
-                attachmentTypeSelector.loadGifs(this);
+                attachmentTypeSelector.loadGifs(this,null,0);
                 break;
         }
     }
@@ -616,8 +616,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (container.isInputOpen()) {
             container.hideCurrentInput(composeText);
-        } else if (attachmentTypeSelector != null && attachmentTypeSelector.isGiphyOpen()) {
-            attachmentTypeSelector.closeGiphy();
+        } else if (attachmentTypeSelector != null && attachmentTypeSelector.isGiphyWindowOpen()) {
+            attachmentTypeSelector.closeGiphyWindow();
         } else {
             super.onBackPressed();
         }
