@@ -200,6 +200,7 @@ public class AttachmentTypeSelector extends PopupWindow {
     public void closeGiphy(){
         contentFlipper.setDisplayedChild(0);
     }
+
     @Override
     public void dismiss() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

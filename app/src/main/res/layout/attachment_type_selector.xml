@@ -58,7 +58,7 @@
                 <ImageView
                     android:id="@+id/photo_button"
                     android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_height="wrap_content"
                     android:contentDescription="@string/attachment_type_selector__image_description"
                     android:scaleType="center"
                     android:src="@drawable/attach_camera" />
@@ -272,7 +272,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="270dp">
+        android:layout_height="350dp">
 
         <LinearLayout
             android:id="@+id/giphy_top_view"
@@ -309,6 +309,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            android:layout_marginTop="8dp"
             android:background="#eaeaea"
             android:padding="16dp"
             android:text="@string/powered_by_giphy"
