@@ -307,6 +307,8 @@
                 android:textSize="16sp"
                 app:textStyle="medium" />
 
+            <requestFocus />
+
         </LinearLayout>
 
         <com.wan.hollout.ui.widgets.HolloutTextView

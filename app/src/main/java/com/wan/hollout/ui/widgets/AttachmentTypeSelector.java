@@ -21,13 +21,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.OvershootInterpolator;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -92,7 +90,7 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     private
     @NonNull
-    EditText gifSearchBox;
+    HolloutEditText gifSearchBox;
 
     private
     @NonNull
@@ -227,10 +225,9 @@ public class AttachmentTypeSelector extends PopupWindow {
     }
 
     public void show(final @NonNull View anchor) {
+        setFocusable(true);
         this.currentAnchor = anchor;
-        setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         showAtLocation(anchor, Gravity.BOTTOM, 0, 0);
-
         getContentView().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
             @Override
@@ -429,7 +426,7 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     public void loadGifs(final Activity activity, String searchKey, int page) {
         if (page == 0) {
-            UiUtils.showView(gifLoadingProgressWheel,true);
+            UiUtils.showView(gifLoadingProgressWheel, true);
             gifs.clear();
             PAGE = 0;
         }
