@@ -172,9 +172,10 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
     }
 
     @Override
-    public void hide(boolean immediate) {
+    public boolean hide(boolean immediate) {
         if (emojiFlipper.getDisplayedChild() == 1) {
             reactionsInvoker.performClick();
+            return false;
         } else {
             setVisibility(GONE);
             if (drawerListener != null) drawerListener.onHidden();
@@ -186,6 +187,7 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
                     e.printStackTrace();
                 }
             }
+            return true;
         }
     }
 

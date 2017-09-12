@@ -32,7 +32,7 @@ public class InputAwareLayout extends KeyboardAwareLinearLayout implements Keybo
 
     public void show(@NonNull final EditText imeTarget, @NonNull final InputView input) {
         if (isKeyboardOpen()) {
-            hideSoftkey(imeTarget, new Runnable() {
+            hideSoftKeyboard(imeTarget, new Runnable() {
                 @Override
                 public void run() {
                     hideAttachedInput(true);
@@ -52,26 +52,32 @@ public class InputAwareLayout extends KeyboardAwareLinearLayout implements Keybo
     }
 
     public void hideCurrentInput(EditText imeTarget) {
-        if (isKeyboardOpen()) hideSoftkey(imeTarget, null);
+        if (isKeyboardOpen()) hideSoftKeyboard(imeTarget, null);
         else hideAttachedInput(false);
     }
 
     public void hideAttachedInput(boolean instant) {
-        if (current != null) current.hide(instant);
-        current = null;
+        if (current != null) {
+            boolean canNullify = current.hide(instant);
+            if (canNullify) {
+                current = null;
+            }
+        }
     }
 
     public boolean isInputOpen() {
         return (isKeyboardOpen() || (current != null && current.isShowing()));
     }
 
-    public void showSoftKey(final EditText inputTarget) {
+    public void showSoftKeyboard(final EditText inputTarget) {
+
         postOnKeyboardOpen(new Runnable() {
             @Override
             public void run() {
                 hideAttachedInput(true);
             }
         });
+
         inputTarget.post(new Runnable() {
             @Override
             public void run() {
@@ -79,11 +85,11 @@ public class InputAwareLayout extends KeyboardAwareLinearLayout implements Keybo
                 ServiceUtil.getInputMethodManager(inputTarget.getContext()).showSoftInput(inputTarget, 0);
             }
         });
+
     }
 
-    private void hideSoftkey(final EditText inputTarget, @Nullable Runnable runAfterClose) {
+    private void hideSoftKeyboard(final EditText inputTarget, @Nullable Runnable runAfterClose) {
         if (runAfterClose != null) postOnKeyboardClose(runAfterClose);
-
         ServiceUtil.getInputMethodManager(inputTarget.getContext())
                 .hideSoftInputFromWindow(inputTarget.getWindowToken(), 0);
     }
@@ -91,7 +97,7 @@ public class InputAwareLayout extends KeyboardAwareLinearLayout implements Keybo
     public interface InputView {
         void show(int height, boolean immediate);
 
-        void hide(boolean immediate);
+        boolean hide(boolean immediate);
 
         boolean isShowing();
     }

@@ -639,7 +639,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
         @Override
         public void onClick(View v) {
-            container.showSoftKey(composeText);
+            container.showSoftKeyboard(composeText);
         }
 
         @Override
@@ -879,7 +879,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             emojiDrawerStub.get().setEmojiEventListener(inputPanel);
         }
         if (container.getCurrentInput() == emojiDrawerStub.get()) {
-            container.showSoftKey(composeText);
+            container.showSoftKeyboard(composeText);
         } else {
             container.show(composeText, emojiDrawerStub.get());
         }
