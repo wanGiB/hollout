@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="112dip"
     android:layout_height="112dip"
+    android:clickable="true"
+    android:background="?attr/selectableItemBackground"
     android:orientation="vertical">
 
     <com.wan.hollout.ui.widgets.LoadingImageView

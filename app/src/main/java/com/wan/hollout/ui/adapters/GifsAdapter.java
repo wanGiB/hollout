@@ -12,9 +12,12 @@ import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.wan.hollout.R;
+import com.wan.hollout.eventbuses.GifMessageEvent;
 import com.wan.hollout.ui.widgets.LoadingImageView;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import butterknife.BindView;
@@ -66,7 +69,7 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             ButterKnife.bind(this, itemView);
         }
 
-        void bindGif(Activity activity, String gifUrl) {
+        void bindGif(Activity activity, final String gifUrl) {
             if (Build.VERSION.SDK_INT >= 17) {
                 if (!activity.isDestroyed()) {
                     if (StringUtils.isNotEmpty(gifUrl)) {
@@ -100,12 +103,16 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                             giphyImageView.stopLoading();
                             return false;
-
                         }
                     }).into(giphyImageView);
                 }
             }
-
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    EventBus.getDefault().post(new GifMessageEvent(gifUrl));
+                }
+            });
         }
 
     }

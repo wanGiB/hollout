@@ -51,6 +51,7 @@
         android:id="@+id/emoji_flipper"
         android:layout_width="match_parent"
         android:layout_below="@+id/upper_view"
+        android:paddingBottom="40dp"
         android:layout_height="match_parent"
         android:background="@color/hollout_material_grey_100">
 

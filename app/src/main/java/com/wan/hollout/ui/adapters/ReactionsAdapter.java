@@ -40,7 +40,8 @@ public class ReactionsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             "reactions/Haha.json",
             "reactions/Wow.json",
             "reactions/Sorry.json",
-            "reactions/Anger.json"};
+            "reactions/Anger.json",
+            "reactions/option2b.json"};
 
     private LayoutInflater layoutInflater;
     private Context context;

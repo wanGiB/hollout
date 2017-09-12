@@ -128,7 +128,7 @@ public class ApplicationLoader extends Application {
                 public void run() {
                     try {
                         parseLiveQueryClient.reconnect();
-                    }catch (NullPointerException ignored){
+                    } catch (NullPointerException ignored) {
 
                     }
                 }
@@ -224,6 +224,10 @@ public class ApplicationLoader extends Application {
             }
         };
         thread.start();
+    }
+
+    private void persistReactionsToLocalDatabase() {
+
     }
 
 }

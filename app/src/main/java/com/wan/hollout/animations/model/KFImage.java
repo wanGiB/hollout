@@ -23,6 +23,7 @@ import java.util.Map;
  * The top level model object for one entire animated image.  Global information such as frame rate
  * it was exported as, frame count, and canvas size are included here for renderers.
  */
+@SuppressWarnings("unchecked")
 public class KFImage {
 
   /**
@@ -171,4 +172,5 @@ public class KFImage {
   public Map<String, Bitmap> getBitmaps() {
     return mBitmaps;
   }
+
 }

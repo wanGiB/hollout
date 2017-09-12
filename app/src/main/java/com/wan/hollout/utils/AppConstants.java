@@ -229,6 +229,10 @@ public class AppConstants {
     public static final String LAST_ATTEMPTED_MESSAGE_FOR = "last_attempted_msg_for_";
     public static final String TURN_OFF_ALL_TAB_LAYOUTS = "turn_off_all_tablayouts";
     public static final String FILE_TYPE_REACTION = "file_type_reaction";
+    public static final String REACTION_VALUE = "reaction_value";
+    public static final String MESSAGE_ATTR_TYPE_REACTION = "message_attribute_type_reaction";
+    public static final String MESSAGE_ATTR_TYPE_GIF = "message_attribute_type_gif";
+    public static final String GIF_URL = "gif_url";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

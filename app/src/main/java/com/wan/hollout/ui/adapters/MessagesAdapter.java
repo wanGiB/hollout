@@ -38,20 +38,23 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private LayoutInflater layoutInflater;
     private Calendar calendar;
 
-    //MeetPoint Types
     private static final int OUTGOING_MESSAGE_TEXT_ONLY = 0;
     private static final int OUTGOING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO = 1;
     private static final int OUTGOING_MESSAGE_WITH_AUDIO = 2;
     private static final int OUTGOING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE = 3;
     private static final int OUTGOING_MESSAGE_WITH_CONTACT = 4;
     private static final int OUTGOING_MESSAGE_WITH_LINK_PREVIEW = 5;
+    private static final int OUTGOING_MESSAGE_WITH_REACTION = 6;
+    private static final int OUTGOING_MESSAGE_WITH_GIF = 7;
 
-    private static final int INCOMING_MESSAGE_TEXT_ONLY = 6;
-    private static final int INCOMING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO = 7;
-    private static final int INCOMING_MESSAGE_WITH_AUDIO = 8;
-    private static final int INCOMING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE = 9;
-    private static final int INCOMING_MESSAGE_WITH_CONTACT = 10;
-    private static final int INCOMING_MESSAGE_WITH_LINK_PREVIEW = 11;
+    private static final int INCOMING_MESSAGE_TEXT_ONLY = 8;
+    private static final int INCOMING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO = 9;
+    private static final int INCOMING_MESSAGE_WITH_AUDIO = 10;
+    private static final int INCOMING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE = 11;
+    private static final int INCOMING_MESSAGE_WITH_CONTACT = 12;
+    private static final int INCOMING_MESSAGE_WITH_LINK_PREVIEW = 13;
+    private static final int INCOMING_MESSAGE_WITH_REACTION = 14;
+    private static final int INCOMING_MESSAGE_WITH_GIF = 15;
 
     public MessagesAdapter(Activity context, List<EMMessage> messages) {
         this.context = context;
@@ -82,6 +85,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case OUTGOING_MESSAGE_WITH_LINK_PREVIEW:
                 layoutRes = R.layout.outgoing_message_with_link_preview;
                 break;
+            case OUTGOING_MESSAGE_WITH_REACTION:
+                layoutRes = R.layout.outgoing_message_with_reaction;
+                break;
+            case OUTGOING_MESSAGE_WITH_GIF:
+                layoutRes = R.layout.outgoing_message_with_gif;
+                break;
             case INCOMING_MESSAGE_TEXT_ONLY:
                 layoutRes = R.layout.incoming_message_text_only;
                 break;
@@ -99,6 +108,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 break;
             case INCOMING_MESSAGE_WITH_LINK_PREVIEW:
                 layoutRes = R.layout.incoming_message_with_link_preview;
+                break;
+            case INCOMING_MESSAGE_WITH_REACTION:
+                layoutRes = R.layout.incoming_message_with_reaction;
+                break;
+            case INCOMING_MESSAGE_WITH_GIF:
+                layoutRes = R.layout.incoming_message_with_gif;
                 break;
             default:
                 layoutRes = R.layout.outgoing_message_text_only;
@@ -140,7 +155,22 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             if (!links.isEmpty()) {
                 return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_LINK_PREVIEW : INCOMING_MESSAGE_WITH_LINK_PREVIEW;
             } else {
-                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
+                try {
+                    String messageAttributeType = messageObject.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
+                    if (messageAttributeType != null) {
+                        switch (messageAttributeType) {
+                            case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
+                                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_REACTION : INCOMING_MESSAGE_WITH_REACTION;
+                            case AppConstants.MESSAGE_ATTR_TYPE_GIF:
+                                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_GIF : INCOMING_MESSAGE_WITH_GIF;
+                        }
+                    } else {
+                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
+                    }
+                } catch (HyphenateException e) {
+                    e.printStackTrace();
+                    return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
+                }
             }
         }
         return -1;

@@ -7,6 +7,7 @@ import android.content.res.AssetManager;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -19,10 +20,12 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
-import com.hyphenate.chat.EMFileMessageBody;
 import com.hyphenate.chat.EMLocationMessageBody;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMTextMessageBody;
@@ -370,8 +373,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         } else {
             UiUtils.showView(deliveryStatusView, false);
         }
-        UiUtils.showView(userStatusOrLastMessageView,!AppConstants.reactionsOpenPositions.get(getMessageId()));
-        UiUtils.showView(reactionsIndicatorView,AppConstants.reactionsOpenPositions.get(getMessageId()));
+        UiUtils.showView(userStatusOrLastMessageView, !AppConstants.reactionsOpenPositions.get(getMessageId()));
+        UiUtils.showView(reactionsIndicatorView, AppConstants.reactionsOpenPositions.get(getMessageId()));
     }
 
     private void subscribeToUserChanges() {
@@ -446,9 +449,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     }
 
     public void setupLastMessage(EMMessage message) {
-
         EMMessage.Type messageType = message.getType();
-
         if (message.direct() == EMMessage.Direct.SEND) {
             UiUtils.showView(deliveryStatusView, true);
             setMessageSendCallback();
@@ -457,11 +458,40 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             setMessageReceiveCallback();
             UiUtils.showView(deliveryStatusView, false);
         }
-
         if (messageType == EMMessage.Type.TXT) {
-            EMTextMessageBody emTextMessageBody = (EMTextMessageBody) message.getBody();
-            userStatusOrLastMessageView.setText(emTextMessageBody.getMessage());
-            UiUtils.removeAllDrawablesFromTextView(userStatusOrLastMessageView);
+            try {
+                String messageAttrType = message.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
+                if (messageAttrType != null) {
+                    switch (messageAttrType) {
+                        case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
+                            String reaction = message.getStringAttribute(AppConstants.REACTION_VALUE);
+                            if (reaction != null) {
+                                UiUtils.showView(reactionsIndicatorView, true);
+                                AppConstants.reactionsOpenPositions.put(getMessageId(), true);
+                                UiUtils.showView(userStatusOrLastMessageView, false);
+                                loadDrawables(activity, reactionsIndicatorView, reaction);
+                            } else {
+                                setupMessageBodyOnlyMessage(message);
+                            }
+                            break;
+                        case AppConstants.MESSAGE_ATTR_TYPE_GIF:
+                            UiUtils.showView(reactionsIndicatorView, true);
+                            AppConstants.reactionsOpenPositions.put(getMessageId(), true);
+                            UiUtils.showView(userStatusOrLastMessageView, false);
+                            String gifUrl = message.getStringAttribute(AppConstants.GIF_URL);
+                            loadLastMessageGif(gifUrl);
+                            break;
+                        default:
+                            setupMessageBodyOnlyMessage(message);
+                            break;
+                    }
+                } else {
+                    setupMessageBodyOnlyMessage(message);
+                }
+            } catch (HyphenateException e) {
+                e.printStackTrace();
+                setupMessageBodyOnlyMessage(message);
+            }
         }
 
         if (messageType == EMMessage.Type.IMAGE) {
@@ -532,13 +562,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                         UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.icon_file_doc_grey_mini, UiUtils.DrawableDirection.LEFT);
                         userStatusOrLastMessageView.setText(messageBody);
                         break;
-                    case AppConstants.FILE_TYPE_REACTION:
-                        UiUtils.showView(reactionsIndicatorView, true);
-                        AppConstants.reactionsOpenPositions.put(getMessageId(), true);
-                        UiUtils.showView(userStatusOrLastMessageView, false);
-                        EMFileMessageBody emFileMessageBody = (EMFileMessageBody)message.getBody();
-                        loadDrawables(activity,reactionsIndicatorView,emFileMessageBody.getFileName());
-                        break;
+
                 }
 
             } catch (HyphenateException e) {
@@ -547,6 +571,52 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
         }
 
+    }
+
+    private void loadLastMessageGif(String gifUrl) {
+        if (Build.VERSION.SDK_INT >= 17) {
+            if (!activity.isDestroyed()) {
+                if (StringUtils.isNotEmpty(gifUrl)) {
+                    Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+
+                        @Override
+                        public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            return false;
+
+                        }
+
+                    }).into(reactionsIndicatorView);
+                }
+            }
+        } else {
+            if (StringUtils.isNotEmpty(gifUrl)) {
+                Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        return false;
+                    }
+                }).into(reactionsIndicatorView);
+            }
+        }
+    }
+
+    private void setupMessageBodyOnlyMessage(EMMessage message) {
+        EMTextMessageBody emTextMessageBody = (EMTextMessageBody) message.getBody();
+        userStatusOrLastMessageView.setText(emTextMessageBody.getMessage());
+        UiUtils.removeAllDrawablesFromTextView(userStatusOrLastMessageView);
+        UiUtils.showView(reactionsIndicatorView, false);
+        AppConstants.reactionsOpenPositions.put(getMessageId(), false);
     }
 
     private void loadDrawables(Context context, ImageView emojiView, String reactionTag) {

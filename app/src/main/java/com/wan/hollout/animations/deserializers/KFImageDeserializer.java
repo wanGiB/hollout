@@ -19,6 +19,7 @@ import com.wan.hollout.animations.model.KFImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +39,11 @@ public class KFImageDeserializer {
   public static KFImage deserialize(InputStream inputStream) throws IOException {
     JsonReader reader = new JsonReader(new InputStreamReader(inputStream));
     return readObject(reader);
+  }
+
+  public static KFImage deserialize(Reader reader) throws IOException {
+    JsonReader jsonReader = new JsonReader(reader);
+    return readObject(jsonReader);
   }
 
   static KFImage readObject(JsonReader reader) throws IOException {

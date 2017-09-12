@@ -18,6 +18,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.hyphenate.EMCallBack;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMFileMessageBody;
@@ -177,7 +180,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         EMMessageBody messageBody = message.getBody();
 
         if (messageType == EMMessage.Type.TXT) {
-            AppConstants.messageBodyPositions.put(getMessageHash(), true);
             setupTxtMessage((EMTextMessageBody) messageBody);
         }
 
@@ -249,9 +251,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             if (fileType.equals(AppConstants.FILE_TYPE_AUDIO)) {
                 setupAudioMessage(messageBody);
             }
-            if (fileType.endsWith(AppConstants.FILE_TYPE_REACTION)){
-                setupReactionMessage(messageBody);
-            }
         } catch (HyphenateException e) {
             e.printStackTrace();
             HolloutLogger.e(TAG, e.getMessage());
@@ -276,14 +275,18 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         return kfImage;
     }
 
-    private void setupReactionMessage(EMFileMessageBody messageBody) {
+    private void setupReactionMessage() {
         UiUtils.showView(fileSizeDurationView, false);
-        UiUtils.showView(messageBodyView,false);
+        UiUtils.showView(messageBodyView, false);
         AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
-        AppConstants.messageBodyPositions.put(getMessageHash(),false);
-        String filePath = messageBody.getFileName();
-        if (StringUtils.isNotEmpty(filePath)){
-            loadDrawables(activity,attachedPhotoOrVideoThumbnailView,filePath);
+        AppConstants.messageBodyPositions.put(getMessageHash(), false);
+        try {
+            String reactionValue = message.getStringAttribute(AppConstants.REACTION_VALUE);
+            if (StringUtils.isNotEmpty(reactionValue)) {
+                loadDrawables(activity, attachedPhotoOrVideoThumbnailView, reactionValue);
+            }
+        } catch (HyphenateException e) {
+            e.printStackTrace();
         }
     }
 
@@ -442,9 +445,96 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void setupTxtMessage(EMTextMessageBody messageBody) {
+        try {
+            String messageAttributeType = message.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
+            if (messageAttributeType != null) {
+                switch (messageAttributeType) {
+                    case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
+                        String reaction = message.getStringAttribute(AppConstants.REACTION_VALUE);
+                        if (reaction != null) {
+                            UiUtils.showView(messageBodyView, false);
+                            AppConstants.messageBodyPositions.put(getMessageHash(), false);
+                            setupReactionMessage();
+                        } else {
+                            setupMessageBodyOnlyMessage(messageBody);
+                        }
+                        break;
+                    case AppConstants.MESSAGE_ATTR_TYPE_GIF:
+                        String gifUrl = message.getStringAttribute(AppConstants.GIF_URL);
+                        if (gifUrl != null) {
+                            setUpGifMessage(gifUrl);
+                        } else {
+                            setupMessageBodyOnlyMessage(messageBody);
+                        }
+                        break;
+                    default:
+                        setupMessageBodyOnlyMessage(messageBody);
+                        break;
+                }
+            } else {
+                setupMessageBodyOnlyMessage(messageBody);
+            }
+        } catch (HyphenateException e) {
+            setupMessageBodyOnlyMessage(messageBody);
+        }
+        acknowledgeMessageRead();
+    }
+
+    private void setUpGifMessage(String gifUrl) {
+        UiUtils.showView(fileSizeDurationView, false);
+        UiUtils.showView(messageBodyView, false);
+        AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
+        AppConstants.messageBodyPositions.put(getMessageHash(), false);
+        if (StringUtils.isNotEmpty(gifUrl)) {
+            if (Build.VERSION.SDK_INT >= 17) {
+                if (!activity.isDestroyed()) {
+                    if (StringUtils.isNotEmpty(gifUrl)) {
+                        getLoadingGifImageCast().startLoading();
+                        Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+                            @Override
+                            public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                getLoadingGifImageCast().stopLoading();
+                                return false;
+
+                            }
+                        }).into(attachedPhotoOrVideoThumbnailView);
+                    }
+                }
+            } else {
+                if (StringUtils.isNotEmpty(gifUrl)) {
+                    getLoadingGifImageCast().startLoading();
+                    Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+
+                        @Override
+                        public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            getLoadingGifImageCast().stopLoading();
+                            return false;
+                        }
+                    }).into(attachedPhotoOrVideoThumbnailView);
+                }
+            }
+        }
+    }
+
+    private LoadingImageView getLoadingGifImageCast() {
+        return (LoadingImageView) attachedPhotoOrVideoThumbnailView;
+    }
+
+    private void setupMessageBodyOnlyMessage(EMTextMessageBody messageBody) {
         String message = messageBody.getMessage();
         if (StringUtils.isNotEmpty(message)) {
             UiUtils.showView(messageBodyView, true);
+            AppConstants.messageBodyPositions.put(getMessageHash(), true);
             if (messageBodyView != null) {
                 if (getMessageDirection() == EMMessage.Direct.SEND) {
                     messageBodyView.setText(UiUtils.fromHtml(message + getOutGoingNonBreakingSpace()));
@@ -452,8 +542,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     messageBodyView.setText(UiUtils.fromHtml(message + getIncomingNonBreakingSpace()));
                 }
             }
+        } else {
+            UiUtils.showView(messageBodyView, false);
+            AppConstants.messageBodyPositions.put(getMessageHash(), false);
         }
-        acknowledgeMessageRead();
     }
 
     private void handleMessageReadOnClickOfImageView() {
@@ -510,8 +602,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
                 @Override
                 public void onError(int code, String error) {
-
-                    //Yabi!!! Lai Lai egberi page ti o
 
                 }
 

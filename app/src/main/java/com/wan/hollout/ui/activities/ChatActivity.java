@@ -60,6 +60,7 @@ import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.chat.MessageNotifier;
 import com.wan.hollout.emoji.EmojiDrawer;
+import com.wan.hollout.eventbuses.GifMessageEvent;
 import com.wan.hollout.eventbuses.MessageDeliveredEvent;
 import com.wan.hollout.eventbuses.MessageReadEvent;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
@@ -588,7 +589,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     private void initializeViews() {
-
         emojiDrawerStub = ViewUtil.findStubById(this, R.id.emoji_drawer_stub);
 
         container.addOnKeyboardShownListener(this);
@@ -616,7 +616,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (container.isInputOpen()) {
             container.hideCurrentInput(composeText);
-        }else{
+        } else {
             super.onBackPressed();
         }
     }
@@ -1308,9 +1308,22 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 } else if (o instanceof ReactionMessageEvent) {
                     ReactionMessageEvent reactionMessageEvent = (ReactionMessageEvent) o;
                     String reaction = reactionMessageEvent.getReaction();
-                    HashMap<String, String> fileProps = new HashMap<>();
-                    fileProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_REACTION);
-                    sendFileMessage(reaction, fileProps);
+                    HashMap<String, String> reactionProps = new HashMap<>();
+                    reactionProps.put(AppConstants.MESSAGE_ATTR_TYPE, AppConstants.MESSAGE_ATTR_TYPE_REACTION);
+                    reactionProps.put(AppConstants.REACTION_VALUE, reaction);
+                    EMMessage message = EMMessage.createTxtSendMessage(reaction, getRecipient());
+                    addPropsToMessage(reactionProps, message);
+                    UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
+                    sendMessage(message);
+                } else if (o instanceof GifMessageEvent) {
+                    GifMessageEvent gifMessageEvent = (GifMessageEvent) o;
+                    HashMap<String, String> reactionProps = new HashMap<>();
+                    reactionProps.put(AppConstants.MESSAGE_ATTR_TYPE, AppConstants.MESSAGE_ATTR_TYPE_GIF);
+                    reactionProps.put(AppConstants.GIF_URL, gifMessageEvent.getGifUrl());
+                    EMMessage message = EMMessage.createTxtSendMessage(gifMessageEvent.getGifUrl(), getRecipient());
+                    addPropsToMessage(reactionProps, message);
+                    UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
+                    sendMessage(message);
                 }
             }
         });
@@ -1420,12 +1433,16 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     protected void sendFileMessage(String filePath, HashMap<String, String> moreMessageProps) {
         EMMessage message = EMMessage.createFileSendMessage(filePath, getRecipient());
+        addPropsToMessage(moreMessageProps, message);
+        sendMessage(message);
+    }
+
+    private void addPropsToMessage(HashMap<String, String> moreMessageProps, EMMessage message) {
         if (moreMessageProps != null && !moreMessageProps.isEmpty()) {
             for (String key : moreMessageProps.keySet()) {
                 message.setAttribute(key, moreMessageProps.get(key));
             }
         }
-        sendMessage(message);
     }
 
     private void checkAndSendChatRequest() {
