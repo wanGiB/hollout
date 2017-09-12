@@ -64,6 +64,9 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         @BindView(R.id.giphy_item_image)
         LoadingImageView giphyImageView;
 
+        @BindView(R.id.parent_view)
+        View parentView;
+
         public GifItemHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
@@ -75,6 +78,7 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     if (StringUtils.isNotEmpty(gifUrl)) {
                         giphyImageView.startLoading();
                         Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+
                             @Override
                             public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
                                 return false;
@@ -84,8 +88,8 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
                                 giphyImageView.stopLoading();
                                 return false;
-
                             }
+
                         }).into(giphyImageView);
                     }
                 }
@@ -104,15 +108,29 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             giphyImageView.stopLoading();
                             return false;
                         }
+
                     }).into(giphyImageView);
+
                 }
+
             }
-            itemView.setOnClickListener(new View.OnClickListener() {
+
+            parentView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     EventBus.getDefault().post(new GifMessageEvent(gifUrl));
                 }
             });
+
+            giphyImageView.setOnClickListener(new View.OnClickListener() {
+
+                @Override
+                public void onClick(View view) {
+                    parentView.performClick();
+                }
+
+            });
+
         }
 
     }

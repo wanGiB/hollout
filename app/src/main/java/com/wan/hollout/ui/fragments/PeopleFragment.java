@@ -221,7 +221,7 @@ public class PeopleFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 UiUtils.blinkView(view);
-                if (meetPeopleTextView.getText().toString().equals(getString(R.string.screwed_data_error_message))) {
+                if (meetPeopleTextView.getText().toString().equals(getString(R.string.review_network))) {
                     Intent dataSourceIntent = new Intent(Settings.ACTION_WIFI_SETTINGS);
                     startActivity(dataSourceIntent);
                 } else {

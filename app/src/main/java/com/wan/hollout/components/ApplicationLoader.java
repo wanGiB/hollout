@@ -31,6 +31,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import io.fabric.sdk.android.Fabric;
+import io.fabric.sdk.android.services.concurrency.AsyncTask;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -75,64 +76,66 @@ public class ApplicationLoader extends Application {
     }
 
     private void initParse() {
-        Thread thread = new Thread() {
+        new AsyncTask<Void,Void,Void>(){
             @Override
-            public void run() {
-                super.run();
-                Parse.initialize(new Parse.Configuration.Builder(ApplicationLoader.this)
-                        .applicationId(AppKeys.APPLICATION_ID) // should correspond to APP_ID env variable
-                        .clientKey(AppKeys.SERVER_CLIENT_KEY)  // set explicitly blank unless clientKey is configured on Parse server
-                        .server(AppKeys.SERVER_ENDPOINT)
-                        .enableLocalDataStore()
-                        .clientBuilder(getOkHttpClientBuilder())
-                        .build());
-                try {
-                    parseLiveQueryClient = ParseLiveQueryClient.Factory.getClient(new URI(AppKeys.SERVER_ENDPOINT));
-
-                    parseLiveQueryClient.registerListener(new ParseLiveQueryClientCallbacks() {
-
-                        @Override
-                        public void onLiveQueryClientConnected(ParseLiveQueryClient client) {
-                            HolloutLogger.d("ParseLiveQueryClient", "Client Connected");
-                        }
-
-                        @Override
-                        public void onLiveQueryClientDisconnected(ParseLiveQueryClient client, boolean userInitiated) {
-                            attemptLiveQueryReconnection();
-                        }
-
-                        @Override
-                        public void onLiveQueryError(ParseLiveQueryClient client, LiveQueryException reason) {
-                            attemptLiveQueryReconnection();
-                        }
-
-                        @Override
-                        public void onSocketError(ParseLiveQueryClient client, Throwable reason) {
-                            attemptLiveQueryReconnection();
-                        }
-
-                    });
-                } catch (URISyntaxException e) {
-                    HolloutLogger.d("ParseLiveQueryClient", "Exception = " + e.getMessage());
-                    e.printStackTrace();
-                }
+            protected Void doInBackground(Void... voids) {
+                initWebGuys();
+                return null;
             }
-        };
-        thread.start();
+        }.execute();
+    }
+
+    private void initWebGuys(){
+        Parse.initialize(new Parse.Configuration.Builder(ApplicationLoader.this)
+                .applicationId(AppKeys.APPLICATION_ID) // should correspond to APP_ID env variable
+                .clientKey(AppKeys.SERVER_CLIENT_KEY)  // set explicitly blank unless clientKey is configured on Parse server
+                .server(AppKeys.SERVER_ENDPOINT)
+                .enableLocalDataStore()
+                .clientBuilder(getOkHttpClientBuilder())
+                .build());
+        try {
+            parseLiveQueryClient = ParseLiveQueryClient.Factory.getClient(new URI(AppKeys.SERVER_ENDPOINT));
+            parseLiveQueryClient.registerListener(new ParseLiveQueryClientCallbacks() {
+
+                @Override
+                public void onLiveQueryClientConnected(ParseLiveQueryClient client) {
+                    HolloutLogger.d("ParseLiveQueryClient", "Client Connected");
+                }
+
+                @Override
+                public void onLiveQueryClientDisconnected(ParseLiveQueryClient client, boolean userInitiated) {
+                    attemptLiveQueryReconnection();
+                }
+
+                @Override
+                public void onLiveQueryError(ParseLiveQueryClient client, LiveQueryException reason) {
+                    attemptLiveQueryReconnection();
+                }
+
+                @Override
+                public void onSocketError(ParseLiveQueryClient client, Throwable reason) {
+                    attemptLiveQueryReconnection();
+                }
+
+            });
+        } catch (URISyntaxException e) {
+            HolloutLogger.d("ParseLiveQueryClient", "Exception = " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void attemptLiveQueryReconnection() {
         if (parseLiveQueryClient != null) {
-            new Thread(new Runnable() {
+            new AsyncTask<Void,Void,Void>(){
                 @Override
-                public void run() {
+                protected Void doInBackground(Void... voids) {
                     try {
                         parseLiveQueryClient.reconnect();
                     } catch (NullPointerException ignored) {
-
                     }
+                    return null;
                 }
-            }).start();
+            }.execute();
         }
     }
 
@@ -170,7 +173,6 @@ public class ApplicationLoader extends Application {
     }
 
     private void configureThemes() {
-
         if (!ATE.config(this, "light_theme").isConfigured()) {
             ATE.config(this, "light_theme")
                     .activityTheme(R.style.AppThemeLight)
@@ -180,7 +182,6 @@ public class ApplicationLoader extends Application {
                     .usingMaterialDialogs(true)
                     .commit();
         }
-
         if (!ATE.config(this, "dark_theme").isConfigured()) {
             ATE.config(this, "dark_theme")
                     .activityTheme(R.style.AppThemeDark)
@@ -190,7 +191,6 @@ public class ApplicationLoader extends Application {
                     .usingMaterialDialogs(true)
                     .commit();
         }
-
         if (!ATE.config(this, "light_theme_notoolbar").isConfigured()) {
             ATE.config(this, "light_theme_notoolbar")
                     .activityTheme(R.style.AppThemeLight)
@@ -201,7 +201,6 @@ public class ApplicationLoader extends Application {
                     .usingMaterialDialogs(true)
                     .commit();
         }
-
         if (!ATE.config(this, "dark_theme_notoolbar").isConfigured()) {
             ATE.config(this, "dark_theme_notoolbar")
                     .activityTheme(R.style.AppThemeDark)
@@ -212,18 +211,17 @@ public class ApplicationLoader extends Application {
                     .usingMaterialDialogs(true)
                     .commit();
         }
-
     }
 
     private void defaultSystemEmojiPref() {
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                HolloutPreferences.defaultToSystemEmojis(AppConstants.SYSTEM_EMOJI_PREF, false);
-            }
-        };
-        thread.start();
+      new AsyncTask<Void,Void,Void>(){
+
+          @Override
+          protected Void doInBackground(Void... voids) {
+              HolloutPreferences.defaultToSystemEmojis(AppConstants.SYSTEM_EMOJI_PREF, false);
+              return null;
+          }
+      }.execute();
     }
 
     private void persistReactionsToLocalDatabase() {

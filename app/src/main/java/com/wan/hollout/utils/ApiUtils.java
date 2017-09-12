@@ -39,7 +39,6 @@ public class ApiUtils {
         HttpUrl httpUrl = HttpUrl.parse(GIPHY_BASE_END_POINT + "/gifs/trending");
 
         if (httpUrl != null) {
-
             HttpUrl.Builder urlBuilder = httpUrl.newBuilder();
             attachApiKey(urlBuilder);
             urlBuilder.addQueryParameter("limit", "25");

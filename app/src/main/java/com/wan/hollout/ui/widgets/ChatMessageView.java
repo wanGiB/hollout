@@ -629,17 +629,15 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (timeTextView != null) {
             timeTextView.setText(messageTime);
         }
-        if (getMessageDirection() == EMMessage.Direct.SEND) {
-            if (deliveryStatusView != null) {
-                if (message.isAcked()) {
-                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-                } else if (message.isListened()) {
-                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-                } else if (message.isDelivered()) {
-                    deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_client_received_white : R.drawable.msg_status_client_received);
-                } else {
-                    deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_server_received_white : R.drawable.msg_status_server_receive);
-                }
+        if (getMessageDirection() == EMMessage.Direct.SEND && deliveryStatusView != null) {
+            if (message.isAcked()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else if (message.isListened()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else if (message.isDelivered()) {
+                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_client_received_white : R.drawable.msg_status_client_received);
+            } else {
+                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_server_received_white : R.drawable.msg_status_server_receive);
             }
         }
     }
