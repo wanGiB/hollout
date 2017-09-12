@@ -562,6 +562,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             case ADD_VIDEO:
                 openCameraToShootVideo();
                 break;
+            case OPEN_GALLERY:
+                checkAccessToGalleryAndOpen();
+                break;
             case ADD_CONTACT:
                 checkContactAccessAndOpenContact();
                 break;
@@ -570,9 +573,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 break;
             case ADD_LOCATION:
                 checkLocationAccessPermissionsAndOpenLocation();
-                break;
-            case OPEN_GALLERY:
-                checkAccessToGalleryAndOpen();
                 break;
             case ADD_GIF:
                 attachmentTypeSelector.loadGifs(this, null, 0);
@@ -616,10 +616,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (container.isInputOpen()) {
             container.hideCurrentInput(composeText);
-        } else if (attachmentTypeSelector != null /*&& attachmentTypeSelector.isShowing() && attachmentTypeSelector.isGiphyWindowOpen()*/) {
-            UiUtils.showSafeToast("Yope");
-            attachmentTypeSelector.closeGiphyWindow();
-        } else {
+        }else{
             super.onBackPressed();
         }
     }

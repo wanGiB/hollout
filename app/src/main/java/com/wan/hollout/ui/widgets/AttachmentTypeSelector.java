@@ -98,7 +98,7 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     private
     @NonNull
-    View giphyWindow;
+    View gifWindow;
 
     private
     @NotNull
@@ -145,7 +145,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.closeButton = ViewUtil.findById(layout, R.id.close_button);
         this.closeGifWindow = ViewUtil.findById(layout, R.id.close_giphy);
         this.attachmentWindow = ViewUtil.findById(layout, R.id.attachment_window);
-        this.giphyWindow = ViewUtil.findById(layout, R.id.giphy_window);
+        this.gifWindow = ViewUtil.findById(layout, R.id.giphy_window);
 
         ImageView dummySearchGifImageView = ViewUtil.findById(layout, R.id.dummy_search_image_view);
 
@@ -187,7 +187,7 @@ public class AttachmentTypeSelector extends PopupWindow {
             @Override
             public void onClick(View view) {
                 UiUtils.showView(attachmentWindow, true);
-                UiUtils.showView(giphyWindow, false);
+                UiUtils.showView(gifWindow, false);
             }
 
         });
@@ -207,6 +207,8 @@ public class AttachmentTypeSelector extends PopupWindow {
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (StringUtils.isNotEmpty(charSequence.toString())) {
                     loadGifs(activity, charSequence.toString().trim(), 0);
+                } else {
+                    loadGifs(activity, null, 0);
                 }
             }
 
@@ -227,6 +229,7 @@ public class AttachmentTypeSelector extends PopupWindow {
     public void show(final @NonNull View anchor) {
         this.currentAnchor = anchor;
         showAtLocation(anchor, Gravity.BOTTOM, 0, 0);
+
         getContentView().getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 
             @Override
@@ -239,12 +242,12 @@ public class AttachmentTypeSelector extends PopupWindow {
                 } else {
                     animateWindowInTranslate(getContentView());
                 }
+
             }
 
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-
             animateButtonIn(imageButton, ANIMATION_DURATION / 2);
             animateButtonIn(documentButton, ANIMATION_DURATION / 2);
 
@@ -254,25 +257,24 @@ public class AttachmentTypeSelector extends PopupWindow {
             animateButtonIn(gifButton, ANIMATION_DURATION / 4);
             animateButtonIn(contactButton, 0);
             animateButtonIn(closeButton, 0);
-
         }
 
     }
 
-    public boolean isGiphyWindowOpen() {
-        return giphyWindow.getVisibility() == View.VISIBLE;
-    }
-
-    public void closeGiphyWindow() {
+    private void closeGifWindow() {
         closeGifWindow.performClick();
     }
 
     @Override
     public void dismiss() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            animateWindowOutCircular(currentAnchor, getContentView());
+        if (gifWindow.getVisibility() == View.VISIBLE) {
+            closeGifWindow();
         } else {
-            animateWindowOutTranslate(getContentView());
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                animateWindowOutCircular(currentAnchor, getContentView());
+            } else {
+                animateWindowOutTranslate(getContentView());
+            }
         }
     }
 
@@ -433,7 +435,7 @@ public class AttachmentTypeSelector extends PopupWindow {
             gifs.clear();
             PAGE = 0;
         }
-        UiUtils.showView(giphyWindow, true);
+        UiUtils.showView(gifWindow, true);
         UiUtils.showView(attachmentWindow, false);
 
         if (StringUtils.isNotEmpty(searchKey)) {

@@ -3,8 +3,12 @@ package com.wan.hollout.utils;
 import android.provider.MediaStore;
 import android.util.SparseBooleanArray;
 
+import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
+
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+
+import bolts.Capture;
 
 /**
  * @author Wan Clem
