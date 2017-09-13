@@ -343,7 +343,9 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                     public void done(Boolean result, Exception e) {
                         UiUtils.dismissProgressDialog();
                         List<String> userInterests = AuthUtil.getCurrentUser().getList(AppConstants.INTERESTS);
-                        HolloutUtils.updateCurrentParseInstallation(userInterests, null);
+                        if (userInterests != null) {
+                            HolloutUtils.updateCurrentParseInstallation(userInterests, null);
+                        }
                         sendBackResultToCaller();
                     }
                 });
