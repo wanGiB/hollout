@@ -67,6 +67,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @BindView(R.id.message_container)
     MessageBubbleLayout messageBubbleLayout;
 
+    @Nullable
     @BindView(R.id.attached_photo_or_video_thumbnail)
     ImageView attachedPhotoOrVideoThumbnailView;
 
