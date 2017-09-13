@@ -67,7 +67,7 @@
         <RelativeLayout
             android:id="@+id/action_mode_bar"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="?attr/actionBarSize"
             android:visibility="gone"
             android:background="@color/colorPrimary">
 

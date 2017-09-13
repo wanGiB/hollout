@@ -676,7 +676,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.message_container:
-                updateActionMode();
+                if (getChatActivity().getChatToolbar().isActionModeActivated()) {
+                    updateActionMode();
+                }
                 break;
         }
     }
