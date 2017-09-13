@@ -78,10 +78,11 @@
         <!-- set your API key -->
         <meta-data
             android:name="EASEMOB_APPKEY"
-            android:value="1503170817002326#connectwithme" />
+            android:value="1504170111200863#tubara" />
+
         <meta-data
             android:name="Hyphenate_AppKey"
-            android:value="1503170817002326#connectwithme" />
+            android:value="1504170111200863#tubara" />
 
         <!-- gcm start -->
         <receiver
