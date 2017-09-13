@@ -317,6 +317,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         tryOffloadLastMessage();
     }
 
+    public ChatToolbar getChatToolbar() {
+        return chatToolbar;
+    }
+
     private void tryOffloadLastMessage() {
         String lastAttemptedMessageForRecipient = HolloutPreferences.getLastAttemptedMessage(recipientId);
         if (StringUtils.isNotEmpty(lastAttemptedMessageForRecipient)) {
@@ -616,6 +620,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onBackPressed() {
         if (container.isInputOpen()) {
             container.hideCurrentInput(composeText);
+        } else if (chatToolbar.isActionModeActivated()) {
+            chatToolbar.updateActionMode(0);
         } else {
             super.onBackPressed();
         }

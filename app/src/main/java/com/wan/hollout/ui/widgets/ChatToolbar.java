@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -71,6 +72,30 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     @BindView(R.id.typing_indicator)
     DotLoader typingIndicator;
+
+    @BindView(R.id.action_mode_bar)
+    View actionModeBar;
+
+    @BindView(R.id.reply_to_a_message)
+    ImageView replyToMessageView;
+
+    @BindView(R.id.view_message_info)
+    ImageView viewMessageInfoView;
+
+    @BindView(R.id.delete_message)
+    ImageView deleteMessageView;
+
+    @BindView(R.id.copy_message)
+    ImageView copyMessageView;
+
+    @BindView(R.id.forward_message)
+    ImageView forwardMessageView;
+
+    @BindView(R.id.destroy_action_mode)
+    ImageView destroyActionModeView;
+
+    @BindView(R.id.action_item_selection_count)
+    TextView selectedItemCountView;
 
     public ChatActivity mContext;
 
@@ -208,7 +233,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                         contactSubTitle.setText(StringUtils.strip(mContext.getString(R.string.typing_), "…"));
                         contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                         UiUtils.showView(typingIndicator, true);
-                        UiUtils.bangSound(getContext(),R.raw.typing);
+                        UiUtils.bangSound(getContext(), R.raw.typing);
                     } else {
                         if (userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
                             contactSubTitle.setText(mContext.getString(R.string.online));
@@ -263,7 +288,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                         });
                     }
                 });
-            }catch (NullPointerException ignored){
+            } catch (NullPointerException ignored) {
 
             }
 
@@ -310,6 +335,28 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
             }
         }
+    }
+
+    public void updateActionMode(int selectionCount) {
+        UiUtils.showView(actionModeBar, selectionCount > 0);
+        if (selectionCount > 1) {
+            selectedItemCountView.setText(String.valueOf(selectionCount));
+        } else {
+            selectedItemCountView.setText(" ");
+        }
+        destroyActionModeView.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                UiUtils.showView(actionModeBar, false);
+            }
+
+        });
+
+    }
+
+    public boolean isActionModeActivated() {
+        return actionModeBar.getVisibility() == VISIBLE;
     }
 
     @Override

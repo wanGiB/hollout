@@ -3,9 +3,11 @@ package com.wan.hollout.utils;
 import android.provider.MediaStore;
 import android.util.SparseBooleanArray;
 
+import com.hyphenate.chat.EMMessage;
 import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import bolts.Capture;
@@ -305,7 +307,6 @@ public class AppConstants {
     public static final String BROADCAST_ACTION_GROUP = "com.wan.hollout.action.group";
     public static final String BROADCAST_ACTION_APPLY = "com.wan.hollout.action.apply";
 
-
     ///MeetPoint Properties
     public static final String MESSAGE_BODY = "message_body";
 
@@ -332,6 +333,7 @@ public class AppConstants {
 
     public static final String START_AGE_FILTER_VALUE = "start_age_filter_value";
     public static final String END_AGE_FILTER_VALUE = "end_age_filter_value";
-
+    public static ArrayList<EMMessage>selectedMessages = new ArrayList<>();
+    public static SparseBooleanArray selectedMessagesPositions = new SparseBooleanArray();
 }
 

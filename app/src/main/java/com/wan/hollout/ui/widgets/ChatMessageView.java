@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -38,6 +39,7 @@ import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
+import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
@@ -58,7 +60,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 @SuppressWarnings({"FieldCanBeLocal", "ConstantConditions"})
-public class ChatMessageView extends RelativeLayout implements View.OnClickListener {
+public class ChatMessageView extends RelativeLayout implements View.OnClickListener, View.OnLongClickListener {
 
     public static String TAG = "ChatMessageView";
 
@@ -156,7 +158,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         setupMessageBody();
         setupMessageTimeAndDeliveryStatus();
         refreshViews();
+        setOnClickListener(this);
         messageBubbleLayout.setOnClickListener(this);
+        messageBubbleLayout.setOnLongClickListener(this);
     }
 
     @Override
@@ -654,6 +658,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         UiUtils.showView(photoVideoProgressView, AppConstants.wavePositions.get(getMessageHash()));
         UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageHash()));
         UiUtils.showView(playMediaIfVideoIcon, AppConstants.playableVideoPositions.get(getMessageHash()));
+        if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
+            messageBubbleLayout.setBackgroundColor(ContextCompat.getColor(activity, R.color.colorPrimary));
+        }
     }
 
     @Override
@@ -669,6 +676,29 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         switch (v.getId()) {
             case R.id.message_container:
                 break;
+        }
+    }
+
+    public ChatActivity getChatActivity() {
+        return (ChatActivity) activity;
+    }
+
+    @Override
+    public boolean onLongClick(View view) {
+        if (getChatActivity() != null) {
+            addToOrRemoveFromSelectedMessages();
+            getChatActivity().getChatToolbar().updateActionMode(AppConstants.selectedMessages.size());
+        }
+        return true;
+    }
+
+    private void addToOrRemoveFromSelectedMessages() {
+        if (!AppConstants.selectedMessages.contains(message)) {
+            AppConstants.selectedMessages.add(message);
+            AppConstants.selectedMessagesPositions.put(getMessageHash(), true);
+        } else {
+            AppConstants.selectedMessages.remove(message);
+            AppConstants.selectedMessagesPositions.put(getMessageHash(), false);
         }
     }
 

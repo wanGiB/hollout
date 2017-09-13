@@ -13,49 +13,159 @@
         android:id="@+id/fixed_frame_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true">
+        android:animateLayoutChanges="true">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:background="@color/white"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-
-            <RelativeLayout
-                android:id="@+id/upbarLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical">
-
-                <ImageView
-                    android:id="@+id/back_button"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:src="@drawable/ic_arrow_back_black_24dp"
-                    tools:ignore="ContentDescription,RtlHardcoded" />
-
-                <include
-                    layout="@layout/chat_contact_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_toEndOf="@id/back_button"
-                    android:layout_toRightOf="@id/back_button" />
-
-            </RelativeLayout>
-
-        </android.support.v7.widget.Toolbar>
-
-        <com.wan.hollout.ui.widgets.MaterialSearchView
-            android:id="@+id/main_search_view"
+        <com.wan.hollout.ui.widgets.FixedFrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColorHint="@color/text_hint_primary_dark" />
+            android:fitsSystemWindows="true">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/white"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+                <RelativeLayout
+                    android:id="@+id/upbarLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/back_button"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:src="@drawable/ic_arrow_back_black_24dp"
+                        tools:ignore="ContentDescription,RtlHardcoded" />
+
+                    <include
+                        layout="@layout/chat_contact_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toEndOf="@id/back_button"
+                        android:layout_toRightOf="@id/back_button" />
+
+                </RelativeLayout>
+
+            </android.support.v7.widget.Toolbar>
+
+            <com.wan.hollout.ui.widgets.MaterialSearchView
+                android:id="@+id/main_search_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColorHint="@color/text_hint_primary_dark" />
+
+        </com.wan.hollout.ui.widgets.FixedFrameLayout>
+
+        <RelativeLayout
+            android:id="@+id/action_mode_bar"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:visibility="gone"
+            android:background="@color/colorPrimary">
+
+            <ImageView
+                android:id="@+id/destroy_action_mode"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:src="@drawable/ic_arrow_back_white_48dp"
+                tools:ignore="ContentDescription" />
+
+            <TextView
+                android:id="@+id/action_item_selection_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="12dp"
+                android:layout_marginStart="12dp"
+                android:layout_toEndOf="@id/destroy_action_mode"
+                android:layout_toRightOf="@id/destroy_action_mode"
+                android:gravity="center_vertical"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:animateLayoutChanges="true"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/reply_to_a_message"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="25dp"
+                    android:layout_marginRight="25dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:src="@drawable/ic_action_reply"
+                    tools:ignore="ContentDescription" />
+
+                <ImageView
+                    android:id="@+id/view_message_info"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="25dp"
+                    android:layout_marginRight="25dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    tools:ignore="ContentDescription"
+                    android:src="@drawable/ic_action_info" />
+
+                <ImageView
+                    android:id="@+id/delete_message"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="25dp"
+                    tools:ignore="ContentDescription"
+                    android:layout_marginRight="25dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:src="@drawable/ic_action_delete" />
+
+                <ImageView
+                    android:id="@+id/copy_message"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="25dp"
+                    android:layout_marginRight="25dp"
+                    tools:ignore="ContentDescription"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:src="@drawable/ic_action_copy" />
+
+                <ImageView
+                    android:id="@+id/forward_message"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="25dp"
+                    tools:ignore="ContentDescription"
+                    android:layout_marginRight="25dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:src="@drawable/ic_action_forward" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
 
     </com.wan.hollout.ui.widgets.FixedFrameLayout>
 
