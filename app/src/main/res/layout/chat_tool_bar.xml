@@ -69,18 +69,18 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:visibility="gone"
-            android:background="@color/colorPrimary">
+            android:background="@color/white">
 
             <ImageView
                 android:id="@+id/destroy_action_mode"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginStart="16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
-                android:src="@drawable/ic_arrow_back_white_48dp"
+                android:src="@drawable/ic_arrow_back_black_24dp"
                 tools:ignore="ContentDescription" />
 
             <TextView
@@ -93,7 +93,7 @@
                 android:layout_toEndOf="@id/destroy_action_mode"
                 android:layout_toRightOf="@id/destroy_action_mode"
                 android:gravity="center_vertical"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:textStyle="bold"
                 android:textSize="16sp" />
 
