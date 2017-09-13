@@ -675,6 +675,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.message_container:
+                updateActionMode();
                 break;
         }
     }
@@ -686,10 +687,14 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @Override
     public boolean onLongClick(View view) {
         if (getChatActivity() != null) {
-            addToOrRemoveFromSelectedMessages();
-            getChatActivity().getChatToolbar().updateActionMode(AppConstants.selectedMessages.size());
+            updateActionMode();
         }
         return true;
+    }
+
+    private void updateActionMode() {
+        addToOrRemoveFromSelectedMessages();
+        getChatActivity().getChatToolbar().updateActionMode(AppConstants.selectedMessages.size());
     }
 
     private void addToOrRemoveFromSelectedMessages() {

@@ -31,7 +31,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import io.fabric.sdk.android.Fabric;
-import io.fabric.sdk.android.services.concurrency.AsyncTask;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -76,16 +75,15 @@ public class ApplicationLoader extends Application {
     }
 
     private void initParse() {
-        new AsyncTask<Void,Void,Void>(){
+        new Thread(new Runnable() {
             @Override
-            protected Void doInBackground(Void... voids) {
+            public void run() {
                 initWebGuys();
-                return null;
             }
-        }.execute();
+        }).start();
     }
 
-    private void initWebGuys(){
+    private void initWebGuys() {
         Parse.initialize(new Parse.Configuration.Builder(ApplicationLoader.this)
                 .applicationId(AppKeys.APPLICATION_ID) // should correspond to APP_ID env variable
                 .clientKey(AppKeys.SERVER_CLIENT_KEY)  // set explicitly blank unless clientKey is configured on Parse server
@@ -126,16 +124,15 @@ public class ApplicationLoader extends Application {
 
     private void attemptLiveQueryReconnection() {
         if (parseLiveQueryClient != null) {
-            new AsyncTask<Void,Void,Void>(){
+            new Thread(new Runnable() {
                 @Override
-                protected Void doInBackground(Void... voids) {
+                public void run() {
                     try {
                         parseLiveQueryClient.reconnect();
                     } catch (NullPointerException ignored) {
                     }
-                    return null;
                 }
-            }.execute();
+            }).start();
         }
     }
 
@@ -214,14 +211,12 @@ public class ApplicationLoader extends Application {
     }
 
     private void defaultSystemEmojiPref() {
-      new AsyncTask<Void,Void,Void>(){
-
-          @Override
-          protected Void doInBackground(Void... voids) {
-              HolloutPreferences.defaultToSystemEmojis(AppConstants.SYSTEM_EMOJI_PREF, false);
-              return null;
-          }
-      }.execute();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HolloutPreferences.defaultToSystemEmojis(AppConstants.SYSTEM_EMOJI_PREF, false);
+            }
+        }).start();
     }
 
     private void persistReactionsToLocalDatabase() {
