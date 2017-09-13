@@ -14,6 +14,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.ui.utils.DateUtils;
 import com.wan.hollout.ui.widgets.ChatMessageView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -119,6 +120,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 layoutRes = R.layout.outgoing_message_text_only;
                 break;
         }
+        HolloutLogger.d("LayoutYawa", "Inflated View Type = " + viewType);
         View convertView = layoutInflater.inflate(layoutRes, parent, false);
         return new MessageItemsHolder(convertView);
     }
@@ -152,25 +154,24 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (messageType == EMMessage.Type.TXT) {
             EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageObject.getBody();
             List<String> links = UiUtils.pullLinks(emTextMessageBody.getMessage());
-            if (!links.isEmpty()) {
-                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_LINK_PREVIEW : INCOMING_MESSAGE_WITH_LINK_PREVIEW;
-            } else {
-                try {
-                    String messageAttributeType = messageObject.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
-                    if (messageAttributeType != null) {
-                        switch (messageAttributeType) {
-                            case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
-                                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_REACTION : INCOMING_MESSAGE_WITH_REACTION;
-                            case AppConstants.MESSAGE_ATTR_TYPE_GIF:
-                                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_GIF : INCOMING_MESSAGE_WITH_GIF;
-                        }
-                    } else {
-                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
-                    }
-                } catch (HyphenateException e) {
-                    e.printStackTrace();
-                    return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
+            String messageAttributeType = null;
+            try {
+                messageAttributeType = messageObject.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
+            } catch (HyphenateException e) {
+                e.printStackTrace();
+            }
+            if (messageAttributeType != null) {
+                switch (messageAttributeType) {
+                    case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
+                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_REACTION : INCOMING_MESSAGE_WITH_REACTION;
+                    case AppConstants.MESSAGE_ATTR_TYPE_GIF:
+                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_GIF : INCOMING_MESSAGE_WITH_GIF;
                 }
+            } else {
+                if (!links.isEmpty()) {
+                    return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_LINK_PREVIEW : INCOMING_MESSAGE_WITH_LINK_PREVIEW;
+                }
+                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
             }
         }
         return -1;

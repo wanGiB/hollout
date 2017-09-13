@@ -67,7 +67,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @BindView(R.id.message_container)
     MessageBubbleLayout messageBubbleLayout;
 
-    @Nullable
     @BindView(R.id.attached_photo_or_video_thumbnail)
     ImageView attachedPhotoOrVideoThumbnailView;
 
@@ -495,6 +494,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     if (StringUtils.isNotEmpty(gifUrl)) {
                         getLoadingGifImageCast().startLoading();
                         Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+
                             @Override
                             public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
                                 return false;
