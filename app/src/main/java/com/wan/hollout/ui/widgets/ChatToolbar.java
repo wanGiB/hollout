@@ -341,8 +341,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         UiUtils.showView(actionModeBar, selectionCount > 0);
         if (selectionCount > 1) {
             selectedItemCountView.setText(String.valueOf(selectionCount));
+            UiUtils.showView(replyToMessageView,false);
         } else {
             selectedItemCountView.setText(" ");
+            UiUtils.showView(replyToMessageView,true);
         }
         destroyActionModeView.setOnClickListener(new OnClickListener() {
 
