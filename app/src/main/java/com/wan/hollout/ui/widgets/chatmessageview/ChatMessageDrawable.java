@@ -8,6 +8,8 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.support.annotation.NonNull;
 
 /**
  * @author Wan Clem
@@ -65,8 +67,10 @@ public class ChatMessageDrawable extends Drawable {
     }
 
     @Override
-    public void getOutline(Outline outline) {
-        outline.setRoundRect(mBoundsI, mRadius);
+    public void getOutline(@NonNull Outline outline) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            outline.setRoundRect(mBoundsI, mRadius);
+        }
     }
 
     @Override

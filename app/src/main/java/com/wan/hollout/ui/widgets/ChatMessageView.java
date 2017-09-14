@@ -666,9 +666,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
-            messageBubbleLayout.setPressed(true);
+            messageBubbleLayout.setSelected();
         }else{
-            messageBubbleLayout.setPressed(false);
+            messageBubbleLayout.deselected();
         }
     }
 

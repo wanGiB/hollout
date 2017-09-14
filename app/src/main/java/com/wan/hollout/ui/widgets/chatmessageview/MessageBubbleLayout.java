@@ -291,6 +291,22 @@ public class MessageBubbleLayout extends RelativeLayout {
 
     }
 
+    public void setSelected(){
+        ChatMessageDrawable conRlBackground = (ChatMessageDrawable) containerLayout.getBackground();
+        conRlBackground.setColor(backgroundColorPressed);
+        arrowImage.setImageDrawable(pressedDrawable);
+        containerLayout.invalidate();
+        arrowImage.invalidate();
+    }
+
+    public void deselected(){
+        ChatMessageDrawable conRlBackground = (ChatMessageDrawable) containerLayout.getBackground();
+        conRlBackground.setColor(backgroundColor);
+        arrowImage.setImageDrawable(normalDrawable);
+        containerLayout.invalidate();
+        arrowImage.invalidate();
+    }
+
     public Bitmap rotateBitmap(Bitmap source, float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
