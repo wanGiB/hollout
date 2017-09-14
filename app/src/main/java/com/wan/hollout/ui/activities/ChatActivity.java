@@ -1291,6 +1291,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             if (AppConstants.selectedMessages != null && !AppConstants.selectedMessages.isEmpty()) {
                                 for (EMMessage emMessage:AppConstants.selectedMessages){
                                     mConversation.removeMessage(emMessage.getMsgId());
+                                    if (messages.contains(emMessage)){
+                                        messages.remove(emMessage);
+                                    }
                                 }
                                 messagesAdapter.notifyDataSetChanged();
                             }
