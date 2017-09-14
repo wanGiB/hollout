@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -39,7 +41,6 @@ import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.ui.activities.ChatActivity;
-import com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.LocationUtils;
@@ -64,7 +65,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     public static String TAG = "ChatMessageView";
 
     @BindView(R.id.message_container)
-    MessageBubbleLayout messageBubbleLayout;
+    View messageBubbleLayout;
 
     @Nullable
     @BindView(R.id.attached_photo_or_video_thumbnail)
@@ -154,12 +155,21 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     public void bindData(Activity context, EMMessage messageObject) {
         this.activity = context;
         this.message = messageObject;
+        setupMessageBubble();
         setupMessageBody();
         setupMessageTimeAndDeliveryStatus();
         refreshViews();
         setOnClickListener(this);
         messageBubbleLayout.setOnClickListener(this);
         messageBubbleLayout.setOnLongClickListener(this);
+    }
+
+    private void setupMessageBubble(){
+        if (message.direct()== EMMessage.Direct.SEND){
+            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity,R.drawable.bubble_outgoing));
+        }else{
+            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity,R.drawable.bubble_incoming));
+        }
     }
 
     @Override
@@ -664,10 +674,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
-            messageBubbleLayout.setSelected();
+            setBackgroundColor(ContextCompat.getColor(activity,R.color.light_blue));
             HolloutLogger.d("SelectionTag","Selected MessageId = "+message.getMsgId());
         } else {
-            messageBubbleLayout.deselected();
+            setBackgroundColor(Color.TRANSPARENT);
             HolloutLogger.d("SelectionTag","UnSelected MessageId = "+message.getMsgId());
         }
     }

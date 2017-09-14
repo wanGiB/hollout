@@ -9,25 +9,18 @@
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
-    <com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout
+    <RelativeLayout
         android:id="@+id/message_container"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:layout_marginBottom="3dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginStart="8dp"
-        android:animateLayoutChanges="true"
-        app:cmv_arrowGravity="start"
-        app:cmv_arrowPosition="left"
-        app:cmv_backgroundColor="@color/whitesmoke"
-        app:cmv_backgroundColorPressed="@color/ease_gray"
-        app:cmv_contentPadding="4dp"
-        app:cmv_cornerRadius="2dp"
-        app:cmv_showArrow="true">
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="10dp"
+        android:animateLayoutChanges="true">
 
         <FrameLayout
             android:id="@+id/content_view"
@@ -40,7 +33,7 @@
                 android:layout_height="200dp"
                 android:padding="2dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/splash_background_image" />
+                android:src="@drawable/ease_default_image" />
 
             <ImageView
                 android:id="@+id/play_media_if_video_icon"
@@ -55,10 +48,15 @@
                 android:id="@+id/file_size_or_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:padding="10dp"
+                android:layout_gravity="bottom|start"
+                android:layout_marginBottom="2dp"
+                android:layout_marginLeft="2dp"
+                android:layout_marginStart="2dp"
+                android:background="#9b000000"
+                android:padding="2dp"
                 android:textColor="@color/white"
                 android:textSize="13sp"
+                android:visibility="gone"
                 app:textStyle="medium" />
 
             <com.john.waveview.WaveView
@@ -74,20 +72,28 @@
                 app:wave_hz="normal"
                 app:wave_length="middle" />
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/delivery_status_and_time_view"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="end|bottom"
-                android:layout_marginEnd="10dp"
-                android:layout_marginRight="10dp"
-                android:drawablePadding="4dp"
-                android:gravity="bottom"
-                android:paddingBottom="6dp"
-                android:textColor="@color/whitesmoke"
-                android:background="#7b000000"
-                android:textSize="12sp"
-                app:textStyle="medium" />
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="2dp"
+                android:background="#9b000000"
+                android:orientation="horizontal"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp">
+
+                <TextView
+                    android:id="@+id/textview_time"
+                    style="@style/chat_timings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginRight="4dp"
+                    android:textColor="@color/white" />
+
+            </LinearLayout>
 
         </FrameLayout>
 
@@ -105,6 +111,6 @@
             android:visibility="gone"
             app:textStyle="medium" />
 
-    </com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout>
+    </RelativeLayout>
 
 </com.wan.hollout.ui.widgets.ChatMessageView>

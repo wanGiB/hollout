@@ -9,7 +9,7 @@
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
-    <com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout
+    <RelativeLayout
         android:id="@+id/message_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,13 +20,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
-        app:cmv_arrowGravity="start"
-        app:cmv_arrowPosition="right"
-        app:cmv_backgroundColor="@color/whitesmoke"
-        app:cmv_backgroundColorPressed="@color/ease_gray"
-        app:cmv_contentPadding="4dp"
-        app:cmv_cornerRadius="2dp"
-        app:cmv_showArrow="true">
+        android:background="@drawable/bubble_outgoing">
 
         <LinearLayout
             android:id="@+id/contact_data_layout"
@@ -83,8 +77,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="4dp"
-                            android:paddingTop="5dp"
-                            android:layout_marginRight="4dp" />
+                            android:layout_marginRight="4dp"
+                            android:paddingTop="5dp" />
 
                         <ImageView
                             android:id="@+id/delivery_status_view"
@@ -104,8 +98,8 @@
                         android:layout_height="wrap_content"
                         android:autoLink="web"
                         android:paddingEnd="6dp"
-                        android:text="070179058582"
                         android:paddingRight="6dp"
+                        android:text="070179058582"
                         android:textColor="@color/grey500"
                         app:emojiconSize="25dp"
                         app:textStyle="medium"
@@ -117,6 +111,6 @@
 
         </LinearLayout>
 
-    </com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout>
+    </RelativeLayout>
 
 </com.wan.hollout.ui.widgets.ChatMessageView>

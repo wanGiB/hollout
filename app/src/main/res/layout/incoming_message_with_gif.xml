@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.wan.hollout.ui.widgets.ChatMessageView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
@@ -9,67 +8,53 @@
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
-    <com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout
+    <LinearLayout
         android:id="@+id/message_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:layout_marginBottom="3dp"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
         android:animateLayoutChanges="true"
-        app:cmv_arrowGravity="start"
-        app:cmv_arrowPosition="left"
-        app:cmv_backgroundColor="@color/whitesmoke"
-        app:cmv_backgroundColorPressed="@color/ease_gray"
-        app:cmv_contentPadding="4dp"
-        app:cmv_cornerRadius="2dp"
-        app:cmv_showArrow="true">
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:orientation="vertical">
+
+        <com.wan.hollout.ui.widgets.LoadingImageView
+            android:id="@+id/attached_photo_or_video_thumbnail"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:padding="2dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ease_default_image"
+            tools:ignore="ContentDescription" />
 
         <LinearLayout
-            android:id="@+id/content_view"
-            android:orientation="vertical"
             android:layout_width="wrap_content"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="2dp"
+            android:orientation="horizontal"
+            android:paddingEnd="5dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingStart="5dp"
+            tools:ignore="UseCompoundDrawables">
 
-            <com.wan.hollout.ui.widgets.LoadingImageView
-                android:id="@+id/attached_photo_or_video_thumbnail"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:padding="2dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ease_default_image"
-                tools:ignore="ContentDescription" />
-
-            <LinearLayout
+            <TextView
+                android:id="@+id/textview_time"
+                style="@style/chat_timings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:orientation="horizontal"
-                android:paddingEnd="5dp"
-                android:paddingLeft="5dp"
-                android:layout_marginBottom="2dp"
-                android:paddingRight="5dp"
-                android:paddingStart="5dp"
-                tools:ignore="UseCompoundDrawables">
-
-                <TextView
-                    android:id="@+id/textview_time"
-                    style="@style/chat_timings"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="4dp"
-                    android:layout_marginEnd="4dp" />
-
-            </LinearLayout>
+                android:layout_marginEnd="4dp"
+                android:layout_marginRight="4dp" />
 
         </LinearLayout>
 
-    </com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout>
+    </LinearLayout>
 
 </com.wan.hollout.ui.widgets.ChatMessageView>

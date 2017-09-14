@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.wan.hollout.ui.widgets.ChatMessageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -8,25 +9,17 @@
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
-    <com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout
+    <RelativeLayout
         android:id="@+id/message_container"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginBottom="3dp"
-        android:layout_marginEnd="10dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginStart="8dp"
-        android:animateLayoutChanges="true"
-        app:cmv_arrowGravity="start"
-        app:cmv_arrowPosition="left"
-        app:cmv_backgroundColor="@color/whitesmoke"
-        app:cmv_backgroundColorPressed="@color/ease_gray"
-        app:cmv_contentPadding="4dp"
-        app:cmv_cornerRadius="2dp"
-        app:cmv_showArrow="true">
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="10dp">
 
         <com.wan.hollout.ui.widgets.AudioView
             android:id="@+id/audio_view"
@@ -38,7 +31,6 @@
             android:id="@+id/upload_progress_wave_view"
             android:layout_width="250dp"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/audio_view"
             android:background="#7b000000"
             android:visibility="gone"
             app:above_wave_color="@android:color/white"
@@ -48,22 +40,30 @@
             app:wave_hz="normal"
             app:wave_length="middle" />
 
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/delivery_status_and_time_view"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/audio_view"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_gravity="end"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:drawablePadding="4dp"
-            android:text="16:00AM"
-            android:textColor="@color/grey500"
-            android:textSize="12sp"
-            app:textStyle="medium" />
+            android:layout_gravity="bottom|end"
+            android:orientation="horizontal"
+            android:paddingEnd="5dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:paddingStart="5dp"
+            tools:ignore="RelativeOverlap">
 
-    </com.wan.hollout.ui.widgets.chatmessageview.MessageBubbleLayout>
+            <TextView
+                android:id="@+id/textview_time"
+                style="@style/chat_timings"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:layout_marginRight="4dp" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
 
 </com.wan.hollout.ui.widgets.ChatMessageView>
