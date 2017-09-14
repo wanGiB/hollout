@@ -5,6 +5,7 @@
     android:id="@+id/appbar"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:background="@color/white"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:elevation="8dp">
@@ -15,7 +16,7 @@
         android:layout_height="wrap_content"
         android:animateLayoutChanges="true">
 
-        <com.wan.hollout.ui.widgets.FixedFrameLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true">
@@ -62,13 +63,13 @@
                 android:layout_height="wrap_content"
                 android:textColorHint="@color/text_hint_primary_dark" />
 
-        </com.wan.hollout.ui.widgets.FixedFrameLayout>
+        </FrameLayout>
 
         <RelativeLayout
             android:id="@+id/action_mode_bar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
             android:visibility="gone"
+            android:layout_height="?attr/actionBarSize"
             android:background="@color/white">
 
             <ImageView
@@ -95,7 +96,8 @@
                 android:gravity="center_vertical"
                 android:textColor="@color/black"
                 android:textStyle="bold"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                tools:ignore="RelativeOverlap" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -168,5 +170,10 @@
         </RelativeLayout>
 
     </com.wan.hollout.ui.widgets.FixedFrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dip"
+        android:background="@drawable/bottom_shadow"/>
 
 </android.support.design.widget.AppBarLayout>

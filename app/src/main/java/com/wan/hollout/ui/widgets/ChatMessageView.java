@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -409,13 +410,14 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
         try {
             String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION);
-            if (StringUtils.isNotEmpty(fileCaption)) {
+            if (fileCaption != null && StringUtils.isNotEmpty(fileCaption) && !StringUtils.containsIgnoreCase(fileCaption, activity.getString(R.string.photo))) {
                 UiUtils.showView(messageBodyView, true);
                 messageBodyView.setText(fileCaption);
                 AppConstants.messageBodyPositions.put(getMessageHash(), true);
             } else {
                 UiUtils.showView(messageBodyView, false);
                 AppConstants.messageBodyPositions.put(getMessageHash(), false);
+                messageBodyView.setText(activity.getString(R.string.video));
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
@@ -659,8 +661,14 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         UiUtils.showView(photoVideoProgressView, AppConstants.wavePositions.get(getMessageHash()));
         UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageHash()));
         UiUtils.showView(playMediaIfVideoIcon, AppConstants.playableVideoPositions.get(getMessageHash()));
+        invalidateMessageBubble();
+    }
+
+    private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
-            messageBubbleLayout.setBackgroundColor(ContextCompat.getColor(activity, R.color.colorPrimary));
+            messageBubbleLayout.setPressed(true);
+        }else{
+            messageBubbleLayout.setPressed(false);
         }
     }
 
@@ -678,6 +686,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             case R.id.message_container:
                 if (getChatActivity().getChatToolbar().isActionModeActivated()) {
                     updateActionMode();
+                    messageBubbleLayout.setPressed(true);
                 }
                 break;
         }
@@ -690,6 +699,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @Override
     public boolean onLongClick(View view) {
         if (getChatActivity() != null) {
+            getChatActivity().vibrateVibrator();
             updateActionMode();
         }
         return true;
@@ -698,6 +708,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void updateActionMode() {
         addToOrRemoveFromSelectedMessages();
         getChatActivity().getChatToolbar().updateActionMode(AppConstants.selectedMessages.size());
+        messageBubbleLayout.setPressed(true);
     }
 
     private void addToOrRemoveFromSelectedMessages() {

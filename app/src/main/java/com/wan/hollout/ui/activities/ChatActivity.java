@@ -709,6 +709,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         sendOrRecordAudioButton.setBackgroundTintList(new ColorStateList(new int[][]{new int[]{0}}, new int[]{ContextCompat.getColor(this, color)}));
     }
 
+    public void vibrateVibrator(){
+        vibrator.vibrate(100);
+    }
+
     private class SendButtonListener implements View.OnClickListener, TextView.OnEditorActionListener {
 
         @Override
@@ -761,7 +765,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     sendFileMessage(holloutFile.getLocalFilePath(), moreMessageProps);
                     break;
                 case AppConstants.FILE_TYPE_VIDEO:
-                    sendVideoMessage(holloutFile.getLocalFilePath(), holloutFile.getLocalFilePath(), (int) (new File(holloutFile.getLocalFilePath()).length() / 1000),
+                    sendVideoMessage(holloutFile.getLocalFilePath(),
+                            holloutFile.getLocalFilePath(),
+                            (int) (new File(holloutFile.getLocalFilePath()).length() / 1000),
                             composeText.getText().toString().trim());
                     break;
             }

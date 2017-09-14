@@ -351,10 +351,14 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             @Override
             public void onClick(View view) {
                 UiUtils.showView(actionModeBar, false);
+                AppConstants.selectedMessages.clear();
+                AppConstants.selectedMessagesPositions.clear();
             }
 
         });
-
+        if (selectionCount==0){
+            destroyActionModeView.performClick();
+        }
     }
 
     public boolean isActionModeActivated() {
