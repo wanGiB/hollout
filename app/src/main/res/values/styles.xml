@@ -300,7 +300,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textSize">12sp</item>
-        <item name="android:textColor">#a6abad</item>
+        <item name="android:textColor">#e3e3e3</item>
     </style>
 
 </resources>

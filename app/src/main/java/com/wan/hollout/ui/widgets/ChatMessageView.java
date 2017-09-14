@@ -160,15 +160,16 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         setupMessageTimeAndDeliveryStatus();
         refreshViews();
         setOnClickListener(this);
+        setOnLongClickListener(this);
         messageBubbleLayout.setOnClickListener(this);
         messageBubbleLayout.setOnLongClickListener(this);
     }
 
-    private void setupMessageBubble(){
-        if (message.direct()== EMMessage.Direct.SEND){
-            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity,R.drawable.bubble_outgoing));
-        }else{
-            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity,R.drawable.bubble_incoming));
+    private void setupMessageBubble() {
+        if (message.direct() == EMMessage.Direct.SEND) {
+            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.bubble_outgoing));
+        } else {
+            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.bubble_incoming));
         }
     }
 
@@ -674,11 +675,11 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
-            setBackgroundColor(ContextCompat.getColor(activity,R.color.light_blue));
-            HolloutLogger.d("SelectionTag","Selected MessageId = "+message.getMsgId());
+            setBackgroundColor(ContextCompat.getColor(activity, R.color.light_blue));
+            HolloutLogger.d("SelectionTag", "Selected MessageId = " + message.getMsgId());
         } else {
             setBackgroundColor(Color.TRANSPARENT);
-            HolloutLogger.d("SelectionTag","UnSelected MessageId = "+message.getMsgId());
+            HolloutLogger.d("SelectionTag", "UnSelected MessageId = " + message.getMsgId());
         }
     }
 
@@ -694,6 +695,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.message_container:
+            case R.id.conversation_message_view:
                 if (getChatActivity().getChatToolbar().isActionModeActivated()) {
                     updateActionMode();
                 }
