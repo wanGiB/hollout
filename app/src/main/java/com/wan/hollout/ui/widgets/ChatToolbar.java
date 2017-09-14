@@ -31,6 +31,7 @@ import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.util.Calendar;
@@ -338,7 +339,9 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     public void updateActionMode(int selectionCount) {
+
         UiUtils.showView(actionModeBar, selectionCount > 0);
+
         if (selectionCount > 1) {
             selectedItemCountView.setText(String.valueOf(selectionCount));
             UiUtils.showView(replyToMessageView,false);
@@ -346,6 +349,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             selectedItemCountView.setText(" ");
             UiUtils.showView(replyToMessageView,true);
         }
+
         destroyActionModeView.setOnClickListener(new OnClickListener() {
 
             @Override
@@ -356,9 +360,30 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             }
 
         });
+
         if (selectionCount==0){
             destroyActionModeView.performClick();
         }
+
+        View.OnClickListener actionModeItemClickListener = new OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                UiUtils.blinkView(view);
+                switch (view.getId()){
+                    case R.id.delete_message:
+                        EventBus.getDefault().post(AppConstants.DELETE_ALL_SELECTED_MESSAGES);
+                }
+            }
+
+        };
+
+        replyToMessageView.setOnClickListener(actionModeItemClickListener);
+        viewMessageInfoView.setOnClickListener(actionModeItemClickListener);
+        deleteMessageView.setOnClickListener(actionModeItemClickListener);
+        copyMessageView.setOnClickListener(actionModeItemClickListener);
+        forwardMessageView.setOnClickListener(actionModeItemClickListener);
+
     }
 
     public boolean isActionModeActivated() {

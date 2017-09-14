@@ -235,6 +235,7 @@ public class AppConstants {
     public static final String MESSAGE_ATTR_TYPE_REACTION = "message_attribute_type_reaction";
     public static final String MESSAGE_ATTR_TYPE_GIF = "message_attribute_type_gif";
     public static final String GIF_URL = "gif_url";
+    public static final String DELETE_ALL_SELECTED_MESSAGES = "delete_all_selected_messages";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
@@ -333,7 +334,7 @@ public class AppConstants {
 
     public static final String START_AGE_FILTER_VALUE = "start_age_filter_value";
     public static final String END_AGE_FILTER_VALUE = "end_age_filter_value";
-    public static ArrayList<EMMessage>selectedMessages = new ArrayList<>();
+    public static ArrayList<EMMessage> selectedMessages = new ArrayList<>();
     public static SparseBooleanArray selectedMessagesPositions = new SparseBooleanArray();
 }
 

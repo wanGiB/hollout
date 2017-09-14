@@ -709,7 +709,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         sendOrRecordAudioButton.setBackgroundTintList(new ColorStateList(new int[][]{new int[]{0}}, new int[]{ContextCompat.getColor(this, color)}));
     }
 
-    public void vibrateVibrator(){
+    public void vibrateVibrator() {
         vibrator.vibrate(100);
     }
 
@@ -1286,6 +1286,15 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             }
                             break;
                         case AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER:
+                            break;
+                        case AppConstants.DELETE_ALL_SELECTED_MESSAGES:
+                            if (AppConstants.selectedMessages != null && !AppConstants.selectedMessages.isEmpty()) {
+                                for (EMMessage emMessage:AppConstants.selectedMessages){
+                                    mConversation.removeMessage(emMessage.getMsgId());
+                                }
+                                messagesAdapter.notifyDataSetChanged();
+                            }
+                            getChatToolbar().updateActionMode(0);
                             break;
                     }
                 } else if (o instanceof MessageReceivedEvent) {
