@@ -26,6 +26,7 @@ import com.wan.hollout.ui.widgets.chatmessageview.util.ViewUtil;
 /**
  * @author Wan Clem
  */
+@SuppressWarnings("deprecation")
 public class MessageBubbleLayout extends RelativeLayout {
     private static final String TAG = "ChatMessageView";
 
@@ -254,19 +255,12 @@ public class MessageBubbleLayout extends RelativeLayout {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void updateColors() {
         ChatMessageDrawable roundRectDrawable = new ChatMessageDrawable(backgroundColor, cornerRadius);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            containerLayout.setBackground(roundRectDrawable);
-        } else {
-            containerLayout.setBackgroundDrawable(roundRectDrawable);
-        }
-
+        setContainerBackground(roundRectDrawable);
         normalDrawable.setTint(backgroundColor);
         pressedDrawable.setTint(backgroundColorPressed);
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             arrowImage.setImageTintList(ColorStateList.valueOf(backgroundColor));
         }
-
         Drawable stateDrawable = new ChatMessageStateDrawable(Color.TRANSPARENT) {
             @Override
             protected void onIsPressed(boolean isPressed) {
@@ -282,13 +276,15 @@ public class MessageBubbleLayout extends RelativeLayout {
                 arrowImage.invalidate();
             }
         };
+        setContainerBackground(stateDrawable);
+    }
 
+    private void setContainerBackground(Drawable stateDrawable) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             setBackground(stateDrawable);
         } else {
             setBackgroundDrawable(stateDrawable);
         }
-
     }
 
     public void setSelected(){

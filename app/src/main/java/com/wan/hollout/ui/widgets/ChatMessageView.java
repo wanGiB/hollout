@@ -665,8 +665,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
             messageBubbleLayout.setSelected();
+            HolloutLogger.d("SelectionTag","Selected MessageId = "+message.getMsgId());
         } else {
             messageBubbleLayout.deselected();
+            HolloutLogger.d("SelectionTag","UnSelected MessageId = "+message.getMsgId());
         }
     }
 
@@ -709,14 +711,13 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void addToOrRemoveFromSelectedMessages() {
         if (!AppConstants.selectedMessages.contains(message)) {
-            messageBubbleLayout.setSelected();
             AppConstants.selectedMessages.add(message);
             AppConstants.selectedMessagesPositions.put(getMessageHash(), true);
         } else {
-            messageBubbleLayout.deselected();
             AppConstants.selectedMessages.remove(message);
             AppConstants.selectedMessagesPositions.put(getMessageHash(), false);
         }
+        invalidateMessageBubble();
     }
 
 }
