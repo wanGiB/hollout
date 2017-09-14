@@ -4,14 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -667,7 +665,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
             messageBubbleLayout.setSelected();
-        }else{
+        } else {
             messageBubbleLayout.deselected();
         }
     }
@@ -686,7 +684,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             case R.id.message_container:
                 if (getChatActivity().getChatToolbar().isActionModeActivated()) {
                     updateActionMode();
-                    messageBubbleLayout.setPressed(true);
                 }
                 break;
         }
@@ -708,14 +705,15 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void updateActionMode() {
         addToOrRemoveFromSelectedMessages();
         getChatActivity().getChatToolbar().updateActionMode(AppConstants.selectedMessages.size());
-        messageBubbleLayout.setPressed(true);
     }
 
     private void addToOrRemoveFromSelectedMessages() {
         if (!AppConstants.selectedMessages.contains(message)) {
+            messageBubbleLayout.setSelected();
             AppConstants.selectedMessages.add(message);
             AppConstants.selectedMessagesPositions.put(getMessageHash(), true);
         } else {
+            messageBubbleLayout.deselected();
             AppConstants.selectedMessages.remove(message);
             AppConstants.selectedMessagesPositions.put(getMessageHash(), false);
         }
