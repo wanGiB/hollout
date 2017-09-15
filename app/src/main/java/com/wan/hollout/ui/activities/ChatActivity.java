@@ -622,6 +622,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             container.hideCurrentInput(composeText);
         } else if (chatToolbar.isActionModeActivated()) {
             chatToolbar.updateActionMode(0);
+            messagesAdapter.notifyDataSetChanged();
         } else {
             super.onBackPressed();
         }
@@ -670,7 +671,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             ArrayList<String> linksInMessage = UiUtils.pullLinks(s.toString());
             if (!linksInMessage.isEmpty()) {
-                String firstUrl = linksInMessage.get(0);
+                String firstUrl = linksInMessage.get(linksInMessage.size()-1);
                 UiUtils.showView(linkPreviewLayout, true);
                 linkPreview.setData(firstUrl);
             } else {

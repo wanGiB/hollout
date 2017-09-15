@@ -5,7 +5,7 @@
     android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="3dp"
+    android:layout_marginBottom="1dp"
     android:animateLayoutChanges="true"
     android:orientation="vertical">
 
@@ -15,7 +15,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="3dp"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
@@ -29,12 +28,13 @@
             android:orientation="horizontal"
             tools:ignore="UseCompoundDrawables">
 
-            <TextView
+            <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/textview_time"
                 style="@style/chat_timings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
+                app:textStyle="medium"
                 android:layout_marginRight="4dp" />
 
             <ImageView

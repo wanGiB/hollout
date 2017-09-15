@@ -8,6 +8,7 @@ import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import bolts.Capture;
@@ -336,5 +337,9 @@ public class AppConstants {
     public static final String END_AGE_FILTER_VALUE = "end_age_filter_value";
     public static ArrayList<EMMessage> selectedMessages = new ArrayList<>();
     public static SparseBooleanArray selectedMessagesPositions = new SparseBooleanArray();
+    public static List<EMMessage> currentMessages = new ArrayList<>();
+
+    public static SparseBooleanArray linkPreviewPositions = new SparseBooleanArray();
+
 }
 

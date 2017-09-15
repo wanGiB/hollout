@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -12,6 +14,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -51,7 +54,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -168,9 +173,17 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void setupMessageBubble() {
         if (message.direct() == EMMessage.Direct.SEND) {
             messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.bubble_outgoing));
+            tintDrawable(messageBubbleLayout.getBackground(), ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.light_blue_50)));
         } else {
             messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.bubble_incoming));
+            tintDrawable(messageBubbleLayout.getBackground(), ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.grey_50)));
         }
+    }
+
+    public Drawable tintDrawable(Drawable drawable, ColorStateList colors) {
+        final Drawable wrappedDrawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTintList(wrappedDrawable, colors);
+        return wrappedDrawable;
     }
 
     @Override
@@ -550,7 +563,19 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         String message = messageBody.getMessage();
         if (StringUtils.isNotEmpty(message)) {
             UiUtils.showView(messageBodyView, true);
+
+            ArrayList includedLinks = UiUtils.pullLinks(message);
             AppConstants.messageBodyPositions.put(getMessageHash(), true);
+
+            if (includedLinks != null && !includedLinks.isEmpty()) {
+                setupLinkPreviewMessage(includedLinks);
+                AppConstants.linkPreviewPositions.put(getMessageHash(),true);
+                UiUtils.showView(linkPreview,true);
+            }else{
+                AppConstants.linkPreviewPositions.put(getMessageHash(),false);
+                UiUtils.showView(linkPreview,false);
+            }
+
             if (messageBodyView != null) {
                 if (getMessageDirection() == EMMessage.Direct.SEND) {
                     messageBodyView.setText(UiUtils.fromHtml(message + getOutGoingNonBreakingSpace()));
@@ -561,6 +586,15 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         } else {
             UiUtils.showView(messageBodyView, false);
             AppConstants.messageBodyPositions.put(getMessageHash(), false);
+        }
+    }
+
+    private void setupLinkPreviewMessage(List includedLinks) {
+        try {
+            String firstLink = (String) includedLinks.get(includedLinks.size()-1);
+            linkPreview.setData(firstLink);
+        } catch (IndexOutOfBoundsException e) {
+            HolloutLogger.d(TAG,"IndexOutOfBoundsException with error message = "+e.getMessage());
         }
     }
 
@@ -670,6 +704,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         UiUtils.showView(photoVideoProgressView, AppConstants.wavePositions.get(getMessageHash()));
         UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageHash()));
         UiUtils.showView(playMediaIfVideoIcon, AppConstants.playableVideoPositions.get(getMessageHash()));
+        UiUtils.showView(linkPreview,AppConstants.linkPreviewPositions.get(getMessageHash()));
         invalidateMessageBubble();
     }
 

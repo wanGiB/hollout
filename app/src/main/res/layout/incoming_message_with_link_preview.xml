@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.wan.hollout.ui.widgets.ChatMessageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="3dp"
     android:animateLayoutChanges="true"
+    android:layout_marginBottom="1dp"
     android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/message_container"
         android:layout_width="wrap_content"
-        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="3dp"
+        android:layout_alignParentStart="true"
         android:layout_marginEnd="8dp"
+        android:background="@drawable/bubble_incoming"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
-        android:background="@drawable/bubble_incoming"
         android:animateLayoutChanges="true"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <com.wan.hollout.ui.widgets.LinkPreview
             android:id="@+id/link_preview"
-            android:layout_width="200dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="visible" />
 
@@ -37,6 +37,7 @@
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:paddingStart="8dp"
+            android:autoLink="all"
             android:textColor="@color/text_black"
             android:textSize="16sp"
             app:textStyle="medium" />
@@ -58,6 +59,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="4dp"
                 android:layout_marginEnd="4dp" />
+
+            <ImageView
+                android:id="@+id/delivery_status_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:paddingBottom="3dp"
+                android:src="@drawable/msg_status_client_received"
+                tools:ignore="ContentDescription" />
 
         </LinearLayout>
 

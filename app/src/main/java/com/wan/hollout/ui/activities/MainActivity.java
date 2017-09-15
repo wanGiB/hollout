@@ -104,6 +104,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     @BindView(R.id.search_view)
     MaterialSearchView materialSearchView;
 
+    @BindView(R.id.action_mode_bar)
+    View actionModeBar;
+
     private HolloutPermissions holloutPermissions;
     private DrawerFragment drawerFragment;
 

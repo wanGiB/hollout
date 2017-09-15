@@ -135,7 +135,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     public ConversationItemView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        inflate(context, R.layout.chat_item, this);
+        inflate(context, R.layout.conversation_item, this);
     }
 
     private void init() {
