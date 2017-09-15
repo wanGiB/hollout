@@ -26,15 +26,12 @@
             android:id="@+id/contact_data_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingEnd="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingStart="10dp">
+            android:orientation="horizontal">
 
             <com.wan.hollout.ui.widgets.CircleColorImageView
                 android:id="@+id/contact_icon"
                 android:layout_width="40dp"
+                android:layout_gravity="center_vertical"
                 android:layout_height="40dp"
                 android:src="@drawable/attach_contact"
                 tools:ignore="ContentDescription" />
@@ -100,7 +97,7 @@
                         android:paddingEnd="6dp"
                         android:paddingRight="6dp"
                         android:text="070179058582"
-                        android:textColor="@color/grey500"
+                        android:textColor="@color/text_black"
                         app:emojiconSize="25dp"
                         app:textStyle="medium"
                         tools:ignore="RtlSymmetry" />
