@@ -76,6 +76,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -245,9 +246,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     private void getUnreadMessagesCount() {
-        long unreadMessagesCount = HolloutPreferences.getUnreadMessagesCount();
-        if (unreadMessagesCount > 0) {
-            updateTab(1, unreadMessagesCount);
+        Set<String> unreadMessagesCount = HolloutPreferences.getTotalUnreadChats();
+        if (unreadMessagesCount != null) {
+            updateTab(1, unreadMessagesCount.size());
         }
     }
 
@@ -518,7 +519,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         } else if (id == R.id.filter_people) {
             initPeopleFilterDialog();
             return true;
-        }else if (id==R.id.action_search){
+        } else if (id == R.id.action_search) {
             toggleViews();
             return true;
         }

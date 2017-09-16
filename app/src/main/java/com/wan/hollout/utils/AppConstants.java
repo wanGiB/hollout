@@ -182,7 +182,7 @@ public class AppConstants {
     public static final String EXTRA_FROM = "from";
     public static final String EXTRA_TYPE = "type";
     public static final String EXTRA_TO = "to";
-    public static final String UNREAD_MESSAGES_COUNT = "unread_messages_count";
+    public static final String TOTAL_UNREAD_CHATS = "total_unread_chats";
     public static final String GROUPS_AND_ROOMS = "groups";
     public static final String CHAT_TYPE = "chat_type";
     public static final String EXTRA_USER_ID = "userId";
@@ -237,6 +237,8 @@ public class AppConstants {
     public static final String MESSAGE_ATTR_TYPE_GIF = "message_attribute_type_gif";
     public static final String GIF_URL = "gif_url";
     public static final String DELETE_ALL_SELECTED_MESSAGES = "delete_all_selected_messages";
+    public static final String FILE_NAME = "file_name";
+    public static final String FILE_SIZE = "file_size";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

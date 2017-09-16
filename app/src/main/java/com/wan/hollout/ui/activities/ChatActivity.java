@@ -1,8 +1,10 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
 import android.database.Cursor;
 import android.media.MediaRecorder;
@@ -18,6 +20,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -37,6 +40,9 @@ import android.widget.TextView;
 import com.afollestad.appthemeengine.ATE;
 import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.hyphenate.EMError;
@@ -44,7 +50,14 @@ import com.hyphenate.EMValueCallBack;
 import com.hyphenate.chat.EMChatRoom;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMConversation;
+import com.hyphenate.chat.EMFileMessageBody;
+import com.hyphenate.chat.EMImageMessageBody;
+import com.hyphenate.chat.EMLocationMessageBody;
 import com.hyphenate.chat.EMMessage;
+import com.hyphenate.chat.EMMessageBody;
+import com.hyphenate.chat.EMTextMessageBody;
+import com.hyphenate.chat.EMVideoMessageBody;
+import com.hyphenate.chat.EMVoiceMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -52,6 +65,10 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
+import com.wan.hollout.animations.KeyframesDrawable;
+import com.wan.hollout.animations.KeyframesDrawableBuilder;
+import com.wan.hollout.animations.deserializers.KFImageDeserializer;
+import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.call.VideoCallActivity;
 import com.wan.hollout.call.VoiceCallActivity;
@@ -91,6 +108,7 @@ import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.HolloutVCFParser;
+import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.NotificationCenter;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.SafeLayoutManager;
@@ -108,11 +126,14 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -129,7 +150,7 @@ import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
  * @author Wan Clem
  * ***/
 
-@SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal", "unused"})
+@SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal", "unused", "ConstantConditions"})
 public class ChatActivity extends BaseActivity implements ATEActivityThemeCustomizer,
         KeyboardAwareLinearLayout.OnKeyboardShownListener,
         ActivityCompat.OnRequestPermissionsResultCallback, InputPanel.Listener, View.OnClickListener {
@@ -167,7 +188,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     LinearLayout messageReplyView;
 
     @BindView(R.id.reply_icon)
-    RoundedImageView replyIconView;
+    ImageView replyIconView;
 
     @BindView(R.id.play_reply_msg_if_video)
     ImageView playReplyMessageIfVideo;
@@ -276,6 +297,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     };
 
+    private static KeyframesDrawable imageDrawable;
+    private static InputStream stream;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
@@ -315,6 +339,16 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         setupMessagesAdapter();
         initConversation();
         tryOffloadLastMessage();
+    }
+
+    private void decrementTotalUnreadMessages() {
+        Set<String> totalUnreadMessages = HolloutPreferences.getTotalUnreadChats();
+        if (totalUnreadMessages != null) {
+            if (totalUnreadMessages.contains(getRecipient())) {
+                totalUnreadMessages.remove(getRecipient());
+                HolloutPreferences.saveTotalUnreadChats(totalUnreadMessages);
+            }
+        }
     }
 
     public ChatToolbar getChatToolbar() {
@@ -421,6 +455,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         messagesRecyclerView.setLayoutManager(messagesLayoutManager);
         StickyRecyclerHeadersDecoration stickyRecyclerHeadersDecoration = new StickyRecyclerHeadersDecoration(messagesAdapter);
         messagesRecyclerView.addItemDecoration(stickyRecyclerHeadersDecoration);
+        messagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
         messagesRecyclerView.setAdapter(messagesAdapter);
     }
 
@@ -671,7 +706,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             ArrayList<String> linksInMessage = UiUtils.pullLinks(s.toString());
             if (!linksInMessage.isEmpty()) {
-                String firstUrl = linksInMessage.get(linksInMessage.size()-1);
+                String firstUrl = linksInMessage.get(linksInMessage.size() - 1);
                 UiUtils.showView(linkPreviewLayout, true);
                 linkPreview.setData(firstUrl);
             } else {
@@ -799,6 +834,203 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     public void snackInMessageReplyView(View view) {
         UiUtils.showView(view, true);
+        EMMessage messageToReplyTo = AppConstants.selectedMessages.get(0);
+        if (messageToReplyTo != null) {
+            try {
+
+                String senderName = messageToReplyTo.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
+                if (senderName != null) {
+                    replyMessageTitleView.setText(senderName);
+                }
+                EMMessageBody messageBody = messageToReplyTo.getBody();
+                EMMessage.Type messageType = getMessageType(messageToReplyTo);
+
+                if (messageType == EMMessage.Type.TXT) {
+                    EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageBody;
+                    String messageAttributeType = messageToReplyTo.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
+                    if (messageAttributeType != null) {
+                        switch (messageAttributeType) {
+                            case AppConstants.MESSAGE_ATTR_TYPE_GIF:
+                                String gifUrl = messageToReplyTo.getStringAttribute(AppConstants.GIF_URL);
+                                if (gifUrl != null) {
+                                    loadGif(gifUrl);
+                                } else {
+                                    replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
+                                }
+                                break;
+                            case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
+                                String reactionValue = messageToReplyTo.getStringAttribute(AppConstants.REACTION_VALUE);
+                                if (reactionValue != null) {
+                                    loadDrawables(ChatActivity.this, replyIconView, reactionValue);
+                                } else {
+                                    replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
+                                }
+                                break;
+                        }
+                    } else {
+                        replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
+                    }
+                }
+
+                if (messageType == EMMessage.Type.IMAGE) {
+                    EMImageMessageBody emImageMessageBody = (EMImageMessageBody) messageBody;
+                    String filePath = emImageMessageBody.getLocalUrl();
+                    File file = new File(filePath);
+                    if (file.exists()) {
+                        filePath = emImageMessageBody.getLocalUrl();
+                    } else {
+                        filePath = emImageMessageBody.getRemoteUrl();
+                    }
+                    UiUtils.loadImage(ChatActivity.this, filePath, replyIconView);
+                    String fileCaption = messageToReplyTo.getStringAttribute(AppConstants.FILE_CAPTION);
+                    if (StringUtils.isNotEmpty(fileCaption)) {
+                        replyMessageSubTitleView.setText(fileCaption);
+                    } else {
+                        replyMessageSubTitleView.setText(getString(R.string.photo));
+                    }
+                }
+
+                if (messageType == EMMessage.Type.VIDEO) {
+                    EMVideoMessageBody emVideoMessageBody = (EMVideoMessageBody) messageBody;
+                    String remoteVideoThumbnailUrl = emVideoMessageBody.getThumbnailUrl();
+                    File localThumbFile = new File(emVideoMessageBody.getLocalThumb());
+
+                    if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
+                        HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
+                        UiUtils.loadImage(ChatActivity.this, emVideoMessageBody.getThumbnailUrl(), replyIconView);
+                        UiUtils.showView(playReplyMessageIfVideo, true);
+                    } else {
+                        if (localThumbFile.exists()) {
+                            HolloutLogger.d("VideoThumbnailPath", "Local Video Thumb exists with value = " + localThumbFile);
+                            loadVideoFromPath(replyIconView, emVideoMessageBody.getLocalThumb());
+                        }
+                    }
+
+                }
+
+                if (messageType == EMMessage.Type.LOCATION) {
+                    EMLocationMessageBody emLocationMessageBody = (EMLocationMessageBody) messageBody;
+                    String locationName = emLocationMessageBody.getAddress();
+                    if (StringUtils.isNotEmpty(locationName)) {
+                        replyMessageSubTitleView.setText(locationName);
+                    } else {
+                        replyMessageSubTitleView.setText(getString(R.string.location));
+                    }
+                    String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(emLocationMessageBody.getLatitude()),
+                            String.valueOf(emLocationMessageBody.getLongitude()));
+                    if (StringUtils.isNotEmpty(locationStaticMap)) {
+                        UiUtils.loadImage(ChatActivity.this, locationStaticMap, replyIconView);
+                    }
+                }
+
+                if (messageType == EMMessage.Type.FILE) {
+                    EMFileMessageBody emFileMessageBody = ((EMFileMessageBody) messageBody);
+                    String fileType = messageToReplyTo.getStringAttribute(AppConstants.FILE_TYPE);
+                    if (fileType.equals(AppConstants.FILE_TYPE_CONTACT)) {
+                        String contactName = messageToReplyTo.getStringAttribute(AppConstants.CONTACT_NAME);
+                        String contactPhoneNumber = messageToReplyTo.getStringAttribute(AppConstants.CONTACT_NUMBER);
+                        String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
+                        replyMessageSubTitleView.setText(contactName + ":" + purifiedPhoneNumber);
+                    }
+                    if (fileType.equals(AppConstants.FILE_TYPE_AUDIO)) {
+                        replyMessageSubTitleView.setText(getString(R.string.audio));
+                    }
+                    if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)){
+                        String documentName = messageToReplyTo.getStringAttribute(AppConstants.FILE_NAME);
+                        String documentSize = messageToReplyTo.getStringAttribute(AppConstants.FILE_SIZE);
+                        if (StringUtils.isNotEmpty(documentName)) {
+                            replyMessageSubTitleView.setText(documentName + "\n" + documentSize);
+                        }
+                    }
+                }
+
+                if (messageType == EMMessage.Type.VOICE) {
+                    EMVoiceMessageBody emVoiceMessageBody = (EMVoiceMessageBody) messageBody;
+                    String audioDuration = UiUtils.getTimeString(emVoiceMessageBody.getLength());
+                    String fileCaption = "Voice Note";
+                    replyMessageSubTitleView.setText(audioDuration + ":" + fileCaption);
+                }
+
+            } catch (HyphenateException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
+    public void loadVideoFromPath(ImageView videoView, String videoPath) {
+        if (videoView != null) {
+            if (Build.VERSION.SDK_INT >= 17) {
+                if (!this.isDestroyed()) {
+                    Glide.with(this).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
+                }
+            } else {
+                Glide.with(this).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
+            }
+        }
+    }
+
+    private void loadDrawables(Context context, ImageView emojiView, String reactionTag) {
+        imageDrawable = new KeyframesDrawableBuilder().withImage(getKFImage(context, reactionTag)).build();
+        emojiView.setImageDrawable(imageDrawable);
+        imageDrawable.startAnimation();
+    }
+
+    private KFImage getKFImage(Context context, String fileName) {
+        AssetManager assetManager = context.getAssets();
+        KFImage kfImage = null;
+        try {
+            stream = assetManager.open(fileName);
+            kfImage = KFImageDeserializer.deserialize(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return kfImage;
+    }
+
+    private void loadGif(String gifUrl) {
+        if (StringUtils.isNotEmpty(gifUrl)) {
+            if (Build.VERSION.SDK_INT >= 17) {
+                if (!this.isDestroyed()) {
+                    if (StringUtils.isNotEmpty(gifUrl)) {
+                        Glide.with(this).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+
+                            @Override
+                            public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                                return false;
+                            }
+
+                            @Override
+                            public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                return false;
+
+                            }
+                        }).into(replyIconView);
+                    }
+                }
+            } else {
+                if (StringUtils.isNotEmpty(gifUrl)) {
+                    Glide.with(this).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+
+                        @Override
+                        public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                            return false;
+                        }
+                    }).into(replyIconView);
+                }
+            }
+        }
+
+    }
+
+    private EMMessage.Type getMessageType(EMMessage message) {
+        return message.getType();
     }
 
     @Override
@@ -1222,7 +1454,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         if ("content".equalsIgnoreCase(uri.getScheme())) {
             String[] filePathColumn = {MediaStore.Images.Media.DATA};
             Cursor cursor;
-
             try {
                 cursor = this.getContentResolver().query(uri, filePathColumn, null, null, null);
                 int column_index;
@@ -1255,6 +1486,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     } else {
                         moreMessageProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_DOCUMENT);
                         moreMessageProps.put(AppConstants.FILE_MIME_TYPE, fileMime);
+                        moreMessageProps.put(AppConstants.FILE_NAME,file.getName());
+                        moreMessageProps.put(AppConstants.FILE_SIZE,HolloutUtils.getFileSize(ChatActivity.this,uri));
                         sendFileMessage(filePath, moreMessageProps);
                     }
                 }
@@ -1275,6 +1508,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     switch (s) {
                         case AppConstants.REPLY_MESSAGE:
                             snackInMessageReplyView(messageReplyView);
+                            getChatToolbar().justHideActionMode();
+                            messagesAdapter.notifyDataSetChanged();
                             break;
                         case AppConstants.HIDE_MESSAGE_REPLY_VIEW:
                             snackOutMessageReplyView(messageReplyView);
@@ -1290,17 +1525,17 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             break;
                         case AppConstants.DELETE_ALL_SELECTED_MESSAGES:
                             if (AppConstants.selectedMessages != null && !AppConstants.selectedMessages.isEmpty()) {
-                                for (EMMessage emMessage:AppConstants.selectedMessages){
+                                for (EMMessage emMessage : AppConstants.selectedMessages) {
                                     mConversation.removeMessage(emMessage.getMsgId());
-                                    if (messages.contains(emMessage)){
+                                    if (messages.contains(emMessage)) {
                                         messages.remove(emMessage);
                                     }
                                 }
                                 messagesAdapter.notifyDataSetChanged();
                             }
                             getChatToolbar().updateActionMode(0);
-                            if (messages.isEmpty()){
-                                UiUtils.showView(messagesEmptyView,true);
+                            if (messages.isEmpty()) {
+                                UiUtils.showView(messagesEmptyView, true);
                             }
                             break;
                     }
@@ -1308,7 +1543,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     MessageReceivedEvent messageReceivedEvent = (MessageReceivedEvent) o;
                     EMMessage emMessage = messageReceivedEvent.getMessage();
                     if (emMessage != null && emMessage.getFrom().equals(recipientId)) {
-                        messages.add(emMessage);
+                        messages.add(0, emMessage);
                         messagesAdapter.notifyDataSetChanged();
                         UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
                     } else {
@@ -1557,27 +1792,17 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         String signedInUserDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         newMessage.setAttribute(AppConstants.APP_USER_DISPLAY_NAME, signedInUserDisplayName);
-
         if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
             newMessage.setAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL, signedInUserPhotoUrl);
         }
-
         EMClient.getInstance().chatManager().sendMessage(newMessage);
-
         //Send message here
         messages.add(0, newMessage);
-
-        if (messages.isEmpty()){
-            messagesAdapter.notifyDataSetChanged();
-        }else {
-            messagesAdapter.notifyItemInserted(messages.size()-1);
-        }
-
+        messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();
         messagesRecyclerView.smoothScrollToPosition(0);
         emptyComposeText();
         HolloutPreferences.updateConversationTime(recipientId);
-
         if (!isAContact()) {
             if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
                 checkAndSendChatRequest();

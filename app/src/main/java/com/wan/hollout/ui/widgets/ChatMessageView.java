@@ -46,6 +46,7 @@ import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -278,9 +279,28 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             if (fileType.equals(AppConstants.FILE_TYPE_AUDIO)) {
                 setupAudioMessage(messageBody);
             }
+            if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)) {
+                setupDocumentMessage(messageBody);
+            }
         } catch (HyphenateException e) {
             e.printStackTrace();
             HolloutLogger.e(TAG, e.getMessage());
+        }
+    }
+
+    private void setupDocumentMessage(EMFileMessageBody messageBody) {
+        try {
+            String documentName = message.getStringAttribute(AppConstants.FILE_NAME);
+            String documentSize = message.getStringAttribute(AppConstants.FILE_SIZE);
+            if (StringUtils.isNotEmpty(documentName)) {
+                documentNameAndSizeView.setText(documentName + "\n" + documentSize);
+            }
+
+            String documentLocalUrl = messageBody.getLocalUrl();
+            String documentRemoteUrl = messageBody.getRemoteUrl();
+
+        } catch (HyphenateException e) {
+            e.printStackTrace();
         }
     }
 
@@ -358,13 +378,13 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     @NonNull
     private String getIncomingNonBreakingSpace() {
-        return " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;";
+        return " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;";
     }
 
     @NonNull
     private String getOutGoingNonBreakingSpace() {
         return " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
-                "&#160;&#160;&#160;&#160;&#160;&#160;&#160;";
+                "&#160;&#160;&#160;&#160;&#160;";
     }
 
     private void handleCommonalities() {
@@ -623,7 +643,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
         if (timeTextView != null) {
             timeTextView.setText(messageTime);
-            timeTextView.setTextColor(ContextCompat.getColor(activity,R.color.grey_500));
+            timeTextView.setTextColor(ContextCompat.getColor(activity, R.color.grey_500));
         }
         if (getMessageDirection() == EMMessage.Direct.SEND && deliveryStatusView != null) {
             if (message.isAcked()) {
@@ -720,7 +740,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
-            setBackgroundColor(ContextCompat.getColor(activity, R.color.light_blue));
+            setBackgroundColor(ContextCompat.getColor(activity, R.color.colorSelectableItemWhite));
             HolloutLogger.d("SelectionTag", "Selected MessageId = " + message.getMsgId());
         } else {
             setBackgroundColor(Color.TRANSPARENT);

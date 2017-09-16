@@ -22,6 +22,7 @@ import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -144,6 +145,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                                                     signedInUserChats.add(requestOriginator.getString(AppConstants.REAL_OBJECT_ID));
                                                 }
                                                 signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
+                                                HolloutPreferences.updateConversationTime(requestOriginator.getString(AppConstants.REAL_OBJECT_ID));
                                                 AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                                                     @Override
                                                     public void done(Boolean result, Exception e) {

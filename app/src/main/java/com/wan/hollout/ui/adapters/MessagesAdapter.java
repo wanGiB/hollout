@@ -154,23 +154,25 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         if (messageType == EMMessage.Type.TXT) {
             EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageObject.getBody();
             List<String> links = UiUtils.pullLinks(emTextMessageBody.getMessage());
-            String messageAttributeType = null;
+            String messageAttributeType;
             try {
                 messageAttributeType = messageObject.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
+                if (messageAttributeType != null) {
+                    switch (messageAttributeType) {
+                        case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
+                            return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_REACTION : INCOMING_MESSAGE_WITH_REACTION;
+                        case AppConstants.MESSAGE_ATTR_TYPE_GIF:
+                            return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_GIF : INCOMING_MESSAGE_WITH_GIF;
+                    }
+                } else {
+                    if (!links.isEmpty()) {
+                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_LINK_PREVIEW : INCOMING_MESSAGE_WITH_LINK_PREVIEW;
+                    } else {
+                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
+                    }
+                }
             } catch (HyphenateException e) {
                 e.printStackTrace();
-            }
-            if (messageAttributeType != null) {
-                switch (messageAttributeType) {
-                    case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
-                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_REACTION : INCOMING_MESSAGE_WITH_REACTION;
-                    case AppConstants.MESSAGE_ATTR_TYPE_GIF:
-                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_GIF : INCOMING_MESSAGE_WITH_GIF;
-                }
-            } else {
-                if (!links.isEmpty()) {
-                    return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_LINK_PREVIEW : INCOMING_MESSAGE_WITH_LINK_PREVIEW;
-                }
                 return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
             }
         }

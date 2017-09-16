@@ -106,8 +106,7 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="com.hyphenate.sdk.push" />
-
-                <category android:name="com.hyphenate.chatuidemo" />
+                <category android:name="com.wan.hollout" />
             </intent-filter>
         </receiver>
 

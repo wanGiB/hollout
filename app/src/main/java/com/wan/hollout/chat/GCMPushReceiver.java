@@ -10,7 +10,7 @@ public class GCMPushReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		HolloutLogger.i("info", "gcmpush onreceive");
+		HolloutLogger.i("HyphenateGCM", "Hyphenate Message Push Notification received");
 		HolloutCommunicationsManager.getInstance().init(context);
 	}
 

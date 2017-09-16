@@ -3,7 +3,6 @@ package com.wan.hollout.chat;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 
 import com.hyphenate.EMCallBack;
@@ -24,6 +23,7 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.wan.hollout.BuildConfig;
 import com.wan.hollout.R;
 import com.wan.hollout.call.CallReceiver;
 import com.wan.hollout.call.CallStateChangeListener;
@@ -33,7 +33,6 @@ import com.wan.hollout.eventbuses.MessageChangedEvent;
 import com.wan.hollout.eventbuses.MessageDeliveredEvent;
 import com.wan.hollout.eventbuses.MessageReadEvent;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
-import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
@@ -153,9 +152,8 @@ public class HolloutCommunicationsManager {
             initCallOptions();
             //init message notifier
             mNotifier.init(context);
-
             // set debug mode open:true, close:false
-            EMClient.getInstance().setDebugMode(true);
+            EMClient.getInstance().setDebugMode(BuildConfig.DEBUG);
             //set events listeners
             setGlobalListener();
             try {
@@ -384,7 +382,7 @@ public class HolloutCommunicationsManager {
                 }
 
                 if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0 && !unreadConversationItems.isEmpty()) {
-                    HolloutPreferences.saveUnreadMessagesCount(unreadConversationItems.size());
+                    HolloutPreferences.saveTotalUnreadChats(unreadConversationItems);
                 }
 
                 ParseObject signedInUser = AuthUtil.getCurrentUser();

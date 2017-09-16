@@ -231,9 +231,9 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                         contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
                         UiUtils.showView(typingIndicator, false);
                     } else if (chatStateToSignedInUser.contains(mContext.getString(R.string.typing)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
+                        UiUtils.showView(typingIndicator, true);
                         contactSubTitle.setText(StringUtils.strip(mContext.getString(R.string.typing_), "…"));
                         contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.colorGreen));
-                        UiUtils.showView(typingIndicator, true);
                         UiUtils.bangSound(getContext(), R.raw.typing);
                     } else {
                         if (userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
@@ -338,6 +338,11 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         }
     }
 
+    public void justHideActionMode(){
+        UiUtils.showView(actionModeBar, false);
+        AppConstants.selectedMessagesPositions.clear();
+    }
+
     public void updateActionMode(int selectionCount) {
 
         UiUtils.showView(actionModeBar, selectionCount > 0);
@@ -373,6 +378,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 switch (view.getId()){
                     case R.id.delete_message:
                         EventBus.getDefault().post(AppConstants.DELETE_ALL_SELECTED_MESSAGES);
+                        break;
+                    case R.id.reply_to_a_message:
+                        EventBus.getDefault().post(AppConstants.REPLY_MESSAGE);
+                        break;
                 }
             }
 

@@ -6,6 +6,10 @@ import android.content.SharedPreferences;
 
 import com.wan.hollout.components.ApplicationLoader;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static com.wan.hollout.utils.AppConstants.ENTER_SENDS_PREF;
 import static com.wan.hollout.utils.AppConstants.SYSTEM_EMOJI_PREF;
 
@@ -142,16 +146,24 @@ public class HolloutPreferences {
         return getInstance().getString(AppConstants.LAST_FILE_CAPTION, "Photo");
     }
 
-    public static long getUnreadMessagesCount() {
-        return getInstance().getLong(AppConstants.UNREAD_MESSAGES_COUNT, 0);
+    public static Set<String> getTotalUnreadChats() {
+        return getInstance().getStringSet(AppConstants.TOTAL_UNREAD_CHATS, null);
     }
 
-    public static void saveUnreadMessagesCount(int unreadMessageCount) {
-        getInstance().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT, unreadMessageCount).commit();
+    public static void saveTotalUnreadChats(List<String> unreadMessages) {
+        Set<String>unreadMessageSet=new HashSet<>();
+        for (String s:unreadMessages){
+            unreadMessageSet.add(s);
+        }
+        getInstance().edit().putStringSet(AppConstants.TOTAL_UNREAD_CHATS, unreadMessageSet).commit();
+    }
+
+    public static void saveTotalUnreadChats(Set<String>unreadMessageSet) {
+        getInstance().edit().putStringSet(AppConstants.TOTAL_UNREAD_CHATS, unreadMessageSet).commit();
     }
 
     public static void clearUnreadMessagesCount() {
-        getInstance().edit().putLong(AppConstants.UNREAD_MESSAGES_COUNT, 0).commit();
+        getInstance().edit().putStringSet(AppConstants.TOTAL_UNREAD_CHATS, null).commit();
     }
 
     public static String getLastAttemptedMessage(String recipientId) {

@@ -5,8 +5,9 @@
     android:id="@+id/message_reply_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:background="@color/hollout_material_grey_50"
+    android:orientation="vertical"
+    android:foreground="?attr/selectableItemBackground"
     android:visibility="gone">
 
     <RelativeLayout
@@ -37,13 +38,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-                <com.wan.hollout.ui.widgets.RoundedImageView
+                <ImageView
                     android:id="@+id/reply_icon"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_margin="3dp"
-                    android:visibility="gone"
-                    app:riv_corner_radius="2dp" />
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
 
                 <ImageView
                     android:id="@+id/play_reply_msg_if_video"
@@ -61,14 +62,16 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginRight="8dp"
                 android:orientation="vertical"
                 tools:ignore="RtlHardcoded">
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/reply_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Title"
-                    android:id="@+id/reply_title"
                     android:textColor="@color/colorPrimary"
                     android:textSize="16sp"
                     app:textStyle="medium" />
@@ -77,8 +80,9 @@
                     android:id="@+id/reply_subtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="1"
+                    android:maxLines="2"
                     android:text="Reply subtitle"
+                    android:ellipsize="end"
                     android:textColor="@color/hollout_material_grey_600"
                     app:textStyle="medium" />
 
@@ -87,8 +91,8 @@
         </LinearLayout>
 
         <ImageView
-            android:layout_width="25dp"
             android:id="@+id/close_reply_message_view"
+            android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
