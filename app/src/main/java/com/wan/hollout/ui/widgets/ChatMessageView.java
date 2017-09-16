@@ -740,7 +740,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
-            setBackgroundColor(ContextCompat.getColor(activity, R.color.colorSelectableItemWhite));
+            setBackgroundColor(ContextCompat.getColor(activity, R.color.hint_color));
             HolloutLogger.d("SelectionTag", "Selected MessageId = " + message.getMsgId());
         } else {
             setBackgroundColor(Color.TRANSPARENT);

@@ -658,6 +658,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         } else if (chatToolbar.isActionModeActivated()) {
             chatToolbar.updateActionMode(0);
             messagesAdapter.notifyDataSetChanged();
+        } else if (messageReplyView.getVisibility() == View.VISIBLE) {
+            snackOutMessageReplyView(messageReplyView);
         } else {
             super.onBackPressed();
         }
@@ -830,19 +832,21 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     public void snackOutMessageReplyView(final View view) {
         UiUtils.showView(view, false);
+        AppConstants.selectedMessages.clear();
+        AppConstants.selectedMessagesPositions.clear();
     }
 
     public void snackInMessageReplyView(View view) {
         UiUtils.showView(view, true);
         EMMessage messageToReplyTo = AppConstants.selectedMessages.get(0);
         if (messageToReplyTo != null) {
+            EMMessageBody messageBody = messageToReplyTo.getBody();
             try {
 
                 String senderName = messageToReplyTo.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
                 if (senderName != null) {
                     replyMessageTitleView.setText(senderName);
                 }
-                EMMessageBody messageBody = messageToReplyTo.getBody();
                 EMMessage.Type messageType = getMessageType(messageToReplyTo);
 
                 if (messageType == EMMessage.Type.TXT) {
@@ -865,6 +869,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                                 } else {
                                     replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
                                 }
+                                break;
+                            default:
+                                replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
                                 break;
                         }
                     } else {
@@ -935,7 +942,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     if (fileType.equals(AppConstants.FILE_TYPE_AUDIO)) {
                         replyMessageSubTitleView.setText(getString(R.string.audio));
                     }
-                    if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)){
+                    if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)) {
                         String documentName = messageToReplyTo.getStringAttribute(AppConstants.FILE_NAME);
                         String documentSize = messageToReplyTo.getStringAttribute(AppConstants.FILE_SIZE);
                         if (StringUtils.isNotEmpty(documentName)) {
@@ -953,6 +960,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
             } catch (HyphenateException e) {
                 e.printStackTrace();
+                if (e.getDescription().contains("attribute em_type not found")) {
+                    replyMessageSubTitleView.setText(((EMTextMessageBody) messageBody).getMessage());
+                }
             }
 
         }
@@ -1486,8 +1496,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     } else {
                         moreMessageProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_DOCUMENT);
                         moreMessageProps.put(AppConstants.FILE_MIME_TYPE, fileMime);
-                        moreMessageProps.put(AppConstants.FILE_NAME,file.getName());
-                        moreMessageProps.put(AppConstants.FILE_SIZE,HolloutUtils.getFileSize(ChatActivity.this,uri));
+                        moreMessageProps.put(AppConstants.FILE_NAME, file.getName());
+                        moreMessageProps.put(AppConstants.FILE_SIZE, HolloutUtils.getFileSize(ChatActivity.this, uri));
                         sendFileMessage(filePath, moreMessageProps);
                     }
                 }
