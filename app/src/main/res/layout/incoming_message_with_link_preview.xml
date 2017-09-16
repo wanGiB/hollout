@@ -5,42 +5,41 @@
     android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
     android:layout_marginBottom="1dp"
+    android:animateLayoutChanges="true"
     android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/message_container"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginEnd="8dp"
-        android:background="@drawable/bubble_incoming"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
         android:animateLayoutChanges="true"
-        android:layout_height="wrap_content"
+        android:background="@drawable/bubble_incoming"
         android:orientation="vertical">
 
         <com.wan.hollout.ui.widgets.LinkPreview
             android:id="@+id/link_preview"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="visible" />
+            android:layout_height="wrap_content"/>
 
         <com.wan.hollout.ui.widgets.HolloutTextView
             android:id="@+id/message_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:autoLink="all"
             android:paddingEnd="8dp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:paddingStart="8dp"
-            android:autoLink="all"
             android:textColor="@color/text_black"
             android:textSize="16sp"
-            app:textStyle="medium" />
+            app:textStyle="none" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -52,13 +51,14 @@
             android:paddingRight="5dp"
             android:paddingStart="5dp">
 
-            <TextView
+            <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/textview_time"
                 style="@style/chat_timings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
                 android:layout_marginRight="4dp"
-                android:layout_marginEnd="4dp" />
+                app:textStyle="none" />
 
             <ImageView
                 android:id="@+id/delivery_status_view"

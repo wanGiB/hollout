@@ -1299,6 +1299,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                                 messagesAdapter.notifyDataSetChanged();
                             }
                             getChatToolbar().updateActionMode(0);
+                            if (messages.isEmpty()){
+                                UiUtils.showView(messagesEmptyView,true);
+                            }
                             break;
                     }
                 } else if (o instanceof MessageReceivedEvent) {
@@ -1554,17 +1557,27 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         String signedInUserDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         newMessage.setAttribute(AppConstants.APP_USER_DISPLAY_NAME, signedInUserDisplayName);
+
         if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
             newMessage.setAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL, signedInUserPhotoUrl);
         }
+
         EMClient.getInstance().chatManager().sendMessage(newMessage);
+
         //Send message here
         messages.add(0, newMessage);
-        messagesAdapter.notifyDataSetChanged();
+
+        if (messages.isEmpty()){
+            messagesAdapter.notifyDataSetChanged();
+        }else {
+            messagesAdapter.notifyItemInserted(messages.size()-1);
+        }
+
         invalidateEmptyView();
         messagesRecyclerView.smoothScrollToPosition(0);
         emptyComposeText();
         HolloutPreferences.updateConversationTime(recipientId);
+
         if (!isAContact()) {
             if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
                 checkAndSendChatRequest();

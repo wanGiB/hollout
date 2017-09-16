@@ -377,8 +377,11 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void setupImageMessage(EMImageMessageBody messageBody) {
+
         String filePath = messageBody.getLocalUrl();
+
         File file = new File(filePath);
+
         if (file.exists()) {
             filePath = messageBody.getLocalUrl();
         } else {
@@ -387,9 +390,11 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                 UiUtils.showView(photoVideoProgressView, false);
             }
         }
+
         UiUtils.loadImage(activity, filePath, attachedPhotoOrVideoThumbnailView);
         UiUtils.showView(fileSizeDurationView, false);
         AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
+
         try {
             String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION);
             if (StringUtils.isNotEmpty(fileCaption)) {
@@ -404,6 +409,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             e.printStackTrace();
             HolloutLogger.e(TAG, e.getMessage());
         }
+
+        attachedPhotoOrVideoThumbnailView.setOnClickListener(this);
+        attachedPhotoOrVideoThumbnailView.setOnLongClickListener(this);
+
     }
 
     public void setupVideoMessage(final EMVideoMessageBody upVideoMessage) {
@@ -569,11 +578,11 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
             if (includedLinks != null && !includedLinks.isEmpty()) {
                 setupLinkPreviewMessage(includedLinks);
-                AppConstants.linkPreviewPositions.put(getMessageHash(),true);
-                UiUtils.showView(linkPreview,true);
-            }else{
-                AppConstants.linkPreviewPositions.put(getMessageHash(),false);
-                UiUtils.showView(linkPreview,false);
+                AppConstants.linkPreviewPositions.put(getMessageHash(), true);
+                UiUtils.showView(linkPreview, true);
+            } else {
+                AppConstants.linkPreviewPositions.put(getMessageHash(), false);
+                UiUtils.showView(linkPreview, false);
             }
 
             if (messageBodyView != null) {
@@ -591,10 +600,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void setupLinkPreviewMessage(List includedLinks) {
         try {
-            String firstLink = (String) includedLinks.get(includedLinks.size()-1);
+            String firstLink = (String) includedLinks.get(includedLinks.size() - 1);
             linkPreview.setData(firstLink);
         } catch (IndexOutOfBoundsException e) {
-            HolloutLogger.d(TAG,"IndexOutOfBoundsException with error message = "+e.getMessage());
+            HolloutLogger.d(TAG, "IndexOutOfBoundsException with error message = " + e.getMessage());
         }
     }
 
@@ -606,6 +615,26 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     acknowledgeMessageRead();
                 }
             });
+        }
+    }
+
+    private void setupMessageTimeAndDeliveryStatus() {
+        Date messageDate = new Date(message.getMsgTime());
+        String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
+        if (timeTextView != null) {
+            timeTextView.setText(messageTime);
+            timeTextView.setTextColor(ContextCompat.getColor(activity,R.color.grey_500));
+        }
+        if (getMessageDirection() == EMMessage.Direct.SEND && deliveryStatusView != null) {
+            if (message.isAcked()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else if (message.isListened()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else if (message.isDelivered()) {
+                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_client_received_white : R.drawable.msg_status_client_received);
+            } else {
+                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_server_received_white : R.drawable.msg_status_server_receive);
+            }
         }
     }
 
@@ -673,25 +702,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         }
     }
 
-    private void setupMessageTimeAndDeliveryStatus() {
-        Date messageDate = new Date(message.getMsgTime());
-        String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
-        if (timeTextView != null) {
-            timeTextView.setText(messageTime);
-        }
-        if (getMessageDirection() == EMMessage.Direct.SEND && deliveryStatusView != null) {
-            if (message.isAcked()) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.isListened()) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.isDelivered()) {
-                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_client_received_white : R.drawable.msg_status_client_received);
-            } else {
-                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_server_received_white : R.drawable.msg_status_server_receive);
-            }
-        }
-    }
-
     public boolean hashDrawable() {
         return (message.getType() == EMMessage.Type.IMAGE
                 || message.getType() == EMMessage.Type.VIDEO
@@ -704,7 +714,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         UiUtils.showView(photoVideoProgressView, AppConstants.wavePositions.get(getMessageHash()));
         UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageHash()));
         UiUtils.showView(playMediaIfVideoIcon, AppConstants.playableVideoPositions.get(getMessageHash()));
-        UiUtils.showView(linkPreview,AppConstants.linkPreviewPositions.get(getMessageHash()));
+        UiUtils.showView(linkPreview, AppConstants.linkPreviewPositions.get(getMessageHash()));
         invalidateMessageBubble();
     }
 
@@ -733,6 +743,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             case R.id.conversation_message_view:
                 if (getChatActivity().getChatToolbar().isActionModeActivated()) {
                     updateActionMode();
+                } else {
+                    UiUtils.blinkView(v);
                 }
                 break;
         }

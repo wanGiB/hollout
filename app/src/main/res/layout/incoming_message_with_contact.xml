@@ -66,14 +66,15 @@
                         android:paddingRight="5dp"
                         android:paddingStart="5dp">
 
-                        <TextView
+                        <com.wan.hollout.ui.widgets.HolloutTextView
                             android:id="@+id/textview_time"
                             style="@style/chat_timings"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="4dp"
                             android:layout_marginRight="4dp"
-                            android:paddingTop="5dp" />
+                            android:paddingTop="5dp"
+                            app:textStyle="none" />
 
                     </LinearLayout>
 

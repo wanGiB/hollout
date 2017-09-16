@@ -34,7 +34,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
-                app:textStyle="medium"
+                app:textStyle="none"
                 android:layout_marginRight="4dp" />
 
             <ImageView

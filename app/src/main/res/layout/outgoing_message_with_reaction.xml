@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.wan.hollout.ui.widgets.ChatMessageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -44,11 +45,12 @@
             android:paddingStart="5dp"
             tools:ignore="UseCompoundDrawables">
 
-            <TextView
+            <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/textview_time"
                 style="@style/chat_timings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                app:textStyle="none"
                 android:layout_marginEnd="4dp"
                 android:layout_marginRight="4dp" />
 

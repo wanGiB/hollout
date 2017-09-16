@@ -13,14 +13,14 @@
         android:id="@+id/message_container"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:background="@drawable/bubble_incoming"
+        android:layout_alignParentStart="true"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
-        android:animateLayoutChanges="true">
+        android:animateLayoutChanges="true"
+        android:background="@drawable/bubble_incoming">
 
         <FrameLayout
             android:id="@+id/content_view"
@@ -31,7 +31,7 @@
                 android:id="@+id/attached_photo_or_video_thumbnail"
                 android:layout_width="200dp"
                 android:layout_height="200dp"
-                android:padding="2dp"
+                android:padding="1dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ease_default_image" />
 
@@ -84,14 +84,15 @@
                 android:paddingRight="5dp"
                 android:paddingStart="5dp">
 
-                <TextView
+                <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/textview_time"
                     style="@style/chat_timings"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="4dp"
                     android:layout_marginRight="4dp"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white"
+                    app:textStyle="none" />
 
             </LinearLayout>
 
@@ -103,13 +104,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/content_view"
             android:paddingEnd="8dp"
-            android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            android:paddingStart="8dp"
             android:textColor="@color/text_black"
             android:textSize="16sp"
             android:visibility="gone"
-            app:textStyle="medium" />
+            app:textStyle="none"
+            tools:ignore="RtlSymmetry" />
 
     </RelativeLayout>
 

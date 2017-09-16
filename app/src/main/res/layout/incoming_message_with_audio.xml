@@ -17,9 +17,9 @@
         android:layout_alignParentStart="true"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="10dp"
-        android:background="@drawable/bubble_incoming"
         android:layout_marginRight="8dp"
-        android:layout_marginStart="10dp">
+        android:layout_marginStart="10dp"
+        android:background="@drawable/bubble_incoming">
 
         <com.wan.hollout.ui.widgets.AudioView
             android:id="@+id/audio_view"
@@ -54,13 +54,14 @@
             android:paddingStart="5dp"
             tools:ignore="RelativeOverlap">
 
-            <TextView
+            <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/textview_time"
                 style="@style/chat_timings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
-                android:layout_marginRight="4dp" />
+                android:layout_marginRight="4dp"
+                app:textStyle="none" />
 
         </LinearLayout>
 

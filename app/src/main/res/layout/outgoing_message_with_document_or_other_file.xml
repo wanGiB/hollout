@@ -16,11 +16,11 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_marginEnd="8dp"
-        android:background="@drawable/bubble_outgoing"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
-        android:animateLayoutChanges="true">
+        android:animateLayoutChanges="true"
+        android:background="@drawable/bubble_outgoing">
 
         <LinearLayout
             android:id="@+id/document_data_layout"
@@ -65,13 +65,14 @@
             android:paddingStart="5dp"
             tools:ignore="UseCompoundDrawables">
 
-            <TextView
+            <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/textview_time"
                 style="@style/chat_timings"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
-                android:layout_marginRight="4dp" />
+                android:layout_marginRight="4dp"
+                app:textStyle="none" />
 
             <ImageView
                 android:id="@+id/delivery_status_view"
