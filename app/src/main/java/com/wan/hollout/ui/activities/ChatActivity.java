@@ -845,8 +845,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
                 String senderName = messageToReplyTo.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
                 if (senderName != null) {
-                    replyMessageTitleView.setText(senderName);
+                    replyMessageTitleView.setText(StringUtils.capitalize(senderName));
                 }
+
                 EMMessage.Type messageType = getMessageType(messageToReplyTo);
 
                 if (messageType == EMMessage.Type.TXT) {
@@ -960,7 +961,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
             } catch (HyphenateException e) {
                 e.printStackTrace();
-                if (e.getDescription().contains("attribute em_type not found")) {
+                if (e.getDescription().contains("em_type")) {
                     replyMessageSubTitleView.setText(((EMTextMessageBody) messageBody).getMessage());
                 }
             }
