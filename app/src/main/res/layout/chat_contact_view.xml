@@ -56,6 +56,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:animateLayoutChanges="true"
+            android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingRight="15dip">
 
@@ -74,7 +75,7 @@
             <com.wan.hollout.ui.widgets.dotloader.DotLoader
                 android:id="@+id/typing_indicator"
                 android:layout_width="wrap_content"
-                android:layout_height="10dp"
+                android:layout_height="9dp"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="8dp"
                 android:visibility="gone"

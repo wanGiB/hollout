@@ -339,6 +339,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         setupMessagesAdapter();
         initConversation();
         tryOffloadLastMessage();
+        decrementTotalUnreadMessages();
     }
 
     private void decrementTotalUnreadMessages() {
@@ -441,6 +442,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             }
             sortMessages();
             messagesAdapter.notifyDataSetChanged();
+            mConversation.markAllMessagesAsRead();
         }
         invalidateEmptyView();
     }
