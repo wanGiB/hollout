@@ -247,7 +247,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private void getUnreadMessagesCount() {
         Set<String> unreadMessagesCount = HolloutPreferences.getTotalUnreadChats();
-        if (unreadMessagesCount != null) {
+        if (unreadMessagesCount != null && unreadMessagesCount.size()!=0) {
             updateTab(1, unreadMessagesCount.size());
         }
     }
@@ -260,7 +260,11 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 TextView tabCountView = (TextView) tabView.findViewById(R.id.tab_count);
                 if (tabCountView != null) {
                     UiUtils.showView(tabCountView, true);
-                    tabCountView.setText(String.valueOf(incrementValue));
+                    if (incrementValue==0){
+                        UiUtils.showView(tabCountView, false);
+                    }else{
+                        tabCountView.setText(String.valueOf(incrementValue));
+                    }
                 }
             }
         }
