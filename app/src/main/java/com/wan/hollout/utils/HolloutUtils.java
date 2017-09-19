@@ -33,6 +33,10 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.KryoException;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.OnProgressListener;
@@ -40,6 +44,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.hyphenate.chat.EMMessage;
 import com.hyphenate.util.EMLog;
 import com.hyphenate.util.PathUtil;
 import com.parse.ParseInstallation;
@@ -56,8 +61,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.RoundingMode;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -96,6 +106,44 @@ public class HolloutUtils {
     static {
         leftBaseline = isTablet() ? 80 : 72;
         checkDisplaySize(ApplicationLoader.getInstance(), null);
+    }
+
+
+    public static Kryo getKryoInstance() {
+        return new Kryo();
+    }
+
+    public static synchronized void serializeMessages(List<EMMessage> tObjects, String serializableName) {
+        Kryo kryo = getKryoInstance();
+        try {
+            FileOutputStream fileOutputStream = ApplicationLoader.getInstance().openFileOutput(serializableName, Context.MODE_PRIVATE);
+            Output messageOutPuts = new Output(fileOutputStream);
+            kryo.writeObject(messageOutPuts, tObjects);
+            messageOutPuts.close();
+        } catch (IOException | KryoException | BufferOverflowException e) {
+            e.printStackTrace();
+            HolloutLogger.e(TAG, e.getMessage());
+        }
+
+    }
+
+    @SuppressWarnings("unchecked")
+    public static synchronized void deserializeMessages(String fileName, DoneCallback<List<EMMessage>> doneCallback) {
+        Kryo kryo = getKryoInstance();
+        try {
+            Input input = new Input(ApplicationLoader.getInstance().openFileInput(fileName));
+            ArrayList<EMMessage> previouslySerializedChats = kryo.readObject(input, ArrayList.class);
+            if (doneCallback != null) {
+                doneCallback.done(previouslySerializedChats, null);
+            }
+            input.close();
+        } catch (FileNotFoundException | KryoException | BufferUnderflowException e) {
+            if (doneCallback != null) {
+                doneCallback.done(null, null);
+            }
+            e.printStackTrace();
+            HolloutLogger.e(TAG, e.getMessage());
+        }
     }
 
     public static boolean isTablet() {

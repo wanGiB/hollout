@@ -37,6 +37,7 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.HolloutUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -370,7 +371,7 @@ public class HolloutCommunicationsManager {
         messageListener = new EMMessageListener() {
 
             @Override
-            public void onMessageReceived(List<EMMessage> messages) {
+            public void onMessageReceived(final List<EMMessage> messages) {
 
                 List<String> unreadConversationItems = new ArrayList<>();
 
@@ -390,7 +391,21 @@ public class HolloutCommunicationsManager {
                 if (signedInUser != null) {
                     String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                     if (!signedInUserStatus.equals(AppConstants.ONLINE)) {
-                        getNotifier().onNewMsg(messages);
+                        HolloutUtils.deserializeMessages(AppConstants.UNREAD_MESSAGES, new DoneCallback<List<EMMessage>>() {
+                            @Override
+                            public void done(List<EMMessage> result, Exception e) {
+                                if (result != null) {
+                                    result.addAll(0,messages);
+                                    HolloutUtils.serializeMessages(result,AppConstants.UNREAD_MESSAGES);
+                                    getNotifier().onNewMsg(result);
+                                }else{
+                                    List<EMMessage>newUnreadMessages = new ArrayList<>();
+                                    newUnreadMessages.addAll(messages);
+                                    HolloutUtils.serializeMessages(newUnreadMessages,AppConstants.UNREAD_MESSAGES);
+                                    getNotifier().onNewMsg(newUnreadMessages);
+                                }
+                            }
+                        });
                     } else {
                         for (EMMessage message : messages) {
                             EventBus.getDefault().post(new MessageReceivedEvent(message));
