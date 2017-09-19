@@ -239,6 +239,7 @@ public class AppConstants {
     public static final String DELETE_ALL_SELECTED_MESSAGES = "delete_all_selected_messages";
     public static final String FILE_NAME = "file_name";
     public static final String FILE_SIZE = "file_size";
+    public static final String UNREAD_MESSAGES = "unread_messages_";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

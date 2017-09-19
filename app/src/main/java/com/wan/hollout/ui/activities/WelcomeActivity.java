@@ -173,7 +173,8 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                         if (e.getCode() == ParseException.USERNAME_MISSING || e.getCode() == ParseException.OBJECT_NOT_FOUND) {
                             createNewUserOnParse(firebaseUser);
                         } else {
-                            UiUtils.showSafeToast("An error while authenticating you. Please try again");
+                            UiUtils.showSafeToast("An error occurred while authenticating you. Please try again");
+                            UiUtils.dismissProgressDialog();
                             Crashlytics.logException(e);
                         }
                     }

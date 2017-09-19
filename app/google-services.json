@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "805027156034-8eatab65nd1ad6bt0q4c53jng633ffh8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wan.hollout",
+            "certificate_hash": "2f59dfc85ac256a3e7b1c535dada9a7a9d6e64c8"
+          }
+        },
+        {
           "client_id": "805027156034-mdr1js8vitrj54vmdh8jimt2sb13ncgt.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -207,7 +207,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     }
 
     public int getMessageId() {
-        return parseObject.getObjectId().hashCode();
+        return parseObject.getString(AppConstants.REAL_OBJECT_ID).hashCode();
     }
 
     public void setupConversation(String searchString) {
