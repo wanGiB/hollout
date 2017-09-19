@@ -439,12 +439,12 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 if (!messages.contains(emMessage)) {
                     messages.add(0, emMessage);
                 }
+                HolloutUtils.removeMessageFromListOfUnread(emMessage);
             }
             sortMessages();
             messagesAdapter.notifyDataSetChanged();
             mConversation.markAllMessagesAsRead();
         }
-
         invalidateEmptyView();
     }
 
@@ -854,7 +854,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 EMMessage.Type messageType = getMessageType(messageToReplyTo);
 
                 if (messageType == EMMessage.Type.TXT) {
-                    HolloutLogger.d("MessageType","Message Type is Text");
+                    HolloutLogger.d("MessageType", "Message Type is Text");
                     EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageBody;
                     String messageAttributeType = messageToReplyTo.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
                     if (messageAttributeType != null) {

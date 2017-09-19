@@ -52,6 +52,7 @@ import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.AudioFile;
 import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.components.ApplicationLoader;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
@@ -109,10 +110,31 @@ public class HolloutUtils {
     }
 
 
-    private static Kryo getKryoInstance() {
+    public static Kryo getKryoInstance() {
         Kryo kryo=new Kryo();
         kryo.register(EMMessage.class,new EMMessageSerializer());
         return kryo;
+    }
+
+    public static void removeMessageFromListOfUnread(final EMMessage emMessage){
+        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+            @Override
+            public void run() {
+                HolloutUtils.deserializeMessages(AppConstants.UNREAD_MESSAGES, new DoneCallback<List<EMMessage>>() {
+                    @Override
+                    public void done(List<EMMessage> result, Exception e) {
+                        if (e==null && result!=null){
+                            for (EMMessage message:result){
+                                if (message.getMsgId().equals(emMessage.getMsgId())){
+                                    result.remove(message);
+                                }
+                            }
+                            serializeMessages(result,AppConstants.UNREAD_MESSAGES);
+                        }
+                    }
+                });
+            }
+        });
     }
 
     public static synchronized void serializeMessages(List<EMMessage> tObjects, String serializableName) {

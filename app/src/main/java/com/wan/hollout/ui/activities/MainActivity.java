@@ -64,6 +64,7 @@ import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
@@ -643,6 +644,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                         invalidateDrawerMenuHeader();
                         ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
                         ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
+                        HolloutUtils.getKryoInstance().reset();
                         AuthUtil.signOut(MainActivity.this).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
