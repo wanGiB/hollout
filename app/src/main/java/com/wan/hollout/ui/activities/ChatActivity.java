@@ -446,7 +446,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         }
 
         invalidateEmptyView();
-        HolloutUtils.serializeMessages(messages,AppConstants.CONTACT_NAME);
     }
 
     private void sortMessages() {

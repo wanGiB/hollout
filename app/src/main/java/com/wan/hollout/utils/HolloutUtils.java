@@ -109,8 +109,10 @@ public class HolloutUtils {
     }
 
 
-    public static Kryo getKryoInstance() {
-        return new Kryo();
+    private static Kryo getKryoInstance() {
+        Kryo kryo=new Kryo();
+        kryo.register(EMMessage.class,new EMMessageSerializer());
+        return kryo;
     }
 
     public static synchronized void serializeMessages(List<EMMessage> tObjects, String serializableName) {
