@@ -29,6 +29,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
+import com.wan.hollout.models.NearbyPerson;
 import com.wan.hollout.ui.activities.MeetPeopleActivity;
 import com.wan.hollout.ui.adapters.PeopleAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
@@ -75,7 +76,7 @@ public class PeopleFragment extends Fragment {
     HolloutTextView meetPeopleTextView;
 
     private PeopleAdapter peopleAdapter;
-    private List<ParseObject> people = new ArrayList<>();
+    private List<NearbyPerson> people = new ArrayList<>();
     private ParseObject signedInUser;
 
     private View footerView;
@@ -329,7 +330,11 @@ public class PeopleFragment extends Fragment {
         ParseObject.unpinAllInBackground(AppConstants.APP_USERS, new DeleteCallback() {
             @Override
             public void done(ParseException e) {
-                ParseObject.pinAllInBackground(AppConstants.APP_USERS, people);
+                List<ParseObject>peopleToPin = new ArrayList<>();
+                for (NearbyPerson nearbyPerson:people){
+                    peopleToPin.add(nearbyPerson.getPerson());
+                }
+                ParseObject.pinAllInBackground(AppConstants.APP_USERS, peopleToPin);
             }
         });
     }
@@ -337,8 +342,8 @@ public class PeopleFragment extends Fragment {
     private void loadAdapter(List<ParseObject> users) {
         if (!users.isEmpty()) {
             for (ParseObject parseUser : users) {
-                if (!people.contains(parseUser)) {
-                    people.add(parseUser);
+                if (!people.contains(new NearbyPerson(parseUser))) {
+                    people.add(new NearbyPerson(parseUser));
                 }
             }
         }
@@ -394,8 +399,8 @@ public class PeopleFragment extends Fragment {
                             people.clear();
                         }
                         for (ParseObject parseUser : objects) {
-                            if (!people.contains(parseUser)) {
-                                people.add(parseUser);
+                            if (!people.contains(new NearbyPerson(parseUser))) {
+                                people.add(new NearbyPerson(parseUser));
                             }
                         }
                         peopleAdapter.notifyDataSetChanged();

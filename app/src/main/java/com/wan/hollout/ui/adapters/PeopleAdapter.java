@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.parse.ParseObject;
 import com.wan.hollout.R;
+import com.wan.hollout.models.NearbyPerson;
 import com.wan.hollout.ui.widgets.NearbyPersonView;
 
 import java.util.List;
@@ -20,13 +21,13 @@ import butterknife.ButterKnife;
  */
 public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<ParseObject> people;
+    private List<NearbyPerson> people;
     private Activity activity;
     private LayoutInflater layoutInflater;
 
     private String searchString;
 
-    public PeopleAdapter(Activity activity, List<ParseObject> people) {
+    public PeopleAdapter(Activity activity, List<NearbyPerson> people) {
         this.activity = activity;
         this.people = people;
         this.layoutInflater = LayoutInflater.from(activity);
@@ -49,7 +50,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         final PersonHolder personHolder = (PersonHolder) holder;
-        ParseObject parseUser = people.get(position);
+        ParseObject parseUser = people.get(position).getPerson();
         personHolder.bindData(activity, getSearchString(), parseUser);
     }
 

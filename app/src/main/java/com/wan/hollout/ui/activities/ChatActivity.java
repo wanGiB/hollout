@@ -444,7 +444,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             messagesAdapter.notifyDataSetChanged();
             mConversation.markAllMessagesAsRead();
         }
+
         invalidateEmptyView();
+        HolloutUtils.serializeMessages(messages,AppConstants.CONTACT_NAME);
     }
 
     private void sortMessages() {
