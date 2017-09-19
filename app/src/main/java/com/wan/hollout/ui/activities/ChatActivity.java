@@ -844,11 +844,15 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         EMMessage messageToReplyTo = AppConstants.selectedMessages.get(0);
         if (messageToReplyTo != null) {
             EMMessageBody messageBody = messageToReplyTo.getBody();
+
             try {
 
                 String senderName = messageToReplyTo.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
-                if (senderName != null) {
-                    replyMessageTitleView.setText(StringUtils.capitalize(senderName));
+                String senderId = messageToReplyTo.getStringAttribute(AppConstants.REAL_OBJECT_ID);
+
+                if (senderId != null && senderName != null) {
+                    replyMessageTitleView.setText(StringUtils.capitalize(senderId.equals(signedInUser.getString(AppConstants.REAL_OBJECT_ID))
+                            ?getString(R.string.you):senderName));
                 }
 
                 EMMessage.Type messageType = getMessageType(messageToReplyTo);
@@ -965,11 +969,22 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
             } catch (HyphenateException e) {
                 e.printStackTrace();
-                if (e.getDescription().contains("em_type")) {
+                HolloutLogger.d("MessageType", e.getMessage());
+                if (e.getMessage().contains(AppConstants.MESSAGE_ATTR_TYPE)) {
                     replyMessageSubTitleView.setText(((EMTextMessageBody) messageBody).getMessage());
+                }
+                if (e.getMessage().contains(AppConstants.FILE_CAPTION)) {
+                    replyMessageSubTitleView.setText((getString(R.string.photo)));
                 }
             }
 
+            closeReplyMessageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    UiUtils.blinkView(view);
+                    snackOutMessageReplyView(messageReplyView);
+                }
+            });
         }
 
     }
@@ -1806,10 +1821,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     protected void sendMessage(EMMessage newMessage) {
         String signedInUserDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+        String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
+
         newMessage.setAttribute(AppConstants.APP_USER_DISPLAY_NAME, signedInUserDisplayName);
         if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
             newMessage.setAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL, signedInUserPhotoUrl);
         }
+        newMessage.setAttribute(AppConstants.REAL_OBJECT_ID, signedInUserId.toLowerCase());
+
         EMClient.getInstance().chatManager().sendMessage(newMessage);
         //Send message here
         messages.add(0, newMessage);

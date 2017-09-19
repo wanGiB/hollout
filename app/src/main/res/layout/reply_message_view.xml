@@ -16,15 +16,15 @@
 
         <ImageView
             android:id="@+id/reply_to_a_message"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_centerVertical="true"
             android:layout_marginEnd="5dp"
-            android:layout_marginLeft="8dp"
+            android:layout_marginLeft="10dp"
             android:layout_marginRight="5dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="10dp"
             android:src="@drawable/reply_to_a_message"
-            tools:ignore="RtlHardcoded" />
+            tools:ignore="ContentDescription,RtlHardcoded" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -32,7 +32,8 @@
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/reply_to_a_message"
             android:layout_toRightOf="@id/reply_to_a_message"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            tools:ignore="RelativeOverlap">
 
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -44,7 +45,8 @@
                     android:layout_height="40dp"
                     android:layout_margin="3dp"
                     android:scaleType="centerCrop"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
 
                 <ImageView
                     android:id="@+id/play_reply_msg_if_video"
@@ -52,7 +54,8 @@
                     android:layout_height="15dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_play_circle_filled_white_48dp"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    tools:ignore="ContentDescription" />
 
             </FrameLayout>
 
@@ -71,9 +74,9 @@
                     android:id="@+id/reply_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Title"
+                    android:text=""
                     android:textColor="@color/colorPrimary"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     app:textStyle="medium" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
@@ -81,8 +84,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="2"
-                    android:text="Reply subtitle"
+                    android:text=" "
                     android:ellipsize="end"
+                    android:textSize="16sp"
                     android:textColor="@color/hollout_material_grey_600"
                     app:textStyle="medium" />
 
@@ -92,14 +96,16 @@
 
         <ImageView
             android:id="@+id/close_reply_message_view"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:src="@drawable/ic_action_navigation_close" />
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_action_navigation_close"
+            tools:ignore="ContentDescription" />
 
     </RelativeLayout>
 

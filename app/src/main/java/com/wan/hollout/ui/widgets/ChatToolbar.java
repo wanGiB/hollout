@@ -308,9 +308,11 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 break;
             case R.id.launch_user_profile:
                 if (recipientObject != null && recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-                    Intent userProfileIntent = new Intent(mContext, UserProfileActivity.class);
-                    userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, recipientObject);
-                    mContext.startActivity(userProfileIntent);
+                    if (actionModeBar.getVisibility() == GONE) {
+                        Intent userProfileIntent = new Intent(mContext, UserProfileActivity.class);
+                        userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, recipientObject);
+                        mContext.startActivity(userProfileIntent);
+                    }
                 } else if (recipientObject != null) {
                     //Start Group info activity here
                 }
@@ -338,7 +340,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         }
     }
 
-    public void justHideActionMode(){
+    public void justHideActionMode() {
         UiUtils.showView(actionModeBar, false);
         AppConstants.selectedMessagesPositions.clear();
     }
@@ -349,10 +351,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
         if (selectionCount > 1) {
             selectedItemCountView.setText(String.valueOf(selectionCount));
-            UiUtils.showView(replyToMessageView,false);
+            UiUtils.showView(replyToMessageView, false);
         } else {
             selectedItemCountView.setText(" ");
-            UiUtils.showView(replyToMessageView,true);
+            UiUtils.showView(replyToMessageView, true);
         }
 
         destroyActionModeView.setOnClickListener(new OnClickListener() {
@@ -366,7 +368,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
         });
 
-        if (selectionCount==0){
+        if (selectionCount == 0) {
             destroyActionModeView.performClick();
         }
 
@@ -375,7 +377,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             @Override
             public void onClick(View view) {
                 UiUtils.blinkView(view);
-                switch (view.getId()){
+                switch (view.getId()) {
                     case R.id.delete_message:
                         EventBus.getDefault().post(AppConstants.DELETE_ALL_SELECTED_MESSAGES);
                         break;

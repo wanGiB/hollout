@@ -235,7 +235,7 @@ public class MessageNotifier {
                         .setContentIntent(pendingIntent)
                         .setNumber(emMessages.size())
                         .setStyle(inboxStyle)
-                        .setSubText((emMessages.size() == 1 ? "1 message " : emMessages.size() + " messages"));
+                        .setSubText((emMessages.size() == 1 ? "1 new message " : emMessages.size() + " new messages"));
 
                 for (EMMessage message : emMessages) {
                     inboxStyle.addLine(UiUtils.fromHtml(getMessage(message)));
@@ -281,7 +281,7 @@ public class MessageNotifier {
                         .setContentIntent(pendingIntent)
                         .setNumber(emMessages.size())
                         .setStyle(inboxStyle)
-                        .setSubText((emMessages.size() == 1 ? "1 message " : emMessages.size() + " messages") + " from " + ((getConversationIds(emMessages).size() == 1) ? " 1 chat " : (getConversationIds(emMessages).size() + " chats")));
+                        .setSubText((emMessages.size() == 1 ? "1 new message " : emMessages.size() + " new messages") + " from " + ((getConversationIds(emMessages).size() == 1) ? " 1 chat " : (getConversationIds(emMessages).size() + " chats")));
 
                 for (EMMessage message : emMessages) {
                     try {
