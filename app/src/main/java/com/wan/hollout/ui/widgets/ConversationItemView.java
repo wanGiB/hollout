@@ -229,7 +229,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             applyIconAnimation();
             if (emConversation != null) {
                 int unreadMessagesCount = emConversation.getUnreadMsgCount();
-                if (unreadMessagesCount > 0) {
+                if (unreadMessagesCount > 0 && lastMessage.direct()== EMMessage.Direct.RECEIVE) {
                     UiUtils.showView(unreadMessagesCountView, true);
                     unreadMessagesCountView.setText(String.valueOf(unreadMessagesCount));
                     AppConstants.unreadMessagesPositions.put(getMessageId(), true);
