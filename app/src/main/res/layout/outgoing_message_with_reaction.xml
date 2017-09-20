@@ -25,10 +25,18 @@
         android:clipToPadding="false"
         android:orientation="vertical">
 
+        <com.wan.hollout.ui.widgets.MessageReplyRecyclerItemView
+            android:id="@+id/message_reply_recycler_item_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
         <ImageView
             android:id="@+id/attached_photo_or_video_thumbnail"
             android:layout_width="150dp"
             android:layout_height="150dp"
+            android:minWidth="150dp"
+            android:minHeight="150dp"
             android:padding="5dp"
             android:src="@drawable/ease_default_image"
             tools:ignore="ContentDescription" />

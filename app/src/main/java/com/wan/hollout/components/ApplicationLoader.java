@@ -11,12 +11,14 @@ import android.support.multidex.MultiDex;
 import com.afollestad.appthemeengine.ATE;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
+import com.hyphenate.chat.EMMessage;
 import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseLiveQueryClient;
 import com.parse.ParseLiveQueryClientCallbacks;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
@@ -24,11 +26,14 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.HolloutUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.fabric.sdk.android.Fabric;
 import okhttp3.OkHttpClient;
@@ -67,6 +72,18 @@ public class ApplicationLoader extends Application {
         startAppInstanceDetector();
         defaultSystemEmojiPref();
         HolloutCommunicationsManager.getInstance().init(this);
+
+        HolloutUtils.deserializeMessages(AppConstants.UNREAD_MESSAGES, new DoneCallback<List<EMMessage>>() {
+
+            @Override
+            public void done(List<EMMessage> result, Exception e) {
+                if (result != null) {
+                    HolloutCommunicationsManager.getInstance().getNotifier().onNewMsg(result);
+                }
+            }
+
+        });
+
     }
 
     private void startAppInstanceDetector() {

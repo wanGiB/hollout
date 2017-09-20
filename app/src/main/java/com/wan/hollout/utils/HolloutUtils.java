@@ -383,6 +383,10 @@ public class HolloutUtils {
         return new Gson().toJson(additionalPhotosOfUser, listType);
     }
 
+    public static Gson getGson(){
+        return new Gson();
+    }
+
     public static List<String> extractAdditionalPhotosFromString(String string) {
         if (StringUtils.isNotEmpty(string)) {
             Type listType = new TypeToken<List<String>>() {

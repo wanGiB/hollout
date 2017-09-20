@@ -137,6 +137,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @BindView(R.id.link_preview)
     LinkPreview linkPreview;
 
+    @Nullable
+    @BindView(R.id.message_reply_recycler_item_view)
+    MessageReplyRecyclerItemView messageReplyRecyclerItemView;
+
     private EMMessage message;
     private Activity activity;
 
@@ -233,6 +237,11 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
         handleCommonalities();
         refreshViews();
+
+    }
+
+    private void setupMessageRply0View(String messageString)
+    {
 
     }
 

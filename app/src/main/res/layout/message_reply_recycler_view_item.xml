@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/grey_100"
+    android:orientation="horizontal"
+    android:padding="2dp">
+
+    <LinearLayout
+        android:id="@+id/message_reply_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@+id/blockquote_view"
+        android:layout_toRightOf="@+id/blockquote_view"
+        android:orientation="horizontal"
+        tools:ignore="DisableBaselineAlignment">
+
+        <LinearLayout
+            android:id="@+id/content_view"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.8"
+            android:orientation="vertical"
+            tools:ignore="UselessParent">
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/reply_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
+                android:paddingStart="5dp"
+                android:paddingTop="3dp"
+                android:text="@string/you"
+                android:textColor="@color/hollout_color_five"
+                android:textSize="14sp"
+                app:textStyle="bold"
+                tools:ignore="RtlSymmetry" />
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/reply_message_body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
+                android:paddingStart="5dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text="@string/app_intro_message"
+                app:textStyle="none"
+                tools:ignore="RtlSymmetry" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/reply_attachment_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/reply_icon"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_margin="3dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/authentication_background_image"
+                android:visibility="visible"
+                tools:ignore="ContentDescription" />
+
+            <ImageView
+                android:id="@+id/play_reply_msg_if_video"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_play_circle_filled_white_48dp"
+                android:visibility="visible"
+                tools:ignore="ContentDescription" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/blockquote_view"
+        android:layout_width="3dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/message_reply_view"
+        android:layout_alignTop="@id/message_reply_view"
+        android:background="@color/hollout_color_four"
+        android:paddingLeft="3dp"
+        android:paddingStart="3dp"
+        tools:ignore="RtlSymmetry" />
+
+</RelativeLayout>

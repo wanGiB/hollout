@@ -278,7 +278,7 @@ public class HolloutCommunicationsManager {
 
     }
 
-    private MessageNotifier getNotifier() {
+    public MessageNotifier getNotifier() {
         return mNotifier;
     }
 

@@ -50,9 +50,10 @@ import java.util.concurrent.FutureTask;
  */
 public class MessageNotifier {
 
-    private final static String[] msgStandIns = {"Photo", "Voice Note",
-            "Location", "Video", "Audio", "Contact", "Document", "GIF", "Reaction"
+    private final static String[] msgStandIns = {"&#x1f4f7; Photo", "&#x1f3a4; Voice Note",
+            "&#x2316; Location", "&#x1f4f7; Video", "&#x1f3a4; Audio", "&#x260e; Contact", "sent a Document", "Sent a GIF", "Reaction"
     };
+
     private Context appContext;
 
     public static MessageNotifier getInstance() {
@@ -135,7 +136,6 @@ public class MessageNotifier {
         return "New Message";
     }
 
-
     private boolean fromSameSender(List<EMMessage> messages) {
         List<String> senders = new ArrayList<>();
         for (EMMessage emMessage : messages) {
@@ -186,7 +186,7 @@ public class MessageNotifier {
                     e.printStackTrace();
                 }
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
-                builder.setContentTitle(senderName);
+                builder.setContentTitle(WordUtils.capitalize(senderName));
                 Spanned messageSpannable = UiUtils.fromHtml(getMessage(message));
                 builder.setContentText(messageSpannable);
                 builder.setTicker(messageSpannable);
@@ -201,7 +201,7 @@ public class MessageNotifier {
                 builder.setAutoCancel(true);
                 builder.setContentIntent(pendingIntent);
                 builder.setContentText(messageSpannable);
-                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(messageSpannable).setBigContentTitle(senderName));
+                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(messageSpannable).setBigContentTitle(WordUtils.capitalize(senderName)));
                 builder.setSubText("1 New Message");
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;
@@ -219,7 +219,6 @@ public class MessageNotifier {
             appContext = ApplicationLoader.getInstance();
         }
         HolloutCommunicationsManager.getInstance().execute(new Runnable() {
-
             @Override
             public void run() {
                 Intent userProfileIntent = new Intent(appContext, ChatActivity.class);
@@ -245,7 +244,6 @@ public class MessageNotifier {
                         .setNumber(emMessages.size())
                         .setStyle(inboxStyle)
                         .setSubText((emMessages.size() == 1 ? "1 new message " : emMessages.size() + " new messages"));
-
                 for (EMMessage message : emMessages) {
                     inboxStyle.addLine(UiUtils.fromHtml(getMessage(message)));
                 }

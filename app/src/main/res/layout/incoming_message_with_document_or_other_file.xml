@@ -22,6 +22,12 @@
         android:animateLayoutChanges="true"
         android:background="@drawable/bubble_incoming">
 
+        <com.wan.hollout.ui.widgets.MessageReplyRecyclerItemView
+            android:id="@+id/message_reply_recycler_item_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
         <LinearLayout
             android:id="@+id/document_data_layout"
             android:layout_width="wrap_content"
@@ -29,6 +35,7 @@
             android:orientation="horizontal"
             android:paddingEnd="10dp"
             android:paddingLeft="10dp"
+            android:layout_below="@+id/message_reply_recycler_item_view"
             android:paddingRight="10dp"
             android:paddingStart="10dp"
             android:visibility="visible">

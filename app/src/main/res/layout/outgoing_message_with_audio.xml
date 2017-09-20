@@ -21,9 +21,16 @@
         android:layout_marginStart="10dp"
         android:background="@drawable/bubble_outgoing">
 
+        <com.wan.hollout.ui.widgets.MessageReplyRecyclerItemView
+            android:id="@+id/message_reply_recycler_item_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
         <com.wan.hollout.ui.widgets.AudioView
             android:id="@+id/audio_view"
             android:layout_width="250dp"
+            android:layout_below="@+id/message_reply_recycler_item_view"
             android:layout_height="wrap_content"
             android:visibility="visible" />
 

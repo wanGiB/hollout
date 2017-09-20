@@ -842,6 +842,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     public void snackInMessageReplyView(View view) {
         UiUtils.showView(view, true);
         EMMessage messageToReplyTo = AppConstants.selectedMessages.get(0);
+
+        String messageString = HolloutUtils.getGson().toJson(messageToReplyTo,EMMessage.class);
+        HolloutLogger.d("GsonString",messageString);
+
         if (messageToReplyTo != null) {
             EMMessageBody messageBody = messageToReplyTo.getBody();
 
@@ -925,7 +929,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             loadVideoFromPath(replyIconView, emVideoMessageBody.getLocalThumb());
                         }
                     }
-
                 }
 
                 if (messageType == EMMessage.Type.LOCATION) {
