@@ -10,6 +10,9 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -75,7 +78,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     DotLoader typingIndicator;
 
     @BindView(R.id.action_mode_bar)
-    View actionModeBar;
+    RelativeLayout actionModeBar;
 
     @BindView(R.id.reply_to_a_message)
     ImageView replyToMessageView;

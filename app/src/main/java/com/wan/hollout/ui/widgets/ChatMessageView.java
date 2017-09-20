@@ -401,7 +401,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         String filePath = messageBody.getLocalUrl();
 
         File file = new File(filePath);
-
         if (file.exists()) {
             filePath = messageBody.getLocalUrl();
         } else {
