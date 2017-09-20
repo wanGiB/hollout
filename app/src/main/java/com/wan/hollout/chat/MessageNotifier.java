@@ -7,7 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spanned;
 
@@ -157,45 +163,38 @@ public class MessageNotifier {
     }
 
     public void sendSingleNotification(final EMMessage message, final ParseObject sender) {
-
         if (appContext == null) {
             appContext = ApplicationLoader.getInstance();
         }
-
         HolloutCommunicationsManager.getInstance().execute(new Runnable() {
 
             @Override
             public void run() {
-
                 Intent userProfileIntent = new Intent(appContext, ChatActivity.class);
                 userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, sender);
-
                 PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 String senderName = appContext.getString(R.string.app_name);
-
                 try {
                     senderName = message.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
                 } catch (HyphenateException e) {
                     e.printStackTrace();
                 }
-
                 String senderPhoto = null;
                 try {
                     senderPhoto = message.getStringAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                 } catch (HyphenateException e) {
                     e.printStackTrace();
                 }
-
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
                 builder.setContentTitle(senderName);
                 Spanned messageSpannable = UiUtils.fromHtml(getMessage(message));
                 builder.setContentText(messageSpannable);
                 builder.setTicker(messageSpannable);
-                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setSmallIcon(R.mipmap.ic_launcher_round);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
-                Bitmap notificationInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
+                Bitmap notificationInitiatorBitmap = getCircleBitmap(BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher));
                 if (StringUtils.isNotEmpty(senderPhoto)) {
-                    notificationInitiatorBitmap = getBitmapFromURL(senderPhoto);
+                    notificationInitiatorBitmap = getCircleBitmap(getBitmapFromURL(senderPhoto));
                 }
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                 builder.setLargeIcon(notificationInitiatorBitmap);
@@ -223,31 +222,25 @@ public class MessageNotifier {
 
             @Override
             public void run() {
-
                 Intent userProfileIntent = new Intent(appContext, ChatActivity.class);
                 userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
-
                 PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
                 String senderName = WordUtils.capitalize(parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
                 String senderPhoto = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
                 Spanned messageSpannable = UiUtils.fromHtml(EMClient.getInstance().chatManager().getUnreadMessageCount() + " new messages");
                 builder.setTicker(messageSpannable);
-                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setSmallIcon(R.mipmap.ic_launcher_round);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
-                Bitmap notifInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
+                Bitmap notificationInitiatorBitmap = getCircleBitmap(BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher));
                 if (StringUtils.isNotEmpty(senderPhoto)) {
-                    notifInitiatorBitmap = getBitmapFromURL(senderPhoto);
+                    notificationInitiatorBitmap = getCircleBitmap(getBitmapFromURL(senderPhoto));
                 }
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                 builder.setAutoCancel(true);
-
                 NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-
                 builder.setContentTitle(WordUtils.capitalize(senderName))
-                        .setLargeIcon(notifInitiatorBitmap)
+                        .setLargeIcon(notificationInitiatorBitmap)
                         .setContentIntent(pendingIntent)
                         .setNumber(emMessages.size())
                         .setStyle(inboxStyle)
@@ -256,7 +249,6 @@ public class MessageNotifier {
                 for (EMMessage message : emMessages) {
                     inboxStyle.addLine(UiUtils.fromHtml(getMessage(message)));
                 }
-
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;
                 notification.defaults |= Notification.DEFAULT_VIBRATE;
@@ -276,29 +268,23 @@ public class MessageNotifier {
 
             @Override
             public void run() {
-
                 Intent mainIntent = new Intent(appContext, MainActivity.class);
-
                 PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
                 Spanned messageSpannable = UiUtils.fromHtml(EMClient.getInstance().chatManager().getUnreadMessageCount() + " new messages");
                 builder.setTicker(messageSpannable);
-                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setSmallIcon(R.mipmap.ic_launcher_round);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
-                Bitmap notifInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
+                Bitmap notificationInitiatorBitmap = getCircleBitmap(BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher));
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                 builder.setAutoCancel(true);
-
                 NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-
                 builder.setContentTitle(WordUtils.capitalize(appContext.getString(R.string.app_name)))
-                        .setLargeIcon(notifInitiatorBitmap)
+                        .setLargeIcon(notificationInitiatorBitmap)
                         .setContentIntent(pendingIntent)
                         .setNumber(emMessages.size())
                         .setStyle(inboxStyle)
                         .setSubText((emMessages.size() == 1 ? "1 new message " : emMessages.size() + " new messages") + " from " + ((getConversationIds(emMessages).size() == 1) ? " 1 chat " : (getConversationIds(emMessages).size() + " chats")));
-
                 for (EMMessage message : emMessages) {
                     try {
                         inboxStyle.addLine(UiUtils.fromHtml(message.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME) + ":" + getMessage(message)));
@@ -306,7 +292,6 @@ public class MessageNotifier {
                         e.printStackTrace();
                     }
                 }
-
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;
                 notification.defaults |= Notification.DEFAULT_VIBRATE;
@@ -345,6 +330,23 @@ public class MessageNotifier {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private Bitmap getCircleBitmap(Bitmap bitmap){
+        Bitmap output=Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+        int color = Color.RED;
+        Paint paint = new Paint();
+        Rect rect = new Rect(0,0,bitmap.getWidth(),bitmap.getHeight());
+        RectF rectF = new RectF(rect);
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0,0,0,0);
+        paint.setColor(color);
+        canvas.drawOval(rectF,paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap,rect,rect,paint);
+        bitmap.recycle();
+        return output;
     }
 
 }
