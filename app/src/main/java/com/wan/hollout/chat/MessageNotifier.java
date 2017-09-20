@@ -45,7 +45,7 @@ import java.util.concurrent.FutureTask;
 public class MessageNotifier {
 
     private final static String[] msgStandIns = {"Photo", "Voice Note",
-            "Location", "Video", "Audio", "Contact", "Document"
+            "Location", "Video", "Audio", "Contact", "Document", "GIF", "Reaction"
     };
     private Context appContext;
 
@@ -86,6 +86,22 @@ public class MessageNotifier {
 
     public String getMessage(EMMessage message) {
         if (message.getType() == EMMessage.Type.TXT) {
+            try {
+                String messageAttributeType = message.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
+                if (messageAttributeType != null) {
+                    switch (messageAttributeType) {
+                        case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
+                            return msgStandIns[8];
+                        case AppConstants.MESSAGE_ATTR_TYPE_GIF:
+                            return msgStandIns[7];
+                    }
+                } else {
+                    return ((EMTextMessageBody) message.getBody()).getMessage();
+                }
+            } catch (HyphenateException e) {
+                e.printStackTrace();
+                return ((EMTextMessageBody) message.getBody()).getMessage();
+            }
             return ((EMTextMessageBody) message.getBody()).getMessage();
         } else if (message.getType() == EMMessage.Type.IMAGE) {
             return msgStandIns[0];
@@ -177,12 +193,12 @@ public class MessageNotifier {
                 builder.setTicker(messageSpannable);
                 builder.setSmallIcon(R.mipmap.ic_launcher);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
-                Bitmap notifInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
+                Bitmap notificationInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
                 if (StringUtils.isNotEmpty(senderPhoto)) {
-                    notifInitiatorBitmap = getBitmapFromURL(senderPhoto);
+                    notificationInitiatorBitmap = getBitmapFromURL(senderPhoto);
                 }
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
-                builder.setLargeIcon(notifInitiatorBitmap);
+                builder.setLargeIcon(notificationInitiatorBitmap);
                 builder.setAutoCancel(true);
                 builder.setContentIntent(pendingIntent);
                 builder.setContentText(messageSpannable);
@@ -285,7 +301,7 @@ public class MessageNotifier {
 
                 for (EMMessage message : emMessages) {
                     try {
-                        inboxStyle.addLine(UiUtils.fromHtml(message.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME)+":"+getMessage(message)));
+                        inboxStyle.addLine(UiUtils.fromHtml(message.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME) + ":" + getMessage(message)));
                     } catch (HyphenateException e) {
                         e.printStackTrace();
                     }

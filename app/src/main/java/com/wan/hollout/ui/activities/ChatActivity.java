@@ -852,7 +852,11 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
                 if (senderId != null && senderName != null) {
                     replyMessageTitleView.setText(StringUtils.capitalize(senderId.equals(signedInUser.getString(AppConstants.REAL_OBJECT_ID))
-                            ?getString(R.string.you):senderName));
+                            ? getString(R.string.you) : senderName));
+                } else {
+                    if (senderName != null) {
+                        replyMessageTitleView.setText(StringUtils.capitalize(messageToReplyTo.direct() == EMMessage.Direct.SEND ? getString(R.string.you) : senderName));
+                    }
                 }
 
                 EMMessage.Type messageType = getMessageType(messageToReplyTo);
@@ -981,7 +985,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             closeReplyMessageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    UiUtils.blinkView(view);
                     snackOutMessageReplyView(messageReplyView);
                 }
             });

@@ -74,21 +74,19 @@
                     android:id="@+id/reply_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text=""
                     android:textColor="@color/colorPrimary"
                     android:textSize="18sp"
-                    app:textStyle="medium" />
+                    app:textStyle="bold" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/reply_subtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="2"
-                    android:text=" "
                     android:ellipsize="end"
                     android:textSize="16sp"
                     android:textColor="@color/hollout_material_grey_600"
-                    app:textStyle="medium" />
+                    app:textStyle="none" />
 
             </LinearLayout>
 

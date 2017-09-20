@@ -761,6 +761,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         switch (v.getId()) {
             case R.id.message_container:
             case R.id.conversation_message_view:
+            case R.id.attached_photo_or_video_thumbnail:
                 if (getChatActivity().getChatToolbar().isActionModeActivated()) {
                     updateActionMode();
                 } else {
