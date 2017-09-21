@@ -20,6 +20,7 @@ import android.text.Spanned;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMMessage;
 import com.hyphenate.chat.EMTextMessageBody;
+import com.hyphenate.chat.EMVideoMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
@@ -117,7 +118,8 @@ public class MessageNotifier {
         } else if (message.getType() == EMMessage.Type.LOCATION) {
             return msgStandIns[2];
         } else if (message.getType() == EMMessage.Type.VIDEO) {
-            return msgStandIns[3];
+            long videoLength = ((EMVideoMessageBody) message.getBody()).getDuration();
+            return msgStandIns[3] + "<b> (" + UiUtils.getTimeString(videoLength) + ")</b>)";
         } else if (message.getType() == EMMessage.Type.FILE) {
             try {
                 String fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
@@ -330,19 +332,19 @@ public class MessageNotifier {
         return null;
     }
 
-    private Bitmap getCircleBitmap(Bitmap bitmap){
-        Bitmap output=Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+    private Bitmap getCircleBitmap(Bitmap bitmap) {
+        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
         int color = Color.RED;
         Paint paint = new Paint();
-        Rect rect = new Rect(0,0,bitmap.getWidth(),bitmap.getHeight());
+        Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
         RectF rectF = new RectF(rect);
         paint.setAntiAlias(true);
-        canvas.drawARGB(0,0,0,0);
+        canvas.drawARGB(0, 0, 0, 0);
         paint.setColor(color);
-        canvas.drawOval(rectF,paint);
+        canvas.drawOval(rectF, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap,rect,rect,paint);
+        canvas.drawBitmap(bitmap, rect, rect, paint);
         bitmap.recycle();
         return output;
     }

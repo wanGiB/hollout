@@ -837,23 +837,18 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         UiUtils.showView(view, false);
         AppConstants.selectedMessages.clear();
         AppConstants.selectedMessagesPositions.clear();
+        composeText.setHint(getString(R.string.compose_message));
     }
 
     public void snackInMessageReplyView(View view) {
         UiUtils.showView(view, true);
         EMMessage messageToReplyTo = AppConstants.selectedMessages.get(0);
-
-        String messageString = HolloutUtils.getGson().toJson(messageToReplyTo,EMMessage.class);
-        HolloutLogger.d("GsonString",messageString);
-
+        composeText.setHint("Reply this message");
         if (messageToReplyTo != null) {
             EMMessageBody messageBody = messageToReplyTo.getBody();
-
             try {
-
                 String senderName = messageToReplyTo.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
                 String senderId = messageToReplyTo.getStringAttribute(AppConstants.REAL_OBJECT_ID);
-
                 if (senderId != null && senderName != null) {
                     replyMessageTitleView.setText(StringUtils.capitalize(senderId.equals(signedInUser.getString(AppConstants.REAL_OBJECT_ID))
                             ? getString(R.string.you) : senderName));
@@ -862,14 +857,12 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         replyMessageTitleView.setText(StringUtils.capitalize(messageToReplyTo.direct() == EMMessage.Direct.SEND ? getString(R.string.you) : senderName));
                     }
                 }
-
                 EMMessage.Type messageType = getMessageType(messageToReplyTo);
-
                 if (messageType == EMMessage.Type.TXT) {
-                    HolloutLogger.d("MessageType", "Message Type is Text");
                     EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageBody;
                     String messageAttributeType = messageToReplyTo.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
                     if (messageAttributeType != null) {
+                        HolloutLogger.d("MessageType", "Message Type is Text");
                         switch (messageAttributeType) {
                             case AppConstants.MESSAGE_ATTR_TYPE_GIF:
                                 String gifUrl = messageToReplyTo.getStringAttribute(AppConstants.GIF_URL);
@@ -918,7 +911,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     EMVideoMessageBody emVideoMessageBody = (EMVideoMessageBody) messageBody;
                     String remoteVideoThumbnailUrl = emVideoMessageBody.getThumbnailUrl();
                     File localThumbFile = new File(emVideoMessageBody.getLocalThumb());
-
                     if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
                         HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
                         UiUtils.loadImage(ChatActivity.this, emVideoMessageBody.getThumbnailUrl(), replyIconView);
@@ -1582,6 +1574,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         messages.add(0, emMessage);
                         messagesAdapter.notifyDataSetChanged();
                         UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
+                        prioritizeConversation();
                     } else {
                         List<EMMessage> emMessages = new ArrayList<>();
                         emMessages.add(emMessage);
@@ -1828,13 +1821,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         String signedInUserDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
-
         newMessage.setAttribute(AppConstants.APP_USER_DISPLAY_NAME, signedInUserDisplayName);
         if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
             newMessage.setAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL, signedInUserPhotoUrl);
         }
         newMessage.setAttribute(AppConstants.REAL_OBJECT_ID, signedInUserId.toLowerCase());
-
+        if (messageReplyView.getVisibility() == View.VISIBLE && !AppConstants.selectedMessages.isEmpty()) {
+            newMessage.setAttribute(AppConstants.REPLIED_MESSAGE_ID, AppConstants.selectedMessages.get(0).getMsgId());
+        }
         EMClient.getInstance().chatManager().sendMessage(newMessage);
         //Send message here
         messages.add(0, newMessage);
@@ -1843,6 +1837,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         messagesRecyclerView.smoothScrollToPosition(0);
         emptyComposeText();
         HolloutPreferences.updateConversationTime(recipientId);
+        snackOutMessageReplyView(messageReplyView);
+        prioritizeConversation();
         if (!isAContact()) {
             if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
                 checkAndSendChatRequest();
@@ -1858,6 +1854,10 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 }
             });
         }
+    }
+
+    private void prioritizeConversation() {
+        AppConstants.recentConversations.add(0, recipientProperties);
     }
 
     private boolean isAContact() {

@@ -65,8 +65,10 @@ public class FetchUserInfoService extends IntentService {
                         }
                     }else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE) && unreadMessage!=null){
                         MessageNotifier.getInstance().init(FetchUserInfoService.this).sendSingleNotification(unreadMessage,userObject);
+                        AppConstants.recentConversations.add(0,userObject);
                     }else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE) && unreadMessagesFromSameSender!=null){
                         MessageNotifier.getInstance().init(FetchUserInfoService.this).sendSameSenderNotification(unreadMessagesFromSameSender,userObject);
+                        AppConstants.recentConversations.add(0,userObject);
                     }
                 }
             }

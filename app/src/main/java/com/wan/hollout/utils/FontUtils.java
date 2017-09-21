@@ -53,6 +53,8 @@ public class FontUtils {
                 break;
             case 8:
                 return Typeface.DEFAULT;
+            case 9:
+                return Typeface.DEFAULT_BOLD;
             default:
                 font = FontUtils.FONT_REGULAR;
                 break;

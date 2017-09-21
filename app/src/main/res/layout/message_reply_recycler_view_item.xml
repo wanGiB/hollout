@@ -4,8 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="@color/grey_100"
+    android:background="@drawable/message_reply_background"
     android:orientation="horizontal"
+    android:clickable="true"
+    android:foreground="?attr/selectableItemBackground"
     android:padding="2dp">
 
     <LinearLayout
@@ -32,10 +34,10 @@
                 android:paddingLeft="5dp"
                 android:paddingStart="5dp"
                 android:paddingTop="3dp"
-                android:text="@string/you"
+                android:text="@string/someone"
                 android:textColor="@color/hollout_color_five"
                 android:textSize="14sp"
-                app:textStyle="bold"
+                app:textStyle="bold_normal"
                 tools:ignore="RtlSymmetry" />
 
             <com.wan.hollout.ui.widgets.HolloutTextView
@@ -46,8 +48,10 @@
                 android:paddingStart="5dp"
                 android:paddingTop="3dp"
                 android:paddingBottom="3dp"
-                android:text="@string/app_intro_message"
+                android:text="@string/replied_to_this"
                 app:textStyle="none"
+                android:paddingEnd="5dp"
+                android:paddingRight="5dp"
                 tools:ignore="RtlSymmetry" />
 
         </LinearLayout>
@@ -55,6 +59,7 @@
         <FrameLayout
             android:id="@+id/reply_attachment_view"
             android:layout_width="wrap_content"
+            android:visibility="gone"
             android:layout_height="wrap_content">
 
             <ImageView

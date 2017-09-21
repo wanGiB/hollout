@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -17,6 +18,9 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -46,7 +50,6 @@ import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
-import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -141,6 +144,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @BindView(R.id.message_reply_recycler_item_view)
     MessageReplyRecyclerItemView messageReplyRecyclerItemView;
 
+    @Nullable
+    @BindView(R.id.content_view)
+    ViewGroup contentView;
+
     private EMMessage message;
     private Activity activity;
 
@@ -234,15 +241,66 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (messageType == EMMessage.Type.LOCATION) {
             setupLocationMessage((EMLocationMessageBody) messageBody);
         }
-
+        handleRepliedMessageIfAvailable();
+        registerViewTreeObserver();
         handleCommonalities();
-        refreshViews();
 
+        refreshViews();
     }
 
-    private void setupMessageRply0View(String messageString)
-    {
+    //Setup message reply
+    private void handleRepliedMessageIfAvailable() {
+        try {
+            String repliedMessageId = message.getStringAttribute(AppConstants.REPLIED_MESSAGE_ID);
+            if (repliedMessageId != null) {
+                EMMessage repliedMessage = EMClient.getInstance().chatManager().getMessage(repliedMessageId);
+                if (repliedMessage != null) {
+                    UiUtils.showView(messageReplyRecyclerItemView, true);
+                    AppConstants.repliedMessagePositions.put(getMessageHash(), true);
+                    messageReplyRecyclerItemView.bindMessageReply(activity, repliedMessage);
+                } else {
+                    UiUtils.showView(messageReplyRecyclerItemView, false);
+                    AppConstants.repliedMessagePositions.put(getMessageHash(), false);
+                }
+            } else {
+                UiUtils.showView(messageReplyRecyclerItemView, false);
+                AppConstants.repliedMessagePositions.put(getMessageHash(), false);
+            }
+        } catch (HyphenateException e) {
+            e.printStackTrace();
+            UiUtils.showView(messageReplyRecyclerItemView, false);
+            AppConstants.repliedMessagePositions.put(getMessageHash(), false);
+        }
+    }
 
+    private void registerViewTreeObserver() {
+        ViewTreeObserver viewTreeObserver = getViewTreeObserver();
+        if (viewTreeObserver.isAlive()) {
+            viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    getViewTreeObserver().removeOnPreDrawListener(this);
+                    checkAndRedrawSomeViews();
+                    return true;
+                }
+            });
+        }
+    }
+
+    private void checkAndRedrawSomeViews() {
+        if (contentView != null && messageReplyRecyclerItemView != null && messageReplyRecyclerItemView.getVisibility() == VISIBLE) {
+
+            int messageBubbleWidth = messageBubbleLayout.getWidth();
+
+            ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
+            layoutParams.width = messageBubbleWidth;
+            contentView.setLayoutParams(layoutParams);
+
+            ViewGroup.LayoutParams messageReplyViewLayoutParams =
+                    messageReplyRecyclerItemView.getLayoutParams();
+            messageReplyViewLayoutParams.width = messageBubbleWidth;
+            messageReplyRecyclerItemView.setLayoutParams(messageReplyViewLayoutParams);
+        }
     }
 
     private void setupLocationMessage(EMLocationMessageBody messageBody) {
@@ -304,10 +362,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             if (StringUtils.isNotEmpty(documentName)) {
                 documentNameAndSizeView.setText(documentName + "\n" + documentSize);
             }
-
             String documentLocalUrl = messageBody.getLocalUrl();
             String documentRemoteUrl = messageBody.getRemoteUrl();
-
         } catch (HyphenateException e) {
             e.printStackTrace();
         }
@@ -353,6 +409,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     message.getStringAttribute(AppConstants.FILE_CAPTION) : activity.getString(R.string.audio);
 
             File localFilePath = new File(emFileMessageBody.getLocalUrl());
+
             if (localFilePath.exists()) {
                 //Local File exists
                 audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, audioDuration);
@@ -408,7 +465,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void setupImageMessage(EMImageMessageBody messageBody) {
 
         String filePath = messageBody.getLocalUrl();
-
         File file = new File(filePath);
         if (file.exists()) {
             filePath = messageBody.getLocalUrl();
@@ -743,6 +799,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         UiUtils.showView(messageBodyView, AppConstants.messageBodyPositions.get(getMessageHash()));
         UiUtils.showView(playMediaIfVideoIcon, AppConstants.playableVideoPositions.get(getMessageHash()));
         UiUtils.showView(linkPreview, AppConstants.linkPreviewPositions.get(getMessageHash()));
+        UiUtils.showView(messageReplyRecyclerItemView, AppConstants.repliedMessagePositions.get(getMessageHash()));
         invalidateMessageBubble();
     }
 

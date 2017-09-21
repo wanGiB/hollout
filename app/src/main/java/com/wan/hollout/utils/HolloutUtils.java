@@ -45,6 +45,7 @@ import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.hyphenate.chat.EMMessage;
+import com.hyphenate.chat.EMMessageBody;
 import com.hyphenate.util.EMLog;
 import com.hyphenate.util.PathUtil;
 import com.parse.ParseInstallation;
@@ -995,6 +996,14 @@ public class HolloutUtils {
         String path = PathUtil.getInstance().getImagePath()+"/"+ "th"+thumbImageName;
         EMLog.d("msg", "thum image path:" + path);
         return path;
+    }
+
+    private static EMMessage.Type getMessageType(EMMessage message) {
+        return message.getType();
+    }
+
+    private static EMMessage.Direct getMessageDirection(EMMessage message) {
+        return message.direct();
     }
 
 }

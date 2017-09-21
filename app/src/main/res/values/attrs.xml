@@ -109,6 +109,7 @@
         <enum name="colophon" value="6" />
         <enum name="font_awesome" value="7" />
         <enum name="none" value="8" />
+        <enum name="bold_normal" value="9"/>
     </attr>
 
     <attr name="text_animationStyle" format="enum">

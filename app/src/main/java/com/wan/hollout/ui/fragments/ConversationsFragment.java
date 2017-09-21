@@ -148,8 +148,8 @@ public class ConversationsFragment extends Fragment {
                     fetchConversations(0);
                 }
             });
-        }else{
-            UiUtils.toggleFlipperState(contentFlipper,1);
+        } else {
+            UiUtils.toggleFlipperState(contentFlipper, 1);
         }
     }
 
@@ -206,8 +206,8 @@ public class ConversationsFragment extends Fragment {
                 }
 
             });
-        }else {
-            UiUtils.toggleFlipperState(contentFlipper,1);
+        } else {
+            UiUtils.toggleFlipperState(contentFlipper, 1);
         }
     }
 
@@ -215,7 +215,7 @@ public class ConversationsFragment extends Fragment {
         if (conversations.isEmpty()) {
             UiUtils.toggleFlipperState(contentFlipper, 1);
         }
-        if (errorCode == ParseException.CONNECTION_FAILED && getActivity()!=null) {
+        if (errorCode == ParseException.CONNECTION_FAILED && getActivity() != null) {
             errorTextView.setText(getString(R.string.network_error));
             errorTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -243,8 +243,29 @@ public class ConversationsFragment extends Fragment {
         super.onResume();
         initSignedInUser();
         checkAndRegEventBus();
+        refreshConversations();
         invalidateAdapter();
-        fetchConversations(0);
+        AppConstants.recentConversations.clear();
+    }
+
+    private void refreshConversations() {
+        if (!AppConstants.recentConversations.isEmpty()) {
+            for (ParseObject parseObject : AppConstants.recentConversations) {
+                ConversationItem conversationItem = new ConversationItem(parseObject,
+                        HolloutPreferences.getLastConversationTime(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
+                if (conversations.isEmpty()) {
+                    conversations.add(conversationItem);
+                } else {
+                    int indexOfConversationItem = conversations.indexOf(conversationItem);
+                    if (indexOfConversationItem == -1) {
+                        conversations.add(0,conversationItem);
+                    }else{
+                        Collections.swap(conversations,0,indexOfConversationItem);
+                    }
+                }
+            }
+            invalidateEmptyView();
+        }
     }
 
     private void invalidateAdapter() {

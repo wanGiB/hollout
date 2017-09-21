@@ -4,6 +4,7 @@ import android.provider.MediaStore;
 import android.util.SparseBooleanArray;
 
 import com.hyphenate.chat.EMMessage;
+import com.parse.ParseObject;
 import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
 
 import java.text.SimpleDateFormat;
@@ -240,6 +241,7 @@ public class AppConstants {
     public static final String FILE_NAME = "file_name";
     public static final String FILE_SIZE = "file_size";
     public static final String UNREAD_MESSAGES = "unread_messages_";
+    public static final String REPLIED_MESSAGE_ID = "replied_message_id";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
@@ -327,6 +329,12 @@ public class AppConstants {
     public static SparseBooleanArray onlinePositions = new SparseBooleanArray();
     public static SparseBooleanArray fileSizeOrDurationPositions = new SparseBooleanArray();
     public static SparseBooleanArray playableVideoPositions = new SparseBooleanArray();
+    public static SparseBooleanArray repliedMessagePositions = new SparseBooleanArray();
+    public static SparseBooleanArray messageReplyAttachmentPositions = new SparseBooleanArray();
+    public static SparseBooleanArray messageReplyAttachmentGifPositions = new SparseBooleanArray();
+    public static SparseBooleanArray messageReplyAttachmentMediaPlayPositions = new SparseBooleanArray();
+
+    public static ArrayList<ParseObject>recentConversations = new ArrayList<>();
 
     public static SparseBooleanArray wavePositions = new SparseBooleanArray();
 
