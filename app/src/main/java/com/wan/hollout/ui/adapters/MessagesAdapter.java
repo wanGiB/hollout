@@ -2,6 +2,8 @@ package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.drawable.TransitionDrawable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,8 +66,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private static Animation bounceAnimation;
 
-    private void initBounceAnimation(Context context){
-        bounceAnimation = AnimationUtils.loadAnimation(context,R.anim.bounce);
+    private void initBounceAnimation(Context context) {
+        bounceAnimation = AnimationUtils.loadAnimation(context, R.anim.bounce);
         bounceAnimation.setDuration(500);
         bounceAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
     }
@@ -243,8 +245,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         public void bindMessage(Activity context, EMMessage emMessage) {
             chatMessageView.bindData(context, emMessage);
-            if (AppConstants.bounceablePositions.get(emMessage.getMsgId().hashCode())){
-                itemView.startAnimation(bounceAnimation);
+            if (AppConstants.bounceablePositions.get(emMessage.getMsgId().hashCode())) {
+                itemView.setBackground(ContextCompat.getDrawable(context, R.drawable.background_color_transition));
+                TransitionDrawable transition = (TransitionDrawable) itemView.getBackground();
+                transition.setCrossFadeEnabled(true);
+                transition.startTransition(3000);
+//                itemView.startAnimation(bounceAnimation);
                 AppConstants.bounceablePositions.clear();
             }
         }
