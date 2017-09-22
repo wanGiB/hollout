@@ -1626,7 +1626,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     if (emMessage!=null){
                         int indexOfMessage = messages.indexOf(emMessage);
                         if (indexOfMessage!=-1){
-                            messagesRecyclerView.scrollToPosition(indexOfMessage);
+                            ((LinearLayoutManager)messagesRecyclerView.getLayoutManager()).scrollToPositionWithOffset(indexOfMessage,5);
                             AppConstants.bounceablePositions.put(emMessage.getMsgId().hashCode(),true);
                             messagesAdapter.notifyDataSetChanged();
                         }else{
