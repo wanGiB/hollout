@@ -1,10 +1,14 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.widget.TextView;
 
 import com.hyphenate.chat.EMMessage;
@@ -57,11 +61,19 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int INCOMING_MESSAGE_WITH_REACTION = 14;
     private static final int INCOMING_MESSAGE_WITH_GIF = 15;
 
+    private static Animation bounceAnimation;
+
+    private void initBounceAnimation(Context context){
+        bounceAnimation = AnimationUtils.loadAnimation(context,R.anim.bounce);
+        bounceAnimation.setInterpolator(new LinearInterpolator());
+    }
+
     public MessagesAdapter(Activity context, List<EMMessage> messages) {
         this.context = context;
         this.messages = messages;
         this.layoutInflater = LayoutInflater.from(context);
-        calendar = Calendar.getInstance();
+
+        initBounceAnimation(context);
     }
 
     @Override
@@ -229,6 +241,10 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         public void bindMessage(Activity context, EMMessage emMessage) {
             chatMessageView.bindData(context, emMessage);
+            if (AppConstants.bounceablePositions.get(emMessage.getMsgId().hashCode())){
+                itemView.startAnimation(bounceAnimation);
+                AppConstants.bounceablePositions.clear();
+            }
         }
 
     }

@@ -303,7 +303,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private static KeyframesDrawable imageDrawable;
     private static InputStream stream;
-    private Animation bounceAnimation;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -345,12 +344,6 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         initConversation();
         tryOffloadLastMessage();
         decrementTotalUnreadMessages();
-        initBounceAnimation();
-    }
-
-    private void initBounceAnimation(){
-        bounceAnimation = AnimationUtils.loadAnimation(this,R.anim.bounce);
-        bounceAnimation.setInterpolator(new LinearInterpolator());
     }
 
     private void decrementTotalUnreadMessages() {
@@ -1634,13 +1627,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         int indexOfMessage = messages.indexOf(emMessage);
                         if (indexOfMessage!=-1){
                             messagesRecyclerView.scrollToPosition(indexOfMessage);
-                            View viewAtPosition =messagesRecyclerView.getLayoutManager().getChildAt(indexOfMessage);
-                            if (viewAtPosition!=null){
-                                viewAtPosition.startAnimation(bounceAnimation);
-                                UiUtils.showSafeToast("View is not null");
-                            }else{
-                                UiUtils.showSafeToast("View is null");
-                            }
+                            AppConstants.bounceablePositions.put(emMessage.getMsgId().hashCode(),true);
+                            messagesAdapter.notifyDataSetChanged();
                         }else{
                             //Load more messages till the message is found
                         }

@@ -333,6 +333,7 @@ public class AppConstants {
     public static SparseBooleanArray messageReplyAttachmentPositions = new SparseBooleanArray();
     public static SparseBooleanArray messageReplyAttachmentGifPositions = new SparseBooleanArray();
     public static SparseBooleanArray messageReplyAttachmentMediaPlayPositions = new SparseBooleanArray();
+    public static SparseBooleanArray bounceablePositions = new SparseBooleanArray();
 
     public static ArrayList<ParseObject>recentConversations = new ArrayList<>();
 
