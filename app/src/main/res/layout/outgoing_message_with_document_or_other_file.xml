@@ -28,69 +28,75 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:id="@+id/document_data_layout"
+        <RelativeLayout
+            android:id="@+id/content_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_below="@+id/message_reply_recycler_item_view"
-            android:paddingEnd="10dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:paddingStart="10dp"
-            android:visibility="visible">
+            android:layout_below="@+id/message_reply_recycler_item_view">
 
-            <com.wan.hollout.ui.widgets.CircleColorImageView
-                android:id="@+id/document_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/attach_contact"
-                tools:ignore="ContentDescription" />
-
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/document_name_and_size"
+            <LinearLayout
+                android:id="@+id/document_data_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
-                android:text="Hello.js"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                app:textStyle="bold" />
+                android:orientation="horizontal"
+                android:paddingEnd="10dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:paddingStart="10dp"
+                android:visibility="visible">
 
-        </LinearLayout>
+                <com.wan.hollout.ui.widgets.CircleColorImageView
+                    android:id="@+id/document_icon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/attach_contact"
+                    tools:ignore="ContentDescription" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:orientation="horizontal"
-            android:paddingEnd="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingStart="5dp"
-            tools:ignore="UseCompoundDrawables">
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/document_name_and_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    app:textStyle="bold" />
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/textview_time"
-                style="@style/chat_timings"
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:layout_marginRight="4dp"
-                app:textStyle="none" />
+                android:layout_gravity="bottom|end"
+                android:orientation="horizontal"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp"
+                tools:ignore="UseCompoundDrawables">
 
-            <ImageView
-                android:id="@+id/delivery_status_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:paddingBottom="3dp"
-                android:src="@drawable/msg_status_client_received"
-                tools:ignore="ContentDescription" />
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/textview_time"
+                    style="@style/chat_timings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginRight="4dp"
+                    app:textStyle="none" />
 
-        </LinearLayout>
+                <ImageView
+                    android:id="@+id/delivery_status_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:paddingBottom="3dp"
+                    android:src="@drawable/msg_status_client_received"
+                    tools:ignore="ContentDescription" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
 
     </RelativeLayout>
 

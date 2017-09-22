@@ -51,6 +51,9 @@
                 android:text="@string/replied_to_this"
                 app:textStyle="none"
                 android:paddingEnd="5dp"
+                android:maxLines="5"
+                android:ellipsize="end"
+                android:textSize="13sp"
                 android:paddingRight="5dp"
                 tools:ignore="RtlSymmetry" />
 
@@ -87,7 +90,7 @@
 
     <TextView
         android:id="@+id/blockquote_view"
-        android:layout_width="3dp"
+        android:layout_width="2dp"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/message_reply_view"
         android:layout_alignTop="@id/message_reply_view"

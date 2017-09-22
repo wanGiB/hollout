@@ -29,51 +29,59 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <com.wan.hollout.ui.widgets.LinkPreview
-            android:id="@+id/link_preview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/message_body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:autoLink="all"
-            android:paddingEnd="8dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingStart="8dp"
-            android:textColor="@color/text_black"
-            android:textSize="16sp"
-            app:textStyle="none" />
-
         <LinearLayout
+            android:id="@+id/content_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:orientation="horizontal"
-            android:paddingEnd="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingStart="5dp">
+            android:orientation="vertical">
+
+            <com.wan.hollout.ui.widgets.LinkPreview
+                android:id="@+id/link_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
             <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/textview_time"
-                style="@style/chat_timings"
+                android:id="@+id/message_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:layout_marginRight="4dp"
+                android:autoLink="all"
+                android:paddingEnd="8dp"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingStart="8dp"
+                android:textColor="@color/text_black"
+                android:textSize="16sp"
                 app:textStyle="none" />
 
-            <ImageView
-                android:id="@+id/delivery_status_view"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:paddingBottom="3dp"
-                android:src="@drawable/msg_status_client_received"
-                tools:ignore="ContentDescription" />
+                android:layout_gravity="bottom|end"
+                android:orientation="horizontal"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp">
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/textview_time"
+                    style="@style/chat_timings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginRight="4dp"
+                    app:textStyle="none" />
+
+                <ImageView
+                    android:id="@+id/delivery_status_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:paddingBottom="3dp"
+                    android:src="@drawable/msg_status_client_received"
+                    tools:ignore="ContentDescription" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

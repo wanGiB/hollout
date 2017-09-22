@@ -186,4 +186,12 @@ public class HolloutPreferences {
         getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH +"_"+recipient,System.currentTimeMillis()).commit();
     }
 
+    public static int getViewWidth(String messageId){
+        return getInstance().getInt(messageId,0);
+    }
+
+    public static void saveViewWidth(String messageId,int width){
+        getInstance().edit().putInt(messageId,width).commit();
+    }
+
 }

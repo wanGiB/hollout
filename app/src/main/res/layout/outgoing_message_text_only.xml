@@ -24,8 +24,8 @@
         <com.wan.hollout.ui.widgets.MessageReplyRecyclerItemView
             android:id="@+id/message_reply_recycler_item_view"
             android:layout_width="wrap_content"
-            android:visibility="gone"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
 
         <FrameLayout
             android:id="@+id/content_view"

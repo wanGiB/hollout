@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.wan.hollout.ui.widgets.ChatMessageView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -31,45 +31,53 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <ImageView
-            android:id="@+id/attached_photo_or_video_thumbnail"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:minWidth="150dp"
-            android:minHeight="150dp"
-            android:padding="5dp"
-            android:src="@drawable/ease_default_image"
-            tools:ignore="ContentDescription" />
-
         <LinearLayout
+            android:id="@+id/content_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="2dp"
-            android:orientation="horizontal"
-            android:paddingEnd="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:paddingStart="5dp"
-            tools:ignore="UseCompoundDrawables">
-
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/textview_time"
-                style="@style/chat_timings"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:textStyle="none"
-                android:layout_marginEnd="4dp"
-                android:layout_marginRight="4dp" />
+            android:orientation="vertical">
 
             <ImageView
-                android:id="@+id/delivery_status_view"
+                android:id="@+id/attached_photo_or_video_thumbnail"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:minHeight="150dp"
+                android:minWidth="150dp"
+                android:padding="5dp"
+                android:src="@drawable/ease_default_image"
+                tools:ignore="ContentDescription" />
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:paddingBottom="3dp"
-                android:src="@drawable/msg_status_client_received"
-                tools:ignore="ContentDescription" />
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="2dp"
+                android:orientation="horizontal"
+                android:paddingEnd="5dp"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp"
+                android:paddingStart="5dp"
+                tools:ignore="UseCompoundDrawables">
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/textview_time"
+                    style="@style/chat_timings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginRight="4dp"
+                    app:textStyle="none" />
+
+                <ImageView
+                    android:id="@+id/delivery_status_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:paddingBottom="3dp"
+                    android:src="@drawable/msg_status_client_received"
+                    tools:ignore="ContentDescription" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

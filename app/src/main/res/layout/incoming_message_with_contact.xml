@@ -27,82 +27,88 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
 
-        <LinearLayout
-            android:layout_below="@+id/message_reply_recycler_item_view"
-            android:id="@+id/contact_data_layout"
+        <FrameLayout
+            android:id="@+id/content_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <com.wan.hollout.ui.widgets.CircleColorImageView
-                android:id="@+id/contact_icon"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/attach_contact"
-                tools:ignore="ContentDescription" />
+            android:layout_below="@+id/message_reply_recycler_item_view">
 
             <LinearLayout
+                android:id="@+id/contact_data_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                tools:ignore="UselessParent">
 
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:id="@+id/contact_name"
+                <com.wan.hollout.ui.widgets.CircleColorImageView
+                    android:id="@+id/contact_icon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/attach_contact"
+                    tools:ignore="ContentDescription" />
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="1"
-                    android:text="Contact Name"
-                    android:textColor="@color/black"
-                    android:textSize="16sp"
-                    app:textStyle="bold" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
 
-                <FrameLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <LinearLayout
+                    <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/contact_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="bottom|end"
-                        android:orientation="horizontal"
-                        android:paddingEnd="5dp"
-                        android:paddingLeft="5dp"
-                        android:paddingRight="5dp"
-                        android:paddingStart="5dp">
+                        android:maxLines="1"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        app:textStyle="bold" />
 
-                        <com.wan.hollout.ui.widgets.HolloutTextView
-                            android:id="@+id/textview_time"
-                            style="@style/chat_timings"
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="4dp"
-                            android:layout_marginRight="4dp"
-                            android:paddingTop="5dp"
-                            app:textStyle="none" />
+                            android:layout_gravity="bottom|end"
+                            android:orientation="horizontal"
+                            android:paddingEnd="5dp"
+                            android:paddingLeft="5dp"
+                            android:paddingRight="5dp"
+                            android:paddingStart="5dp">
 
-                    </LinearLayout>
+                            <com.wan.hollout.ui.widgets.HolloutTextView
+                                android:id="@+id/textview_time"
+                                style="@style/chat_timings"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="4dp"
+                                android:layout_marginRight="4dp"
+                                android:paddingTop="5dp"
+                                app:textStyle="none" />
 
-                    <com.wan.hollout.ui.widgets.ChatMessageTextView
-                        android:id="@+id/contact_phone_numbers"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:autoLink="web"
-                        android:paddingEnd="6dp"
-                        android:paddingRight="6dp"
-                        android:text="070179058582"
-                        android:textColor="@color/text_black"
-                        app:emojiconSize="25dp"
-                        app:textStyle="medium"
-                        tools:ignore="RtlSymmetry" />
+                        </LinearLayout>
 
-                </FrameLayout>
+                        <com.wan.hollout.ui.widgets.ChatMessageTextView
+                            android:id="@+id/contact_phone_numbers"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:autoLink="web"
+                            android:paddingEnd="6dp"
+                            android:paddingRight="6dp"
+                            android:textColor="@color/text_black"
+                            app:emojiconSize="25dp"
+                            app:textStyle="medium"
+                            tools:ignore="RtlSymmetry" />
+
+                    </FrameLayout>
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
+        </FrameLayout>
 
     </RelativeLayout>
 

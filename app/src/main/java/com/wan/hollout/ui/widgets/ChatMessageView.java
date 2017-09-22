@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -20,7 +19,6 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -50,6 +48,7 @@ import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -274,24 +273,29 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void registerViewTreeObserver() {
-        ViewTreeObserver viewTreeObserver = getViewTreeObserver();
-        if (viewTreeObserver.isAlive()) {
-            viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    getViewTreeObserver().removeOnPreDrawListener(this);
-                    checkAndRedrawSomeViews();
-                    return true;
-                }
-            });
+        int viewWidth = HolloutPreferences.getViewWidth(message.getMsgId());
+        if (viewWidth != 0) {
+            checkAndRedrawSomeViews(viewWidth);
+        } else {
+            ViewTreeObserver viewTreeObserver = getViewTreeObserver();
+            if (viewTreeObserver.isAlive()) {
+                viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                    @Override
+                    public boolean onPreDraw() {
+                        getViewTreeObserver().removeOnPreDrawListener(this);
+                        int messageBubbleWidth = messageBubbleLayout.getWidth();
+                        checkAndRedrawSomeViews(messageBubbleWidth);
+                        HolloutPreferences.saveViewWidth(message.getMsgId(), messageBubbleWidth);
+                        return true;
+                    }
+                });
+            }
         }
     }
 
-    private void checkAndRedrawSomeViews() {
+    private void checkAndRedrawSomeViews(int messageBubbleWidth) {
         if (contentView != null && messageReplyRecyclerItemView != null && messageReplyRecyclerItemView.getVisibility() == VISIBLE) {
-
-            int messageBubbleWidth = messageBubbleLayout.getWidth();
-
+            HolloutLogger.d("ViewParams", "BubbleWidth for " + message.getMsgId() + " is = " + messageBubbleWidth);
             ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
             layoutParams.width = messageBubbleWidth;
             contentView.setLayoutParams(layoutParams);
