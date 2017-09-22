@@ -8,9 +8,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
@@ -30,6 +32,7 @@ import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
+import com.wan.hollout.eventbuses.ScrollToMessageEvent;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
@@ -37,6 +40,7 @@ import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +51,7 @@ import java.io.InputStream;
  */
 
 @SuppressWarnings("ConstantConditions")
-public class MessageReplyRecyclerItemView extends LinearLayout {
+public class MessageReplyRecyclerItemView extends RelativeLayout implements View.OnClickListener {
 
     private static final String TAG = "MessageReplyRecyclerItemView";
     private HolloutTextView replyTitleView;
@@ -56,6 +60,7 @@ public class MessageReplyRecyclerItemView extends LinearLayout {
     private ImageView replyIconView;
     private ImageView playReplyIconView;
 
+    private RelativeLayout contentView;
     private EMMessage repliedMessage;
 
     private Activity activity;
@@ -80,6 +85,8 @@ public class MessageReplyRecyclerItemView extends LinearLayout {
         replyAttachmentView = (FrameLayout) findViewById(R.id.reply_attachment_view);
         replyIconView = (ImageView) findViewById(R.id.reply_icon);
         playReplyIconView = (ImageView) findViewById(R.id.play_reply_msg_if_video);
+        contentView=(RelativeLayout)findViewById(R.id.content_view);
+        contentView.setOnClickListener(this);
     }
 
     public int getMessageHash() {
@@ -405,6 +412,11 @@ public class MessageReplyRecyclerItemView extends LinearLayout {
     private void refreshViewComponents() {
         UiUtils.showView(replyAttachmentView, AppConstants.messageReplyAttachmentPositions.get(getMessageHash()));
         UiUtils.showView(playReplyIconView, AppConstants.messageReplyAttachmentMediaPlayPositions.get(getMessageHash()));
+    }
+
+    @Override
+    public void onClick(View view) {
+        EventBus.getDefault().post(new ScrollToMessageEvent(repliedMessage));
     }
 
 }

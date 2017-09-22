@@ -29,6 +29,9 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -82,6 +85,7 @@ import com.wan.hollout.eventbuses.MessageDeliveredEvent;
 import com.wan.hollout.eventbuses.MessageReadEvent;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.ReactionMessageEvent;
+import com.wan.hollout.eventbuses.ScrollToMessageEvent;
 import com.wan.hollout.language.DynamicLanguage;
 import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
 import com.wan.hollout.ui.adapters.MessagesAdapter;
@@ -299,6 +303,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private static KeyframesDrawable imageDrawable;
     private static InputStream stream;
+    private Animation bounceAnimation;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -340,6 +345,12 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         initConversation();
         tryOffloadLastMessage();
         decrementTotalUnreadMessages();
+        initBounceAnimation();
+    }
+
+    private void initBounceAnimation(){
+        bounceAnimation = AnimationUtils.loadAnimation(this,R.anim.bounce);
+        bounceAnimation.setInterpolator(new LinearInterpolator());
     }
 
     private void decrementTotalUnreadMessages() {
@@ -1616,6 +1627,24 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     addPropsToMessage(reactionProps, message);
                     UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
                     sendMessage(message);
+                }else if (o instanceof ScrollToMessageEvent){
+                    ScrollToMessageEvent scrollToMessageEvent = (ScrollToMessageEvent)o;
+                    EMMessage emMessage = scrollToMessageEvent.getEmMessage();
+                    if (emMessage!=null){
+                        int indexOfMessage = messages.indexOf(emMessage);
+                        if (indexOfMessage!=-1){
+                            messagesRecyclerView.scrollToPosition(indexOfMessage);
+                            View viewAtPosition =messagesRecyclerView.getLayoutManager().getChildAt(indexOfMessage);
+                            if (viewAtPosition!=null){
+                                viewAtPosition.startAnimation(bounceAnimation);
+                                UiUtils.showSafeToast("View is not null");
+                            }else{
+                                UiUtils.showSafeToast("View is null");
+                            }
+                        }else{
+                            //Load more messages till the message is found
+                        }
+                    }
                 }
             }
         });

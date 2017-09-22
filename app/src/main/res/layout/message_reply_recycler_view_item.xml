@@ -7,8 +7,8 @@
     android:background="@drawable/message_reply_background"
     android:orientation="horizontal"
     android:clickable="true"
-    android:foreground="?attr/selectableItemBackground"
-    android:padding="2dp">
+    android:id="@+id/content_view"
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:id="@+id/message_reply_view"
@@ -20,7 +20,6 @@
         tools:ignore="DisableBaselineAlignment">
 
         <LinearLayout
-            android:id="@+id/content_view"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.8"
@@ -35,7 +34,7 @@
                 android:paddingStart="5dp"
                 android:paddingTop="3dp"
                 android:text="@string/someone"
-                android:textColor="@color/hollout_color_five"
+                android:textColor="@color/hollout_color_four"
                 android:textSize="14sp"
                 app:textStyle="bold_normal"
                 tools:ignore="RtlSymmetry" />
@@ -94,9 +93,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@id/message_reply_view"
         android:layout_alignTop="@id/message_reply_view"
-        android:background="@color/hollout_color_four"
-        android:paddingLeft="3dp"
-        android:paddingStart="3dp"
+        android:background="@color/green500"
         tools:ignore="RtlSymmetry" />
 
 </RelativeLayout>
