@@ -250,6 +250,12 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             attachedPhotoOrVideoThumbnailView.setOnClickListener(this);
             attachedPhotoOrVideoThumbnailView.setOnLongClickListener(this);
         }
+
+        if (audioView != null) {
+            audioView.setOnClickListener(this);
+            audioView.setOnLongClickListener(this);
+        }
+
     }
 
     //Setup message reply
@@ -833,6 +839,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             case R.id.message_container:
             case R.id.conversation_message_view:
             case R.id.attached_photo_or_video_thumbnail:
+            case R.id.audio_view:
                 if (getChatActivity().getChatToolbar().isActionModeActivated()) {
                     updateActionMode();
                 } else {

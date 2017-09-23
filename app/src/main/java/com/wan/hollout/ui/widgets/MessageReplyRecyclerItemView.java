@@ -86,8 +86,8 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
         replyAttachmentView = (FrameLayout) findViewById(R.id.reply_attachment_view);
         replyIconView = (ImageView) findViewById(R.id.reply_icon);
         playReplyIconView = (ImageView) findViewById(R.id.play_reply_msg_if_video);
-        contentView=(RelativeLayout)findViewById(R.id.content_view);
-        messageReplyView = (LinearLayout)findViewById(R.id.message_reply_view);
+        contentView = (RelativeLayout) findViewById(R.id.content_view);
+        messageReplyView = (LinearLayout) findViewById(R.id.message_reply_view);
         contentView.setOnClickListener(this);
     }
 
@@ -101,10 +101,10 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
         setupMessageBody();
     }
 
-    public void reMeasureMessageReplyView(ViewGroup.LayoutParams layoutParams){
+    public void reMeasureMessageReplyView(ViewGroup.LayoutParams layoutParams) {
         ViewGroup.LayoutParams params = messageReplyView.getLayoutParams();
         params.width = layoutParams.width;
-        if (messageReplyView.getVisibility()==VISIBLE){
+        if (messageReplyView.getVisibility() == VISIBLE) {
             messageReplyView.setLayoutParams(params);
         }
     }
@@ -165,7 +165,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
     private void setupLocationMessage(EMLocationMessageBody messageBody) {
         String locationName = messageBody.getAddress();
         replySubTitleView.setText(activity.getString(R.string.location));
-        if (locationName!=null){
+        if (locationName != null) {
             replySubTitleView.setText(locationName);
         }
         String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(messageBody.getLatitude()),
@@ -173,8 +173,8 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
 
         if (StringUtils.isNotEmpty(locationStaticMap)) {
             UiUtils.showView(replyAttachmentView, true);
-            UiUtils.showView(playReplyIconView,false);
-            AppConstants.messageReplyAttachmentPositions.put(getMessageHash(),true);
+            UiUtils.showView(playReplyIconView, false);
+            AppConstants.messageReplyAttachmentPositions.put(getMessageHash(), true);
             UiUtils.loadImage(activity, locationStaticMap, replyIconView);
         }
 
@@ -182,7 +182,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
 
     private void setupVoiceMessage(EMVoiceMessageBody emFileMessageBody) {
         String audioDuration = UiUtils.getTimeString(emFileMessageBody.getLength());
-        replySubTitleView.setText(activity.getString(R.string.voice_note)+" - "+audioDuration);
+        replySubTitleView.setText(activity.getString(R.string.voice_note) + " - " + audioDuration);
     }
 
     private void setupImageMessage(EMImageMessageBody messageBody) {
@@ -243,7 +243,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
     private void setupAudioMessage() {
         try {
             String audioDuration = repliedMessage.getStringAttribute(AppConstants.AUDIO_DURATION);
-            replySubTitleView.setText(activity.getString(R.string.audio)+" - "+audioDuration);
+            replySubTitleView.setText(activity.getString(R.string.audio) + " - " + audioDuration);
         } catch (HyphenateException e) {
             e.printStackTrace();
             HolloutLogger.e(TAG, "Audio Exception = " + e.getMessage());
@@ -255,7 +255,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
             String contactName = repliedMessage.getStringAttribute(AppConstants.CONTACT_NAME);
             String contactPhoneNumber = repliedMessage.getStringAttribute(AppConstants.CONTACT_NUMBER);
             String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
-            replySubTitleView.setText(activity.getString(R.string.contact)+" - "+contactName+" "+purifiedPhoneNumber);
+            replySubTitleView.setText(activity.getString(R.string.contact) + " - " + contactName + " " + purifiedPhoneNumber);
         } catch (HyphenateException e) {
             e.printStackTrace();
             HolloutLogger.e(TAG, e.getMessage());
@@ -286,15 +286,16 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
                 loadVideoFromPath(replyIconView, upVideoMessage.getLocalThumb());
             }
         }
+        AppConstants.messageReplyAttachmentPositions.put(getMessageHash(), true);
         AppConstants.messageReplyAttachmentMediaPlayPositions.put(getMessageHash(), true);
         UiUtils.showView(playReplyIconView, true);
+        UiUtils.showView(replyAttachmentView, true);
         long videoLength = upVideoMessage.getDuration();
-        replySubTitleView.setText(activity.getString(R.string.video) + " - " + UiUtils.getTimeString(videoLength));
-
+        replySubTitleView.setText(UiUtils.fromHtml(activity.getString(R.string.video) + " - <b>" + UiUtils.getTimeString(videoLength) + "</b>"));
         try {
             String fileCaption = repliedMessage.getStringAttribute(AppConstants.FILE_CAPTION);
             if (fileCaption != null && StringUtils.isNotEmpty(fileCaption) && !StringUtils.containsIgnoreCase(fileCaption, activity.getString(R.string.photo))) {
-                replySubTitleView.setText(fileCaption + " - " + UiUtils.getTimeString(videoLength));
+                replySubTitleView.setText(UiUtils.fromHtml(fileCaption + " - <b>" + UiUtils.getTimeString(videoLength) + "</b>"));
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
@@ -309,7 +310,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
     }
 
     private void loadDrawables(Context context, ImageView emojiView, String reactionTag) {
-        UiUtils.showView(replyAttachmentView,true);
+        UiUtils.showView(replyAttachmentView, true);
         AppConstants.messageReplyAttachmentPositions.put(getMessageHash(), true);
         KeyframesDrawable imageDrawable = new KeyframesDrawableBuilder().withImage(getKFImage(context, reactionTag)).build();
         emojiView.setImageDrawable(imageDrawable);
@@ -320,7 +321,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
         try {
             String reactionValue = repliedMessage.getStringAttribute(AppConstants.REACTION_VALUE);
             if (StringUtils.isNotEmpty(reactionValue)) {
-                replySubTitleView.setText(StringUtils.strip(reactionValue.split("/")[1],".json"));
+                replySubTitleView.setText(StringUtils.strip(reactionValue.split("/")[1], ".json"));
                 loadDrawables(activity, replyIconView, reactionValue);
             }
         } catch (HyphenateException e) {

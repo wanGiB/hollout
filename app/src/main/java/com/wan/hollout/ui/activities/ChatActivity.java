@@ -390,6 +390,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
             @Override
             public void onError(final int error, String errorMsg) {
+
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -407,7 +408,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         finish();
                     }
                 });
+
             }
+
         });
     }
 
@@ -926,6 +929,12 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             HolloutLogger.d("VideoThumbnailPath", "Local Video Thumb exists with value = " + localThumbFile);
                             loadVideoFromPath(replyIconView, emVideoMessageBody.getLocalThumb());
                         }
+                    }
+                    String videoCaption = messageToReplyTo.getStringAttribute(AppConstants.FILE_CAPTION);
+                    if (videoCaption!=null){
+                        replyMessageSubTitleView.setText(videoCaption);
+                    }else{
+                        replyMessageSubTitleView.setText(getString(R.string.video));
                     }
                 }
 
