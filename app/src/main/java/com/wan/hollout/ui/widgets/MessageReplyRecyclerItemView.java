@@ -9,6 +9,7 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -59,7 +60,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
     private FrameLayout replyAttachmentView;
     private ImageView replyIconView;
     private ImageView playReplyIconView;
-
+    private LinearLayout messageReplyView;
     private RelativeLayout contentView;
     private EMMessage repliedMessage;
 
@@ -86,6 +87,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
         replyIconView = (ImageView) findViewById(R.id.reply_icon);
         playReplyIconView = (ImageView) findViewById(R.id.play_reply_msg_if_video);
         contentView=(RelativeLayout)findViewById(R.id.content_view);
+        messageReplyView = (LinearLayout)findViewById(R.id.message_reply_view);
         contentView.setOnClickListener(this);
     }
 
@@ -97,6 +99,14 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
         this.activity = activity;
         this.repliedMessage = repliedMessage;
         setupMessageBody();
+    }
+
+    public void reMeasureMessageReplyView(ViewGroup.LayoutParams layoutParams){
+        ViewGroup.LayoutParams params = messageReplyView.getLayoutParams();
+        params.width = layoutParams.width;
+        if (messageReplyView.getVisibility()==VISIBLE){
+            messageReplyView.setLayoutParams(params);
+        }
     }
 
     private EMMessage.Type getMessageType() {
@@ -299,18 +309,18 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
     }
 
     private void loadDrawables(Context context, ImageView emojiView, String reactionTag) {
-        UiUtils.showView(playReplyIconView, false);
-        AppConstants.messageReplyAttachmentMediaPlayPositions.put(getMessageHash(), false);
+        UiUtils.showView(replyAttachmentView,true);
+        AppConstants.messageReplyAttachmentPositions.put(getMessageHash(), true);
         KeyframesDrawable imageDrawable = new KeyframesDrawableBuilder().withImage(getKFImage(context, reactionTag)).build();
         emojiView.setImageDrawable(imageDrawable);
         imageDrawable.startAnimation();
     }
 
     private void setupReactionMessage() {
-        replySubTitleView.setText(activity.getString(R.string.reaction));
         try {
             String reactionValue = repliedMessage.getStringAttribute(AppConstants.REACTION_VALUE);
             if (StringUtils.isNotEmpty(reactionValue)) {
+                replySubTitleView.setText(StringUtils.strip(reactionValue.split("/")[1],".json"));
                 loadDrawables(activity, replyIconView, reactionValue);
             }
         } catch (HyphenateException e) {

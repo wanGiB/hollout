@@ -245,6 +245,11 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         handleCommonalities();
 
         refreshViews();
+
+        if (attachedPhotoOrVideoThumbnailView != null) {
+            attachedPhotoOrVideoThumbnailView.setOnClickListener(this);
+            attachedPhotoOrVideoThumbnailView.setOnLongClickListener(this);
+        }
     }
 
     //Setup message reply
@@ -304,6 +309,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     messageReplyRecyclerItemView.getLayoutParams();
             messageReplyViewLayoutParams.width = messageBubbleWidth;
             messageReplyRecyclerItemView.setLayoutParams(messageReplyViewLayoutParams);
+            messageReplyRecyclerItemView.reMeasureMessageReplyView(messageReplyViewLayoutParams);
         }
     }
 
@@ -497,10 +503,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             e.printStackTrace();
             HolloutLogger.e(TAG, e.getMessage());
         }
-
-        attachedPhotoOrVideoThumbnailView.setOnClickListener(this);
-        attachedPhotoOrVideoThumbnailView.setOnLongClickListener(this);
-
     }
 
     public void setupVideoMessage(final EMVideoMessageBody upVideoMessage) {

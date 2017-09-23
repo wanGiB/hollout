@@ -29,9 +29,6 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -737,7 +734,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private void displayActiveSendButton() {
         sendOrRecordAudioButton.setImageResource(R.drawable.ic_ami_send_24dp);
-        tintSendOrRecordAudioButton(R.color.news_feed_indicator_icons);
+        tintSendOrRecordAudioButton(R.color.colorPrimary);
     }
 
     private void updateToggleButtonState() {
@@ -879,7 +876,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
                                 String reactionValue = messageToReplyTo.getStringAttribute(AppConstants.REACTION_VALUE);
                                 if (reactionValue != null) {
+                                    UiUtils.showView(replyIconView,true);
                                     loadDrawables(ChatActivity.this, replyIconView, reactionValue);
+                                    replyMessageSubTitleView.setText(StringUtils.strip(reactionValue.split("/")[1],".json"));
                                 } else {
                                     replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
                                 }
@@ -902,6 +901,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     } else {
                         filePath = emImageMessageBody.getRemoteUrl();
                     }
+                    UiUtils.showView(replyIconView,true);
                     UiUtils.loadImage(ChatActivity.this, filePath, replyIconView);
                     String fileCaption = messageToReplyTo.getStringAttribute(AppConstants.FILE_CAPTION);
                     if (StringUtils.isNotEmpty(fileCaption)) {
@@ -915,6 +915,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     EMVideoMessageBody emVideoMessageBody = (EMVideoMessageBody) messageBody;
                     String remoteVideoThumbnailUrl = emVideoMessageBody.getThumbnailUrl();
                     File localThumbFile = new File(emVideoMessageBody.getLocalThumb());
+                    UiUtils.showView(replyIconView,true);
+                    UiUtils.showView(playReplyMessageIfVideo,true);
                     if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
                         HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
                         UiUtils.loadImage(ChatActivity.this, emVideoMessageBody.getThumbnailUrl(), replyIconView);
@@ -938,6 +940,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(emLocationMessageBody.getLatitude()),
                             String.valueOf(emLocationMessageBody.getLongitude()));
                     if (StringUtils.isNotEmpty(locationStaticMap)) {
+                        UiUtils.showView(replyIconView,true);
                         UiUtils.loadImage(ChatActivity.this, locationStaticMap, replyIconView);
                     }
                 }
@@ -945,15 +948,18 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 if (messageType == EMMessage.Type.FILE) {
                     EMFileMessageBody emFileMessageBody = ((EMFileMessageBody) messageBody);
                     String fileType = messageToReplyTo.getStringAttribute(AppConstants.FILE_TYPE);
+
                     if (fileType.equals(AppConstants.FILE_TYPE_CONTACT)) {
                         String contactName = messageToReplyTo.getStringAttribute(AppConstants.CONTACT_NAME);
                         String contactPhoneNumber = messageToReplyTo.getStringAttribute(AppConstants.CONTACT_NUMBER);
                         String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
                         replyMessageSubTitleView.setText(contactName + ":" + purifiedPhoneNumber);
                     }
+
                     if (fileType.equals(AppConstants.FILE_TYPE_AUDIO)) {
                         replyMessageSubTitleView.setText(getString(R.string.audio));
                     }
+
                     if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)) {
                         String documentName = messageToReplyTo.getStringAttribute(AppConstants.FILE_NAME);
                         String documentSize = messageToReplyTo.getStringAttribute(AppConstants.FILE_SIZE);
@@ -982,11 +988,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             }
 
             closeReplyMessageView.setOnClickListener(new View.OnClickListener() {
+
                 @Override
                 public void onClick(View view) {
                     snackOutMessageReplyView(messageReplyView);
                 }
+
             });
+
         }
 
     }
