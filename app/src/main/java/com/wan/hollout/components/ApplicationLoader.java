@@ -77,7 +77,7 @@ public class ApplicationLoader extends Application {
 
             @Override
             public void done(List<EMMessage> result, Exception e) {
-                if (result != null) {
+                if (result != null && !result.isEmpty()) {
                     HolloutCommunicationsManager.getInstance().getNotifier().onNewMsg(result);
                 }
             }
