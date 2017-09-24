@@ -871,6 +871,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             case AppConstants.MESSAGE_ATTR_TYPE_GIF:
                                 String gifUrl = messageToReplyTo.getStringAttribute(AppConstants.GIF_URL);
                                 if (gifUrl != null) {
+                                    UiUtils.showView(replyIconView, true);
                                     loadGif(gifUrl);
                                 } else {
                                     replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
@@ -879,9 +880,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
                                 String reactionValue = messageToReplyTo.getStringAttribute(AppConstants.REACTION_VALUE);
                                 if (reactionValue != null) {
-                                    UiUtils.showView(replyIconView,true);
+                                    UiUtils.showView(replyIconView, true);
                                     loadDrawables(ChatActivity.this, replyIconView, reactionValue);
-                                    replyMessageSubTitleView.setText(StringUtils.strip(reactionValue.split("/")[1],".json"));
+                                    replyMessageSubTitleView.setText(StringUtils.strip(reactionValue.split("/")[1], ".json"));
                                 } else {
                                     replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
                                 }
@@ -904,7 +905,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     } else {
                         filePath = emImageMessageBody.getRemoteUrl();
                     }
-                    UiUtils.showView(replyIconView,true);
+                    UiUtils.showView(replyIconView, true);
                     UiUtils.loadImage(ChatActivity.this, filePath, replyIconView);
                     String fileCaption = messageToReplyTo.getStringAttribute(AppConstants.FILE_CAPTION);
                     if (StringUtils.isNotEmpty(fileCaption)) {
@@ -918,8 +919,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     EMVideoMessageBody emVideoMessageBody = (EMVideoMessageBody) messageBody;
                     String remoteVideoThumbnailUrl = emVideoMessageBody.getThumbnailUrl();
                     File localThumbFile = new File(emVideoMessageBody.getLocalThumb());
-                    UiUtils.showView(replyIconView,true);
-                    UiUtils.showView(playReplyMessageIfVideo,true);
+                    UiUtils.showView(replyIconView, true);
+                    UiUtils.showView(playReplyMessageIfVideo, true);
                     if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
                         HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
                         UiUtils.loadImage(ChatActivity.this, emVideoMessageBody.getThumbnailUrl(), replyIconView);
@@ -931,9 +932,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         }
                     }
                     String videoCaption = messageToReplyTo.getStringAttribute(AppConstants.FILE_CAPTION);
-                    if (videoCaption!=null){
+                    if (videoCaption != null) {
                         replyMessageSubTitleView.setText(videoCaption);
-                    }else{
+                    } else {
                         replyMessageSubTitleView.setText(getString(R.string.video));
                     }
                 }
@@ -949,7 +950,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(emLocationMessageBody.getLatitude()),
                             String.valueOf(emLocationMessageBody.getLongitude()));
                     if (StringUtils.isNotEmpty(locationStaticMap)) {
-                        UiUtils.showView(replyIconView,true);
+                        UiUtils.showView(replyIconView, true);
                         UiUtils.loadImage(ChatActivity.this, locationStaticMap, replyIconView);
                     }
                 }
@@ -1125,6 +1126,11 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 }
                 break;
             case R.id.view_shared_media:
+                break;
+            case R.id.delete_conversation:
+                mConversation.clearAllMessages();
+                messagesAdapter.notifyDataSetChanged();
+                invalidateEmptyView();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -1638,16 +1644,16 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     addPropsToMessage(reactionProps, message);
                     UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
                     sendMessage(message);
-                }else if (o instanceof ScrollToMessageEvent){
-                    ScrollToMessageEvent scrollToMessageEvent = (ScrollToMessageEvent)o;
+                } else if (o instanceof ScrollToMessageEvent) {
+                    ScrollToMessageEvent scrollToMessageEvent = (ScrollToMessageEvent) o;
                     EMMessage emMessage = scrollToMessageEvent.getEmMessage();
-                    if (emMessage!=null){
+                    if (emMessage != null) {
                         int indexOfMessage = messages.indexOf(emMessage);
-                        if (indexOfMessage!=-1){
-                            ((LinearLayoutManager)messagesRecyclerView.getLayoutManager()).scrollToPositionWithOffset(indexOfMessage,5);
-                            AppConstants.bounceablePositions.put(emMessage.getMsgId().hashCode(),true);
+                        if (indexOfMessage != -1) {
+                            ((LinearLayoutManager) messagesRecyclerView.getLayoutManager()).scrollToPositionWithOffset(indexOfMessage, 5);
+                            AppConstants.bounceablePositions.put(emMessage.getMsgId().hashCode(), true);
                             messagesAdapter.notifyDataSetChanged();
-                        }else{
+                        } else {
                             //Load more messages till the message is found
                         }
                     }

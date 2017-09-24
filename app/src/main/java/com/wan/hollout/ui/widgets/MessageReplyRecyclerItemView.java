@@ -376,7 +376,8 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
 
     private void setUpGifMessage(String gifUrl) {
         AppConstants.messageReplyAttachmentPositions.put(getMessageHash(), true);
-        AppConstants.messageReplyAttachmentMediaPlayPositions.put(getMessageHash(), false);
+        UiUtils.showView(replyAttachmentView,true);
+        replySubTitleView.setText(UiUtils.fromHtml("<b>"+activity.getString(R.string.gif)+"</b>"));
         if (StringUtils.isNotEmpty(gifUrl)) {
             if (Build.VERSION.SDK_INT >= 17) {
                 if (!activity.isDestroyed()) {

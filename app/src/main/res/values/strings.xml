@@ -320,5 +320,6 @@
     <string name="reaction">Reaction</string>
     <string name="replied_to_this">Replied to this</string>
     <string name="someone">Someone</string>
+    <string name="gif">GIF</string>
 
 </resources>
