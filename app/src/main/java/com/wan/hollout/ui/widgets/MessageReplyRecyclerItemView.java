@@ -255,7 +255,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
             String contactName = repliedMessage.getStringAttribute(AppConstants.CONTACT_NAME);
             String contactPhoneNumber = repliedMessage.getStringAttribute(AppConstants.CONTACT_NUMBER);
             String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
-            replySubTitleView.setText(activity.getString(R.string.contact) + " - " + contactName + " " + purifiedPhoneNumber);
+            replySubTitleView.setText(UiUtils.fromHtml("<b>" + activity.getString(R.string.contact) + "</b>") + " - " + contactName + " " + purifiedPhoneNumber);
         } catch (HyphenateException e) {
             e.printStackTrace();
             HolloutLogger.e(TAG, e.getMessage());
@@ -376,8 +376,8 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
 
     private void setUpGifMessage(String gifUrl) {
         AppConstants.messageReplyAttachmentPositions.put(getMessageHash(), true);
-        UiUtils.showView(replyAttachmentView,true);
-        replySubTitleView.setText(UiUtils.fromHtml("<b>"+activity.getString(R.string.gif)+"</b>"));
+        UiUtils.showView(replyAttachmentView, true);
+        replySubTitleView.setText(UiUtils.fromHtml("<b>" + activity.getString(R.string.gif) + "</b>"));
         if (StringUtils.isNotEmpty(gifUrl)) {
             if (Build.VERSION.SDK_INT >= 17) {
                 if (!activity.isDestroyed()) {

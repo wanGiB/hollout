@@ -5,9 +5,9 @@
     android:id="@+id/message_reply_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/hollout_material_grey_50"
-    android:orientation="vertical"
+    android:background="@color/grey_100"
     android:foreground="?attr/selectableItemBackground"
+    android:orientation="vertical"
     android:visibility="gone">
 
     <RelativeLayout
@@ -23,6 +23,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="5dp"
             android:layout_marginStart="10dp"
+            android:rotation="-10"
             android:src="@drawable/reply_to_a_message"
             tools:ignore="ContentDescription,RtlHardcoded" />
 
@@ -63,10 +64,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
                 android:orientation="vertical"
                 tools:ignore="RtlHardcoded">
 
@@ -82,10 +83,10 @@
                     android:id="@+id/reply_subtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxLines="2"
                     android:ellipsize="end"
-                    android:textSize="16sp"
+                    android:maxLines="2"
                     android:textColor="@color/hollout_material_grey_600"
+                    android:textSize="16sp"
                     app:textStyle="none" />
 
             </LinearLayout>

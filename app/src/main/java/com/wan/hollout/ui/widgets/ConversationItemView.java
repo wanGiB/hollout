@@ -229,7 +229,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             applyIconAnimation();
             if (emConversation != null) {
                 int unreadMessagesCount = emConversation.getUnreadMsgCount();
-                if (unreadMessagesCount > 0 && lastMessage!=null&&lastMessage.direct()== EMMessage.Direct.RECEIVE) {
+                if (unreadMessagesCount > 0 && lastMessage != null && lastMessage.direct() == EMMessage.Direct.RECEIVE) {
                     UiUtils.showView(unreadMessagesCountView, true);
                     unreadMessagesCountView.setText(String.valueOf(unreadMessagesCount));
                     AppConstants.unreadMessagesPositions.put(getMessageId(), true);
@@ -477,7 +477,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                         case AppConstants.MESSAGE_ATTR_TYPE_GIF:
                             UiUtils.showView(reactionsIndicatorView, true);
                             AppConstants.reactionsOpenPositions.put(getMessageId(), true);
-                            UiUtils.showView(userStatusOrLastMessageView, false);
+                            UiUtils.showView(userStatusOrLastMessageView, true);
+                            userStatusOrLastMessageView.setText(UiUtils.fromHtml("<b>" + activity.getString(R.string.gif) + "</b>"));
                             String gifUrl = message.getStringAttribute(AppConstants.GIF_URL);
                             loadLastMessageGif(gifUrl);
                             break;
