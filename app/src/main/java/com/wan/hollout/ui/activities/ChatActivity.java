@@ -283,6 +283,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     protected EMConversation mConversation;
     private int chatType;
 
+    private boolean onScrolledUp = false;
     /**
      * load 20 messages at one time
      */
@@ -479,40 +480,48 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
         });
 
-        messagesRecyclerView.addOnScrollListener(new OnVerticalScrollListener(){
+        messagesRecyclerView.addOnScrollListener(new OnVerticalScrollListener() {
+
+            @Override
+            public void onScrolledUp() {
+                super.onScrolledUp();
+                onScrolledUp = true;
+            }
 
             @Override
             public void onScrolledToTop() {
                 super.onScrolledToTop();
-                UiUtils.showView(scrollToBottomFrame,true);
+                UiUtils.showView(scrollToBottomFrame, true);
+                onScrolledUp = true;
             }
 
             @Override
             public void onScrolledToBottom() {
                 super.onScrolledToBottom();
-                if (tempReceivedMessages.isEmpty()){
-                    UiUtils.showView(scrollToBottomFrame,false);
+                if (tempReceivedMessages.isEmpty()) {
+                    UiUtils.showView(scrollToBottomFrame, false);
                 }
+                onScrolledUp = false;
             }
 
         });
 
     }
 
-    private void loadMoreMessages(DoneCallback<Boolean>messageLoadDoneCallback) {
+    private void loadMoreMessages(DoneCallback<Boolean> messageLoadDoneCallback) {
         EMMessage lastMessage = messages.get(messages.size() - 1);
         if (lastMessage != null) {
             List<EMMessage> moreMessages = mConversation.loadMoreMsgFromDB(lastMessage.getMsgId(), pageSize);
             if (moreMessages != null && !moreMessages.isEmpty()) {
-                for (EMMessage emMessage:messages){
-                    if (!messages.contains(emMessage)){
+                for (EMMessage emMessage : messages) {
+                    if (!messages.contains(emMessage)) {
                         messages.add(emMessage);
                         messagesAdapter.notifyDataSetChanged();
                     }
                 }
-                messagesLayoutManager.scrollToPosition(messages.size()-1);
-                if (messageLoadDoneCallback!=null){
-                    messageLoadDoneCallback.done(true,null);
+                messagesLayoutManager.scrollToPosition(messages.size() - 1);
+                if (messageLoadDoneCallback != null) {
+                    messageLoadDoneCallback.done(true, null);
                 }
             }
         }
@@ -1659,8 +1668,14 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     if (emMessage != null && emMessage.getFrom().equals(recipientId)) {
                         messages.add(0, emMessage);
                         messagesAdapter.notifyDataSetChanged();
+                        if (onScrolledUp) {
+                            tempReceivedMessages.add(emMessage);
+                        } else {
+                            messagesRecyclerView.smoothScrollToPosition(0);
+                        }
                         UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
                         prioritizeConversation();
+                        refreshPendingUnseenMessages();
                     } else {
                         List<EMMessage> emMessages = new ArrayList<>();
                         emMessages.add(emMessage);
@@ -1716,7 +1731,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             loadMoreMessages(new DoneCallback<Boolean>() {
                                 @Override
                                 public void done(Boolean done, Exception e) {
-                                    if (done){
+                                    if (done) {
                                         int indexOfMessage = messages.indexOf(emMessage);
                                         if (indexOfMessage != -1) {
                                             messagesLayoutManager.scrollToPositionWithOffset(indexOfMessage, 5);
@@ -1733,9 +1748,17 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         });
     }
 
+    private void refreshPendingUnseenMessages() {
+        UiUtils.showView(unreadMessagesIndicator, !tempReceivedMessages.isEmpty());
+        if (!tempReceivedMessages.isEmpty()) {
+            unreadMessagesIndicator.setText(String.valueOf(tempReceivedMessages.size()));
+        }
+    }
+
     private void scrollToBottom() {
         messagesLayoutManager.scrollToPosition(0);
-        UiUtils.showView(scrollToBottomFrame,false);
+        UiUtils.showView(scrollToBottomFrame, false);
+        onScrolledUp = false;
     }
 
     @Override
