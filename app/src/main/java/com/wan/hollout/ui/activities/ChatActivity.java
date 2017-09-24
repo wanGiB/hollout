@@ -43,6 +43,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.google.android.gms.common.api.BooleanResult;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.hyphenate.EMError;
@@ -85,6 +86,8 @@ import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.ReactionMessageEvent;
 import com.wan.hollout.eventbuses.ScrollToMessageEvent;
 import com.wan.hollout.language.DynamicLanguage;
+import com.wan.hollout.listeners.HideShowScrollListener;
+import com.wan.hollout.listeners.OnVerticalScrollListener;
 import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
 import com.wan.hollout.ui.adapters.MessagesAdapter;
 import com.wan.hollout.ui.adapters.PickedMediaFilesAdapter;
@@ -471,14 +474,29 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 UiUtils.showView(scrollToBottomFrame, true);
-                loadMoreMessages();
+                loadMoreMessages(null);
+            }
+
+        });
+
+        messagesRecyclerView.addOnScrollListener(new OnVerticalScrollListener(){
+
+            @Override
+            public void onScrolledDown() {
+                super.onScrolledDown();
+            }
+
+            @Override
+            public void onScrolledToBottom() {
+                super.onScrolledToBottom();
+                UiUtils.showView(scrollToBottomFrame,false);
             }
 
         });
 
     }
 
-    private void loadMoreMessages() {
+    private void loadMoreMessages(DoneCallback<Boolean>messageLoadDoneCallback) {
         EMMessage lastMessage = messages.get(messages.size() - 1);
         if (lastMessage != null) {
             List<EMMessage> moreMessages = mConversation.loadMoreMsgFromDB(lastMessage.getMsgId(), pageSize);
@@ -490,6 +508,9 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     }
                 }
                 messagesLayoutManager.scrollToPosition(messages.size()-1);
+                if (messageLoadDoneCallback!=null){
+                    messageLoadDoneCallback.done(true,null);
+                }
             }
         }
     }
@@ -1680,7 +1701,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                     sendMessage(message);
                 } else if (o instanceof ScrollToMessageEvent) {
                     ScrollToMessageEvent scrollToMessageEvent = (ScrollToMessageEvent) o;
-                    EMMessage emMessage = scrollToMessageEvent.getEmMessage();
+                    final EMMessage emMessage = scrollToMessageEvent.getEmMessage();
                     if (emMessage != null) {
                         int indexOfMessage = messages.indexOf(emMessage);
                         if (indexOfMessage != -1) {
@@ -1689,6 +1710,19 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                             messagesAdapter.notifyDataSetChanged();
                         } else {
                             //Load more messages till the message is found
+                            loadMoreMessages(new DoneCallback<Boolean>() {
+                                @Override
+                                public void done(Boolean done, Exception e) {
+                                    if (done){
+                                        int indexOfMessage = messages.indexOf(emMessage);
+                                        if (indexOfMessage != -1) {
+                                            messagesLayoutManager.scrollToPositionWithOffset(indexOfMessage, 5);
+                                            AppConstants.bounceablePositions.put(emMessage.getMsgId().hashCode(), true);
+                                            messagesAdapter.notifyDataSetChanged();
+                                        }
+                                    }
+                                }
+                            });
                         }
                     }
                 }
@@ -1698,6 +1732,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private void scrollToBottom() {
         messagesLayoutManager.scrollToPosition(0);
+        UiUtils.showView(scrollToBottomFrame,false);
     }
 
     @Override
