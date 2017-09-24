@@ -259,6 +259,7 @@ public class MessageNotifier {
                 builder.setContentTitle(WordUtils.capitalize(senderName))
                         .setLargeIcon(notificationInitiatorBitmap)
                         .setContentIntent(pendingIntent)
+                        .setNumber(emMessages.size())
                         .setStyle(inboxStyle)
                         .setSubText((emMessages.size() == 1 ? "1 new message " : emMessages.size() + " new messages"));
                 for (EMMessage message : emMessages) {
@@ -307,6 +308,7 @@ public class MessageNotifier {
                 builder.setContentTitle(WordUtils.capitalize(appContext.getString(R.string.app_name)))
                         .setLargeIcon(notificationInitiatorBitmap)
                         .setContentIntent(pendingIntent)
+                        .setNumber(emMessages.size())
                         .setStyle(inboxStyle)
                         .setSubText((emMessages.size() == 1 ? "1 new message " : emMessages.size() + " new messages") + " from " + ((getConversationIds(emMessages).size() == 1) ? " 1 chat " : (getConversationIds(emMessages).size() + " chats")));
                 for (EMMessage message : emMessages) {
