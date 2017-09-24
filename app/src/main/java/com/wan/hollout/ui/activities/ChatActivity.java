@@ -482,14 +482,17 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         messagesRecyclerView.addOnScrollListener(new OnVerticalScrollListener(){
 
             @Override
-            public void onScrolledDown() {
-                super.onScrolledDown();
+            public void onScrolledToTop() {
+                super.onScrolledToTop();
+                UiUtils.showView(scrollToBottomFrame,true);
             }
 
             @Override
             public void onScrolledToBottom() {
                 super.onScrolledToBottom();
-                UiUtils.showView(scrollToBottomFrame,false);
+                if (tempReceivedMessages.isEmpty()){
+                    UiUtils.showView(scrollToBottomFrame,false);
+                }
             }
 
         });
