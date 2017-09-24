@@ -307,6 +307,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
     private static KeyframesDrawable imageDrawable;
     private static InputStream stream;
 
+    private List<EMMessage>kryoUnreadMessages = new ArrayList<>();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
@@ -444,13 +446,28 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 msgs.addAll(moreMessages);
             }
         }
+
         if (!msgs.isEmpty()) {
+            HolloutUtils.deserializeMessages(AppConstants.UNREAD_MESSAGES, new DoneCallback<List<EMMessage>>() {
+                @Override
+                public void done(List<EMMessage> result, Exception e) {
+                    if (e==null && result!=null){
+                        kryoUnreadMessages.clear();
+                        kryoUnreadMessages.addAll(result);
+                    }
+                }
+            });
             for (EMMessage emMessage : msgs) {
                 if (!messages.contains(emMessage)) {
                     messages.add(0, emMessage);
                 }
-                HolloutUtils.removeMessageFromListOfUnread(emMessage);
+                if (kryoUnreadMessages.contains(emMessage)){
+                    kryoUnreadMessages.remove(emMessage);
+                }
             }
+
+            HolloutUtils.serializeMessages(kryoUnreadMessages,AppConstants.UNREAD_MESSAGES);
+
             sortMessages();
             messagesAdapter.notifyDataSetChanged();
             mConversation.markAllMessagesAsRead();
@@ -485,14 +502,18 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
             @Override
             public void onScrolledUp() {
                 super.onScrolledUp();
-                onScrolledUp = true;
+                if (!messages.isEmpty() && messages.size() >= 20) {
+                    onScrolledUp = true;
+                }
             }
 
             @Override
             public void onScrolledToTop() {
                 super.onScrolledToTop();
-                UiUtils.showView(scrollToBottomFrame, true);
-                onScrolledUp = true;
+                if (!messages.isEmpty() && messages.size() >= 20) {
+                    UiUtils.showView(scrollToBottomFrame, true);
+                    onScrolledUp = true;
+                }
             }
 
             @Override
@@ -500,8 +521,8 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 super.onScrolledToBottom();
                 if (tempReceivedMessages.isEmpty()) {
                     UiUtils.showView(scrollToBottomFrame, false);
+                    onScrolledUp = false;
                 }
-                onScrolledUp = false;
             }
 
         });
@@ -1759,6 +1780,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
         messagesLayoutManager.scrollToPosition(0);
         UiUtils.showView(scrollToBottomFrame, false);
         onScrolledUp = false;
+        tempReceivedMessages.clear();
     }
 
     @Override

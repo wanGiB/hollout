@@ -694,15 +694,24 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         lastMessage.setMessageStatusCallback(messageReceiveCallback);
     }
 
+    public EMMessage.Direct getMessageDirection() {
+        return lastMessage != null ? lastMessage.direct() : null;
+    }
+
     private void setupMessageReadStatus(EMMessage message) {
-        if (message.isAcked()) {
-            deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-        } else if (message.isDelivered()) {
-            deliveryStatusView.setImageResource(R.drawable.msg_status_client_received_white);
-        } else if (message.isListened()) {
-            deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-        } else {
-            deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
+        if (getMessageDirection() != null && getMessageDirection() == EMMessage.Direct.SEND && deliveryStatusView != null) {
+            UiUtils.showView(deliveryStatusView,true);
+            if (message.isAcked()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else if (message.isListened()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else if (message.isDelivered()) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_received);
+            } else {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
+            }
+        }else{
+            UiUtils.showView(deliveryStatusView,false);
         }
     }
 

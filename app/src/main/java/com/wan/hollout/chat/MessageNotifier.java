@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -192,20 +193,30 @@ public class MessageNotifier {
                 Spanned messageSpannable = UiUtils.fromHtml(getMessage(message));
                 builder.setContentText(messageSpannable);
                 builder.setTicker(messageSpannable);
-                builder.setSmallIcon(R.mipmap.ic_launcher_round);
+                builder.setSmallIcon(R.mipmap.ic_launcher);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
-                Bitmap notificationInitiatorBitmap = getCircleBitmap(BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher));
+
+                Bitmap notificationInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
+
                 if (StringUtils.isNotEmpty(senderPhoto)) {
-                    notificationInitiatorBitmap = getCircleBitmap(getBitmapFromURL(senderPhoto));
+                    Resources res = appContext.getResources();
+                    int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
+                    int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
+                    notificationInitiatorBitmap = getCircleBitmap(Bitmap.createScaledBitmap(getBitmapFromURL(senderPhoto), width, height, false));
                 }
+
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                 builder.setLargeIcon(notificationInitiatorBitmap);
                 builder.setAutoCancel(true);
                 builder.setContentIntent(pendingIntent);
-                builder.setContentText(messageSpannable);
-                builder.setStyle(new NotificationCompat.BigTextStyle().bigText(messageSpannable).setBigContentTitle(WordUtils.capitalize(senderName)));
-                builder.setSubText("1 New Message");
+                builder.setColor(Color.parseColor("#00628F"));
+
+                builder.setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(messageSpannable)
+                        .setBigContentTitle(WordUtils.capitalize(senderName)).setSummaryText("1 New Message"));
+
                 Notification notification = builder.build();
+
                 notification.defaults |= Notification.DEFAULT_LIGHTS;
                 notification.defaults |= Notification.DEFAULT_VIBRATE;
                 notification.defaults |= Notification.DEFAULT_SOUND;
@@ -231,11 +242,16 @@ public class MessageNotifier {
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
                 Spanned messageSpannable = UiUtils.fromHtml(EMClient.getInstance().chatManager().getUnreadMessageCount() + " new messages");
                 builder.setTicker(messageSpannable);
-                builder.setSmallIcon(R.mipmap.ic_launcher_round);
+                builder.setSmallIcon(R.mipmap.ic_launcher);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
-                Bitmap notificationInitiatorBitmap = getCircleBitmap(BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher));
+                builder.setColor(Color.parseColor("#00628F"));
+                Bitmap notificationInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
                 if (StringUtils.isNotEmpty(senderPhoto)) {
-                    notificationInitiatorBitmap = getCircleBitmap(getBitmapFromURL(senderPhoto));
+                    Resources res = appContext.getResources();
+                    int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
+                    int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
+                    notificationInitiatorBitmap = getCircleBitmap(Bitmap.createScaledBitmap(getBitmapFromURL(senderPhoto), width, height, false));
+
                 }
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                 builder.setAutoCancel(true);
@@ -273,12 +289,22 @@ public class MessageNotifier {
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
                 Spanned messageSpannable = UiUtils.fromHtml(EMClient.getInstance().chatManager().getUnreadMessageCount() + " new messages");
                 builder.setTicker(messageSpannable);
-                builder.setSmallIcon(R.mipmap.ic_launcher_round);
+                builder.setSmallIcon(R.mipmap.ic_launcher);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
-                Bitmap notificationInitiatorBitmap = getCircleBitmap(BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher));
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                 builder.setAutoCancel(true);
                 NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+                builder.setColor(Color.parseColor("#00628F"));
+                Resources res = appContext.getResources();
+
+                int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
+                int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
+
+                Bitmap notificationInitiatorBitmap =
+                        getCircleBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(appContext.getResources(),
+                                R.mipmap.ic_launcher),
+                                width, height, false));
+
                 builder.setContentTitle(WordUtils.capitalize(appContext.getString(R.string.app_name)))
                         .setLargeIcon(notificationInitiatorBitmap)
                         .setContentIntent(pendingIntent)
@@ -333,12 +359,12 @@ public class MessageNotifier {
     }
 
     private Bitmap getCircleBitmap(Bitmap bitmap) {
-        Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(output);
-        int color = Color.RED;
-        Paint paint = new Paint();
-        Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        RectF rectF = new RectF(rect);
+        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(output);
+        final int color = Color.RED;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
         paint.setAntiAlias(true);
         canvas.drawARGB(0, 0, 0, 0);
         paint.setColor(color);

@@ -394,7 +394,7 @@ public class HolloutCommunicationsManager {
                         HolloutUtils.deserializeMessages(AppConstants.UNREAD_MESSAGES, new DoneCallback<List<EMMessage>>() {
                             @Override
                             public void done(List<EMMessage> result, Exception e) {
-                                if (result != null) {
+                                if (result != null && !result.isEmpty()) {
                                     result.addAll(0,messages);
                                     HolloutUtils.serializeMessages(result,AppConstants.UNREAD_MESSAGES);
                                     getNotifier().onNewMsg(result);

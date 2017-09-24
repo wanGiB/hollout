@@ -41,6 +41,7 @@ import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
@@ -124,9 +125,9 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
             if (signedInUser != null) {
                 String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
                 if (signedInUserId.equals(repliedMessage.getFrom())) {
-                    replyTitleView.setText(activity.getString(R.string.you));
+                    replyTitleView.setText(WordUtils.capitalize(activity.getString(R.string.you)));
                 } else {
-                    replyTitleView.setText(senderNameOfMessage);
+                    replyTitleView.setText(WordUtils.capitalize(senderNameOfMessage));
                 }
                 if (messageType == EMMessage.Type.TXT) {
                     setupTxtMessage((EMTextMessageBody) messageBody);

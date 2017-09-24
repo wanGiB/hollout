@@ -117,27 +117,6 @@ public class HolloutUtils {
         return kryo;
     }
 
-    public static void removeMessageFromListOfUnread(final EMMessage emMessage){
-        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
-            @Override
-            public void run() {
-                HolloutUtils.deserializeMessages(AppConstants.UNREAD_MESSAGES, new DoneCallback<List<EMMessage>>() {
-                    @Override
-                    public void done(List<EMMessage> result, Exception e) {
-                        if (e==null && result!=null){
-                            for (EMMessage message:result){
-                                if (message.getMsgId().equals(emMessage.getMsgId())){
-                                    result.remove(message);
-                                }
-                            }
-                            serializeMessages(result,AppConstants.UNREAD_MESSAGES);
-                        }
-                    }
-                });
-            }
-        });
-    }
-
     public static synchronized void serializeMessages(List<EMMessage> tObjects, String serializableName) {
         Kryo kryo = getKryoInstance();
         try {
