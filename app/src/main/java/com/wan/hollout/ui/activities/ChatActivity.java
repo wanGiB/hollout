@@ -80,6 +80,7 @@ import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.chat.MessageNotifier;
 import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.eventbuses.GifMessageEvent;
+import com.wan.hollout.eventbuses.MessageChangedEvent;
 import com.wan.hollout.eventbuses.MessageDeliveredEvent;
 import com.wan.hollout.eventbuses.MessageReadEvent;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
@@ -1217,6 +1218,7 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                 break;
             case R.id.delete_conversation:
                 mConversation.clearAllMessages();
+                messages.clear();
                 messagesAdapter.notifyDataSetChanged();
                 invalidateEmptyView();
                 break;
@@ -1719,7 +1721,16 @@ public class ChatActivity extends BaseActivity implements ATEActivityThemeCustom
                         messagesAdapter.notifyDataSetChanged();
                         UiUtils.bangSound(ChatActivity.this, R.raw.pop);
                     }
-                } else if (o instanceof ReactionMessageEvent) {
+                }else if (o instanceof MessageChangedEvent){
+                    MessageChangedEvent messageChangedEvent = (MessageChangedEvent)o;
+                    int indexOfMessage = messages.indexOf(messageChangedEvent.getMessage());
+                    if (indexOfMessage != -1) {
+                        messages.set(indexOfMessage, messageChangedEvent.getMessage());
+                        messagesAdapter.notifyDataSetChanged();
+                        UiUtils.bangSound(ChatActivity.this, R.raw.pop);
+                    }
+                }
+                else if (o instanceof ReactionMessageEvent) {
                     ReactionMessageEvent reactionMessageEvent = (ReactionMessageEvent) o;
                     String reaction = reactionMessageEvent.getReaction();
                     HashMap<String, String> reactionProps = new HashMap<>();

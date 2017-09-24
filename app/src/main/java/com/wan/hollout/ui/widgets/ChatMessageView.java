@@ -256,6 +256,17 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             audioView.setOnLongClickListener(this);
         }
 
+        EMMessage.Status status = message.status();
+
+        if (status== EMMessage.Status.FAIL){
+            resendMessage(message);
+        }
+
+    }
+
+    public void resendMessage(EMMessage message) {
+        message.setStatus(EMMessage.Status.CREATE);
+        EMClient.getInstance().chatManager().sendMessage(message);
     }
 
     //Setup message reply
