@@ -112,8 +112,8 @@ public class HolloutUtils {
 
 
     public static Kryo getKryoInstance() {
-        Kryo kryo=new Kryo();
-        kryo.register(EMMessage.class,new EMMessageSerializer());
+        Kryo kryo = new Kryo();
+        kryo.register(EMMessage.class, new EMMessageSerializer());
         return kryo;
     }
 
@@ -363,7 +363,7 @@ public class HolloutUtils {
         return new Gson().toJson(additionalPhotosOfUser, listType);
     }
 
-    public static Gson getGson(){
+    public static Gson getGson() {
         return new Gson();
     }
 
@@ -971,8 +971,8 @@ public class HolloutUtils {
     }
 
     public static String getThumbnailImagePath(String thumbRemoteUrl) {
-        String thumbImageName= thumbRemoteUrl.substring(thumbRemoteUrl.lastIndexOf("/") + 1, thumbRemoteUrl.length());
-        String path = PathUtil.getInstance().getImagePath()+"/"+ "th"+thumbImageName;
+        String thumbImageName = thumbRemoteUrl.substring(thumbRemoteUrl.lastIndexOf("/") + 1, thumbRemoteUrl.length());
+        String path = PathUtil.getInstance().getImagePath() + "/" + "th" + thumbImageName;
         EMLog.d("msg", "thum image path:" + path);
         return path;
     }

@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import com.google.android.gms.auth.api.Auth;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.BounceInterpolator;
@@ -121,7 +120,10 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             }
         }
 
-        private void handleItemViewClick(final Context context, final String host, final int position, final List<ParseObject> people, final PeopleToMeetAdapter peopleToMeetAdapter, final ParseObject personObject) {
+        private void handleItemViewClick(final Context context, final String host, final int position,
+                                         final List<ParseObject> people,
+                                         final PeopleToMeetAdapter peopleToMeetAdapter,
+                                         final ParseObject personObject) {
             final ParseObject parseUser = AuthUtil.getCurrentUser();
             final String personName = personObject.getString(AppConstants.NAME);
             final List<String> selectedPeopleToMeet = parseUser.getList(AppConstants.INTERESTS);
