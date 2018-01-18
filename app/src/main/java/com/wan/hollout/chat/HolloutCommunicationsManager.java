@@ -33,13 +33,17 @@ import com.wan.hollout.eventbuses.MessageChangedEvent;
 import com.wan.hollout.eventbuses.MessageDeliveredEvent;
 import com.wan.hollout.eventbuses.MessageReadEvent;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
+import com.wan.hollout.layoutmanagers.chipslayoutmanager.util.log.Log;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,17 +108,19 @@ public class HolloutCommunicationsManager {
     private String getAppName(int pID) {
         String processName;
         ActivityManager am = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        List l = am.getRunningAppProcesses();
-        for (Object aL : l) {
-            ActivityManager.RunningAppProcessInfo info =
-                    (ActivityManager.RunningAppProcessInfo) (aL);
-            try {
-                if (info.pid == pID) {
-                    processName = info.processName;
-                    return processName;
-                }
-            } catch (Exception ignored) {
+        if (am != null) {
+            List l = am.getRunningAppProcesses();
+            for (Object aL : l) {
+                ActivityManager.RunningAppProcessInfo info =
+                        (ActivityManager.RunningAppProcessInfo) (aL);
+                try {
+                    if (info.pid == pID) {
+                        processName = info.processName;
+                        return processName;
+                    }
+                } catch (Exception ignored) {
 
+                }
             }
         }
         return null;
@@ -243,14 +249,11 @@ public class HolloutCommunicationsManager {
      * Set Connection Listener
      */
     private void setConnectionListener() {
-
         if (mConnectionListener != null) {
             EMClient.getInstance().removeConnectionListener(mConnectionListener);
             mConnectionListener = null;
         }
-
         mConnectionListener = new EMConnectionListener() {
-
             /**
              * The connection to the server is successful
              */
@@ -271,11 +274,8 @@ public class HolloutCommunicationsManager {
                     onConnectionConflict();
                 }
             }
-
         };
-
         EMClient.getInstance().addConnectionListener(mConnectionListener);
-
     }
 
     public MessageNotifier getNotifier() {
@@ -314,11 +314,9 @@ public class HolloutCommunicationsManager {
      *
      * @param callback to receive the result of the logout
      */
-    public void signOut(boolean unbindDeviceToken, final EMCallBack callback) {
-
-        HolloutLogger.d(TAG, "Sign out: " + unbindDeviceToken);
-
-        EMClient.getInstance().logout(unbindDeviceToken, new EMCallBack() {
+    public void signOut(final EMCallBack callback) {
+        HolloutLogger.d(TAG, "Sign out: " + true);
+        EMClient.getInstance().logout(true, new EMCallBack() {
 
             @Override
             public void onSuccess() {
@@ -348,10 +346,10 @@ public class HolloutCommunicationsManager {
     }
 
     private boolean isAContact(ParseObject signedInUser, String recipientId) {
-        if (signedInUser!=null){
+        if (signedInUser != null) {
             List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
             return signedInUserChats != null && signedInUserChats.contains(recipientId);
-        }else {
+        } else {
             return false;
         }
     }
@@ -362,32 +360,26 @@ public class HolloutCommunicationsManager {
      * activityList.size() <= 0 means all activities already in background or not in Activity Stack
      */
     private void registerMessageListener() {
-
         if (messageListener != null) {
             EMClient.getInstance().chatManager().removeMessageListener(messageListener);
             messageListener = null;
         }
-
         messageListener = new EMMessageListener() {
 
             @Override
             public void onMessageReceived(final List<EMMessage> messages) {
-
                 List<String> unreadConversationItems = new ArrayList<>();
-
                 for (EMMessage emMessage : messages) {
-                    if (!unreadConversationItems.contains(emMessage.getFrom()) && isAContact(AuthUtil.getCurrentUser(),emMessage.getFrom())) {
+                    Log.d("MessageTracker", "New Message Received");
+                    if (!unreadConversationItems.contains(emMessage.getFrom()) && isAContact(AuthUtil.getCurrentUser(), emMessage.getFrom())) {
                         unreadConversationItems.add(emMessage.getFrom());
                         HolloutPreferences.updateConversationTime(emMessage.getFrom());
                     }
                 }
-
                 if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0 && !unreadConversationItems.isEmpty()) {
                     HolloutPreferences.saveTotalUnreadChats(unreadConversationItems);
                 }
-
                 ParseObject signedInUser = AuthUtil.getCurrentUser();
-
                 if (signedInUser != null) {
                     String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                     if (!signedInUserStatus.equals(AppConstants.ONLINE)) {
@@ -395,13 +387,13 @@ public class HolloutCommunicationsManager {
                             @Override
                             public void done(List<EMMessage> result, Exception e) {
                                 if (result != null && !result.isEmpty()) {
-                                    result.addAll(0,messages);
-                                    HolloutUtils.serializeMessages(result,AppConstants.UNREAD_MESSAGES);
+                                    result.addAll(0, messages);
+                                    HolloutUtils.serializeMessages(result, AppConstants.UNREAD_MESSAGES);
                                     getNotifier().onNewMsg(result);
-                                }else{
-                                    List<EMMessage>newUnreadMessages = new ArrayList<>();
+                                } else {
+                                    List<EMMessage> newUnreadMessages = new ArrayList<>();
                                     newUnreadMessages.addAll(messages);
-                                    HolloutUtils.serializeMessages(newUnreadMessages,AppConstants.UNREAD_MESSAGES);
+                                    HolloutUtils.serializeMessages(newUnreadMessages, AppConstants.UNREAD_MESSAGES);
                                     getNotifier().onNewMsg(newUnreadMessages);
                                 }
                             }
@@ -412,7 +404,6 @@ public class HolloutCommunicationsManager {
                         }
                     }
                 }
-
             }
 
             @Override
@@ -451,6 +442,7 @@ public class HolloutCommunicationsManager {
         };
 
         EMClient.getInstance().chatManager().addMessageListener(messageListener);
+
     }
 
     /**
@@ -718,6 +710,25 @@ public class HolloutCommunicationsManager {
         }
         mCallStateChangeListener = new CallStateChangeListener(mContext);
         EMClient.getInstance().callManager().addCallStateChangeListener(mCallStateChangeListener);
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static void sendChatState(String chatState, String recipientId) {
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
+        JSONObject chatStates = existingChatStates != null ? existingChatStates : new JSONObject();
+        try {
+            chatStates.put(recipientId, chatState);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        signedInUserObject.put(AppConstants.APP_USER_CHAT_STATES, chatStates);
+        AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
+            @Override
+            public void done(Boolean result, Exception e) {
+
+            }
+        });
     }
 
 }

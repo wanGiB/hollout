@@ -8,7 +8,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -20,7 +19,6 @@ import com.wan.hollout.ui.adapters.ChatRequestsAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
-import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
@@ -33,9 +31,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class FullChatRequestsActivity extends BaseActivity implements ATEActivityThemeCustomizer {
-
-    private boolean isDarkTheme;
+public class FullChatRequestsActivity extends BaseActivity {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -55,7 +51,6 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_full_chat_requests);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -78,9 +73,7 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
         MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
-        MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
 
-        invitePeopleMenuItem.setVisible(false);
         createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
         supportInvalidateOptionsMenu();
@@ -128,11 +121,6 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
     }
 
     @Override
-    public int getActivityTheme() {
-        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         if (isFinishing())
@@ -143,6 +131,7 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
         if (signedInUser != null) {
             ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            chatRequestsQuery.setLimit(30);
             if (skip != 0) {
                 chatRequestsQuery.setSkip(skip);
             }
@@ -162,23 +151,20 @@ public class FullChatRequestsActivity extends BaseActivity implements ATEActivit
         }
     }
 
-    private void loadAdapter(List<ParseObject> objects){
-
-        for (ParseObject parseObject:objects){
-            if (!chatRequests.contains(parseObject)){
+    private void loadAdapter(List<ParseObject> objects) {
+        for (ParseObject parseObject : objects) {
+            if (!chatRequests.contains(parseObject)) {
                 chatRequests.add(parseObject);
             }
         }
-
         chatRequestsAdapter.notifyDataSetChanged();
-
-        if (!chatRequests.isEmpty()){
+        if (!chatRequests.isEmpty()) {
             hideEmptyViewsAndShowRecyclerView();
         }
 
     }
 
-    private void hideEmptyViewsAndShowRecyclerView(){
+    private void hideEmptyViewsAndShowRecyclerView() {
         UiUtils.showView(nothingToLoadView, false);
         UiUtils.showView(progressWheel, false);
         UiUtils.showView(chatRequestsRecyclerView, true);

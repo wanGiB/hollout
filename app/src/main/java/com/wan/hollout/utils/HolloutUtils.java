@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -37,6 +38,8 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.OnProgressListener;
@@ -336,25 +339,6 @@ public class HolloutUtils {
             }
         }
         return false;
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public static void sendChatState(String chatState, String recipientId) {
-        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
-        JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
-        JSONObject chatStates = existingChatStates != null ? existingChatStates : new JSONObject();
-        try {
-            chatStates.put(recipientId, chatState);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        signedInUserObject.put(AppConstants.APP_USER_CHAT_STATES, chatStates);
-        AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
-            @Override
-            public void done(Boolean result, Exception e) {
-
-            }
-        });
     }
 
     public static String convertAdditionalPhotosToString(List<Object> additionalPhotosOfUser) {
@@ -983,6 +967,21 @@ public class HolloutUtils {
 
     private static EMMessage.Direct getMessageDirection(EMMessage message) {
         return message.direct();
+    }
+
+    public static boolean checkGooglePlayServices(Activity activity) {
+        final int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity);
+        if (status != ConnectionResult.SUCCESS) {
+            HolloutLogger.d(TAG, GoogleApiAvailability.getInstance().getErrorString(status));
+            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(activity, status, 1);
+            if (!dialog.isShowing()) {
+                dialog.show();
+            }
+            return false;
+        } else {
+            HolloutLogger.i(TAG, GoogleApiAvailability.getInstance().getErrorString(status));
+            return true;
+        }
     }
 
 }

@@ -7,14 +7,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.fragments.ChatSettingsFragment;
 import com.wan.hollout.ui.fragments.NotificationSettingsFragment;
 import com.wan.hollout.ui.fragments.PrivacySettingsFragment;
 import com.wan.hollout.ui.fragments.SupportSettings;
 import com.wan.hollout.utils.AppConstants;
-import com.wan.hollout.utils.HolloutPreferences;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,16 +21,13 @@ import butterknife.ButterKnife;
  * * Created by Wan on 7/16/2016.
  */
 
-public class SettingsActivity extends BaseActivity implements ATEActivityThemeCustomizer {
+public class SettingsActivity extends BaseActivity {
 
     @BindView(R.id.toolbar)
     public Toolbar toolbar;
 
-    private boolean isDarkTheme;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.settings);
@@ -75,9 +70,7 @@ public class SettingsActivity extends BaseActivity implements ATEActivityThemeCu
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
         MenuItem createNewGroupItem  = menu.findItem(R.id.create_new_group);
-        MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
 
-        invitePeopleMenuItem.setVisible(false);
         createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
 
@@ -91,11 +84,6 @@ public class SettingsActivity extends BaseActivity implements ATEActivityThemeCu
     protected void onPause() {
         super.onPause();
         if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
-    }
-
-    @Override
-    public int getActivityTheme() {
-        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }
 
     @Override

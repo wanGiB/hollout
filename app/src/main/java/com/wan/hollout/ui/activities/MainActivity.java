@@ -17,10 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
@@ -34,31 +31,35 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.Config;
-import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hyphenate.EMCallBack;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
+import com.mikepenz.materialdrawer.model.SectionDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
-import com.wan.hollout.entities.drawerMenu.DrawerItemCategory;
-import com.wan.hollout.entities.drawerMenu.DrawerItemPage;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.eventbuses.UnreadFeedsBadge;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
-import com.wan.hollout.ui.fragments.DrawerFragment;
-import com.wan.hollout.ui.fragments.FeedFragment;
 import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.services.EMClientAuthenticationService;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
-import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FontUtils;
@@ -82,20 +83,18 @@ import java.util.Set;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends BaseActivity implements ATEActivityThemeCustomizer,
-        DrawerFragment.FragmentDrawerListener,
-        ActivityCompat.OnRequestPermissionsResultCallback {
+import static com.wan.hollout.utils.UiUtils.showView;
 
-    private boolean isDarkTheme;
+public class MainActivity extends BaseActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     @BindView(R.id.footerAd)
     LinearLayout footerView;
 
-    @BindView(R.id.drawer_layout)
-    DrawerLayout drawer;
-
     @BindView(R.id.toolbar)
     Toolbar toolbar;
+
+    @BindView(R.id.rootLayout)
+    View rootLayout;
 
     @BindView(R.id.viewpager)
     ViewPager viewPager;
@@ -110,57 +109,48 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     View actionModeBar;
 
     private HolloutPermissions holloutPermissions;
-    private DrawerFragment drawerFragment;
 
+    private static final int PROFILE_SETTING = 100000;
+    private static final int ACTIVE_PROFILE = 100;
+
+    //save our header or result
+    private AccountHeader headerResult = null;
+    private Drawer result = null;
+
+    private IProfile currentProfile;
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
-
         ParseObject signedInUser = AuthUtil.getCurrentUser();
-        final ActionBar ab = getSupportActionBar();
-
-        if (ab != null) {
-            ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-            ab.setDisplayHomeAsUpEnabled(true);
-        }
-
         if (viewPager != null) {
             Adapter adapter = setupViewPagerAdapter(viewPager);
             viewPager.setOffscreenPageLimit(3);
-            tabLayout.setSelectedTabIndicatorHeight(6);
+            tabLayout.setSelectedTabIndicatorHeight(7);
             tabLayout.setupWithViewPager(viewPager);
             setupTabs(adapter);
         }
-
         fetchUnreadMessagesCount();
-
-        if (HolloutPreferences.getInstance().getBoolean("dark_theme", false)) {
-            ATE.apply(this, "dark_theme");
-        } else {
-            ATE.apply(this, "light_theme");
-        }
-
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
         initAndroidPermissions();
-        drawerFragment = (DrawerFragment) getSupportFragmentManager().findFragmentById(R.id.main_navigation_drawer_fragment);
-        drawerFragment.setUp(drawer, this);
-
+        setupNavigationDrawer(savedInstanceState, signedInUser);
+        displaySignedInUserInfo(signedInUser);
         if (!HolloutPreferences.isUserWelcomed()) {
             if (signedInUser != null) {
                 UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)));
             }
             HolloutPreferences.setUserWelcomed(true);
         }
-
         checkAndRegEventBus();
+        attachEventHandlers();
+    }
 
+    private void attachEventHandlers() {
         materialSearchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
 
             @Override
@@ -171,7 +161,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             @Override
             public void onSearchViewClosed() {
                 EventBus.getDefault().post(AppConstants.ENABLE_NESTED_SCROLLING);
-                UiUtils.showView(tabLayout, true);
+                showView(tabLayout, true);
                 EventBus.getDefault().post(AppConstants.SEARCH_VIEW_CLOSED);
             }
 
@@ -206,6 +196,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         });
 
         materialSearchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+
             @Override
             public boolean onQueryTextSubmit(String query) {
                 if (viewPager.getCurrentItem() == 0) {
@@ -225,8 +216,112 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                 }
                 return true;
             }
+
         });
 
+    }
+
+    private void setupNavigationDrawer(Bundle savedInstanceState, ParseObject signedInUser) {
+        String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+
+        currentProfile = new ProfileDrawerItem()
+                .withName(StringUtils.isNotEmpty(userDisplayName) ? WordUtils.capitalize(userDisplayName) : "Hollout User")
+                .withIcon(R.drawable.empty_profile)
+                .withIdentifier(ACTIVE_PROFILE);
+
+        headerResult = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withTranslucentStatusBar(true)
+                .withDividerBelowHeader(false)
+                .withHeaderBackground(R.color.colorPrimary)
+                .withPaddingBelowHeader(false)
+                .withSelectionSecondLineShown(false)
+                .addProfiles(currentProfile, new ProfileSettingDrawerItem().withName("Switch Accounts")
+                        .withDescription("Log Out")
+                        .withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_settings)
+                                .actionBar().paddingDp(5).colorRes(R.color.material_drawer_primary_text))
+                        .withIdentifier(PROFILE_SETTING))
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean current) {
+                        if (profile instanceof IDrawerItem && profile.getIdentifier() == PROFILE_SETTING) {
+                            attemptLogOut();
+                        }
+                        return false;
+                    }
+                }).withOnAccountHeaderProfileImageListener(new AccountHeader.OnAccountHeaderProfileImageListener() {
+                    @Override
+                    public boolean onProfileImageClick(View view, IProfile profile, boolean current) {
+                        if (current) {
+                            launchUserProfile();
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onProfileImageLongClick(View view, IProfile profile, boolean current) {
+                        return false;
+                    }
+                })
+                .withSavedInstance(savedInstanceState).build();
+
+        result = new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .withTranslucentStatusBar(true)
+                .withAccountHeader(headerResult)
+                .withHeaderPadding(false)
+                .addDrawerItems(
+                        new SectionDrawerItem().withName("People").withDivider(false),
+                        new PrimaryDrawerItem().withName(R.string.meet_people).withIcon(GoogleMaterial.Icon.gmd_nature_people).withIdentifier(1),
+                        new SectionDrawerItem().withName("Account"),
+                        new PrimaryDrawerItem().withName(R.string.your_profile).withIcon(GoogleMaterial.Icon.gmd_account_circle).withIdentifier(2),
+                        new PrimaryDrawerItem().withName(R.string.invite_friends).withIcon(GoogleMaterial.Icon.gmd_insert_link).withIdentifier(7),
+                        new SectionDrawerItem().withName("Help & Settings"),
+                        new PrimaryDrawerItem().withName(R.string.notification_settings).withIcon(GoogleMaterial.Icon.gmd_notifications).withIdentifier(3),
+                        new PrimaryDrawerItem().withName(R.string.chats_and_calls_settings).withIcon(GoogleMaterial.Icon.gmd_chat).withIdentifier(4),
+                        new PrimaryDrawerItem().withName(R.string.privacy_settings).withIcon(GoogleMaterial.Icon.gmd_security).withIdentifier(5),
+                        new PrimaryDrawerItem().withName(R.string.support_and_about_settings).withIcon(GoogleMaterial.Icon.gmd_help).withIdentifier(6)
+                ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        if (drawerItem != null) {
+                            if (drawerItem.getIdentifier() == 1) {
+                                meetMorePeople();
+                            } else if (drawerItem.getIdentifier() == 2) {
+                                launchUserProfile();
+                            } else if (drawerItem.getIdentifier() == 3) {
+                                launchSettings(AppConstants.NOTIFICATION_SETTINGS_FRAGMENT);
+                            } else if (drawerItem.getIdentifier() == 4) {
+                                launchSettings(AppConstants.CHATS_SETTINGS_FRAGMENT);
+                            } else if (drawerItem.getIdentifier() == 5) {
+                                launchSettings(AppConstants.PRIVACY_AND_SECURITY_FRAGMENT);
+                            } else if (drawerItem.getIdentifier() == 6) {
+                                launchSettings(AppConstants.SUPPORT_SETTINGS_FRAGMENT);
+                            }
+                        }
+                        return false;
+                    }
+                }).withSavedInstance(savedInstanceState).build();
+    }
+
+    private void displaySignedInUserInfo(ParseObject signedInUser) {
+        if (currentProfile != null && signedInUser != null) {
+            String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+            String userPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            String userEmail = signedInUser.getString(AppConstants.USER_EMAIL);
+            if (StringUtils.isNotEmpty(userDisplayName)) {
+                currentProfile.withName(WordUtils.capitalize(userDisplayName));
+            }
+            if (StringUtils.isNotEmpty(userPhotoUrl)) {
+                currentProfile.withIcon(userPhotoUrl);
+            }
+            if (StringUtils.isNotEmpty(userEmail)) {
+                currentProfile.withEmail(userEmail);
+            }
+            headerResult.updateProfile(currentProfile);
+            headerResult.setActiveProfile(currentProfile);
+        }
     }
 
     private void fetchUnreadMessagesCount() {
@@ -236,12 +331,10 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             onSharedPreferenceChangeListener = null;
         }
         onSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
-
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 getUnreadMessagesCount();
             }
-
         };
         HolloutPreferences.getInstance().registerOnSharedPreferenceChangeListener(onSharedPreferenceChangeListener);
     }
@@ -262,9 +355,9 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             if (tabView != null) {
                 TextView tabCountView = (TextView) tabView.findViewById(R.id.tab_count);
                 if (tabCountView != null) {
-                    UiUtils.showView(tabCountView, true);
+                    showView(tabCountView, true);
                     if (incrementValue == 0) {
-                        UiUtils.showView(tabCountView, false);
+                        showView(tabCountView, false);
                     } else {
                         tabCountView.setText(String.valueOf(incrementValue));
                     }
@@ -277,7 +370,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         Adapter adapter = new Adapter(this, getSupportFragmentManager());
         adapter.addFragment(new PeopleFragment(), this.getString(R.string.people));
         adapter.addFragment(new ConversationsFragment(), this.getString(R.string.chats));
-        adapter.addFragment(new FeedFragment(), this.getString(R.string.feeds));
         viewPager.setAdapter(adapter);
         return adapter;
     }
@@ -286,9 +378,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public void onResume() {
         super.onResume();
         checkAndRegEventBus();
-        String ateKey = HolloutPreferences.getATEKey();
-        ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
-        invalidateDrawerMenuHeader();
         fetchUnreadMessagesCount();
     }
 
@@ -318,7 +407,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
             tryAskForPermissions();
         } else {
             UiUtils.snackMessage("To enjoy all features of hollout, please grant the requested permissions.",
-                    drawer, true, "OK", new DoneCallback<Object>() {
+                    rootLayout, true, "OK", new DoneCallback<Object>() {
                         @Override
                         public void done(Object result, Exception e) {
                             tryAskForPermissions();
@@ -355,6 +444,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onStart();
         checkAndRegEventBus();
         fetchUnreadMessagesCount();
+        displaySignedInUserInfo(AuthUtil.getCurrentUser());
     }
 
     @Override
@@ -366,7 +456,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
 
     private void turnOnLocationMessage() {
         UiUtils.snackMessage("To enjoy all features of hollout, please Turn on your location.",
-                drawer, true, "OK", new DoneCallback<Object>() {
+                rootLayout, true, "OK", new DoneCallback<Object>() {
                     @Override
                     public void done(Object result, Exception e) {
                         Intent mLocationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
@@ -427,8 +517,11 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     }
 
     private void toggleViews() {
-        UiUtils.showView(tabLayout, false);
+        showView(tabLayout, false);
         materialSearchView.showSearch(true);
+        if (viewPager.getCurrentItem() == 1) {
+            materialSearchView.setHint("Search your chats");
+        }
     }
 
     @Override
@@ -466,33 +559,30 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
     }
 
-    /**
-     * Method checks if MainActivity instance exist. If so, then drawer menu header will be invalidated.
-     */
-    public void invalidateDrawerMenuHeader() {
-        if (drawerFragment != null) {
-            drawerFragment.invalidateHeader();
-        }
-    }
-
-    @Override
-    public int getActivityTheme() {
-        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
-    }
-
     @Override
     public void onBackPressed() {
-        if (drawerFragment != null && drawerFragment.isSubMenuVisible()) {
-            drawerFragment.animateSubListHide();
-        } else if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (AppConstants.ARE_REACTIONS_OPEN) {
-            EventBus.getDefault().post(AppConstants.CLOSE_REACTIONS);
-        } else if (materialSearchView.isSearchOpen()) {
-            materialSearchView.closeSearch();
-        } else {
-            super.onBackPressed();
+        if (viewPager.getCurrentItem() != 0) {
+            viewPager.setCurrentItem(0);
+            return;
         }
+
+        if (result != null && result.isDrawerOpen()) {
+            result.closeDrawer();
+            return;
+        }
+
+        if (AppConstants.ARE_REACTIONS_OPEN) {
+            EventBus.getDefault().post(AppConstants.CLOSE_REACTIONS);
+            return;
+        }
+
+        if (materialSearchView.isSearchOpen()) {
+            materialSearchView.closeSearch();
+            return;
+        }
+
+        super.onBackPressed();
+
     }
 
     @Override
@@ -509,7 +599,6 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
-        ATE.applyMenu(this, getATEKey(), menu);
         return true;
     }
 
@@ -520,10 +609,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         //noinspection SimplifiableIfStatement
-        if (id == android.R.id.home) {
-            drawer.openDrawer(GravityCompat.START);
-            return true;
-        } else if (id == R.id.filter_people) {
+        if (id == R.id.filter_people) {
             initPeopleFilterDialog();
             return true;
         } else if (id == R.id.action_search) {
@@ -608,7 +694,7 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                EventBus.getDefault().post(AppConstants.REFRESH_PEOPLE);
+                EventBus.getDefault().postSticky(AppConstants.REFRESH_PEOPLE);
             }
         } else {
             getSupportFragmentManager().findFragmentById(R.id.fragment_container).onActivityResult(requestCode, resultCode, data);
@@ -643,45 +729,46 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
                     if (e == null) {
                         HolloutPreferences.setUserWelcomed(false);
                         HolloutPreferences.clearPersistedCredentials();
-                        invalidateDrawerMenuHeader();
                         ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
                         ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
                         HolloutUtils.getKryoInstance().reset();
-                        AuthUtil.signOut(MainActivity.this).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    HolloutCommunicationsManager.getInstance().signOut(true, new EMCallBack() {
-                                        @Override
-                                        public void onSuccess() {
-                                            HolloutPreferences.clearUnreadMessagesCount();
-                                            runOnUiThread(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    finishUp();
-                                                }
-                                            });
-                                        }
+                        AuthUtil.signOut(MainActivity.this)
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            HolloutCommunicationsManager.getInstance().signOut(new EMCallBack() {
 
-                                        @Override
-                                        public void onError(int code, String error) {
+                                                @Override
+                                                public void onSuccess() {
+                                                    HolloutPreferences.clearUnreadMessagesCount();
+                                                    runOnUiThread(new Runnable() {
+                                                        @Override
+                                                        public void run() {
+                                                            finishUp();
+                                                        }
+                                                    });
+                                                }
+
+                                                @Override
+                                                public void onError(int code, String error) {
+                                                    UiUtils.dismissProgressDialog();
+                                                    UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                                                }
+
+                                                @Override
+                                                public void onProgress(int progress, String status) {
+
+                                                }
+
+                                            });
+
+                                        } else {
                                             UiUtils.dismissProgressDialog();
                                             UiUtils.showSafeToast("Failed to sign you out.Please try again");
                                         }
-
-                                        @Override
-                                        public void onProgress(int progress, String status) {
-
-                                        }
-
-                                    });
-
-                                } else {
-                                    UiUtils.dismissProgressDialog();
-                                    UiUtils.showSafeToast("Failed to sign you out.Please try again");
-                                }
-                            }
-                        });
+                                    }
+                                });
                     } else {
                         UiUtils.dismissProgressDialog();
                         UiUtils.showSafeToast("Failed to sign you out.Please try again");
@@ -701,43 +788,15 @@ public class MainActivity extends BaseActivity implements ATEActivityThemeCustom
         finish();
     }
 
-    @Override
-    public void onDrawersPeopleOfSharedInterestsSelected() {
+    private void meetMorePeople() {
         Intent meetPeopleIntent = new Intent(MainActivity.this, MeetPeopleActivity.class);
         startActivityForResult(meetPeopleIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
-    }
-
-    @Override
-    public void onDrawerItemCategorySelected(DrawerItemCategory drawerItemCategory) {
-        if (drawerItemCategory.getId() == DrawerFragment.LOG_OUT) {
-            attemptLogOut();
-        } else if (drawerItemCategory.getId() == DrawerFragment.YOUR_PROFILE) {
-            launchUserProfile();
-        } else if (drawerItemCategory.getId() == DrawerFragment.NOTIFICATION_SETTINGS) {
-            launchSettings(AppConstants.NOTIFICATION_SETTINGS_FRAGMENT);
-        } else if (drawerItemCategory.getId() == DrawerFragment.CHATS_AND_CALLS_SETTINGS) {
-            launchSettings(AppConstants.CHATS_SETTINGS_FRAGMENT);
-        } else if (drawerItemCategory.getId() == DrawerFragment.ABOUT_AND_SUPPORT_SETTINGS) {
-            launchSettings(AppConstants.SUPPORT_SETTINGS_FRAGMENT);
-        } else if (drawerItemCategory.getId() == DrawerFragment.PRIVACY_SETTINGS) {
-            launchSettings(AppConstants.PRIVACY_AND_SECURITY_FRAGMENT);
-        }
     }
 
     private void launchSettings(String settingsFragmentName) {
         Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
         settingsIntent.putExtra(AppConstants.SETTINGS_FRAGMENT_NAME, settingsFragmentName);
         startActivity(settingsIntent);
-    }
-
-    @Override
-    public void onDrawerItemPageSelected(DrawerItemPage drawerItemPage) {
-
-    }
-
-    @Override
-    public void onAccountSelected() {
-        launchUserProfile();
     }
 
     private void launchUserProfile() {

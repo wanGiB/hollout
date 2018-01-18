@@ -25,7 +25,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
 
-import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -57,9 +56,7 @@ import butterknife.ButterKnife;
  */
 
 @SuppressWarnings({"deprecation", "FieldCanBeLocal"})
-public class AboutUserActivity extends BaseActivity implements ATEActivityThemeCustomizer {
-
-    private boolean isDarkTheme;
+public class AboutUserActivity extends BaseActivity {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -88,6 +85,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
     private String NO_WORK_PLACE = "Nope! Do not include where you work or school.";
 
     private Vibrator vibrator;
+
     private Animation shakeAnimation;
 
     private boolean keyboardListenersAttached = false;
@@ -101,7 +99,6 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.about_user_layout);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -137,9 +134,7 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
         MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
-        MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
 
-        invitePeopleMenuItem.setVisible(false);
         createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
         supportInvalidateOptionsMenu();
@@ -490,11 +485,6 @@ public class AboutUserActivity extends BaseActivity implements ATEActivityThemeC
                 UiUtils.loadImage(this, signedInUserPhotoUrl, userPhotoView);
             }
         }
-    }
-
-    @Override
-    public int getActivityTheme() {
-        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }
 
 }

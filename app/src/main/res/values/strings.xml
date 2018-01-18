@@ -321,5 +321,8 @@
     <string name="replied_to_this">Replied to this</string>
     <string name="someone">Someone</string>
     <string name="gif">GIF</string>
+    <string name="find">Find</string>
+    <string name="requests">REQUESTS</string>
+    <string name="nearby">NEARBY</string>
 
 </resources>

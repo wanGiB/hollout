@@ -5,14 +5,11 @@ import android.util.SparseBooleanArray;
 
 import com.hyphenate.chat.EMMessage;
 import com.parse.ParseObject;
-import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import bolts.Capture;
 
 /**
  * @author Wan Clem
@@ -242,6 +239,8 @@ public class AppConstants {
     public static final String FILE_SIZE = "file_size";
     public static final String UNREAD_MESSAGES = "unread_messages_";
     public static final String REPLIED_MESSAGE_ID = "replied_message_id";
+    public static final String SHOW_APPROPRIATE_VIEWS = "show_appropriate_views";
+    public static final String REMOVE_SOMETHING = "remove_something_o";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

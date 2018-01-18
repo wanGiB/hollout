@@ -13,12 +13,14 @@
         android:clickable="true"
         android:foreground="?attr/selectableItemBackground"
         android:orientation="horizontal"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:focusable="true">
 
         <com.wan.hollout.ui.widgets.CircleImageView
             android:id="@+id/requester_photo"
             android:layout_width="45dp"
             android:layout_height="45dp"
+            android:layout_gravity="center_vertical"
             android:src="@drawable/empty_profile" />
 
         <LinearLayout

@@ -47,7 +47,7 @@
             android:gravity="center_vertical"
             android:maxLines="1"
             android:text="Name View"
-            android:textColor="@color/text_black"
+            android:textColor="@color/white"
             android:textSize="18sp"
             app:textStyle="bold" />
 
@@ -68,7 +68,7 @@
                 android:layout_gravity="center_vertical"
                 android:maxLines="1"
                 android:text="Subtitle"
-                android:textColor="@color/text_black"
+                android:textColor="@color/whitesmoke"
                 android:textSize="12sp"
                 app:textStyle="medium" />
 

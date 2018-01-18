@@ -4,14 +4,21 @@ import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
+import android.widget.ImageView;
 
-import com.afollestad.appthemeengine.ATE;
+import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
 import com.hyphenate.chat.EMMessage;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
+import com.mikepenz.materialdrawer.util.DrawerImageLoader;
+import com.mikepenz.materialdrawer.util.DrawerUIUtils;
 import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseLiveQueryClient;
@@ -32,7 +39,6 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 import io.fabric.sdk.android.Fabric;
@@ -66,9 +72,9 @@ public class ApplicationLoader extends Application {
         sInstance = this;
         AppEventsLogger.activateApp(this);
         initParse();
+        initDrawer();
         Fabric.with(this, new Crashlytics());
         FlowManager.init(this);
-        configureThemes();
         startAppInstanceDetector();
         defaultSystemEmojiPref();
         HolloutCommunicationsManager.getInstance().init(this);
@@ -86,6 +92,37 @@ public class ApplicationLoader extends Application {
 
     }
 
+    private void initDrawer() {
+        DrawerImageLoader.init(new AbstractDrawerImageLoader() {
+
+            @Override
+            public void set(ImageView imageView, Uri uri, Drawable placeholder, String tag) {
+                Glide.with(imageView.getContext()).load(uri).placeholder(placeholder).into(imageView);
+            }
+
+            @Override
+            public void cancel(ImageView imageView) {
+                Glide.clear(imageView);
+            }
+
+            @Override
+            public Drawable placeholder(Context ctx, String tag) {
+                //define different placeholders for different imageView targets
+                //default tags are accessible via the DrawerImageLoader.Tags
+                //custom ones can be checked via string. see the CustomUrlBasePrimaryDrawerItem LINE 111
+                if (DrawerImageLoader.Tags.PROFILE.name().equals(tag)) {
+                    return DrawerUIUtils.getPlaceHolder(ctx);
+                } else if (DrawerImageLoader.Tags.ACCOUNT_HEADER.name().equals(tag)) {
+                    return new IconicsDrawable(ctx).iconText(" ").backgroundColorRes(com.mikepenz.materialdrawer.R.color.primary).sizeDp(56);
+                } else if ("customUrlItem".equals(tag)) {
+                    return new IconicsDrawable(ctx).iconText(" ").backgroundColorRes(R.color.md_red_500).sizeDp(56);
+                }
+                return super.placeholder(ctx, tag);
+            }
+        });
+
+    }
+
     private void startAppInstanceDetector() {
         Intent serviceIntent = new Intent(this, AppInstanceDetectionService.class);
         startService(serviceIntent);
@@ -95,12 +132,12 @@ public class ApplicationLoader extends Application {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                initWebGuys();
+                configureParse();
             }
         }).start();
     }
 
-    private void initWebGuys() {
+    private void configureParse() {
         Parse.initialize(new Parse.Configuration.Builder(ApplicationLoader.this)
                 .applicationId(AppKeys.APPLICATION_ID) // should correspond to APP_ID env variable
                 .clientKey(AppKeys.SERVER_CLIENT_KEY)  // set explicitly blank unless clientKey is configured on Parse server
@@ -184,47 +221,6 @@ public class ApplicationLoader extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         MultiDex.install(this);
-    }
-
-    private void configureThemes() {
-        if (!ATE.config(this, "light_theme").isConfigured()) {
-            ATE.config(this, "light_theme")
-                    .activityTheme(R.style.AppThemeLight)
-                    .primaryColorRes(R.color.colorPrimaryLightDefault)
-                    .accentColorRes(R.color.colorAccentLightDefault)
-                    .coloredNavigationBar(false)
-                    .usingMaterialDialogs(true)
-                    .commit();
-        }
-        if (!ATE.config(this, "dark_theme").isConfigured()) {
-            ATE.config(this, "dark_theme")
-                    .activityTheme(R.style.AppThemeDark)
-                    .primaryColorRes(R.color.colorPrimaryDarkDefault)
-                    .accentColorRes(R.color.colorAccentDarkDefault)
-                    .coloredNavigationBar(false)
-                    .usingMaterialDialogs(true)
-                    .commit();
-        }
-        if (!ATE.config(this, "light_theme_notoolbar").isConfigured()) {
-            ATE.config(this, "light_theme_notoolbar")
-                    .activityTheme(R.style.AppThemeLight)
-                    .coloredActionBar(false)
-                    .primaryColorRes(R.color.colorPrimaryLightDefault)
-                    .accentColorRes(R.color.colorAccentLightDefault)
-                    .coloredNavigationBar(false)
-                    .usingMaterialDialogs(true)
-                    .commit();
-        }
-        if (!ATE.config(this, "dark_theme_notoolbar").isConfigured()) {
-            ATE.config(this, "dark_theme_notoolbar")
-                    .activityTheme(R.style.AppThemeDark)
-                    .coloredActionBar(false)
-                    .primaryColorRes(R.color.colorPrimaryDarkDefault)
-                    .accentColorRes(R.color.colorAccentDarkDefault)
-                    .coloredNavigationBar(true)
-                    .usingMaterialDialogs(true)
-                    .commit();
-        }
     }
 
     private void defaultSystemEmojiPref() {

@@ -1,6 +1,7 @@
 package com.wan.hollout.utils;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 
 import com.facebook.login.LoginManager;
@@ -52,7 +53,7 @@ public class AuthUtil {
         return null;
     }
 
-    public static void updateCurrentLocalUser(final ParseObject updatableProps, final DoneCallback<Boolean> successCallback) {
+    public static void updateCurrentLocalUser(final ParseObject updatableProps, @Nullable  final DoneCallback<Boolean> successCallback) {
         updatableProps.pinInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
@@ -73,7 +74,7 @@ public class AuthUtil {
         newLocalObject.pinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS);
     }
 
-    private static void updateRemoteUserVariant(final ParseObject updatableProps, String realObjectId, final DoneCallback<Boolean> successCallback) {
+    private static void updateRemoteUserVariant(final ParseObject updatableProps, String realObjectId, @Nullable final DoneCallback<Boolean> successCallback) {
         ParseQuery<ParseObject> personQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         personQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, realObjectId);
         personQuery.getFirstInBackground(new GetCallback<ParseObject>() {
@@ -88,7 +89,9 @@ public class AuthUtil {
                     object.saveInBackground(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
-                            successCallback.done(true, null);
+                            if (successCallback != null) {
+                                successCallback.done(true, null);
+                            }
                             if (e != null) {
                                 object.saveEventually();
                             }

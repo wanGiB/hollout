@@ -11,10 +11,10 @@
     <com.pnikosis.materialishprogress.ProgressWheel
         android:layout_width="80dp"
         android:layout_height="80dp"
-        app:progressIndeterminate="true"
+        android:layout_gravity="center"
         app:barColor="@color/ease_gray"
-        app:rimColor="@color/white"
-        android:layout_gravity="center" />
+        app:progressIndeterminate="true"
+        app:rimColor="@color/white" />
 
     <LinearLayout
         android:id="@+id/no_feed_view"
@@ -54,10 +54,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/conversations_recycler_view"
+        <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:id="@+id/nested_scroll_view"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/conversations_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </android.support.v4.widget.NestedScrollView>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

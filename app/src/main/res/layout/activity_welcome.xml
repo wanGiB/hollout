@@ -107,8 +107,9 @@
                     android:lineSpacingMultiplier="1.2"
                     android:paddingLeft="20dp"
                     android:paddingStart="20dp"
-                    android:text="Find"
-                    android:textColor="@color/white" />
+                    android:text="@string/find"
+                    android:textColor="@color/white"
+                    tools:ignore="RtlSymmetry" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/typing_text_view"

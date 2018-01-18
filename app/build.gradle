@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'io.fabric'
 
 repositories {
@@ -9,17 +8,17 @@ repositories {
     }
 }
 
-def dbflow_version = "4.0.4"
+def dbflow_version = "4.1.1"
 
 android {
 
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "com.wan.hollout"
         minSdkVersion 16
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 4
         versionName "1.0"
         testInstrumentationRunner "com.wan.hollout"
@@ -29,7 +28,7 @@ android {
 
     signingConfigs {
         release {
-            storeFile file("/Users/wan/StudioProjects/Hollout/Store/release_key.jks")
+            storeFile file("../Store/release_key.jks")
             storePassword "descriptor"
             keyAlias "Wan"
             keyPassword "descriptor"
@@ -82,28 +81,25 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true
     }
-    compile('com.github.naman14:app-theme-engine:0.5.2@aar') {
-        transitive = true
-    }
     compile files('libs/YouTubeAndroidPlayerApi.jar')
     //noinspection GradleCompatible
-    compile 'com.android.support:design:26.2.0'
-    compile 'com.android.support:appcompat-v7:26.2.0'
-    compile 'com.android.support:cardview-v7:26.2.0'
-    compile 'com.android.support:support-v13:26.2.0'
-    compile 'com.jakewharton:butterknife:8.7.0'
+    compile 'com.android.support:design:27.0.2'
+    compile 'com.android.support:appcompat-v7:27.0.2'
+    compile 'com.android.support:cardview-v7:27.0.2'
+    compile 'com.android.support:support-v13:27.0.2'
+    compile 'com.jakewharton:butterknife:8.8.1'
     compile 'com.readystatesoftware.systembartint:systembartint:1.0.3'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.squareup.okhttp:okhttp:2.7.2'
-    compile 'com.google.firebase:firebase-core:11.4.2'
-    compile 'com.google.firebase:firebase-database:11.4.2'
-    compile 'com.google.firebase:firebase-ads:11.4.2'
-    compile 'com.google.firebase:firebase-auth:11.4.2'
-    compile 'com.google.firebase:firebase-messaging:11.4.2'
-    compile 'com.google.firebase:firebase-storage:11.4.2'
+    compile 'com.google.firebase:firebase-core:11.8.0'
+    compile 'com.google.firebase:firebase-database:11.8.0'
+    compile 'com.google.firebase:firebase-ads:11.8.0'
+    compile 'com.google.firebase:firebase-auth:11.8.0'
+    compile 'com.google.firebase:firebase-messaging:11.8.0'
+    compile 'com.google.firebase:firebase-storage:11.8.0'
     compile 'com.gordonwong:material-sheet-fab:1.2.1'
-    compile 'com.google.android.gms:play-services-auth:11.4.2'
-    compile 'com.github.bumptech.glide:glide:3.7.0'
+    compile 'com.google.android.gms:play-services-auth:11.8.0'
+    compile 'com.github.bumptech.glide:glide:3.8.0'
     compile 'cn.pedant.sweetalert:library:1.3'
     compile 'com.github.machinarius:preferencefragment:0.1.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.8.0'
@@ -111,8 +107,8 @@ dependencies {
     compile 'com.android.support:multidex:1.0.2'
     compile 'org.apmem.tools:layouts:1.10@aar'
     compile 'com.bartoszlipinski:viewpropertyobjectanimator:1.2.0'
-    compile 'com.google.android.gms:play-services-location:11.4.2'
-    compile 'com.google.android.gms:play-services-places:11.4.2'
+    compile 'com.google.android.gms:play-services-location:11.8.0'
+    compile 'com.google.android.gms:play-services-places:11.8.0'
     compile 'com.afollestad.material-dialogs:core:0.9.0.2'
     compile 'com.afollestad.material-dialogs:commons:0.9.0.2'
     compile 'org.jsoup:jsoup:1.10.3'
@@ -123,17 +119,23 @@ dependencies {
     compile 'com.parse:parse-livequery-android:1.0.4'
     compile 'com.parse:parse-android:1.16.1'
     compile 'net.alhazmy13.MediaPicker:libary:2.2.5'
-    compile 'com.google.code.gson:gson:2.8.1'
+    compile 'com.google.code.gson:gson:2.8.2'
     compile 'com.github.florent37:diagonallayout:1.0.7'
     compile 'com.flaviofaria:kenburnsview:1.0.7'
     compile 'com.amulyakhare:com.amulyakhare.textdrawable:1.0.1'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.1.1'
     compile 'com.github.john990:WaveView:v0.9'
-    compile 'com.google.android.gms:play-services-gcm:11.4.2'
+    compile 'com.google.android.gms:play-services-gcm:11.8.0'
     compile 'com.hyphenate:hyphenate-sdk:3.3.2'
-    compile 'com.google.android.gms:play-services-maps:11.4.2'
+    compile 'com.google.android.gms:play-services-maps:11.8.0'
     testCompile 'junit:junit:4.12'
-    annotationProcessor 'com.jakewharton:butterknife-compiler:8.7.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    implementation 'com.mikepenz:google-material-typeface:3.0.1.1.original@aar'
+    implementation 'com.mikepenz:fontawesome-typeface:4.7.0.1@aar'
+    implementation 'com.mikepenz:octicons-typeface:3.0.0.1@aar'
+    implementation("com.mikepenz:materialdrawer:6.0.2@aar") {
+        transitive = true
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -15,9 +15,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.Config;
-import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.ui.adapters.MainViewPagerAdapter;
@@ -26,7 +23,6 @@ import com.wan.hollout.ui.fragments.UserPhotosFragment;
 import com.wan.hollout.ui.fragments.UserVideosFragment;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
-import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutPreferences;
 
@@ -38,7 +34,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 @SuppressWarnings("unused")
-public class GalleryActivity extends BaseActivity implements ATEActivityThemeCustomizer,
+public class GalleryActivity extends BaseActivity implements
         ActivityCompat.OnRequestPermissionsResultCallback,
         ViewPager.OnPageChangeListener, View.OnClickListener {
 
@@ -147,12 +143,6 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
             setupTabs();
         }
 
-        if (HolloutPreferences.getInstance().getBoolean("dark_theme", false)) {
-            ATE.apply(this, "dark_theme");
-        } else {
-            ATE.apply(this, "light_theme");
-        }
-
         searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
 
             @Override
@@ -222,12 +212,6 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
     public void onResume() {
         super.onResume();
         String ateKey = HolloutPreferences.getATEKey();
-        ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
-    }
-
-    @Override
-    public int getActivityTheme() {
-        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }
 
     private void setupToolbarText(String title) {
@@ -288,9 +272,7 @@ public class GalleryActivity extends BaseActivity implements ATEActivityThemeCus
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
         MenuItem createNewGroupItem  = menu.findItem(R.id.create_new_group);
-        MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
 
-        invitePeopleMenuItem.setVisible(false);
         createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
 

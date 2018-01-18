@@ -100,13 +100,11 @@ public class AttachmentTypeSelector extends PopupWindow {
     @NonNull
     View gifWindow;
 
-    private
     @NotNull
-    RecyclerView gifRecyclerView;
+    private RecyclerView gifRecyclerView;
 
-    private
     @NonNull
-    ProgressWheel gifLoadingProgressWheel;
+    private ProgressWheel gifLoadingProgressWheel;
 
     private
     @NonNull
@@ -133,7 +131,6 @@ public class AttachmentTypeSelector extends PopupWindow {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         @SuppressLint("InflateParams") View layout = inflater.inflate(R.layout.attachment_type_selector, null, true);
         RecentPhotoViewRail recentPhotos = ViewUtil.findById(layout, R.id.recent_photos);
-
         this.listener = listener;
         this.imageButton = ViewUtil.findById(layout, R.id.photo_button);
         this.galleryButton = ViewUtil.findById(layout, R.id.gallery_button);

@@ -9,10 +9,10 @@
     <com.pnikosis.materialishprogress.ProgressWheel
         android:layout_width="80dp"
         android:layout_height="80dp"
-        app:progressIndeterminate="true"
+        android:layout_gravity="center"
         app:barColor="@color/ease_gray"
-        app:rimColor="@color/white"
-        android:layout_gravity="center" />
+        app:progressIndeterminate="true"
+        app:rimColor="@color/white" />
 
     <LinearLayout
         android:id="@+id/no_feed_view"
@@ -51,21 +51,21 @@
             android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
+            app:cardBackgroundColor="@color/colorPrimary"
             app:cardCornerRadius="8dp"
-            app:cardElevation="10dp"
-            app:cardBackgroundColor="@color/colorPrimary">
+            app:cardElevation="2dp">
 
             <com.wan.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/meet_people_textview"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:id="@+id/meet_people_textview"
                 android:gravity="center"
                 android:paddingBottom="10dp"
-                app:textStyle="medium"
                 android:paddingTop="10dp"
                 android:text="@string/meet_more_people"
-                android:textColor="@color/white" />
+                android:textColor="@color/white"
+                app:textStyle="medium" />
 
         </android.support.v7.widget.CardView>
 
@@ -77,11 +77,32 @@
         android:layout_height="match_parent"
         android:visibility="gone">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/people_recycler_view"
-            android:background="@color/white"
+        <android.support.v4.widget.NestedScrollView
+            android:id="@+id/nested_scroll_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:animateLayoutChanges="true"
+                android:orientation="vertical">
+
+                <com.wan.hollout.ui.widgets.ChatRequestsHeaderView
+                    android:id="@+id/chat_requests_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/people_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+            </LinearLayout>
+
+        </android.support.v4.widget.NestedScrollView>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

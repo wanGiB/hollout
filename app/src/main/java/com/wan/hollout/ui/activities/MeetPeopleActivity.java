@@ -195,19 +195,10 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
 
     private void initNewPeopleToMeetLayoutManager() {
         potentialPeopleToMeetLayoutManager = ChipsLayoutManager.newBuilder(this)
-                //whether RecyclerView can scroll. TRUE by default
                 .setScrollingEnabled(true)
-                //set maximum views count in a particular row
                 .setMaxViewsInRow(3)
-                //set gravity resolver where you can determine gravity for item in position.
-                //This method have priority over previous one
-                //you are able to break row due to your conditions. Row breaker should return true for that views
-                //a layoutOrientation of layout manager, could be VERTICAL OR HORIZONTAL. HORIZONTAL by default
                 .setOrientation(ChipsLayoutManager.HORIZONTAL)
-                // row strategy for views in completed row, could be STRATEGY_DEFAULT, STRATEGY_FILL_VIEW,
-                //STRATEGY_FILL_SPACE or STRATEGY_CENTER
-                .setRowStrategy(ChipsLayoutManager.STRATEGY_FILL_SPACE)
-                // whether strategy is applied to last row. FALSE by default
+                .setRowStrategy(ChipsLayoutManager.STRATEGY_DEFAULT)
                 .withLastRow(true)
                 .build();
         potentialPeopleToMeetRecyclerView.setLayoutManager(potentialPeopleToMeetLayoutManager);

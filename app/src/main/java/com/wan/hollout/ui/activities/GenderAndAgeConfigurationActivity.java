@@ -19,7 +19,6 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
@@ -27,7 +26,6 @@ import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
-import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -39,9 +37,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
-public class GenderAndAgeConfigurationActivity extends BaseActivity implements ATEActivityThemeCustomizer {
-
-    private boolean isDarkTheme;
+public class GenderAndAgeConfigurationActivity extends BaseActivity {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -81,7 +77,6 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gender_and_age_layout);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
@@ -209,9 +204,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
         MenuItem createNewGroupItem  = menu.findItem(R.id.create_new_group);
-        MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
 
-        invitePeopleMenuItem.setVisible(false);
         createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
 
@@ -225,11 +218,6 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity implements A
     protected void onPause() {
         super.onPause();
         if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
-    }
-
-    @Override
-    public int getActivityTheme() {
-        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }
 
     @Override

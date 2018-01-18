@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/white"
     android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
     app:elevation="8dp">
 
@@ -19,14 +18,15 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
             android:fitsSystemWindows="true">
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@color/white"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay">
 
                 <RelativeLayout
                     android:id="@+id/upbarLayout"
@@ -34,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical">
 
-                    <ImageView
+                    <android.support.v7.widget.AppCompatImageView
                         android:id="@+id/back_button"
                         android:layout_width="25dp"
                         android:layout_height="25dp"
@@ -43,7 +43,9 @@
                         android:layout_centerVertical="true"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
+                        android:focusable="true"
                         android:src="@drawable/ic_arrow_back_black_24dp"
+                        app:tint="@color/white"
                         tools:ignore="ContentDescription,RtlHardcoded" />
 
                     <include
@@ -68,11 +70,11 @@
         <RelativeLayout
             android:id="@+id/action_mode_bar"
             android:layout_width="match_parent"
-            android:visibility="gone"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/white">
+            android:background="@color/colorPrimary"
+            android:visibility="gone">
 
-            <ImageView
+            <android.support.v7.widget.AppCompatImageView
                 android:id="@+id/destroy_action_mode"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
@@ -81,7 +83,9 @@
                 android:layout_marginStart="16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:focusable="true"
                 android:src="@drawable/ic_arrow_back_black_24dp"
+                app:tint="@color/whitesmoke"
                 tools:ignore="ContentDescription" />
 
             <TextView
@@ -95,8 +99,8 @@
                 android:layout_toRightOf="@id/destroy_action_mode"
                 android:gravity="center_vertical"
                 android:textColor="@color/black"
-                android:textStyle="bold"
                 android:textSize="16sp"
+                android:textStyle="bold"
                 tools:ignore="RelativeOverlap" />
 
             <LinearLayout
@@ -110,7 +114,7 @@
                 android:animateLayoutChanges="true"
                 android:orientation="horizontal">
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:id="@+id/reply_to_a_message"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
@@ -118,10 +122,12 @@
                     android:layout_marginRight="25dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
+                    android:focusable="true"
                     android:src="@drawable/ic_action_reply"
+                    app:tint="@color/whitesmoke"
                     tools:ignore="ContentDescription" />
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:id="@+id/view_message_info"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
@@ -129,41 +135,49 @@
                     android:layout_marginRight="25dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
-                    tools:ignore="ContentDescription"
-                    android:src="@drawable/ic_action_info" />
+                    android:focusable="true"
+                    android:src="@drawable/ic_action_info"
+                    app:tint="@color/whitesmoke"
+                    tools:ignore="ContentDescription" />
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:id="@+id/delete_message"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginEnd="25dp"
-                    tools:ignore="ContentDescription"
                     android:layout_marginRight="25dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
-                    android:src="@drawable/ic_action_delete" />
+                    android:focusable="true"
+                    android:src="@drawable/ic_action_delete"
+                    app:tint="@color/whitesmoke"
+                    tools:ignore="ContentDescription" />
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:id="@+id/copy_message"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginEnd="25dp"
                     android:layout_marginRight="25dp"
-                    tools:ignore="ContentDescription"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
-                    android:src="@drawable/ic_action_copy" />
+                    android:focusable="true"
+                    android:src="@drawable/ic_action_copy"
+                    app:tint="@color/whitesmoke"
+                    tools:ignore="ContentDescription" />
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:id="@+id/forward_message"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_marginEnd="25dp"
-                    tools:ignore="ContentDescription"
                     android:layout_marginRight="25dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:clickable="true"
-                    android:src="@drawable/ic_action_forward" />
+                    android:focusable="true"
+                    android:src="@drawable/ic_action_forward"
+                    app:tint="@color/whitesmoke"
+                    tools:ignore="ContentDescription" />
 
             </LinearLayout>
 
@@ -174,6 +188,6 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="2dip"
-        android:background="@drawable/bottom_shadow"/>
+        android:background="@drawable/bottom_shadow_color_primary" />
 
 </android.support.design.widget.AppBarLayout>

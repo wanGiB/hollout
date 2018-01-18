@@ -1,8 +1,10 @@
 package com.wan.hollout.ui.fragments;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +20,6 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.wan.hollout.R;
-import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
@@ -58,6 +59,9 @@ public class ConversationsFragment extends Fragment {
     @BindView(R.id.content_flipper)
     ViewFlipper contentFlipper;
 
+    @BindView(R.id.nested_scroll_view)
+    NestedScrollView nestedScrollView;
+
     @BindView(R.id.no_hollout_users_text_view)
     HolloutTextView errorTextView;
 
@@ -85,6 +89,12 @@ public class ConversationsFragment extends Fragment {
         return peopleView;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        conversationsRecyclerView.setNestedScrollingEnabled(false);
+    }
+
     private void setupAdapter() {
         conversationsAdapter = new ConversationsAdapter(getActivity(), conversations);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
@@ -92,12 +102,19 @@ public class ConversationsFragment extends Fragment {
         conversationsRecyclerView.setItemAnimator(new DefaultItemAnimator());
         conversationsRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         conversationsRecyclerView.setAdapter(conversationsAdapter);
-        conversationsRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+        nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
-            public void onLoadMore(int page, int totalItemsCount) {
-                if (!conversations.isEmpty()) {
-                    fetchConversations(conversations.size() - 1);
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                if (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1) != null) {
+                    if ((scrollY >= (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1).getMeasuredHeight() - v.getMeasuredHeight())) &&
+                            scrollY > oldScrollY) {
+                        //code to fetch more data for endless scrolling
+                        if (!conversations.isEmpty()) {
+                            fetchConversations(conversations.size() - 1);
+                        }
+                    }
                 }
+
             }
         });
     }
@@ -258,9 +275,9 @@ public class ConversationsFragment extends Fragment {
                 } else {
                     int indexOfConversationItem = conversations.indexOf(conversationItem);
                     if (indexOfConversationItem == -1) {
-                        conversations.add(0,conversationItem);
-                    }else{
-                        Collections.swap(conversations,0,indexOfConversationItem);
+                        conversations.add(0, conversationItem);
+                    } else {
+                        Collections.swap(conversations, 0, indexOfConversationItem);
                     }
                 }
             }
@@ -325,6 +342,7 @@ public class ConversationsFragment extends Fragment {
                             break;
                     }
                 }
+                EventBus.getDefault().removeAllStickyEvents();
             }
         });
     }

@@ -69,7 +69,6 @@ import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.fabric.sdk.android.services.common.Crash;
 
 
 public class WelcomeActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
@@ -110,7 +109,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
 
     private int fieldIndex = 0;
 
-    String[] sentences = {
+    private String[] sentences = {
             "Your Sport Team Fans",
             "People in your field of study",
             "People who share in your passion",
@@ -147,9 +146,9 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     }
 
     private void authenticateUser(final FirebaseUser firebaseUser) {
-        ParseQuery<ParseObject>peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        peopleQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID,getValidAppUserId(firebaseUser));
-        peopleQuery.whereEqualTo(AppConstants.APP_USER_PASSWORD,getValidAppUserId(firebaseUser));
+        ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        peopleQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, getValidAppUserId(firebaseUser));
+        peopleQuery.whereEqualTo(AppConstants.APP_USER_PASSWORD, getValidAppUserId(firebaseUser));
         peopleQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(ParseObject object, ParseException e) {
@@ -223,7 +222,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     }
 
     private void createNewUserOnParse(final FirebaseUser firebaseUser) {
-        UiUtils.showProgressDialog(this, "Creating account...");
+        UiUtils.showProgressDialog(this, "Authenticating account...");
         setupCrashlyticsUser(firebaseUser);
         final ParseObject newHolloutUser = new ParseObject(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         if (firebaseUser.getDisplayName() != null) {
@@ -233,9 +232,9 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             newHolloutUser.put(AppConstants.APP_USER_PROFILE_PHOTO_URL, firebaseUser.getPhotoUrl().toString());
         }
         newHolloutUser.put(AppConstants.REAL_OBJECT_ID, getValidAppUserId(firebaseUser));
-        newHolloutUser.put(AppConstants.APP_USER_PASSWORD,getValidAppUserId(firebaseUser));
+        newHolloutUser.put(AppConstants.APP_USER_PASSWORD, getValidAppUserId(firebaseUser));
         newHolloutUser.put(AppConstants.PLAY_SOUND_ON_NEW_MESAGE_NOTIF, true);
-        newHolloutUser.put(AppConstants.OBJECT_TYPE,AppConstants.OBJECT_TYPE_INDIVIDUAL);
+        newHolloutUser.put(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
         newHolloutUser.put(AppConstants.WAKE_PHONE_ON_NOTIFICATION, true);
         newHolloutUser.put(AppConstants.SHOW_MESSAGE_TICKER, true);
         newHolloutUser.put(AppConstants.VIBRATE_ON_NEW_NOTIFICATION, true);
@@ -267,12 +266,12 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                                             HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
                                             finishUp();
                                         } else {
-                                            terminateAuthentication(newHolloutUser,e);
+                                            terminateAuthentication(newHolloutUser, e);
                                         }
                                     }
                                 });
                             } else {
-                                terminateAuthentication(newHolloutUser,e);
+                                terminateAuthentication(newHolloutUser, e);
                             }
                         }
                     });
@@ -302,18 +301,28 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         newHolloutUser.deleteInBackground(new DeleteCallback() {
             @Override
             public void done(ParseException e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        UiUtils.dismissProgressDialog();
+                    }
+                });
                 if (e == null) {
                     AuthUtil.dissolveAuthenticatedUser(null);
-                    UiUtils.dismissProgressDialog();
-                    runOnUiThread(new Runnable() {
+                    HolloutPreferences.setUserWelcomed(false);
+                    HolloutPreferences.clearPersistedCredentials();
+                    UiUtils.showSafeToast("Sorry, an error occurred while authenticating you. Please try again.");
+                } else {
+                    newHolloutUser.deleteEventually(new DeleteCallback() {
                         @Override
-                        public void run() {
-                            UiUtils.showSafeToast("Sorry, an error occurred while authenticating you. Please try again.");
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                AuthUtil.dissolveAuthenticatedUser(null);
+                                HolloutPreferences.setUserWelcomed(false);
+                                HolloutPreferences.clearPersistedCredentials();
+                            }
                         }
                     });
-                } else {
-                    UiUtils.dismissProgressDialog();
-                    newHolloutUser.deleteEventually();
                     UiUtils.showSafeToast("Sorry, an error occurred while authenticating you. Please try again.");
                     Crashlytics.logException(gobe);
                 }
@@ -514,8 +523,8 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RC_SIGN_IN) {
             // If the error resolution was not successful we should not resolve further.
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (resultCode == RESULT_OK) {
-                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
                 handleSignInResult(result);
                 mIsResolving = false;
                 if (!mGoogleApiClient.isConnected()) {
@@ -523,6 +532,8 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                 }
             } else {
                 mShouldResolve = false;
+                UiUtils.showSafeToast("Failed to log in via google. Please try again ");
+                UiUtils.dismissProgressDialog();
             }
         } else if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
             finishUp();

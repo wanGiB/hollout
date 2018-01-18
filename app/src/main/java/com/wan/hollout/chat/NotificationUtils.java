@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spanned;
 
+import com.parse.Parse;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;

@@ -2,12 +2,12 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
-    android:id="@+id/parent_layout"
     android:paddingBottom="@dimen/padding_list_row"
     android:paddingLeft="5dp"
     android:paddingRight="5dp"
@@ -18,19 +18,20 @@
         android:id="@+id/icon_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"
         android:background="?attr/selectableItemBackground"
-        android:clickable="true">
+        android:clickable="true"
+        android:focusable="true">
 
         <ImageView
             android:id="@+id/user_online_status"
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
             android:layout_marginEnd="2dp"
@@ -68,8 +69,8 @@
             android:id="@+id/icon_front"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
             android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
             android:layout_toEndOf="@id/user_online_status"
             android:layout_toRightOf="@id/user_online_status"
             android:fillAfter="false"
@@ -101,29 +102,31 @@
         android:layout_toRightOf="@id/icon_container"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
+        android:focusable="true"
         android:orientation="vertical"
-        android:paddingEnd="@dimen/padding_list_row"
-        android:paddingRight="@dimen/padding_list_row"
+        android:paddingEnd="5dp"
+        android:paddingRight="5dp"
         tools:ignore="RtlSymmetry">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:weightSum="1"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:orientation="horizontal">
 
             <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/from"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
+                android:layout_weight="1"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
-                android:maxLines="1"
-                android:paddingEnd="16dp"
-                android:paddingRight="16dp"
+                android:maxLines="2"
                 android:textColor="@color/from"
+                android:paddingRight="5dp"
+                android:paddingEnd="5dp"
                 android:textSize="@dimen/msg_text_primary"
                 app:textStyle="bold" />
 
@@ -131,12 +134,11 @@
                 android:id="@+id/timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"
                 android:layout_gravity="center_vertical"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
                 android:maxLines="1"
                 android:maxWidth="100dp"
                 android:textColor="@color/ease_gray"
@@ -144,7 +146,7 @@
                 android:textStyle="normal"
                 tools:ignore="RelativeOverlap,RtlHardcoded" />
 
-        </RelativeLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -156,9 +158,9 @@
                 android:layout_width="18dp"
                 android:layout_height="18dp"
                 android:layout_gravity="center_vertical"
-                android:visibility="gone"
                 android:layout_marginEnd="5dp"
                 android:layout_marginRight="5dp"
+                android:visibility="gone"
                 tools:ignore="ContentDescription" />
 
             <ImageView
@@ -166,22 +168,22 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_gravity="center_vertical"
-                android:scaleType="centerCrop"
-                android:visibility="gone"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:scaleType="centerCrop"
                 android:src="@drawable/hdp"
+                android:visibility="gone"
                 tools:ignore="ContentDescription" />
 
             <com.wan.hollout.ui.widgets.ChatMessageTextView
                 android:id="@+id/txt_secondary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:layout_weight="0.1"
+                android:drawablePadding="5dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:paddingEnd="16dp"
-                android:drawablePadding="5dp"
-                android:layout_gravity="center_vertical"
                 android:paddingRight="16dp"
                 android:textColor="@color/message"
                 android:textSize="@dimen/msg_text_secondary"
@@ -191,11 +193,11 @@
                 android:id="@+id/unread_message_indicator"
                 android:layout_width="18dp"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:background="@drawable/badge_selected"
                 android:gravity="center_horizontal|center_vertical"
-                android:textColor="@color/white"
                 android:minHeight="18dp"
-                android:layout_gravity="center_vertical"
+                android:textColor="@color/white"
                 android:textSize="9sp"
                 android:textStyle="bold"
                 android:visibility="visible"

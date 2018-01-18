@@ -18,8 +18,8 @@ import com.parse.ParseQuery;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.ChatUtils;
-import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
 import com.wan.hollout.ui.activities.UserProfileActivity;
+import com.wan.hollout.ui.adapters.ChatRequestsAdapter;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutPreferences;
@@ -50,7 +50,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
     private ParseObject signedInUser;
     private ParseObject requestOriginator;
-    
+
     private Activity activity;
     private ParseObject feedObject;
 
@@ -68,7 +68,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
         init();
     }
 
-    public void bindData(final Activity activity, final ChatRequestsAdapterView parent, final ParseObject feedObject) {
+    public void bindData(final Activity activity, final ChatRequestsAdapter parent, final ParseObject feedObject) {
         this.activity = activity;
         this.signedInUser = AuthUtil.getCurrentUser();
         this.feedObject = feedObject;
@@ -81,7 +81,9 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                     if (StringUtils.isNotEmpty(userDisplayName) && !(activity instanceof UserProfileActivity)) {
                         requesterNameView.setText(WordUtils.capitalize(userDisplayName));
                     } else {
-                        requesterNameView.setText(activity.getString(R.string.wants_to_chat));
+                        UiUtils.showView(aboutRequesterView, true);
+                        UiUtils.showView(requesterNameView, false);
+                        aboutRequesterView.setText("Hi, I sent you a chat request.");
                     }
                     String userProfilePhotoUrl = requestOriginator.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                     if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
@@ -89,10 +91,9 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                     } else {
                         requesterPhotoView.setImageResource(R.drawable.empty_profile);
                     }
-                    if (!(activity instanceof UserProfileActivity)){
+                    if (!(activity instanceof UserProfileActivity)) {
                         List<String> aboutUser = requestOriginator.getList(AppConstants.ABOUT_USER);
                         List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
-
                         if (aboutUser != null && aboutSignedInUser != null) {
                             try {
                                 List<String> common = new ArrayList<>(aboutUser);
@@ -103,7 +104,6 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
                             }
                         }
-
                         ParseGeoPoint userGeoPoint = requestOriginator.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                         ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                         if (signedInUserGeoPoint != null && userGeoPoint != null) {
@@ -113,121 +113,130 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                         } else {
                             UiUtils.setTextOnView(distanceToRequesterView, " ");
                         }
-                    }else{
-                        UiUtils.showView(aboutRequesterView,false);
-                        UiUtils.showView(distanceToRequesterView,false);
+                    } else {
+                        UiUtils.showView(distanceToRequesterView, false);
                     }
-
-                    acceptRequestTextView.setOnClickListener(new OnClickListener() {
-
-                        @Override
-                        public void onClick(View v) {
-                            acceptRequestTextView.setText(activity.getString(R.string.working));
-                            ChatUtils.acceptChatInvitation(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase(), new DoneCallback<Boolean>() {
-                                @Override
-                                public void done(Boolean result, Exception e) {
-                                    if (e == null) {
-                                        //remove request
-                                        ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-                                        requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, feedObject.getObjectId());
-                                        requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
-                                            @Override
-                                            public void done(final ParseObject returnedFeedObject, ParseException e) {
-
-                                                List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-
-                                                if (signedInUserChats != null && !signedInUserChats.contains(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase())) {
-                                                    signedInUserChats.add(requestOriginator.getString(AppConstants.REAL_OBJECT_ID));
-                                                }
-
-                                                if (signedInUserChats == null) {
-                                                    signedInUserChats = new ArrayList<>();
-                                                    signedInUserChats.add(requestOriginator.getString(AppConstants.REAL_OBJECT_ID));
-                                                }
-                                                signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
-                                                HolloutPreferences.updateConversationTime(requestOriginator.getString(AppConstants.REAL_OBJECT_ID));
-                                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                                                    @Override
-                                                    public void done(Boolean result, Exception e) {
-                                                        if (e == null) {
-                                                            if (returnedFeedObject != null) {
-                                                                returnedFeedObject.deleteInBackground(new DeleteCallback() {
-                                                                    @Override
-                                                                    public void done(ParseException e) {
-                                                                        if (e == null) {
-                                                                            UiUtils.snackMessage("Request from " + userDisplayName + " successfully accepted.", ChatRequestView.this, true, null, null);
-                                                                            if (parent != null) {
-                                                                                removeRequest(parent, feedObject);
-                                                                            }
-                                                                            EventBus.getDefault().post(AppConstants.REFRESH_CONVERSATIONS);
-                                                                        } else {
-                                                                            UiUtils.snackMessage("Failed to accept request from " + userDisplayName + ". Please try again.", ChatRequestView.this, true, null, null);
-                                                                        }
-                                                                    }
-                                                                });
-                                                            } else {
-                                                                UiUtils.snackMessage("Failed to accept request from " + userDisplayName + ". Please try again.", ChatRequestView.this, true, null, null);
-                                                            }
-                                                        } else {
-                                                            UiUtils.snackMessage("Failed to accept request from " + userDisplayName + ". Please try again.", ChatRequestView.this, true, null, null);
-                                                        }
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    } else {
-                                        UiUtils.snackMessage("Failed to accept request from " + userDisplayName + ". Please try again.", ChatRequestView.this, true, null, null);
-                                    }
-                                }
-                            });
-                        }
-                    });
-
-                    declineRequestView.setOnClickListener(new OnClickListener() {
-
-                        @Override
-                        public void onClick(View v) {
-                            declineRequestView.setText(activity.getString(R.string.working));
-                            ChatUtils.declineChatInvitation(requestOriginator.getString(AppConstants.REAL_OBJECT_ID), new DoneCallback<Boolean>() {
-                                @Override
-                                public void done(Boolean declined, Exception e) {
-                                    if (e == null && declined) {
-                                        ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-                                        requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, feedObject.getObjectId());
-                                        requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
-                                            @Override
-                                            public void done(final ParseObject object, ParseException e) {
-                                                if (e == null && object != null) {
-                                                    object.deleteInBackground(new DeleteCallback() {
-                                                        @Override
-                                                        public void done(ParseException e) {
-                                                            UiUtils.snackMessage("Request from " + userDisplayName + " declined successfully.", ChatRequestView.this, true, null, null);
-                                                            if (parent != null) {
-                                                                removeRequest(parent, object);
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                    });
+                    acceptChatRequest(activity, parent, feedObject, userDisplayName);
+                    declineChatRequest(activity, parent, feedObject, userDisplayName);
                 }
             } else if (requestType.equals(AppConstants.FEED_TYPE_JOIN_GROUP_REQUEST)) {
-                ParseObject groupDetails = feedObject.getParseObject(AppConstants.GROUP_OR_ROOM);
+//                ParseObject groupDetails = feedObject.getParseObject(AppConstants.GROUP_OR_ROOM);
+                //TODO: Add Group support later.....Not now....We don't need such in a dating like app
             }
         }
     }
 
-    private void removeRequest(ChatRequestsAdapterView parent, ParseObject parseObject) {
-        if (parent != null) {
-            parent.removeChatRequest(parseObject);
-        } else {
-            EventBus.getDefault().post(new RemovableChatRequestEvent(parseObject));
-        }
+    private void declineChatRequest(final Activity activity, final ChatRequestsAdapter parent, final ParseObject feedObject, final String userDisplayName) {
+        declineRequestView.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                declineRequestView.setText(activity.getString(R.string.working));
+                ChatUtils.declineChatInvitation(requestOriginator.getString(AppConstants.REAL_OBJECT_ID), new DoneCallback<Boolean>() {
+                    @Override
+                    public void done(Boolean declined, Exception e) {
+                        if (e == null && declined) {
+                            ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+                            requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, feedObject.getObjectId());
+                            requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                                @Override
+                                public void done(final ParseObject object, ParseException e) {
+                                    if (e == null && object != null) {
+                                        object.deleteInBackground(new DeleteCallback() {
+                                            @Override
+                                            public void done(ParseException e) {
+                                                UiUtils.snackMessage("Request from " + userDisplayName + " declined successfully.", ChatRequestView.this, true, null, null);
+                                                if (parent != null) {
+                                                    removeRequest(parent, object);
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    public void acceptChatRequest() {
+        acceptRequestTextView.performClick();
+    }
+
+    private void acceptChatRequest(final Activity activity, final ChatRequestsAdapter parent, final ParseObject feedObject, final String userDisplayName) {
+        acceptRequestTextView.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                acceptRequestTextView.setText(activity.getString(R.string.working));
+                ChatUtils.acceptChatInvitation(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase(), new DoneCallback<Boolean>() {
+                    @Override
+                    public void done(Boolean result, Exception e) {
+                        if (e == null) {
+                            //remove request
+                            ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+                            requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, feedObject.getObjectId());
+                            requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                                @Override
+                                public void done(final ParseObject returnedFeedObject, ParseException e) {
+
+                                    List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+
+                                    if (signedInUserChats != null && !signedInUserChats.contains(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase())) {
+                                        signedInUserChats.add(requestOriginator.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
+                                    }
+
+                                    if (signedInUserChats == null) {
+                                        signedInUserChats = new ArrayList<>();
+                                        signedInUserChats.add(requestOriginator.getString(AppConstants.REAL_OBJECT_ID));
+                                    }
+
+                                    signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
+                                    HolloutPreferences.updateConversationTime(requestOriginator.getString(AppConstants.REAL_OBJECT_ID));
+                                    AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                                        @Override
+                                        public void done(Boolean result, Exception e) {
+                                            if (e == null) {
+                                                if (returnedFeedObject != null) {
+                                                    returnedFeedObject.deleteInBackground(new DeleteCallback() {
+                                                        @Override
+                                                        public void done(ParseException e) {
+                                                            if (e == null) {
+                                                                UiUtils.snackMessage("Request from " + userDisplayName + " successfully accepted.", ChatRequestView.this, true, null, null);
+                                                                if (parent != null) {
+                                                                    removeRequest(parent, feedObject);
+                                                                }
+                                                                EventBus.getDefault().post(AppConstants.REMOVE_SOMETHING);
+                                                                EventBus.getDefault().postSticky(AppConstants.REFRESH_CONVERSATIONS);
+                                                            } else {
+                                                                UiUtils.snackMessage("Failed to accept request from " + userDisplayName + ". Please try again.", ChatRequestView.this, true, null, null);
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    UiUtils.snackMessage("Failed to accept request from " + userDisplayName + ". Please try again.", ChatRequestView.this, true, null, null);
+                                                }
+                                            } else {
+                                                UiUtils.snackMessage("Failed to accept request from " + userDisplayName + ". Please try again.", ChatRequestView.this, true, null, null);
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            UiUtils.snackMessage("Failed to accept request from " + userDisplayName + ". Please try again.", ChatRequestView.this, true, null, null);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    private void removeRequest(ChatRequestsAdapter parent, ParseObject parseObject) {
+        parent.getChatRequests().remove(parseObject);
+        parent.notifyDataSetChanged();
     }
 
     @Override
@@ -242,13 +251,13 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
         initViews();
     }
 
-    private void initViews(){
-        requesterPhotoView = (CircleImageView)findViewById(R.id.requester_photo);
-        requesterNameView = (HolloutTextView)findViewById(R.id.requester_name);
-        aboutRequesterView = (HolloutTextView)findViewById(R.id.about_requester);
-        distanceToRequesterView = (HolloutTextView)findViewById(R.id.distance_to_requester);
-        acceptRequestTextView = (TextView)findViewById(R.id.accept_request);
-        declineRequestView = (TextView)findViewById(R.id.decline_request);
+    private void initViews() {
+        requesterPhotoView = (CircleImageView) findViewById(R.id.requester_photo);
+        requesterNameView = (HolloutTextView) findViewById(R.id.requester_name);
+        aboutRequesterView = (HolloutTextView) findViewById(R.id.about_requester);
+        distanceToRequesterView = (HolloutTextView) findViewById(R.id.distance_to_requester);
+        acceptRequestTextView = (TextView) findViewById(R.id.accept_request);
+        declineRequestView = (TextView) findViewById(R.id.decline_request);
     }
 
     @Override

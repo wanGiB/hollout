@@ -6,9 +6,6 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.util.Log;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;

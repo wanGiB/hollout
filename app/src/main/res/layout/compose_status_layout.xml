@@ -102,9 +102,9 @@
         android:layout_gravity="center_horizontal|bottom"
         android:gravity="center"
         android:padding="16dp"
-        android:textColor="@color/black"
+        android:textColor="@color/whitesmoke"
         android:textSize="16sp"
-        app:cpb_selectorIdle="@color/ease_gray"
+        app:cpb_selectorIdle="@color/colorPrimary"
         app:cpb_textComplete="@string/shared"
         app:cpb_textIdle="@string/set"
         app:elevation="10dp" />

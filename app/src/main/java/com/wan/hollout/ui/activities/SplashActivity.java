@@ -12,6 +12,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.RequestCodes;
 
 import org.json.JSONArray;
@@ -35,7 +36,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
         ButterKnife.bind(this);
-        checkAuthStatus();
+        pushInterestsIfNotAlreadyPushed();
     }
 
     private void checkAuthStatus() {
@@ -60,6 +61,15 @@ public class SplashActivity extends AppCompatActivity {
         }else{
             launchWelcomeActivity();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!HolloutUtils.checkGooglePlayServices(this)) {
+            return;
+        }
+        checkAuthStatus();
     }
 
     @Override

@@ -1,11 +1,14 @@
 package com.wan.hollout.ui.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -19,6 +22,7 @@ import android.widget.ViewFlipper;
 
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
+import com.parse.CountCallback;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -26,13 +30,13 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.wan.hollout.R;
-import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.models.NearbyPerson;
 import com.wan.hollout.ui.activities.MeetPeopleActivity;
 import com.wan.hollout.ui.adapters.PeopleAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
+import com.wan.hollout.ui.widgets.ChatRequestsHeaderView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -75,6 +79,12 @@ public class PeopleFragment extends Fragment {
     @BindView(R.id.meet_people_textview)
     HolloutTextView meetPeopleTextView;
 
+    @BindView(R.id.chat_requests_view)
+    ChatRequestsHeaderView chatRequestsHeaderView;
+
+    @BindView(R.id.nested_scroll_view)
+    NestedScrollView nestedScrollView;
+
     private PeopleAdapter peopleAdapter;
     private List<NearbyPerson> people = new ArrayList<>();
     private ParseObject signedInUser;
@@ -110,6 +120,7 @@ public class PeopleFragment extends Fragment {
         super.onResume();
         initSignedInUser();
         checkAndRegEventBus();
+        countChatRequests();
     }
 
     private void checkAndRegEventBus() {
@@ -137,12 +148,18 @@ public class PeopleFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_people, container, false);
         ButterKnife.bind(this, view);
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        peopleRecyclerView.setNestedScrollingEnabled(false);
     }
 
     @Override
@@ -158,6 +175,53 @@ public class PeopleFragment extends Fragment {
     private void fetchPeople() {
         swipeRefreshLayout.setRefreshing(true);
         fetchPeopleOfCommonInterestFromCache();
+    }
+
+    private void countChatRequests() {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            chatRequestsQuery.include(AppConstants.FEED_CREATOR);
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            chatRequestsQuery.countInBackground(new CountCallback() {
+                @Override
+                public void done(int count, ParseException e) {
+                    if (e == null && count != 0) {
+                        fetchChatRequests(count);
+                    } else {
+                        UiUtils.showView(chatRequestsHeaderView, false);
+                    }
+                }
+            });
+        }
+    }
+
+    private void fetchChatRequests(final int totalCount) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            chatRequestsQuery.include(AppConstants.FEED_CREATOR);
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            chatRequestsQuery.setLimit(3);
+            chatRequestsQuery.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if (e == null && objects != null && !objects.isEmpty()) {
+                        UiUtils.showView(chatRequestsHeaderView, true);
+                        chatRequestsHeaderView.setChatRequests(getActivity(), objects, totalCount);
+                        UiUtils.toggleFlipperState(peopleContentFlipper, 2);
+
+                        if (!people.isEmpty()) {
+                            chatRequestsHeaderView.showNearbyHeader(true);
+                        }
+                    }
+                }
+            });
+        }
+
+        chatRequestsHeaderView.attachEventHandlers(getActivity());
     }
 
     private void fetchPeopleOfCommonInterestFromCache() {
@@ -178,61 +242,72 @@ public class PeopleFragment extends Fragment {
 
     @SuppressLint("InflateParams")
     private void initBasicViews() {
-        footerView = getActivity().getLayoutInflater().inflate(R.layout.loading_footer, null);
-        UiUtils.setUpRefreshColorSchemes(getActivity(), swipeRefreshLayout);
-        peopleAdapter = new PeopleAdapter(getActivity(), people);
+        Activity activity = getActivity();
+        if (activity != null) {
+            LayoutInflater layoutInflater = activity.getLayoutInflater();
 
-        HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(peopleAdapter);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            footerView = layoutInflater.inflate(R.layout.loading_footer, null);
 
-            @Override
-            public void onRefresh() {
-                people.clear();
-                fetchPeopleOfCommonInterestsFromNetwork(0);
-            }
+            UiUtils.setUpRefreshColorSchemes(getActivity(), swipeRefreshLayout);
+            peopleAdapter = new PeopleAdapter(getActivity(), people);
 
-        });
+            HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(peopleAdapter);
+            swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 
-        SafeLayoutManager linearLayoutManager = new SafeLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        peopleRecyclerView.setLayoutManager(linearLayoutManager);
-        peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        peopleRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
-        peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
-        RecyclerViewUtils.setFooterView(peopleRecyclerView, footerView);
-        UiUtils.showView(footerView, false);
+                @Override
+                public void onRefresh() {
+                    fetchPeopleOfCommonInterestsFromNetwork(0);
+                }
 
-        peopleRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            });
 
-            @Override
-            public void onLoadMore(int page, int totalItemsCount) {
-                if (!people.isEmpty() && people.size() >= 100) {
-                    UiUtils.showView(footerView, true);
-                    if (StringUtils.isNotEmpty(searchString)) {
-                        searchPeople(people.size(), searchString);
-                    } else {
-                        fetchPeopleOfCommonInterestsFromNetwork(people.size());
+            SafeLayoutManager linearLayoutManager = new SafeLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+            peopleRecyclerView.setLayoutManager(linearLayoutManager);
+            peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            peopleRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
+            peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
+            RecyclerViewUtils.setFooterView(peopleRecyclerView, footerView);
+            UiUtils.showView(footerView, false);
+
+            nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    if (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1) != null) {
+                        if ((scrollY >= (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1).getMeasuredHeight() - v.getMeasuredHeight())) &&
+                                scrollY > oldScrollY) {
+                            //code to fetch more data for endless scrolling
+                            if (!people.isEmpty() && people.size() >= 100) {
+                                UiUtils.showView(footerView, true);
+                                if (StringUtils.isNotEmpty(searchString)) {
+                                    searchPeople(people.size(), searchString);
+                                } else {
+                                    fetchPeopleOfCommonInterestsFromNetwork(people.size());
+                                }
+                            }
+                        }
                     }
+
                 }
-            }
+            });
 
-        });
+            cardMeetPeople.setOnClickListener(new View.OnClickListener() {
 
-        cardMeetPeople.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    UiUtils.blinkView(view);
+                    if (meetPeopleTextView.getText().toString().equals(getString(R.string.review_network))) {
+                        Intent dataSourceIntent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                        startActivity(dataSourceIntent);
+                    } else {
+                        Intent interestsIntent = new Intent(getActivity(), MeetPeopleActivity.class);
+                        startActivity(interestsIntent);
+                    }
 
-            @Override
-            public void onClick(View view) {
-                UiUtils.blinkView(view);
-                if (meetPeopleTextView.getText().toString().equals(getString(R.string.review_network))) {
-                    Intent dataSourceIntent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                    startActivity(dataSourceIntent);
-                } else {
-                    Intent interestsIntent = new Intent(getActivity(), MeetPeopleActivity.class);
-                    startActivity(interestsIntent);
                 }
 
-            }
+            });
 
-        });
+        }
 
     }
 
@@ -285,7 +360,7 @@ public class PeopleFragment extends Fragment {
                     if (signedInUserGeoPoint != null) {
                         peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 1000.0);
                     }
-                    peopleQuery.setLimit(100);
+                    peopleQuery.setLimit(50);
                     if (skip != 0) {
                         peopleQuery.setSkip(skip);
                     }
@@ -317,6 +392,14 @@ public class PeopleFragment extends Fragment {
                                 displayFetchErrorMessage(false);
                             }
                             UiUtils.showView(footerView, false);
+
+                            if (!people.isEmpty()) {
+                                UiUtils.toggleFlipperState(peopleContentFlipper, 2);
+                                if (chatRequestsHeaderView.getVisibility() == View.VISIBLE) {
+                                    chatRequestsHeaderView.showNearbyHeader(true);
+                                }
+                            }
+
                         }
                     });
                 }
@@ -330,8 +413,8 @@ public class PeopleFragment extends Fragment {
         ParseObject.unpinAllInBackground(AppConstants.APP_USERS, new DeleteCallback() {
             @Override
             public void done(ParseException e) {
-                List<ParseObject>peopleToPin = new ArrayList<>();
-                for (NearbyPerson nearbyPerson:people){
+                List<ParseObject> peopleToPin = new ArrayList<>();
+                for (NearbyPerson nearbyPerson : people) {
                     peopleToPin.add(nearbyPerson.getPerson());
                 }
                 ParseObject.pinAllInBackground(AppConstants.APP_USERS, peopleToPin);
@@ -405,6 +488,7 @@ public class PeopleFragment extends Fragment {
                         }
                         peopleAdapter.notifyDataSetChanged();
                     }
+                    UiUtils.toggleFlipperState(peopleContentFlipper, 2);
                 }
             }
         });
@@ -448,8 +532,11 @@ public class PeopleFragment extends Fragment {
                     searchString = queryString;
                     searchPeople(0, queryString);
                 }
+                EventBus.getDefault().removeAllStickyEvents();
             }
+
         });
+
     }
 
 }

@@ -13,9 +13,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -24,8 +26,11 @@ import com.amulyakhare.textdrawable.TextDrawable;
 import com.flaviofaria.kenburnsview.KenBurnsView;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
+import com.parse.GetCallback;
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
@@ -134,8 +139,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.chat_request_view)
     ChatRequestView chatRequestView;
 
-    ParseObject pendingChatRequest;
-
     private ParseObject parseUser;
 
     @Override
@@ -155,15 +158,36 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void offloadIntent() {
-        parseUser = getIntent().getExtras().getParcelable(AppConstants.USER_PROPERTIES);
-        pendingChatRequest = getIntent().getExtras().getParcelable(AppConstants.PENDING_CHAT_REQUEST);
-        loadUserDetails();
-        if (pendingChatRequest != null) {
-            chatRequestView.bindData(this, null, pendingChatRequest);
+        Bundle intentExtras = getIntent().getExtras();
+        if (intentExtras != null) {
+            parseUser = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
+        }
+        loadUserDetails(parseUser);
+        resolveReceivedChatRequestIfAny();
+    }
+
+    private void resolveReceivedChatRequestIfAny() {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            chatRequestsQuery.include(AppConstants.FEED_CREATOR);
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, parseUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
+            chatRequestsQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(ParseObject object, ParseException e) {
+                    if (e == null && object != null) {
+                        //This user sent a chat request to signed in user
+                        UiUtils.showView(chatRequestView, true);
+                        chatRequestView.bindData(UserProfileActivity.this, null, object);
+                    }
+                }
+            });
         }
     }
 
-    private void loadUserDetails() {
+    private void loadUserDetails(ParseObject parseUser) {
         if (parseUser != null) {
             loadUserProfile(parseUser);
             offloadUserAboutsIfAvailable(parseUser);
@@ -286,6 +310,15 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         }
                     });
                 }
+                userDisplayNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        if (actionId == EditorInfo.IME_ACTION_DONE) {
+                            doneWithDisplayNameEdit.performClick();
+                        }
+                        return true;
+                    }
+                });
             } else {
                 if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
                     if (!userAge.equals(AppConstants.UNKNOWN)) {
@@ -453,7 +486,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                 if (featuredPhotos == null || featuredPhotos.isEmpty()) {
                     featurePhotosInstruction.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.get_started_button_background));
-                    featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + ", tap here to add some featured photos");
+                    featurePhotosInstruction.setText("Hi " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)) + ", tap here to feature some photos");
                     loadFeaturedPhotosPlaceHolder(parseUser);
                     featurePhotosInstruction.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -547,6 +580,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 startChatView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        if (chatRequestView.getVisibility() == View.VISIBLE) {
+                            UiUtils.showProgressDialog(UserProfileActivity.this, "Please wait...");
+                            //Automatically accept chat request
+                            chatRequestView.acceptChatRequest();
+                            return;
+                        }
                         Intent chatIntent = new Intent(UserProfileActivity.this, ChatActivity.class);
                         parseUser.put(AppConstants.CHAT_TYPE, AppConstants.CHAT_TYPE_SINGLE);
                         chatIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
@@ -588,7 +627,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 || requestCode == RequestCodes.COMPOSE_STATUS) {
             if (resultCode == RESULT_OK) {
                 if (parseUser != null) {
-                    loadUserDetails();
+                    loadUserDetails(AuthUtil.getCurrentUser());
                 }
             }
         } else if (requestCode == ImagePicker.IMAGE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
@@ -621,7 +660,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                                         if (e == null) {
                                                             UiUtils.showSafeToast("Upload Success");
                                                             if (parseUser != null) {
-                                                                loadUserDetails();
+                                                                loadUserDetails(AuthUtil.getCurrentUser());
                                                             }
                                                         } else {
                                                             UiUtils.showSafeToast("An error occurred while updating photo please try again");
@@ -670,7 +709,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                                         if (e == null) {
                                                             UiUtils.showSafeToast("Photo featured successfully");
                                                             if (parseUser != null) {
-                                                                loadUserDetails();
+                                                                loadUserDetails(AuthUtil.getCurrentUser());
                                                             }
                                                         } else {
                                                             UiUtils.showSafeToast("An error occurred while featuring photo please try again");
@@ -732,9 +771,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
         MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
-        MenuItem invitePeopleMenuItem = menu.findItem(R.id.invite_people);
 
-        invitePeopleMenuItem.setVisible(false);
         createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
 
@@ -812,9 +849,28 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     if (removableChatRequest != null) {
                         UiUtils.showView(chatRequestView, false);
                     }
+                } else if (o instanceof String) {
+                    String s = (String) o;
+                    if (s.equals(AppConstants.REMOVE_SOMETHING)) {
+                        if (isAContact(parseUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase())) {
+                            UiUtils.dismissProgressDialog();
+                            UiUtils.showView(chatRequestView, false);
+                            startChatView.performClick();
+                        }
+                    }
                 }
+                EventBus.getDefault().removeAllStickyEvents();
             }
         });
+    }
+
+    private boolean isAContact(String recipientId) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+            return (signedInUserChats != null && signedInUserChats.contains(recipientId.toLowerCase()));
+        }
+        return false;
     }
 
 }

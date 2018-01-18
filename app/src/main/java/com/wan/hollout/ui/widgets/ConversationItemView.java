@@ -151,9 +151,9 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         this.parseObject = parseObject;
         this.emConversation = EMClient.getInstance()
                 .chatManager().getConversation(parseObject.getString(AppConstants.REAL_OBJECT_ID),
-                        ChatUtils.getConversationType(parseObject.get(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                        ChatUtils.getConversationType(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                                 ? AppConstants.CHAT_TYPE_SINGLE
-                                : (parseObject.getInt(AppConstants.ROOM_TYPE) == AppConstants.CHAT_TYPE_GROUP)
+                                : (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_GROUP))
                                 ? AppConstants.CHAT_TYPE_GROUP : AppConstants.CHAT_TYPE_ROOM), true);
 
         init();
@@ -212,8 +212,15 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     public void setupConversation(String searchString) {
         if (parseObject != null) {
-            String userName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL) ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-            String userProfilePhoto = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL) ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
+
+            String userName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME)
+                    : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
+
+            String userProfilePhoto = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                    ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL)
+                    : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
+
             if (StringUtils.isNotEmpty(userName)) {
                 if (StringUtils.isNotEmpty(searchString)) {
                     usernameEntryView.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(userName),
@@ -224,6 +231,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 // displaying the first letter of From in icon text
                 iconText.setText(WordUtils.capitalize(userName.substring(0, 1)));
             }
+
             // display profile image
             applyProfilePicture(userProfilePhoto);
             applyIconAnimation();
@@ -241,7 +249,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                     userStatusOrLastMessageView.setTypeface(null, Typeface.NORMAL);
                     userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(activity, R.color.message));
                 }
-
                 lastMessage = emConversation.getLastMessage();
                 if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                     JSONObject chatStates = parseObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
@@ -267,7 +274,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             } else {
                 HolloutLogger.d("LastMessageTracker", "Sorry, conversation does not even exist. Lolz.");
             }
-
             if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                 UiUtils.showView(userOnlineStatusView, true);
                 String userOnlineStatus = parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS);
@@ -289,9 +295,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 UiUtils.showView(userOnlineStatusView, false);
                 AppConstants.parseUserAvailableOnlineStatusPositions.put(getMessageId(), false);
             }
-
             userPhotoView.setOnClickListener(new OnClickListener() {
-
                 @Override
                 public void onClick(View view) {
                     UiUtils.blinkView(view);
@@ -299,29 +303,20 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                         UiUtils.loadUserData(activity, parseObject);
                     }
                 }
-
             });
-
             messageContainer.setOnClickListener(new OnClickListener() {
-
                 @Override
                 public void onClick(View view) {
                     ConversationItemView.this.performClick();
                 }
-
             });
-
             iconContainer.setOnClickListener(new OnClickListener() {
-
                 @Override
                 public void onClick(View view) {
                     ConversationItemView.this.performClick();
                 }
-
             });
-
         }
-
     }
 
     private void setupDefaults() {
@@ -336,7 +331,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
                 msgTimeStampView.setText(msgTime);
             } else {
-                msgTimeStampView.setText(UiUtils.getDaysAgo(AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(msgDate)) + ", " + AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate));
+                msgTimeStampView.setText(UiUtils.getDaysAgo(AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(msgDate)) + " at " + AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate));
             }
             AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
             setupLastMessage(lastMessage);
@@ -419,7 +414,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 ApplicationLoader.getParseLiveQueryClient().unsubscribe(objectStateQuery);
             }
         } catch (NullPointerException ignored) {
-
         }
     }
 
@@ -700,7 +694,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private void setupMessageReadStatus(EMMessage message) {
         if (getMessageDirection() != null && getMessageDirection() == EMMessage.Direct.SEND && deliveryStatusView != null) {
-            UiUtils.showView(deliveryStatusView,true);
+            UiUtils.showView(deliveryStatusView, true);
             if (message.isAcked()) {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
             } else if (message.isListened()) {
@@ -710,8 +704,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             } else {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
             }
-        }else{
-            UiUtils.showView(deliveryStatusView,false);
+        } else {
+            UiUtils.showView(deliveryStatusView, false);
         }
     }
 

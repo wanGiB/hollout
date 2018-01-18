@@ -63,6 +63,7 @@
             android:clickable="true"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:focusable="true"
             android:orientation="horizontal"
             android:padding="10dp">
 
@@ -90,9 +91,10 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginLeft="5dp"
                         android:layout_marginStart="5dp"
-                        android:clickable="true"
                         android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
                         android:contentDescription="@string/conversation_activity__emoji_toggle_description"
+                        android:focusable="true"
                         tools:ignore="RtlHardcoded" />
 
                     <com.wan.hollout.ui.widgets.ComposeText
@@ -122,11 +124,12 @@
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:contentDescription="@string/conversation_activity__quick_attachment_drawer_toggle_camera_description"
+                        android:focusable="true"
                         android:paddingBottom="4dp"
                         android:paddingEnd="20dp"
+                        android:paddingLeft="12dp"
                         android:paddingRight="20dp"
                         android:paddingStart="12dp"
-                        android:paddingLeft="12dp"
                         android:rotation="-45"
                         android:src="@drawable/ic_attachment_icon" />
 
@@ -147,7 +150,7 @@
                         android:layout_marginLeft="20dp"
                         android:layout_marginStart="20dp"
                         android:ellipsize="none"
-                        android:maxLines="1"
+                        android:singleLine="true"
                         android:textColor="#61737b"
                         android:textSize="20sp"
                         android:visibility="gone"
@@ -165,9 +168,9 @@
                         android:drawableStart="@drawable/ic_keyboard_arrow_left_grey600_24dp"
                         android:ellipsize="none"
                         android:gravity="center_vertical"
-                        android:maxLines="1"
                         android:paddingLeft="20dp"
                         android:paddingStart="20dp"
+                        android:singleLine="true"
                         android:text="@string/conversation_input_panel__slide_to_cancel"
                         android:textAllCaps="true"
                         android:textColor="#61737b"

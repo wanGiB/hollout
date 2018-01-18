@@ -22,7 +22,7 @@ import butterknife.ButterKnife;
 
 public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private List<ParseObject> chatRequests;
+    public List<ParseObject> chatRequests;
     private Activity activity;
     private LayoutInflater layoutInflater;
 
@@ -30,6 +30,10 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.activity = activity;
         this.chatRequests = chatRequests;
         this.layoutInflater = LayoutInflater.from(activity);
+    }
+
+    public List<ParseObject> getChatRequests() {
+        return chatRequests;
     }
 
     @Override
@@ -43,7 +47,7 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         ChatRequestsHolder chatRequestsHolder = (ChatRequestsHolder)holder;
         ParseObject chatRequest = chatRequests.get(position);
         if (chatRequest!=null){
-            chatRequestsHolder.bindData(activity,chatRequest);
+            chatRequestsHolder.bindData(activity,this,chatRequest);
         }
     }
 
@@ -64,9 +68,9 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ButterKnife.bind(this,itemView);
         }
 
-        public void bindData(Activity activity,ParseObject chatRequest){
+        public void bindData(Activity activity,ChatRequestsAdapter chatRequestsAdapter,ParseObject chatRequest){
             if (chatRequestView != null) {
-                chatRequestView.bindData(activity,null,chatRequest);
+                chatRequestView.bindData(activity,chatRequestsAdapter,chatRequest);
             }
         }
 

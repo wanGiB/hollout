@@ -8,19 +8,14 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 
-import com.afollestad.appthemeengine.ATE;
-import com.afollestad.appthemeengine.Config;
-import com.afollestad.appthemeengine.customizers.ATEActivityThemeCustomizer;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.CircularProgressButton;
 import com.wan.hollout.ui.widgets.MaterialEditText;
-import com.wan.hollout.utils.ATEUtils;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
-import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,7 +27,7 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
-public class ComposeStatusActivity extends BaseActivity implements ATEActivityThemeCustomizer {
+public class ComposeStatusActivity extends BaseActivity {
 
     @BindView(R.id.status_field)
     public MaterialEditText statusField;
@@ -45,20 +40,12 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
 
     private ParseObject signedInUser;
 
-    private boolean isDarkTheme;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.compose_status_layout);
         ButterKnife.bind(this);
-        if (HolloutPreferences.getInstance().getBoolean("dark_theme", false)) {
-            ATE.apply(this, "dark_theme");
-        } else {
-            ATE.apply(this, "light_theme");
-        }
         signedInUser = AuthUtil.getCurrentUser();
         shareThoughtButton.setIndeterminateProgressMode(true);
         if (signedInUser != null) {
@@ -102,12 +89,9 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
         });
 
         shareThoughtButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
-
                 if (StringUtils.isNotEmpty(statusField.getText().toString().trim())) {
-
                     if (signedInUser != null) {
                         String previousStatus = signedInUser.getString(AppConstants.APP_USER_STATUS);
                         if (StringUtils.isNotEmpty(previousStatus)) {
@@ -123,22 +107,9 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
                             setNewStatus();
                         }
                     }
-
                 }
             }
         });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        String ateKey = HolloutPreferences.getATEKey();
-        ATEUtils.setStatusBarColor(this, ateKey, Config.primaryColor(this, ateKey));
-    }
-
-    @Override
-    public int getActivityTheme() {
-        return isDarkTheme ? R.style.AppThemeNormalDark : R.style.AppThemeNormalLight;
     }
 
     private void setNewStatus() {
@@ -150,6 +121,7 @@ public class ComposeStatusActivity extends BaseActivity implements ATEActivityTh
                 @Override
                 public void done(Boolean result, Exception e) {
                     if (e == null) {
+                        UiUtils.showSafeToast("Success!");
                         UiUtils.morphRequestToSuccess(shareThoughtButton);
                         Intent callerIntent = new Intent();
                         setResult(RESULT_OK, callerIntent);
