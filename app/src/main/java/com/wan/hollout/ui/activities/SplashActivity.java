@@ -58,7 +58,7 @@ public class SplashActivity extends AppCompatActivity {
             } else {
                 launchAboutActivity();
             }
-        }else{
+        } else {
             launchWelcomeActivity();
         }
     }

@@ -37,7 +37,7 @@ public class PeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         this.searchString = searchString;
     }
 
-    public String getSearchString() {
+    private String getSearchString() {
         return searchString;
     }
 

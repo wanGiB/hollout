@@ -57,6 +57,7 @@ import com.hyphenate.chat.EMTextMessageBody;
 import com.hyphenate.chat.EMVideoMessageBody;
 import com.hyphenate.chat.EMVoiceMessageBody;
 import com.hyphenate.exceptions.HyphenateException;
+import com.parse.DeleteCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -75,6 +76,7 @@ import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.chat.MessageNotifier;
+import com.wan.hollout.chat.NotificationUtils;
 import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.eventbuses.GifMessageEvent;
 import com.wan.hollout.eventbuses.MessageChangedEvent;
@@ -112,6 +114,7 @@ import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.HolloutVCFParser;
 import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.PermissionsUtils;
+import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.SafeLayoutManager;
 import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.VCFContactData;
@@ -154,8 +157,6 @@ import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
 public class ChatActivity extends BaseActivity implements
         KeyboardAwareLinearLayout.OnKeyboardShownListener,
         ActivityCompat.OnRequestPermissionsResultCallback, InputPanel.Listener, View.OnClickListener {
-
-    private boolean isDarkTheme;
 
     private static final int REQUEST_CODE_PICK_FILE = 9;
     private static final int REQUEST_CODE_CONTACT_SHARE = 15;
@@ -287,6 +288,8 @@ public class ChatActivity extends BaseActivity implements
     protected boolean isFirstLoad = true;
     protected boolean haveMoreData = true;
 
+    private boolean userFriendable = false;
+
     private Comparator<EMMessage> messageComparator = new Comparator<EMMessage>() {
         @Override
         public int compare(EMMessage o1, EMMessage o2) {
@@ -304,7 +307,6 @@ public class ChatActivity extends BaseActivity implements
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        isDarkTheme = HolloutPreferences.getInstance().getBoolean("dark_theme", false);
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_chat);
@@ -312,6 +314,8 @@ public class ChatActivity extends BaseActivity implements
         ButterKnife.bind(this);
         setSupportActionBar(chatToolbar.getToolbar());
         Bundle intentExtras = getIntent().getExtras();
+        userFriendable = intentExtras.getBoolean(AppConstants.USER_FRIENDABLE);
+        setUserFriendable(userFriendable);
         initBasicComponents();
         signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser == null) {
@@ -337,6 +341,14 @@ public class ChatActivity extends BaseActivity implements
         initConversation();
         tryOffloadLastMessage();
         decrementTotalUnreadMessages();
+    }
+
+    private void setUserFriendable(boolean userFriendable) {
+        this.userFriendable = userFriendable;
+    }
+
+    private boolean isUserFriendable() {
+        return this.userFriendable;
     }
 
     private void decrementTotalUnreadMessages() {
@@ -457,6 +469,7 @@ public class ChatActivity extends BaseActivity implements
             sortMessages();
             messagesAdapter.notifyDataSetChanged();
             mConversation.markAllMessagesAsRead();
+            NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
         }
 
         invalidateEmptyView();
@@ -478,7 +491,7 @@ public class ChatActivity extends BaseActivity implements
 
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
-                UiUtils.showView(scrollToBottomFrame, !onScrolledUp);
+                UiUtils.showView(scrollToBottomFrame, !onScrolledUp && messages.size() >= 20);
                 loadMoreMessages(null);
             }
 
@@ -543,7 +556,7 @@ public class ChatActivity extends BaseActivity implements
         MenuItem viewProfileMenuItem = menu.findItem(R.id.view_profile_info);
         MenuItem blockUserMenuItem = menu.findItem(R.id.block_user);
         if (chatType == AppConstants.CHAT_TYPE_GROUP || chatType == AppConstants.CHAT_TYPE_ROOM) {
-            placeCallMenuItem.setVisible(false);
+            placeCallMenuItem.setVisible(AppConstants.selectedMessages.isEmpty());
             viewProfileMenuItem.setVisible(false);
             blockUserMenuItem.setVisible(false);
         }
@@ -1577,6 +1590,11 @@ public class ChatActivity extends BaseActivity implements
                 }
 
             }
+        } else if (requestCode == RequestCodes.FORWARD_MESSAGE) {
+            if (resultCode == RESULT_OK) {
+                chatToolbar.updateActionMode(0);
+                messagesAdapter.notifyDataSetChanged();
+            }
         }
 
     }
@@ -1669,6 +1687,11 @@ public class ChatActivity extends BaseActivity implements
                             getChatToolbar().updateActionMode(0);
                             if (messages.isEmpty()) {
                                 UiUtils.showView(messagesEmptyView, true);
+                            }
+                            break;
+                        case AppConstants.COPY_MESSAGE:
+                            if (AppConstants.selectedMessages != null && !AppConstants.selectedMessages.isEmpty()) {
+                                copyMessageToClipBoard();
                             }
                             break;
                     }
@@ -1766,6 +1789,41 @@ public class ChatActivity extends BaseActivity implements
         });
     }
 
+    private void copyMessageToClipBoard() {
+        EMMessage message = AppConstants.selectedMessages.get(0);
+        if (message.getType() == EMMessage.Type.TXT) {
+            EMTextMessageBody messageBody = (EMTextMessageBody) message.getBody();
+            if (copyToClipboard(messageBody.getMessage())) {
+                UiUtils.showSafeToast("Message successfully copied ");
+                chatToolbar.updateActionMode(0);
+                messagesAdapter.notifyDataSetChanged();
+            } else {
+                UiUtils.showSafeToast("Failed to copy message");
+            }
+        }
+    }
+
+    @SuppressLint("NewApi")
+    @SuppressWarnings("deprecation")
+    public boolean copyToClipboard(String text) {
+        try {
+            int sdk = android.os.Build.VERSION.SDK_INT;
+            if (sdk < android.os.Build.VERSION_CODES.HONEYCOMB) {
+                android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                clipboard.setText(text);
+            } else {
+                android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                android.content.ClipData clip = android.content.ClipData
+                        .newPlainText(getResources().getString(
+                                R.string.new_clip), text);
+                clipboard.setPrimaryClip(clip);
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private void refreshPendingUnseenMessages() {
         UiUtils.showView(unreadMessagesIndicator, !tempReceivedMessages.isEmpty());
         if (!tempReceivedMessages.isEmpty()) {
@@ -1829,7 +1887,7 @@ public class ChatActivity extends BaseActivity implements
     }
 
     @NonNull
-    private String getRecipient() {
+    public String getRecipient() {
         return recipientId.toLowerCase();
     }
 
@@ -1978,6 +2036,14 @@ public class ChatActivity extends BaseActivity implements
         HolloutPreferences.updateConversationTime(recipientId);
         snackOutMessageReplyView(messageReplyView);
         prioritizeConversation();
+        if (isUserFriendable()) {
+            autoAcceptInvitation();
+            return;
+        }
+        sendAChatRequest();
+    }
+
+    private void sendAChatRequest() {
         if (!isAContact()) {
             if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
                 checkAndSendChatRequest();
@@ -1993,6 +2059,64 @@ public class ChatActivity extends BaseActivity implements
                 }
             });
         }
+    }
+
+    public void autoAcceptInvitation() {
+        ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+        chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+        chatRequestsQuery.include(AppConstants.FEED_CREATOR);
+        chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+        chatRequestsQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, getRecipient());
+        chatRequestsQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(final ParseObject returnedFeedObject, ParseException e) {
+                if (e == null && returnedFeedObject != null) {
+                    //The user sent me a friend request...Accept invitation here
+                    ChatUtils.acceptChatInvitation(getRecipient(), new DoneCallback<Boolean>() {
+                        @Override
+                        public void done(Boolean result, Exception e) {
+                            if (e == null) {
+                                List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+                                if (signedInUserChats != null && !signedInUserChats.contains(getRecipient())) {
+                                    signedInUserChats.add(getRecipient());
+                                }
+                                if (signedInUserChats == null) {
+                                    signedInUserChats = new ArrayList<>();
+                                    signedInUserChats.add(getRecipient());
+                                }
+                                signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
+                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                                    @Override
+                                    public void done(Boolean result, Exception e) {
+                                        if (e == null) {
+                                            setUserFriendable(false);
+                                            if (returnedFeedObject != null) {
+                                                returnedFeedObject.deleteInBackground(new DeleteCallback() {
+                                                    @Override
+                                                    public void done(ParseException e) {
+                                                        if (e != null) {
+                                                            returnedFeedObject.deleteEventually();
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    if (e != null) {
+                        if (e.getCode() == ParseException.OBJECT_NOT_FOUND) {
+                            //No request
+                            sendAChatRequest();
+                        }
+                    }
+                    setUserFriendable(false);
+                }
+            }
+        });
     }
 
     private void prioritizeConversation() {

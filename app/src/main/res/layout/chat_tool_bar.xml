@@ -109,7 +109,9 @@
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
+                android:layout_marginEnd="16dp"
                 android:layout_marginLeft="10dp"
+                android:layout_marginRight="16dp"
                 android:layout_marginStart="10dp"
                 android:animateLayoutChanges="true"
                 android:orientation="horizontal">
@@ -124,19 +126,6 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:src="@drawable/ic_action_reply"
-                    app:tint="@color/whitesmoke"
-                    tools:ignore="ContentDescription" />
-
-                <android.support.v7.widget.AppCompatImageView
-                    android:id="@+id/view_message_info"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="25dp"
-                    android:layout_marginRight="25dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:src="@drawable/ic_action_info"
                     app:tint="@color/whitesmoke"
                     tools:ignore="ContentDescription" />
 

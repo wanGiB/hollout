@@ -15,17 +15,20 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.hyphenate.chat.EMMessage;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.ChatActivity;
+import com.wan.hollout.ui.activities.SelectPeopleToForwardMessageActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
 import com.wang.avi.AVLoadingIndicatorView;
 
@@ -79,9 +82,6 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     @BindView(R.id.reply_to_a_message)
     ImageView replyToMessageView;
-
-    @BindView(R.id.view_message_info)
-    ImageView viewMessageInfoView;
 
     @BindView(R.id.delete_message)
     ImageView deleteMessageView;
@@ -345,9 +345,18 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         if (selectionCount > 1) {
             selectedItemCountView.setText(String.valueOf(selectionCount));
             UiUtils.showView(replyToMessageView, false);
+            UiUtils.showView(copyMessageView, false);
+            UiUtils.showView(forwardMessageView, false);
         } else {
             selectedItemCountView.setText(" ");
             UiUtils.showView(replyToMessageView, true);
+            UiUtils.showView(forwardMessageView, true);
+            if (!AppConstants.selectedMessages.isEmpty()) {
+                EMMessage emMessage = AppConstants.selectedMessages.get(0);
+                if (emMessage != null) {
+                    UiUtils.showView(copyMessageView, emMessage.getType() == EMMessage.Type.TXT);
+                }
+            }
         }
         destroyActionModeView.setOnClickListener(new OnClickListener() {
             @Override
@@ -371,17 +380,26 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                     case R.id.reply_to_a_message:
                         EventBus.getDefault().post(AppConstants.REPLY_MESSAGE);
                         break;
-                    case R.id.view_message_info:
-//                        EventBus.getDefault().post(new MessageInfoEvent());
+                    case R.id.copy_message:
+                        EventBus.getDefault().post(AppConstants.COPY_MESSAGE);
+                        break;
+                    case R.id.forward_message:
+                        forwardMessage();
                         break;
                 }
             }
         };
         replyToMessageView.setOnClickListener(actionModeItemClickListener);
-        viewMessageInfoView.setOnClickListener(actionModeItemClickListener);
         deleteMessageView.setOnClickListener(actionModeItemClickListener);
         copyMessageView.setOnClickListener(actionModeItemClickListener);
         forwardMessageView.setOnClickListener(actionModeItemClickListener);
+    }
+
+    private void forwardMessage() {
+        ChatActivity chatActivity = ((ChatActivity) getContext());
+        Intent messageIntent = new Intent(chatActivity, SelectPeopleToForwardMessageActivity.class);
+        messageIntent.putExtra(AppConstants.EXTRA_FROM, chatActivity.getRecipient());
+        chatActivity.startActivityForResult(messageIntent, RequestCodes.FORWARD_MESSAGE);
     }
 
     public boolean isActionModeActivated() {

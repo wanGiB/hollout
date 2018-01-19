@@ -17,7 +17,6 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.HolloutUtils;
-import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 

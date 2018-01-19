@@ -96,7 +96,7 @@ public class LinkPreview extends RelativeLayout {
             @Override
             protected Document doInBackground(String... strings) {
                 try {
-                    Document document = Jsoup.connect(strings[0]).get();
+                    Document document = Jsoup.connect(strings[0].startsWith("www") ? "http://" + strings[0] : strings[0]).get();
                     HolloutPreferences.saveDocument(strings[0], document.toString());
                     return document;
                 } catch (IOException e) {

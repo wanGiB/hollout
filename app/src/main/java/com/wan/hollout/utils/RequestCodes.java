@@ -14,4 +14,5 @@ public class RequestCodes {
     public static final int UPDATE_ABOUT_YOU = 0x10;
 
     public static final int COMPOSE_STATUS = 0x11;
+    public static final int FORWARD_MESSAGE = 0x12;
 }

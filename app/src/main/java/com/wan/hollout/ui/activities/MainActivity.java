@@ -52,6 +52,7 @@ import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
+import com.wan.hollout.chat.NotificationUtils;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
@@ -149,6 +150,8 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         }
         checkAndRegEventBus();
         attachEventHandlers();
+        NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
+        NotificationUtils.getNotificationManager().cancel(AppConstants.NEARBY_KIND_NOTIFICATION_ID);
     }
 
     private void attachEventHandlers() {

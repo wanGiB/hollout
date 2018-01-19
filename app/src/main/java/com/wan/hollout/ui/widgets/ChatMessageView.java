@@ -258,7 +258,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
         EMMessage.Status status = message.status();
 
-        if (status== EMMessage.Status.FAIL){
+        if (status == EMMessage.Status.FAIL) {
             resendMessage(message);
         }
 

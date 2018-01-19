@@ -14,6 +14,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
+import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
 import com.wan.hollout.ui.adapters.ChatRequestsAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
@@ -48,6 +49,16 @@ public class FullChatRequestsActivity extends BaseActivity {
     private ParseObject signedInUser;
     private List<ParseObject> chatRequests = new ArrayList<>();
     private ChatRequestsAdapter chatRequestsAdapter;
+
+    RecyclerView.AdapterDataObserver adapterDataObserver = new RecyclerView.AdapterDataObserver() {
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            if (chatRequestsAdapter.getChatRequests().isEmpty()) {
+                finish();
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -93,12 +104,16 @@ public class FullChatRequestsActivity extends BaseActivity {
     protected void onStart() {
         super.onStart();
         checkAndRegEventBus();
+        if (chatRequestsAdapter != null) {
+            chatRequestsAdapter.registerAdapterDataObserver(adapterDataObserver);
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         checkAnUnRegEventBus();
+        chatRequestsAdapter.unregisterAdapterDataObserver(adapterDataObserver);
     }
 
     private void initFeedAdapter() {
@@ -106,6 +121,14 @@ public class FullChatRequestsActivity extends BaseActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         chatRequestsRecyclerView.setLayoutManager(linearLayoutManager);
         chatRequestsRecyclerView.setAdapter(chatRequestsAdapter);
+        chatRequestsRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                if (!chatRequests.isEmpty()) {
+                    fetchChatRequests(chatRequests.size());
+                }
+            }
+        });
     }
 
     private void checkAndRegEventBus() {

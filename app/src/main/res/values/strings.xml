@@ -324,5 +324,6 @@
     <string name="find">Find</string>
     <string name="requests">REQUESTS</string>
     <string name="nearby">NEARBY</string>
+    <string name="new_clip">new_clip</string>
 
 </resources>

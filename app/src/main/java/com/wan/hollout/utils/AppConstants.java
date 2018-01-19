@@ -5,6 +5,7 @@ import android.util.SparseBooleanArray;
 
 import com.hyphenate.chat.EMMessage;
 import com.parse.ParseObject;
+import com.wan.hollout.models.ConversationItem;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -242,6 +243,12 @@ public class AppConstants {
     public static final String SHOW_APPROPRIATE_VIEWS = "show_appropriate_views";
     public static final String REMOVE_SOMETHING = "remove_something_o";
     public static final String CHECK_FOR_NEW_CHAT_REQUESTS = "check_for_new_chat_requests";
+    public static final String COPY_MESSAGE = "copy_message";
+    public static final String REFRESH_SELECTED_PEOPLE_TO_FORWARD_MESSAGE = "refresh_people_to_forward_message";
+    public static final String FORWARD_MESSAGE_EXCLUSION = "forward_message_exclusion";
+    public static final String FORWARDED_MESSAGE_RESULT = "forwarded_message_result";
+    public static final boolean RESULT_OK = true;
+    public static final String USER_FRIENDABLE = "user_friendable";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
@@ -335,7 +342,7 @@ public class AppConstants {
     public static SparseBooleanArray messageReplyAttachmentMediaPlayPositions = new SparseBooleanArray();
     public static SparseBooleanArray bounceablePositions = new SparseBooleanArray();
 
-    public static ArrayList<ParseObject>recentConversations = new ArrayList<>();
+    public static ArrayList<ParseObject> recentConversations = new ArrayList<>();
 
     public static SparseBooleanArray wavePositions = new SparseBooleanArray();
 
@@ -349,9 +356,10 @@ public class AppConstants {
     public static final String END_AGE_FILTER_VALUE = "end_age_filter_value";
     public static ArrayList<EMMessage> selectedMessages = new ArrayList<>();
     public static SparseBooleanArray selectedMessagesPositions = new SparseBooleanArray();
-    public static List<EMMessage> currentMessages = new ArrayList<>();
-
     public static SparseBooleanArray linkPreviewPositions = new SparseBooleanArray();
+
+    public static List<ConversationItem> selectedPeople = new ArrayList<>();
+    public static SparseBooleanArray selectedPeoplePositions = new SparseBooleanArray();
 
 }
 

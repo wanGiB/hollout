@@ -271,6 +271,11 @@
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:theme="@style/AppTheme" />
 
+        <activity
+            android:name=".ui.activities.SelectPeopleToForwardMessageActivity"
+            android:configChanges="orientation"
+            android:theme="@style/AppTheme" />
+
     </application>
 
 </manifest>

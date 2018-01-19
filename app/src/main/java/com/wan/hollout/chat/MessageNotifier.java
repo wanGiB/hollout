@@ -67,10 +67,6 @@ public class MessageNotifier {
         return this;
     }
 
-    private NotificationManager getNotificationManager(Context context) {
-        return (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    }
-
     public void onNewMsg(List<EMMessage> emMessages) {
         if (!emMessages.isEmpty()) {
             if (emMessages.size() == 1) {
@@ -221,7 +217,7 @@ public class MessageNotifier {
                 notification.defaults |= Notification.DEFAULT_VIBRATE;
                 notification.defaults |= Notification.DEFAULT_SOUND;
                 if (pendingIntent != null) {
-                    getNotificationManager(appContext).notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
+                    NotificationUtils.getNotificationManager().notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
                 }
             }
         });
@@ -270,7 +266,7 @@ public class MessageNotifier {
                 notification.defaults |= Notification.DEFAULT_VIBRATE;
                 notification.defaults |= Notification.DEFAULT_SOUND;
                 if (pendingIntent != null) {
-                    getNotificationManager(appContext).notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
+                    NotificationUtils.getNotificationManager().notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
                 }
             }
         });
@@ -323,7 +319,7 @@ public class MessageNotifier {
                 notification.defaults |= Notification.DEFAULT_VIBRATE;
                 notification.defaults |= Notification.DEFAULT_SOUND;
                 if (pendingIntent != null) {
-                    getNotificationManager(appContext).notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
+                    NotificationUtils.getNotificationManager().notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
                 }
             }
         });

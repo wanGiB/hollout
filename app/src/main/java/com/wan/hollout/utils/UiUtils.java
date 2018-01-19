@@ -135,12 +135,12 @@ public class UiUtils {
     private static ProgressDialog operationsProgressDialog;
 
     public static synchronized void showProgressDialog(final Context context, final String message) {
-        try{
+        try {
             operationsProgressDialog = new ProgressDialog(context);
             operationsProgressDialog.setCancelable(false);
             operationsProgressDialog.setMessage(message);
             operationsProgressDialog.show();
-        }catch (Exception ignored){
+        } catch (Exception ignored) {
 
         }
     }
@@ -385,7 +385,7 @@ public class UiUtils {
 
     public static boolean canShowStatus(ParseObject parseUser, int type, HashMap<String, Object> optionalProps) {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (signedInUser!=null) {
+        if (signedInUser != null) {
             String signedInUserStatusVisibility = signedInUser.getString(AppConstants.STATUS_VISIBILITY_PREF);
             String statusVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.STATUS_VISIBILITY_PREF) : (String) optionalProps.get(AppConstants.STATUS_VISIBILITY_PREF);
 
@@ -489,8 +489,7 @@ public class UiUtils {
             public void run() {
                 final ParseObject signedInUser = AuthUtil.getCurrentUser();
                 SweetAlertDialog sweetAlertDialog = new SweetAlertDialog(activity);
-                @SuppressLint("InflateParams")
-                final View profilePreview = activity.getLayoutInflater().inflate(R.layout.preview_profile, null);
+                @SuppressLint("InflateParams") final View profilePreview = activity.getLayoutInflater().inflate(R.layout.preview_profile, null);
                 final RecyclerView additionalPhotosRecyclerView = ButterKnife.findById(profilePreview, R.id.additional_photos_recycler_view);
                 final RoundedImageView photoView = ButterKnife.findById(profilePreview, R.id.user_cover_photo_view);
                 final HolloutTextView onlineStatusView = ButterKnife.findById(profilePreview, R.id.user_online_status);
@@ -500,7 +499,7 @@ public class UiUtils {
                 refreshUserData(signedInUser, additionalPhotosRecyclerView, photoView, onlineStatusView, startChatView, viewProfileView, usernameView, parseUser, activity);
                 final ParseQuery<ParseObject> userStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
                 userStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, parseUser.getString(AppConstants.REAL_OBJECT_ID));
-                try{
+                try {
                     SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
                     subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
                         @Override
@@ -513,7 +512,7 @@ public class UiUtils {
                             });
                         }
                     });
-                }catch (NullPointerException ignored){
+                } catch (NullPointerException ignored) {
 
                 }
                 sweetAlertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -640,8 +639,9 @@ public class UiUtils {
                         String signedInUserProfilePhoto = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                         if (StringUtils.isNotEmpty(signedInUserProfilePhoto)) {
                             Intent mChatIntent = new Intent(activity, ChatActivity.class);
-                            parseUser.put(AppConstants.CHAT_TYPE,AppConstants.CHAT_TYPE_SINGLE);
+                            parseUser.put(AppConstants.CHAT_TYPE, AppConstants.CHAT_TYPE_SINGLE);
                             mChatIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
+                            mChatIntent.putExtra(AppConstants.USER_FRIENDABLE, true);
                             activity.startActivity(mChatIntent);
                         } else {
                             Snackbar.make(activity.getWindow().getDecorView(),
@@ -915,7 +915,7 @@ public class UiUtils {
     }
 
     public static int resolveDimension(Context context, @AttrRes int attr, @DimenRes int fallbackRes) {
-        TypedArray a = context.getTheme().obtainStyledAttributes(new int[] {attr});
+        TypedArray a = context.getTheme().obtainStyledAttributes(new int[]{attr});
         try {
             return a.getDimensionPixelSize(0, (int) context.getResources().getDimension(fallbackRes));
         } finally {
@@ -925,7 +925,7 @@ public class UiUtils {
 
     @ColorInt
     public static int resolveColor(Context context, @AttrRes int attr, int fallback) {
-        TypedArray a = context.getTheme().obtainStyledAttributes(new int[] {attr});
+        TypedArray a = context.getTheme().obtainStyledAttributes(new int[]{attr});
         try {
             return a.getColor(0, fallback);
         } finally {
@@ -934,7 +934,7 @@ public class UiUtils {
     }
 
     public static int resolveInt(Context context, @AttrRes int attr, int fallback) {
-        TypedArray a = context.getTheme().obtainStyledAttributes(new int[] {attr});
+        TypedArray a = context.getTheme().obtainStyledAttributes(new int[]{attr});
         try {
             return a.getInt(0, fallback);
         } finally {
@@ -949,7 +949,7 @@ public class UiUtils {
     }
 
     public static int resolveResId(Context context, @AttrRes int attr, int fallback) {
-        TypedArray a = context.getTheme().obtainStyledAttributes(new int[] {attr});
+        TypedArray a = context.getTheme().obtainStyledAttributes(new int[]{attr});
         try {
             return a.getResourceId(0, fallback);
         } finally {
@@ -959,7 +959,7 @@ public class UiUtils {
 
     public static boolean isColorDark(int color) {
         double darkness = 1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color))
-                        / 255;
+                / 255;
         return darkness >= 0.5;
     }
 
