@@ -458,6 +458,7 @@ public class ChatActivity extends BaseActivity implements
             messagesAdapter.notifyDataSetChanged();
             mConversation.markAllMessagesAsRead();
         }
+
         invalidateEmptyView();
     }
 
@@ -524,7 +525,7 @@ public class ChatActivity extends BaseActivity implements
                 for (EMMessage emMessage : moreMessages) {
                     if (!messages.contains(emMessage)) {
                         messages.add(emMessage);
-                        messagesAdapter.notifyItemInserted(messages.size()-1);
+                        messagesAdapter.notifyItemInserted(messages.size() - 1);
                     }
                 }
                 if (messageLoadDoneCallback != null) {
@@ -1294,7 +1295,7 @@ public class ChatActivity extends BaseActivity implements
     }
 
     public void sendChatStateMsg(final String chatState) {
-        HolloutCommunicationsManager.sendChatState(chatState, recipientId);
+        HolloutUtils.sendChatState(chatState, recipientId);
     }
 
     public void checkAccessToGalleryAndOpen() {

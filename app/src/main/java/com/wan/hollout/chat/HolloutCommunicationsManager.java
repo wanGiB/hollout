@@ -39,11 +39,8 @@ import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
-import com.wan.hollout.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -372,13 +369,17 @@ public class HolloutCommunicationsManager {
                 for (EMMessage emMessage : messages) {
                     Log.d("MessageTracker", "New Message Received");
                     if (!unreadConversationItems.contains(emMessage.getFrom()) && isAContact(AuthUtil.getCurrentUser(), emMessage.getFrom())) {
-                        unreadConversationItems.add(emMessage.getFrom());
+                        if (HolloutUtils.isAContact(emMessage.getFrom())) {
+                            unreadConversationItems.add(emMessage.getFrom());
+                        }
                         HolloutPreferences.updateConversationTime(emMessage.getFrom());
                     }
                 }
+
                 if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0 && !unreadConversationItems.isEmpty()) {
                     HolloutPreferences.saveTotalUnreadChats(unreadConversationItems);
                 }
+
                 ParseObject signedInUser = AuthUtil.getCurrentUser();
                 if (signedInUser != null) {
                     String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
@@ -710,25 +711,6 @@ public class HolloutCommunicationsManager {
         }
         mCallStateChangeListener = new CallStateChangeListener(mContext);
         EMClient.getInstance().callManager().addCallStateChangeListener(mCallStateChangeListener);
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public static void sendChatState(String chatState, String recipientId) {
-        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
-        JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
-        JSONObject chatStates = existingChatStates != null ? existingChatStates : new JSONObject();
-        try {
-            chatStates.put(recipientId, chatState);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        signedInUserObject.put(AppConstants.APP_USER_CHAT_STATES, chatStates);
-        AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
-            @Override
-            public void done(Boolean result, Exception e) {
-
-            }
-        });
     }
 
 }

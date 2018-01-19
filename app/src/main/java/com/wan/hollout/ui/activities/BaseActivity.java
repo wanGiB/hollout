@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 
 import com.wan.hollout.R;
-import com.wan.hollout.chat.HolloutCommunicationsManager;
 
 
 public abstract class BaseActivity extends AppCompatActivity {

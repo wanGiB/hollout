@@ -284,7 +284,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                             @Override
                             public void onClick(View view) {
                                 UiUtils.showProgressDialog(UserProfileActivity.this, "Updating display name...");
-                                signedInUser.put(AppConstants.APP_USER_DISPLAY_NAME, userDisplayNameView.getText().toString().trim());
+                                signedInUser.put(AppConstants.APP_USER_DISPLAY_NAME, userDisplayNameView.getText().toString().toLowerCase().trim());
                                 AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                                     @Override
                                     public void done(Boolean result, Exception e) {

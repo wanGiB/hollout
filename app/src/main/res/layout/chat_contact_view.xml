@@ -55,6 +55,7 @@
             android:id="@+id/contact_subtitle_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:animateLayoutChanges="true"
             android:gravity="center_vertical"
             android:orientation="horizontal"
@@ -72,16 +73,14 @@
                 android:textSize="12sp"
                 app:textStyle="medium" />
 
-            <com.wan.hollout.ui.widgets.dotloader.DotLoader
+            <com.wang.avi.AVLoadingIndicatorView
                 android:id="@+id/typing_indicator"
                 android:layout_width="wrap_content"
-                android:layout_height="10dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="8dp"
                 android:visibility="gone"
-                app:color_array="@array/dot_colors"
-                app:dot_radius="4dp"
-                app:number_of_dots="3" />
+                app:indicatorName="BallPulseIndicator" />
 
         </LinearLayout>
 

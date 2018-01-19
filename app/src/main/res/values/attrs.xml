@@ -301,12 +301,6 @@
     <attr name="conversation_item_sent_indicator_text_background" format="reference" />
     <attr name="conversation_item_sent_text_indicator_tab_color" format="reference|color" />
 
-    <declare-styleable name="DotLoader">
-        <attr name="dot_radius" format="dimension" />
-        <attr name="color_array" format="reference" />
-        <attr name="number_of_dots" format="integer" />
-    </declare-styleable>
-
     <declare-styleable name="SquareFrameLayout">
         <attr name="square_height" format="boolean" />
     </declare-styleable>

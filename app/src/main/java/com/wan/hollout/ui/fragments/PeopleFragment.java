@@ -512,13 +512,16 @@ public class PeopleFragment extends Fragment {
                     String action = (String) o;
                     switch (action) {
                         case AppConstants.DISABLE_NESTED_SCROLLING:
-                            peopleRecyclerView.setNestedScrollingEnabled(false);
+                            nestedScrollView.setNestedScrollingEnabled(false);
                             break;
                         case AppConstants.ENABLE_NESTED_SCROLLING:
-                            peopleRecyclerView.setNestedScrollingEnabled(true);
+                            nestedScrollView.setNestedScrollingEnabled(true);
                             break;
                         case AppConstants.REFRESH_PEOPLE:
                             fetchPeopleOfCommonInterestsFromNetwork(0);
+                            break;
+                        case AppConstants.CHECK_FOR_NEW_CHAT_REQUESTS:
+                            countChatRequests();
                             break;
                         case AppConstants.SEARCH_VIEW_CLOSED:
                             peopleAdapter.setSearchString(null);

@@ -98,7 +98,7 @@
                 android:layout_toEndOf="@id/destroy_action_mode"
                 android:layout_toRightOf="@id/destroy_action_mode"
                 android:gravity="center_vertical"
-                android:textColor="@color/black"
+                android:textColor="@color/whitesmoke"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 tools:ignore="RelativeOverlap" />

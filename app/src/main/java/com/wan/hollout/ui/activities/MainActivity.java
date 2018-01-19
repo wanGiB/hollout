@@ -35,6 +35,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hyphenate.EMCallBack;
+import com.hyphenate.chat.EMMessage;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -510,8 +511,17 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     UnreadFeedsBadge unreadFeedsBadge = (UnreadFeedsBadge) o;
                     updateTab(2, unreadFeedsBadge.getUnreadFeedsSize());
                 } else if (o instanceof MessageReceivedEvent) {
-                    fetchUnreadMessagesCount();
+                    MessageReceivedEvent messageReceivedEvent = (MessageReceivedEvent) o;
+                    EMMessage message = messageReceivedEvent.getMessage();
+                    String sender = message.getFrom();
+
+                    if (!HolloutUtils.isAContact(sender)) {
+                        EventBus.getDefault().post(AppConstants.CHECK_FOR_NEW_CHAT_REQUESTS);
+                    } else {
+                        fetchUnreadMessagesCount();
+                    }
                 }
+
             }
         });
     }

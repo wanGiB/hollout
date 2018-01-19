@@ -332,10 +332,10 @@ public class ConversationsFragment extends Fragment {
                     String message = (String) o;
                     switch (message) {
                         case AppConstants.DISABLE_NESTED_SCROLLING:
-                            conversationsRecyclerView.setNestedScrollingEnabled(false);
+                            nestedScrollView.setNestedScrollingEnabled(false);
                             break;
                         case AppConstants.ENABLE_NESTED_SCROLLING:
-                            conversationsRecyclerView.setNestedScrollingEnabled(true);
+                            nestedScrollView.setNestedScrollingEnabled(true);
                             break;
                         case AppConstants.REFRESH_CONVERSATIONS:
                             fetchConversations(0);

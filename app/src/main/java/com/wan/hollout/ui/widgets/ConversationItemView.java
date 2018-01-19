@@ -157,7 +157,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                                 ? AppConstants.CHAT_TYPE_GROUP : AppConstants.CHAT_TYPE_ROOM), true);
 
         init();
-        setupConversation(searchString);
+        setupConversation(parseObject, searchString);
         invalidateViewOnScroll();
     }
 
@@ -210,9 +210,9 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         return parseObject.getString(AppConstants.REAL_OBJECT_ID).hashCode();
     }
 
-    public void setupConversation(String searchString) {
+    public void setupConversation(final ParseObject parseObject, String searchString) {
         if (parseObject != null) {
-
+            this.parseObject = parseObject;
             String userName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME)
                     : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
@@ -384,8 +384,12 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                         post(new Runnable() {
                             @Override
                             public void run() {
-                                parseObject = object;
-                                setupConversation(searchString);
+                                String newObjectRealId = object.getString(AppConstants.REAL_OBJECT_ID);
+                                String personId = parseObject.getString(AppConstants.REAL_OBJECT_ID);
+                                HolloutLogger.d("ObjectUpdate", "A new object has changed. Object Id = " + newObjectRealId + " RefObjectId = " + personId);
+                                if (newObjectRealId.equals(personId)) {
+                                    setupConversation(object, searchString);
+                                }
                             }
                         });
                     }
@@ -638,7 +642,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
                 @Override
                 public void onSuccess() {
-                    setupConversation(searchString);
+                    setupConversation(parseObject, searchString);
                 }
 
                 @Override
@@ -669,7 +673,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
                 @Override
                 public void onSuccess() {
-                    setupConversation(searchString);
+                    setupConversation(parseObject, searchString);
                 }
 
                 @Override

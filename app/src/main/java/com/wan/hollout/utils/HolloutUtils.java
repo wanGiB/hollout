@@ -38,6 +38,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -982,6 +983,34 @@ public class HolloutUtils {
             HolloutLogger.i(TAG, GoogleApiAvailability.getInstance().getErrorString(status));
             return true;
         }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static void sendChatState(String chatState, String recipientId) {
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
+        JSONObject chatStates = existingChatStates != null ? existingChatStates : new JSONObject();
+        try {
+            chatStates.put(recipientId, chatState);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        signedInUserObject.put(AppConstants.APP_USER_CHAT_STATES, chatStates);
+        AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
+            @Override
+            public void done(Boolean result, Exception e) {
+
+            }
+        });
+    }
+
+    public static boolean isAContact(String recipientId) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+            return (signedInUserChats != null && signedInUserChats.contains(recipientId.toLowerCase()));
+        }
+        return false;
     }
 
 }

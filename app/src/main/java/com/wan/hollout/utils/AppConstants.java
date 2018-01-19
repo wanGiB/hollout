@@ -241,6 +241,7 @@ public class AppConstants {
     public static final String REPLIED_MESSAGE_ID = "replied_message_id";
     public static final String SHOW_APPROPRIATE_VIEWS = "show_appropriate_views";
     public static final String REMOVE_SOMETHING = "remove_something_o";
+    public static final String CHECK_FOR_NEW_CHAT_REQUESTS = "check_for_new_chat_requests";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

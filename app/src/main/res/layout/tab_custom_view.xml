@@ -2,11 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:clipToPadding="false"
+    android:layout_height="48dp"
     android:layout_gravity="center_horizontal"
-    android:gravity="center_horizontal"
     android:clipChildren="false"
-    android:layout_height="48dp">
+    android:clipToPadding="false"
+    android:gravity="center_horizontal">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -15,6 +15,7 @@
         android:animateLayoutChanges="true"
         android:clipChildren="false"
         android:clipToPadding="false"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
         tools:ignore="UselessParent">
 
@@ -23,8 +24,8 @@
             style="@style/TextAppearance.Design.Tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"
             android:ellipsize="end"
-            android:layout_gravity="center_horizontal"
             android:gravity="center_horizontal"
             android:maxLines="1"
             android:textColor="@color/tab_text_color_selector"
@@ -34,14 +35,15 @@
             android:id="@+id/tab_count"
             android:layout_width="20dp"
             android:layout_height="20dp"
+            android:layout_gravity="center_vertical"
             android:layout_marginLeft="6dp"
             android:layout_marginStart="6dp"
             android:background="@drawable/tab_badge_selector"
             android:gravity="center"
+            android:maxLines="1"
             android:textColor="@android:color/white"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:maxLines="1"
             android:visibility="gone"
             tools:ignore="RtlHardcoded" />
 

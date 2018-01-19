@@ -22,12 +22,12 @@ import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
-import com.wan.hollout.ui.widgets.dotloader.DotLoader;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -72,7 +72,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     public LinearLayout contactSubtitleLayout;
 
     @BindView(R.id.typing_indicator)
-    DotLoader typingIndicator;
+    AVLoadingIndicatorView typingIndicator;
 
     @BindView(R.id.action_mode_bar)
     RelativeLayout actionModeBar;
@@ -341,9 +341,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     public void updateActionMode(int selectionCount) {
-
         UiUtils.showView(actionModeBar, selectionCount > 0);
-
         if (selectionCount > 1) {
             selectedItemCountView.setText(String.valueOf(selectionCount));
             UiUtils.showView(replyToMessageView, false);
@@ -351,24 +349,18 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             selectedItemCountView.setText(" ");
             UiUtils.showView(replyToMessageView, true);
         }
-
         destroyActionModeView.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 UiUtils.showView(actionModeBar, false);
                 AppConstants.selectedMessages.clear();
                 AppConstants.selectedMessagesPositions.clear();
             }
-
         });
-
         if (selectionCount == 0) {
             destroyActionModeView.performClick();
         }
-
         View.OnClickListener actionModeItemClickListener = new OnClickListener() {
-
             @Override
             public void onClick(View view) {
                 UiUtils.blinkView(view);
@@ -379,17 +371,17 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                     case R.id.reply_to_a_message:
                         EventBus.getDefault().post(AppConstants.REPLY_MESSAGE);
                         break;
+                    case R.id.view_message_info:
+//                        EventBus.getDefault().post(new MessageInfoEvent());
+                        break;
                 }
             }
-
         };
-
         replyToMessageView.setOnClickListener(actionModeItemClickListener);
         viewMessageInfoView.setOnClickListener(actionModeItemClickListener);
         deleteMessageView.setOnClickListener(actionModeItemClickListener);
         copyMessageView.setOnClickListener(actionModeItemClickListener);
         forwardMessageView.setOnClickListener(actionModeItemClickListener);
-
     }
 
     public boolean isActionModeActivated() {

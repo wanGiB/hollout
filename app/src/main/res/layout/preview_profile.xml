@@ -34,7 +34,8 @@
                     android:src="@drawable/empty_profile"
                     app:riv_border_color="@color/colorPrimary"
                     app:riv_border_width="1dp"
-                    app:tint="@color/white" />
+                    app:tint="@color/white"
+                    android:focusable="true" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -48,12 +49,11 @@
                         android:layout_height="wrap_content"
                         android:ellipsize="marquee"
                         android:gravity="bottom"
-                        android:maxLines="1"
                         android:paddingEnd="8dp"
                         android:paddingLeft="8dp"
                         android:paddingRight="8dp"
                         android:paddingStart="8dp"
-                        android:text="Name"
+                        android:singleLine="true"
                         android:textColor="@color/white"
                         android:textSize="20sp"
                         app:textStyle="regular" />
@@ -80,8 +80,8 @@
                         <android.support.v7.widget.RecyclerView
                             android:id="@+id/additional_photos_recycler_view"
                             android:layout_width="wrap_content"
-                            android:layout_gravity="center"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center" />
 
                     </FrameLayout>
 

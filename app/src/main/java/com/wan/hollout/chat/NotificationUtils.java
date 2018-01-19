@@ -12,7 +12,6 @@ import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spanned;
 
-import com.parse.Parse;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
@@ -23,6 +22,7 @@ import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.io.InputStream;

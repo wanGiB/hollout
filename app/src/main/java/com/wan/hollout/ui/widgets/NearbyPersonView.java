@@ -27,6 +27,7 @@ import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -85,14 +86,13 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
     @BindView(R.id.parent_layout)
     View parentView;
 
-    public ParseObject person;
-
     private ParseObject signedInUser;
     public Activity activity;
 
     private ParseQuery<ParseObject> userStateQuery;
 
     private String searchString;
+    private ParseObject person;
 
     public NearbyPersonView(Context context) {
         this(context, null);
@@ -121,10 +121,9 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
     public void bindData(Activity activity, String searchString, ParseObject person) {
         this.searchString = searchString;
         this.activity = activity;
-        this.person = person;
         signedInUser = AuthUtil.getCurrentUser();
         init();
-        loadParseUser(searchString);
+        loadParseUser(person, searchString);
     }
 
     private void applyProfilePicture(String profileUrl) {
@@ -172,8 +171,9 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
         return returnColor;
     }
 
-    public void loadParseUser(String searchString) {
+    public void loadParseUser(final ParseObject person, String searchString) {
         if (person != null) {
+            this.person = person;
             String userName = person.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String userProfilePhoto = person.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             ParseGeoPoint userGeoPoint = person.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
@@ -293,8 +293,12 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
                         post(new Runnable() {
                             @Override
                             public void run() {
-                                person = object;
-                                loadParseUser(searchString);
+                                String newObjectRealId = object.getString(AppConstants.REAL_OBJECT_ID);
+                                String personId = person.getString(AppConstants.REAL_OBJECT_ID);
+                                HolloutLogger.d("ObjectUpdate", "A new object has changed. Object Id = " + newObjectRealId + " RefObjectId = " + personId);
+                                if (newObjectRealId.equals(personId)) {
+                                    loadParseUser(object, searchString);
+                                }
                             }
                         });
                     }
