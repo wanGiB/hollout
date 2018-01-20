@@ -367,7 +367,7 @@ public class HolloutCommunicationsManager {
             public void onMessageReceived(final List<EMMessage> messages) {
                 List<String> unreadConversationItems = new ArrayList<>();
                 for (EMMessage emMessage : messages) {
-                    Log.d("MessageTracker", "New Message Received");
+                    Log.d("MessageTracker", "New Message Received with body = " + emMessage.toString());
                     if (!unreadConversationItems.contains(emMessage.getFrom()) && isAContact(AuthUtil.getCurrentUser(), emMessage.getFrom())) {
                         if (HolloutUtils.isAContact(emMessage.getFrom())) {
                             unreadConversationItems.add(emMessage.getFrom());

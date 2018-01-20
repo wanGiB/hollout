@@ -95,7 +95,7 @@ public abstract class CallActivity extends AppCompatActivity {
             if (isInComingCall) {
                 loadId = mSoundPool.load(mActivity, R.raw.sound_call_incoming, 1);
             } else {
-                loadId = mSoundPool.load(mActivity, R.raw.sound_calling, 1);
+                loadId = mSoundPool.load(mActivity, R.raw.progress_tone, 1);
             }
             // Load SoundPool listener
             mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
@@ -123,25 +123,25 @@ public abstract class CallActivity extends AppCompatActivity {
                 content = mActivity.getString(R.string.em_call_cancel_incoming_call);
                 break;
             case CallStatus.CALL_BUSY:
-                content = String.format(mActivity.getString(R.string.em_call_busy), mCallerId);
+                content = mActivity.getString(R.string.em_call_busy);
                 break;
             case CallStatus.CALL_OFFLINE:
-                content = String.format(mActivity.getString(R.string.em_call_not_online), mCallerId);
+                content = mActivity.getString(R.string.em_call_not_online);
                 break;
             case CallStatus.CALL_REJECT_INCOMING_CALL:
                 content = mActivity.getString(R.string.em_call_reject_incoming_call);
                 break;
             case CallStatus.CALL_REJECT:
-                content = String.format(mActivity.getString(R.string.em_call_reject), mCallerId);
+                content = mActivity.getString(R.string.em_call_reject);
                 break;
             case CallStatus.CALL_NO_RESPONSE:
-                content = String.format(mActivity.getString(R.string.em_call_no_response), mCallerId);
+                content = mActivity.getString(R.string.em_call_no_response);
                 break;
             case CallStatus.CALL_TRANSPORT:
                 content = mActivity.getString(R.string.em_call_connection_fail);
                 break;
             case CallStatus.CALL_VERSION_DIFFERENT:
-                content = String.format(mActivity.getString(R.string.em_call_not_online), mCallerId);
+                content = mActivity.getString(R.string.em_call_not_online);
                 break;
             default:
                 content = mActivity.getString(R.string.em_call_cancel);
