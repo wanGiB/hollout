@@ -35,12 +35,18 @@ import com.hyphenate.exceptions.EMServiceNotReadyException;
 import com.hyphenate.exceptions.HyphenateException;
 import com.hyphenate.media.EMCallSurfaceView;
 import com.hyphenate.util.EMLog;
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.wan.hollout.R;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.PermissionsUtils;
+
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,7 +59,7 @@ import butterknife.OnClick;
  * Create by lzan13 2016/10/13
  * Video call activity
  */
-public class VideoCallActivity extends CallActivity implements ActivityCompat.OnRequestPermissionsResultCallback{
+public class VideoCallActivity extends CallActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     private final String TAG = VideoCallActivity.class.getSimpleName();
 
@@ -76,46 +82,64 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
     // Use ButterKnife define view
     @BindView(R.id.layout_call_control)
     View mControlLayout;
+
     @BindView(R.id.surface_view_local)
     EMCallSurfaceView mLocalSurfaceView;
+
     @BindView(R.id.surface_view_opposite)
     EMCallSurfaceView mOppositeSurfaceView;
 
     @BindView(R.id.layout_call_info)
     View mCallInfoView;
+
     @BindView(R.id.text_resolution)
     TextView mResolutionView;
+
     @BindView(R.id.text_time_latency)
     TextView mTimeLatencyView;
+
     @BindView(R.id.text_frame_rate)
     TextView mFrameRateView;
+
     @BindView(R.id.text_lost_rate)
     TextView mLostRateView;
+
     @BindView(R.id.text_local_bitrate)
     TextView mLocalBitrateView;
+
     @BindView(R.id.text_remote_bitrate)
     TextView mRemoteBitrateView;
 
     @BindView(R.id.img_call_background)
     ImageView mCallBackgroundView;
+
     @BindView(R.id.text_call_status)
     TextView mCallStatusView;
+
     @BindView(R.id.btn_change_camera_switch)
     ImageButton mChangeCameraSwitch;
+
     @BindView(R.id.btn_call_info)
     ImageButton mCallInfoBtn;
+
     @BindView(R.id.btn_exit_full_screen)
     ImageButton mExitFullScreenBtn;
+
     @BindView(R.id.btn_camera_switch)
     ImageButton mCameraSwitch;
+
     @BindView(R.id.btn_mic_switch)
     ImageButton mMicSwitch;
+
     @BindView(R.id.btn_speaker_switch)
     ImageButton mSpeakerSwitch;
+
     @BindView(R.id.fab_reject_call)
     FloatingActionButton mRejectCallFab;
+
     @BindView(R.id.fab_end_call)
     FloatingActionButton mEndCallFab;
+
     @BindView(R.id.fab_answer_call)
     FloatingActionButton mAnswerCallFab;
 
@@ -123,6 +147,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
     LinearLayout footerView;
 
     private HolloutPermissions holloutPermissions;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -130,8 +155,8 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
         HolloutCommunicationsManager.getInstance().isVideoCalling = true;
         // init ButterKnife
         ButterKnife.bind(this);
-        holloutPermissions = new HolloutPermissions(this,footerView);
-        if (HolloutUtils.hasMarshmallow()&& PermissionsUtils.checkSelfForCameraPermission(this)){
+        holloutPermissions = new HolloutPermissions(this, footerView);
+        if (HolloutUtils.hasMarshmallow() && PermissionsUtils.checkSelfForCameraPermission(this)) {
             holloutPermissions.requestCameraPermission();
         }
         initView();
@@ -141,12 +166,32 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.BROADCAST_ACTION_CALL);
         localBroadcastManager.registerReceiver(broadcastReceiver, filter);
+        fetchCallerUserDetails();
+    }
+
+    private void fetchCallerUserDetails() {
+        ParseQuery<ParseObject> callerQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        callerQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, mCallerId);
+        callerQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject object, ParseException e) {
+                if (e == null && object != null) {
+                    String callerName = object.getString(AppConstants.APP_USER_DISPLAY_NAME);
+                    mCallStatusView.setText(WordUtils.capitalize(callerName));
+                    if (isInComingCall) {
+                        mCallStatusView.setText("Incoming Call");
+                    } else {
+                        mCallStatusView.setText("Outgoing Call");
+                    }
+                }
+            }
+        });
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode==PermissionsUtils.REQUEST_CAMERA && holloutPermissions.verifyPermissions(grantResults)){
+        if (requestCode == PermissionsUtils.REQUEST_CAMERA && holloutPermissions.verifyPermissions(grantResults)) {
             initView();
         }
     }
@@ -202,8 +247,8 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                 // Set call state is incoming
                 CallStatus.getInstance().setCallState(CallStatus.CALL_STATUS_CONNECTING_INCOMING);
                 // Set call state view show content
-                mCallStatusView.setText(String.format(mActivity.getResources()
-                        .getString(R.string.em_call_connected_incoming_call), mCallerId));
+                mCallStatusView.setText(mActivity.getResources()
+                        .getString(R.string.em_call_connected_incoming_call));
                 // Set button statue
                 mRejectCallFab.setVisibility(View.VISIBLE);
                 mEndCallFab.setVisibility(View.GONE);
@@ -212,8 +257,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                 // Set call state connecting
                 CallStatus.getInstance().setCallState(CallStatus.CALL_STATUS_CONNECTING);
                 // Set call state view show content
-                mCallStatusView.setText(
-                        String.format(getString(R.string.em_call_connecting), mCallerId));
+                mCallStatusView.setText(getString(R.string.em_call_connecting));
                 // Set button statue
                 mRejectCallFab.setVisibility(View.GONE);
                 mEndCallFab.setVisibility(View.VISIBLE);
@@ -224,7 +268,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
         } else if (CallStatus.getInstance().getCallState() == CallStatus.CALL_STATUS_CONNECTING) {
             isInComingCall = CallStatus.getInstance().isInComing();
             // Set call state view show content
-            mCallStatusView.setText(String.format(getString(R.string.em_call_connecting), mCallerId));
+            mCallStatusView.setText(getString(R.string.em_call_connecting));
             // Set button statue
             mRejectCallFab.setVisibility(View.GONE);
             mEndCallFab.setVisibility(View.VISIBLE);
@@ -233,8 +277,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                 == CallStatus.CALL_STATUS_CONNECTING_INCOMING) {
             isInComingCall = CallStatus.getInstance().isInComing();
             // Set call state view show content
-            mCallStatusView.setText(
-                    String.format(getString(R.string.em_call_connected_incoming_call), mCallerId));
+            mCallStatusView.setText(getString(R.string.em_call_connected_incoming_call));
             // Set button statue
             mRejectCallFab.setVisibility(View.VISIBLE);
             mEndCallFab.setVisibility(View.GONE);
@@ -653,13 +696,11 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
             switch (callState) {
                 case CONNECTING:
                     // Set call state view show content
-                    mCallStatusView.setText(
-                            String.format(getString(R.string.em_call_connecting), mCallerId));
+                    mCallStatusView.setText(getString(R.string.em_call_connecting));
                     break;
                 case CONNECTED:
                     // Set call state view show content
-                    mCallStatusView.setText(
-                            String.format(getString(R.string.em_call_connected), mCallerId));
+                    mCallStatusView.setText(getString(R.string.em_call_connected));
                     break;
                 case ACCEPTED:
                     if (mTimer != null) {
@@ -685,21 +726,17 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                     // Check call error
                     if (callError == CallError.ERROR_UNAVAILABLE) {
                         mCallStatus = CallStatus.CALL_OFFLINE;
-                        mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_not_online), mCallerId));
+                        mCallStatusView.setText(getString(R.string.em_call_not_online));
                         Toast.makeText(VideoCallActivity.this, mCallStatusView.getText(), Toast.LENGTH_LONG).show();
                     } else if (callError == CallError.ERROR_BUSY) {
                         mCallStatus = CallStatus.CALL_BUSY;
-                        mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_busy), mCallerId));
+                        mCallStatusView.setText(getString(R.string.em_call_busy));
                     } else if (callError == CallError.REJECTED) {
                         mCallStatus = CallStatus.CALL_REJECT;
-                        mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_reject), mCallerId));
+                        mCallStatusView.setText(getString(R.string.em_call_reject));
                     } else if (callError == CallError.ERROR_NORESPONSE) {
                         mCallStatus = CallStatus.CALL_NO_RESPONSE;
-                        mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_no_response), mCallerId));
+                        mCallStatusView.setText(getString(R.string.em_call_no_response));
                     } else if (callError == CallError.ERROR_TRANSPORT) {
                         mCallStatus = CallStatus.CALL_TRANSPORT;
                         mCallStatusView.setText(R.string.em_call_connection_fail);
