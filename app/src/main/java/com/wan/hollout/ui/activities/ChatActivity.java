@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -18,6 +17,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -82,7 +82,7 @@ import com.wan.hollout.eventbuses.MessageChangedEvent;
 import com.wan.hollout.eventbuses.MessageDeliveredEvent;
 import com.wan.hollout.eventbuses.MessageReadEvent;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
-import com.wan.hollout.eventbuses.PlaceCallEvent;
+import com.wan.hollout.eventbuses.PlaceLocalCallEvent;
 import com.wan.hollout.eventbuses.ReactionMessageEvent;
 import com.wan.hollout.eventbuses.ScrollToMessageEvent;
 import com.wan.hollout.eventbuses.SearchMessages;
@@ -1179,7 +1179,6 @@ public class ChatActivity extends BaseActivity implements
                 }
             }
         }
-
     }
 
     private EMMessage.Type getMessageType(EMMessage message) {
@@ -1208,18 +1207,35 @@ public class ChatActivity extends BaseActivity implements
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                             Intent intent = new Intent();
+                            List<String> recipientBlackList = recipientProperties.getList(AppConstants.USER_BLACK_LIST);
                             switch (which) {
                                 case 0:
-                                    intent.setClass(ChatActivity.this, VoiceCallActivity.class);
-                                    intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
-                                    intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
-                                    startActivity(intent);
+                                    //Check to see if the user this user is trying to call has him in his contacts
+                                    if (recipientBlackList == null) {
+                                        //Is this user in the recipient contact list?
+                                        checkAndStartOnlineVoiceCall(intent);
+                                    } else {
+                                        if (!recipientBlackList.isEmpty() && recipientBlackList.contains(signedInUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                                            //Sorry them don block you o...E don red o...Lolz
+                                            UiUtils.showSafeToast("Sorry, you can't call this user at this point in time.");
+                                        } else {
+                                            checkAndStartOnlineVoiceCall(intent);
+                                        }
+                                    }
                                     break;
                                 case 1:
-                                    intent.setClass(ChatActivity.this, VideoCallActivity.class);
-                                    intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
-                                    intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
-                                    startActivity(intent);
+                                    //Check to see if the user this user is trying to call has him in his contacts
+                                    if (recipientBlackList == null) {
+                                        //Is this user in the recipient contact list?
+                                        checkAndStartOnlineVideoCall(intent);
+                                    } else {
+                                        if (!recipientBlackList.isEmpty() && recipientBlackList.contains(signedInUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                                            //Sorry them don block you o...E don red o...Lolz
+                                            UiUtils.showSafeToast("Sorry, you can't call this user at this point in time.");
+                                        } else {
+                                            checkAndStartOnlineVideoCall(intent);
+                                        }
+                                    }
                                     break;
                             }
                         }
@@ -1268,6 +1284,48 @@ public class ChatActivity extends BaseActivity implements
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void checkAndStartOnlineVoiceCall(Intent intent) {
+        List<String> recipientChatList = recipientProperties.getList(AppConstants.APP_USER_CHATS);
+        if (recipientChatList != null && !recipientChatList.isEmpty()) {
+            if (recipientChatList.contains(signedInUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                startOnlineVoiceCall(intent);
+            } else {
+                UiUtils.showSafeToast("Sorry, you can't call this user at this point in time.");
+            }
+        } else {
+            UiUtils.showSafeToast("Sorry, you can't call this user at this point in time.");
+        }
+    }
+
+    private void checkAndStartOnlineVideoCall(Intent intent) {
+        List<String> recipientChatList = recipientProperties.getList(AppConstants.APP_USER_CHATS);
+        if (recipientChatList != null && !recipientChatList.isEmpty()) {
+            if (recipientChatList.contains(signedInUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                startOnlineVideoCall(intent);
+            } else {
+                UiUtils.showSafeToast("Sorry, you can't call this user at this point in time.");
+            }
+        } else {
+            UiUtils.showSafeToast("Sorry, you can't call this user at this point in time.");
+        }
+    }
+
+    private void startOnlineVoiceCall(Intent intent) {
+        intent.setClass(ChatActivity.this, VoiceCallActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
+        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
+        startActivity(intent);
+    }
+
+    private void startOnlineVideoCall(Intent intent) {
+        intent.setClass(ChatActivity.this, VideoCallActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
+        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
+        startActivity(intent);
     }
 
     private void attemptToUnBlockUser() {
@@ -1869,13 +1927,13 @@ public class ChatActivity extends BaseActivity implements
                             });
                         }
                     }
-                } else if (o instanceof PlaceCallEvent) {
-                    PlaceCallEvent placeCallEvent = (PlaceCallEvent) o;
+                } else if (o instanceof PlaceLocalCallEvent) {
+                    PlaceLocalCallEvent placeLocalCallEvent = (PlaceLocalCallEvent) o;
                     if (PermissionsUtils.checkSelfForCallPermission(ChatActivity.this)) {
-                        setPhoneNumberToCall(placeCallEvent.getPhoneNumber());
+                        setPhoneNumberToCall(placeLocalCallEvent.getPhoneNumber());
                         holloutPermissions.requestCallPermission();
                     } else {
-                        placeLocalCall(placeCallEvent.getPhoneNumber());
+                        placeLocalCall(placeLocalCallEvent.getPhoneNumber());
                     }
                 } else if (o instanceof SearchMessages) {
                     SearchMessages searchMessages = (SearchMessages) o;

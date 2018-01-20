@@ -168,8 +168,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private void invalidateItemView(Activity activity, int objectHashCode) {
         parentView.setBackgroundColor(AppConstants.selectedPeoplePositions.get(objectHashCode)
-                ? ContextCompat.getColor(activity, R.color.blue_100) :
-                ContextCompat.getColor(activity, R.color.white));
+                ? ContextCompat.getColor(activity, R.color.blue_100) :android.R.attr.selectableItemBackground);
     }
 
     private void applyProfilePicture(String profileUrl) {
@@ -247,6 +246,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             applyProfilePicture(userProfilePhoto);
             applyIconAnimation();
 
+            attachEventHandlers(parseObject);
+
             if (HolloutUtils.isUserBlocked(parseObject.getString(AppConstants.REAL_OBJECT_ID))) {
                 userStatusOrLastMessageView.setText(activity.getString(R.string.user_blocked));
                 userPhotoView.setColorFilter(ContextCompat.getColor(activity, R.color.black_transparent_70percent), PorterDuff.Mode.SRC_ATOP);
@@ -299,69 +300,71 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 AppConstants.parseUserAvailableOnlineStatusPositions.put(getMessageId(), false);
             }
 
-            userPhotoView.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    UiUtils.blinkView(view);
-                    if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-                        UiUtils.loadUserData(activity, parseObject);
-                    }
-                }
-            });
-
-            messageContainer.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ConversationItemView.this.performClick();
-                }
-            });
-
-            iconContainer.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    ConversationItemView.this.performClick();
-                }
-            });
-
-            usernameEntryView.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ConversationItemView.this.performClick();
-                }
-            });
-            userStatusOrLastMessageView.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    ConversationItemView.this.performClick();
-                }
-            });
-
-            View.OnLongClickListener onLongClickListener = new OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    switch (v.getId()) {
-                        case R.id.icon_profile:
-                        case R.id.message_container:
-                        case R.id.icon_container:
-                        case R.id.from:
-                        case R.id.txt_secondary:
-                            ConversationItemView.this.performLongClick();
-                            break;
-                    }
-                    return true;
-                }
-            };
-
-            userPhotoView.setOnLongClickListener(onLongClickListener);
-            usernameEntryView.setOnLongClickListener(onLongClickListener);
-            userStatusOrLastMessageView.setOnLongClickListener(onLongClickListener);
-            iconContainer.setOnLongClickListener(onLongClickListener);
-            messageContainer.setOnLongClickListener(onLongClickListener);
-
         }
 
         invalidateItemView(activity, getCurrentConversationHashCode());
 
+    }
+
+    private void attachEventHandlers(final ParseObject parseObject) {
+        userPhotoView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UiUtils.blinkView(view);
+                if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
+                    UiUtils.loadUserData(activity, parseObject);
+                }
+            }
+        });
+
+        messageContainer.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ConversationItemView.this.performClick();
+            }
+        });
+
+        iconContainer.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ConversationItemView.this.performClick();
+            }
+        });
+
+        usernameEntryView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConversationItemView.this.performClick();
+            }
+        });
+        userStatusOrLastMessageView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ConversationItemView.this.performClick();
+            }
+        });
+
+        OnLongClickListener onLongClickListener = new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                switch (v.getId()) {
+                    case R.id.icon_profile:
+                    case R.id.message_container:
+                    case R.id.icon_container:
+                    case R.id.from:
+                    case R.id.txt_secondary:
+                        ConversationItemView.this.performLongClick();
+                        break;
+                }
+                return true;
+            }
+        };
+
+        userPhotoView.setOnLongClickListener(onLongClickListener);
+        usernameEntryView.setOnLongClickListener(onLongClickListener);
+        userStatusOrLastMessageView.setOnLongClickListener(onLongClickListener);
+        iconContainer.setOnLongClickListener(onLongClickListener);
+        messageContainer.setOnLongClickListener(onLongClickListener);
     }
 
     private void listenToUserPresence(ParseObject parseObject) {

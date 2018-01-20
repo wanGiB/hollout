@@ -7,11 +7,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.widget.Chronometer;
@@ -27,10 +29,18 @@ import com.hyphenate.exceptions.EMNoActiveCallException;
 import com.hyphenate.exceptions.EMServiceNotReadyException;
 import com.hyphenate.exceptions.HyphenateException;
 import com.hyphenate.util.EMLog;
+import com.parse.GetCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.wan.hollout.R;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.UiUtils;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -40,8 +50,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class VoiceCallActivity extends CallActivity {
-
-    private boolean isDarkTheme;
 
     private final String TAG = VoiceCallActivity.class.getSimpleName();
 
@@ -53,22 +61,31 @@ public class VoiceCallActivity extends CallActivity {
     // Use ButterKnife define view
     @BindView(R.id.img_call_background)
     ImageView mCallBackgroundView;
+
     @BindView(R.id.text_call_status)
     TextView mCallStatusView;
+
     @BindView(R.id.img_call_avatar)
     CircleImageView mAvatarView;
+
     @BindView(R.id.text_call_username)
     TextView mUsernameView;
+
     @BindView(R.id.btn_exit_full_screen)
     ImageButton mExitFullScreenBtn;
+
     @BindView(R.id.btn_mic_switch)
     ImageButton mMicSwitch;
+
     @BindView(R.id.btn_speaker_switch)
     ImageButton mSpeakerSwitch;
+
     @BindView(R.id.fab_reject_call)
     FloatingActionButton mRejectCallFab;
+
     @BindView(R.id.fab_end_call)
     FloatingActionButton mEndCallFab;
+
     @BindView(R.id.fab_answer_call)
     FloatingActionButton mAnswerCallFab;
 
@@ -80,15 +97,42 @@ public class VoiceCallActivity extends CallActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voice_call);
         HolloutCommunicationsManager.getInstance().isVoiceCalling = true;
-        // init ButterKnife
         ButterKnife.bind(this);
         initView();
-        // register call broadcast receiver
         localBroadcastManager = LocalBroadcastManager.getInstance(this);
         broadcastReceiver = new CallBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(AppConstants.BROADCAST_ACTION_CALL);
         localBroadcastManager.registerReceiver(broadcastReceiver, filter);
+        fetchCallerUserDetails();
+    }
+
+    private void fetchCallerUserDetails() {
+        ParseQuery<ParseObject> callerQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        callerQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, mCallerId);
+        callerQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject object, ParseException e) {
+                if (e == null && object != null) {
+                    String callerName = object.getString(AppConstants.APP_USER_DISPLAY_NAME);
+                    String userPhotoUrl = object.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+                    String userCoverPhotoUrl = object.getString(AppConstants.APP_USER_COVER_PHOTO);
+                    mUsernameView.setText(WordUtils.capitalize(callerName));
+                    if (StringUtils.isNotEmpty(userPhotoUrl)) {
+                        UiUtils.loadImage(VoiceCallActivity.this, userPhotoUrl, mAvatarView);
+                    }
+                    if (StringUtils.isNotEmpty(userCoverPhotoUrl)) {
+                        UiUtils.loadImage(VoiceCallActivity.this, userCoverPhotoUrl, mCallBackgroundView);
+                        mCallBackgroundView.setColorFilter(ContextCompat.getColor(VoiceCallActivity.this, R.color.black_transparent_70percent), PorterDuff.Mode.SRC_ATOP);
+                    }
+                    if (isInComingCall) {
+                        mCallStatusView.setText("Incoming Call");
+                    } else {
+                        mCallStatusView.setText("Outgoing Call");
+                    }
+                }
+            }
+        });
     }
 
     /**
@@ -97,17 +141,13 @@ public class VoiceCallActivity extends CallActivity {
     @Override
     protected void initView() {
         super.initView();
-
         // Set call type
         mCallType = 1;
-
         mChronometer = (Chronometer) findViewById(R.id.chronometer_call_time);
-
         // Set switch status
         mMicSwitch.setActivated(CallStatus.getInstance().isMic());
         mSpeakerSwitch.setActivated(CallStatus.getInstance().isSpeaker());
-
-        mUsernameView.setText(mCallId);
+        mUsernameView.setText("Loading...");
         // Check call state
         if (CallStatus.getInstance().getCallState() == CallStatus.CALL_STATUS_NORMAL) {
             // Set call state
@@ -117,8 +157,6 @@ public class VoiceCallActivity extends CallActivity {
                 // Set call state is incoming
                 CallStatus.getInstance().setCallState(CallStatus.CALL_STATUS_CONNECTING_INCOMING);
                 // Set call state view show content
-                mCallStatusView.setText(String.format(mActivity.getResources()
-                        .getString(R.string.em_call_connected_incoming_call), mCallId));
                 // Set button statue
                 mRejectCallFab.setVisibility(View.VISIBLE);
                 mEndCallFab.setVisibility(View.GONE);
@@ -127,8 +165,7 @@ public class VoiceCallActivity extends CallActivity {
                 // Set call state connecting
                 CallStatus.getInstance().setCallState(CallStatus.CALL_STATUS_CONNECTING);
                 // Set call state view show content
-                mCallStatusView.setText(
-                        String.format(getString(R.string.em_call_connecting), mCallId));
+                mCallStatusView.setText(getString(R.string.em_call_connecting));
                 // Set button statue
                 mRejectCallFab.setVisibility(View.GONE);
                 mEndCallFab.setVisibility(View.VISIBLE);
@@ -139,7 +176,7 @@ public class VoiceCallActivity extends CallActivity {
         } else if (CallStatus.getInstance().getCallState() == CallStatus.CALL_STATUS_CONNECTING) {
             isInComingCall = CallStatus.getInstance().isInComing();
             // Set call state view show content
-            mCallStatusView.setText(String.format(getString(R.string.em_call_connecting), mCallId));
+            mCallStatusView.setText(getString(R.string.em_call_connecting));
             // Set button statue
             mRejectCallFab.setVisibility(View.GONE);
             mEndCallFab.setVisibility(View.VISIBLE);
@@ -148,8 +185,7 @@ public class VoiceCallActivity extends CallActivity {
                 == CallStatus.CALL_STATUS_CONNECTING_INCOMING) {
             isInComingCall = CallStatus.getInstance().isInComing();
             // Set call state view show content
-            mCallStatusView.setText(
-                    String.format(getString(R.string.em_call_connected_incoming_call), mCallId));
+            mCallStatusView.setText(getString(R.string.em_call_connected_incoming_call));
             // Set button statue
             mRejectCallFab.setVisibility(View.VISIBLE);
             mEndCallFab.setVisibility(View.GONE);
@@ -171,7 +207,7 @@ public class VoiceCallActivity extends CallActivity {
      */
     private void makeCall() {
         try {
-            EMClient.getInstance().callManager().makeVoiceCall(mCallId);
+            EMClient.getInstance().callManager().makeVoiceCall(mCallerId);
             // Set call timeout
             mTimer = new Timer();
             TimerTask task = new TimerTask() {
@@ -203,7 +239,8 @@ public class VoiceCallActivity extends CallActivity {
     @OnClick({
             R.id.btn_exit_full_screen, R.id.btn_mic_switch, R.id.btn_speaker_switch,
             R.id.fab_reject_call, R.id.fab_end_call, R.id.fab_answer_call
-    }) void onClick(View v) {
+    })
+    void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_exit_full_screen:
                 // Minimize the view
@@ -415,13 +452,11 @@ public class VoiceCallActivity extends CallActivity {
             switch (callState) {
                 case CONNECTING:
                     // Set call state view show content
-                    mCallStatusView.setText(
-                            String.format(getString(R.string.em_call_connecting), mCallId));
+                    mCallStatusView.setText(getString(R.string.em_call_connecting));
                     break;
                 case CONNECTED:
                     // Set call state view show content
-                    mCallStatusView.setText(
-                            String.format(getString(R.string.em_call_connected), mCallId));
+                    mCallStatusView.setText(getString(R.string.ringing));
                     break;
                 case ACCEPTED:
                     if (mTimer != null) {
@@ -434,6 +469,7 @@ public class VoiceCallActivity extends CallActivity {
                     // Set call state
                     mCallStatus = CallStatus.CALL_ACCEPTED;
                     // Start time
+                    UiUtils.showView(mChronometer, true);
                     mChronometer.setBase(SystemClock.elapsedRealtime());
                     mChronometer.start();
                     break;
@@ -445,20 +481,16 @@ public class VoiceCallActivity extends CallActivity {
                     // Check call error
                     if (callError == CallError.ERROR_UNAVAILABLE) {
                         mCallStatus = CallStatus.CALL_OFFLINE;
-                        mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_not_online), mCallId));
+                        mCallStatusView.setText(getString(R.string.em_call_not_online));
                     } else if (callError == CallError.ERROR_BUSY) {
                         mCallStatus = CallStatus.CALL_BUSY;
-                        mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_busy), mCallId));
+                        mCallStatusView.setText(getString(R.string.em_call_busy));
                     } else if (callError == CallError.REJECTED) {
                         mCallStatus = CallStatus.CALL_REJECT;
-                        mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_reject), mCallId));
+                        mCallStatusView.setText(getString(R.string.em_call_reject));
                     } else if (callError == CallError.ERROR_NORESPONSE) {
                         mCallStatus = CallStatus.CALL_NO_RESPONSE;
-                        mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_no_response), mCallId));
+                        mCallStatusView.setText(getString(R.string.em_call_no_response));
                     } else if (callError == CallError.ERROR_TRANSPORT) {
                         mCallStatus = CallStatus.CALL_TRANSPORT;
                         mCallStatusView.setText(R.string.em_call_connection_fail);

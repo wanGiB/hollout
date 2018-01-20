@@ -203,7 +203,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                 CallStatus.getInstance().setCallState(CallStatus.CALL_STATUS_CONNECTING_INCOMING);
                 // Set call state view show content
                 mCallStatusView.setText(String.format(mActivity.getResources()
-                        .getString(R.string.em_call_connected_incoming_call), mCallId));
+                        .getString(R.string.em_call_connected_incoming_call), mCallerId));
                 // Set button statue
                 mRejectCallFab.setVisibility(View.VISIBLE);
                 mEndCallFab.setVisibility(View.GONE);
@@ -213,7 +213,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                 CallStatus.getInstance().setCallState(CallStatus.CALL_STATUS_CONNECTING);
                 // Set call state view show content
                 mCallStatusView.setText(
-                        String.format(getString(R.string.em_call_connecting), mCallId));
+                        String.format(getString(R.string.em_call_connecting), mCallerId));
                 // Set button statue
                 mRejectCallFab.setVisibility(View.GONE);
                 mEndCallFab.setVisibility(View.VISIBLE);
@@ -224,7 +224,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
         } else if (CallStatus.getInstance().getCallState() == CallStatus.CALL_STATUS_CONNECTING) {
             isInComingCall = CallStatus.getInstance().isInComing();
             // Set call state view show content
-            mCallStatusView.setText(String.format(getString(R.string.em_call_connecting), mCallId));
+            mCallStatusView.setText(String.format(getString(R.string.em_call_connecting), mCallerId));
             // Set button statue
             mRejectCallFab.setVisibility(View.GONE);
             mEndCallFab.setVisibility(View.VISIBLE);
@@ -234,7 +234,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
             isInComingCall = CallStatus.getInstance().isInComing();
             // Set call state view show content
             mCallStatusView.setText(
-                    String.format(getString(R.string.em_call_connected_incoming_call), mCallId));
+                    String.format(getString(R.string.em_call_connected_incoming_call), mCallerId));
             // Set button statue
             mRejectCallFab.setVisibility(View.VISIBLE);
             mEndCallFab.setVisibility(View.GONE);
@@ -256,7 +256,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
      */
     private void makeCall() {
         try {
-            EMClient.getInstance().callManager().makeVideoCall(mCallId);
+            EMClient.getInstance().callManager().makeVideoCall(mCallerId);
             // Set call timeout
             mTimer = new Timer();
             TimerTask task = new TimerTask() {
@@ -654,12 +654,12 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                 case CONNECTING:
                     // Set call state view show content
                     mCallStatusView.setText(
-                            String.format(getString(R.string.em_call_connecting), mCallId));
+                            String.format(getString(R.string.em_call_connecting), mCallerId));
                     break;
                 case CONNECTED:
                     // Set call state view show content
                     mCallStatusView.setText(
-                            String.format(getString(R.string.em_call_connected), mCallId));
+                            String.format(getString(R.string.em_call_connected), mCallerId));
                     break;
                 case ACCEPTED:
                     if (mTimer != null) {
@@ -686,20 +686,20 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                     if (callError == CallError.ERROR_UNAVAILABLE) {
                         mCallStatus = CallStatus.CALL_OFFLINE;
                         mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_not_online), mCallId));
+                                String.format(getString(R.string.em_call_not_online), mCallerId));
                         Toast.makeText(VideoCallActivity.this, mCallStatusView.getText(), Toast.LENGTH_LONG).show();
                     } else if (callError == CallError.ERROR_BUSY) {
                         mCallStatus = CallStatus.CALL_BUSY;
                         mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_busy), mCallId));
+                                String.format(getString(R.string.em_call_busy), mCallerId));
                     } else if (callError == CallError.REJECTED) {
                         mCallStatus = CallStatus.CALL_REJECT;
                         mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_reject), mCallId));
+                                String.format(getString(R.string.em_call_reject), mCallerId));
                     } else if (callError == CallError.ERROR_NORESPONSE) {
                         mCallStatus = CallStatus.CALL_NO_RESPONSE;
                         mCallStatusView.setText(
-                                String.format(getString(R.string.em_call_no_response), mCallId));
+                                String.format(getString(R.string.em_call_no_response), mCallerId));
                     } else if (callError == CallError.ERROR_TRANSPORT) {
                         mCallStatus = CallStatus.CALL_TRANSPORT;
                         mCallStatusView.setText(R.string.em_call_connection_fail);

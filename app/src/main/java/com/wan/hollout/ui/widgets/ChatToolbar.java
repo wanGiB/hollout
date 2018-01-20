@@ -218,14 +218,11 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         this.recipientObject = recipientUser;
         String recipientName = getRecipientName();
         String recipientPhotoUrl = getRecipientPhotoUrl();
-
         if (StringUtils.isNotEmpty(recipientName)) {
             mContext.setRecipientName(recipientName);
             contactNameView.setText(WordUtils.capitalize(recipientName));
         }
-
         if (recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-
             JSONObject chatStates = recipientUser.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
             Long userLastSeen = recipientUser.getLong(AppConstants.APP_USER_LAST_SEEN);
 
@@ -267,11 +264,9 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 }
             }
         }
-
         if (StringUtils.isNotEmpty(recipientPhotoUrl)) {
             UiUtils.loadImage(mContext, recipientPhotoUrl, contactPhotoView);
         }
-
     }
 
     private void subscribeToObjectChanges() {

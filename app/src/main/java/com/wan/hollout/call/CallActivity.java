@@ -24,7 +24,7 @@ import org.greenrobot.eventbus.EventBus;
 /**
  * @author Wan Clem
  */
-public class CallActivity extends AppCompatActivity {
+public abstract class CallActivity extends AppCompatActivity {
 
     protected Activity mActivity;
 
@@ -32,7 +32,7 @@ public class CallActivity extends AppCompatActivity {
     protected Chronometer mChronometer;
 
     // Call id
-    protected String mCallId;
+    protected String mCallerId;
 
     // Is incoming call
     protected boolean isInComingCall;
@@ -65,7 +65,9 @@ public class CallActivity extends AppCompatActivity {
                 | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+
         EventBus.getDefault().post(AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER);
+
     }
 
     /**
@@ -74,7 +76,7 @@ public class CallActivity extends AppCompatActivity {
     protected void initView() {
         mActivity = this;
         // Get call id
-        mCallId = getIntent().getStringExtra(AppConstants.EXTRA_USER_ID);
+        mCallerId = getIntent().getStringExtra(AppConstants.EXTRA_USER_ID);
         isInComingCall = getIntent().getBooleanExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
         // Set default call end status
         mCallStatus = CallStatus.CALL_CANCEL;
@@ -109,7 +111,7 @@ public class CallActivity extends AppCompatActivity {
      * Call end save message to local
      */
     protected void saveCallMessage() {
-        String content = null;
+        String content;
         switch (mCallStatus) {
             case CallStatus.CALL_ACCEPTED:
                 content = mChronometer.getText().toString();
@@ -121,25 +123,25 @@ public class CallActivity extends AppCompatActivity {
                 content = mActivity.getString(R.string.em_call_cancel_incoming_call);
                 break;
             case CallStatus.CALL_BUSY:
-                content = String.format(mActivity.getString(R.string.em_call_busy), mCallId);
+                content = String.format(mActivity.getString(R.string.em_call_busy), mCallerId);
                 break;
             case CallStatus.CALL_OFFLINE:
-                content = String.format(mActivity.getString(R.string.em_call_not_online), mCallId);
+                content = String.format(mActivity.getString(R.string.em_call_not_online), mCallerId);
                 break;
             case CallStatus.CALL_REJECT_INCOMING_CALL:
                 content = mActivity.getString(R.string.em_call_reject_incoming_call);
                 break;
             case CallStatus.CALL_REJECT:
-                content = String.format(mActivity.getString(R.string.em_call_reject), mCallId);
+                content = String.format(mActivity.getString(R.string.em_call_reject), mCallerId);
                 break;
             case CallStatus.CALL_NO_RESPONSE:
-                content = String.format(mActivity.getString(R.string.em_call_no_response), mCallId);
+                content = String.format(mActivity.getString(R.string.em_call_no_response), mCallerId);
                 break;
             case CallStatus.CALL_TRANSPORT:
                 content = mActivity.getString(R.string.em_call_connection_fail);
                 break;
             case CallStatus.CALL_VERSION_DIFFERENT:
-                content = String.format(mActivity.getString(R.string.em_call_not_online), mCallId);
+                content = String.format(mActivity.getString(R.string.em_call_not_online), mCallerId);
                 break;
             default:
                 content = mActivity.getString(R.string.em_call_cancel);
@@ -147,11 +149,11 @@ public class CallActivity extends AppCompatActivity {
         }
 
         final String finalContent = content;
-        DbUtils.getEntityName(AppConstants.ENTITY_TYPE_INDIVIDUAL, mCallId, new DoneCallback<String>() {
+        DbUtils.getEntityName(AppConstants.ENTITY_TYPE_INDIVIDUAL, mCallerId, new DoneCallback<String>() {
             @Override
             public void done(String result, Exception e) {
                 if (e == null && result != null) {
-                    DbUtils.createCallLog(mCallId, result, finalContent, isInComingCall, mCallType == 0);
+                    DbUtils.createCallLog(mCallerId, result, finalContent, isInComingCall, mCallType == 0);
                 }
             }
         });

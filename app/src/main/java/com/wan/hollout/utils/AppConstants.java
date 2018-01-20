@@ -251,6 +251,7 @@ public class AppConstants {
     public static final String USER_FRIENDABLE = "user_friendable";
     public static final String FILE_PATH = "file_path";
     public static final String CHECK_SELECTED_CONVERSATIONS = "check_selected_conversations";
+    public static final String USER_BLACK_LIST = "user_black_list";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

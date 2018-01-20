@@ -1030,6 +1030,25 @@ public class HolloutUtils {
                 boolean success = true;
                 try {
                     EMClient.getInstance().contactManager().addUserToBlackList(userId, false);
+                    ParseObject signedInUser = AuthUtil.getCurrentUser();
+                    if (signedInUser != null) {
+                        List<String> userBlackList = signedInUser.getList(AppConstants.USER_BLACK_LIST);
+                        if (userBlackList != null && !userBlackList.isEmpty()) {
+                            if (!userBlackList.contains(userId)) {
+                                userBlackList.add(userId);
+                            }
+                        } else {
+                            userBlackList = new ArrayList<>();
+                            userBlackList.add(userId);
+                        }
+                        signedInUser.put(AppConstants.USER_BLACK_LIST, userBlackList);
+                        AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                            @Override
+                            public void done(Boolean result, Exception e) {
+
+                            }
+                        });
+                    }
                 } catch (HyphenateException e) {
                     e.printStackTrace();
                     success = false;
@@ -1052,6 +1071,22 @@ public class HolloutUtils {
                 boolean success = true;
                 try {
                     EMClient.getInstance().contactManager().removeUserFromBlackList(userId);
+                    ParseObject signedInUser = AuthUtil.getCurrentUser();
+                    if (signedInUser != null) {
+                        List<String> userBlackList = signedInUser.getList(AppConstants.USER_BLACK_LIST);
+                        if (userBlackList != null && !userBlackList.isEmpty()) {
+                            if (userBlackList.contains(userId)) {
+                                userBlackList.remove(userId);
+                            }
+                        }
+                        signedInUser.put(AppConstants.USER_BLACK_LIST, userBlackList);
+                        AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                            @Override
+                            public void done(Boolean result, Exception e) {
+
+                            }
+                        });
+                    }
                 } catch (HyphenateException e) {
                     e.printStackTrace();
                     success = false;

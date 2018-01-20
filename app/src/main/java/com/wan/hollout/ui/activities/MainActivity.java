@@ -198,6 +198,8 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                                 UiUtils.showSafeToast("User blocked successfully!");
                                                 ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
                                                 destroyActionMode();
+                                            } else {
+                                                UiUtils.showSafeToast("Sorry and error occurred while trying to block user");
                                             }
                                         }
                                     });
@@ -211,6 +213,8 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                                 UiUtils.showSafeToast("User Unblocked successfully!");
                                                 ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
                                                 destroyActionMode();
+                                            } else {
+                                                UiUtils.showSafeToast("Sorry and error occurred while trying to unblock user");
                                             }
                                         }
                                     });

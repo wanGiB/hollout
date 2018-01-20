@@ -52,7 +52,7 @@ import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
-import com.wan.hollout.eventbuses.PlaceCallEvent;
+import com.wan.hollout.eventbuses.PlaceLocalCallEvent;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.EaseShowImageActivity;
 import com.wan.hollout.utils.AppConstants;
@@ -1016,12 +1016,12 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
-                                    EventBus.getDefault().post(new PlaceCallEvent(numbers[which]));
+                                    EventBus.getDefault().post(new PlaceLocalCallEvent(numbers[which]));
                                 }
                             });
                             numbersToCall.create().show();
                         } else {
-                            EventBus.getDefault().post(new PlaceCallEvent(purifiedPhoneNumber));
+                            EventBus.getDefault().post(new PlaceLocalCallEvent(purifiedPhoneNumber));
                         }
                         break;
                     case 1:

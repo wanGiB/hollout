@@ -15,7 +15,8 @@
         android:id="@+id/img_call_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        tools:ignore="ContentDescription" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -46,7 +47,8 @@
                     android:id="@+id/chronometer_call_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/em_white_87" />
+                    android:textColor="@color/em_white_87"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
@@ -73,6 +75,7 @@
                 android:id="@+id/text_call_username"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingTop="16dp"
                 android:text="@string/app_name"
                 android:textColor="@color/em_white_87"
                 android:textSize="@dimen/call_name_size"

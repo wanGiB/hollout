@@ -4,11 +4,11 @@ package com.wan.hollout.eventbuses;
  * @author Wan Clem
  */
 
-public class PlaceCallEvent {
+public class PlaceLocalCallEvent {
 
     private String phoneNumber;
 
-    public PlaceCallEvent(String phoneNumber){
+    public PlaceLocalCallEvent(String phoneNumber){
         this.phoneNumber = phoneNumber;
     }
 
