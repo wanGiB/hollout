@@ -20,6 +20,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.wan.hollout.R;
+import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
@@ -29,6 +30,7 @@ import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
@@ -69,6 +71,8 @@ public class ConversationsFragment extends Fragment {
     public static List<ConversationItem> conversations = new ArrayList<>();
     private ParseObject signedInUser;
 
+    public String searchString;
+
     private void initSignedInUser() {
         if (signedInUser == null) {
             signedInUser = AuthUtil.getCurrentUser();
@@ -108,13 +112,15 @@ public class ConversationsFragment extends Fragment {
                 if (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1) != null) {
                     if ((scrollY >= (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1).getMeasuredHeight() - v.getMeasuredHeight())) &&
                             scrollY > oldScrollY) {
-                        //code to fetch more data for endless scrolling
                         if (!conversations.isEmpty()) {
-                            fetchConversations(conversations.size() - 1);
+                            if (StringUtils.isNotEmpty(searchString)) {
+                                searchChats(searchString, conversations.size());
+                            } else {
+                                fetchConversations(conversations.size());
+                            }
                         }
                     }
                 }
-
             }
         });
     }
@@ -341,10 +347,65 @@ public class ConversationsFragment extends Fragment {
                             fetchConversations(0);
                             break;
                     }
+                } else if (o instanceof SearchChatsEvent) {
+                    SearchChatsEvent searchChatsEvent = (SearchChatsEvent) o;
+                    String searchString = searchChatsEvent.getQueryString();
+                    ConversationsFragment.this.searchString = searchString;
+                    searchChats(searchString, 0);
                 }
                 EventBus.getDefault().removeAllStickyEvents();
             }
         });
+    }
+
+    private void searchChats(String searchString, final int skip) {
+        if (StringUtils.isNotEmpty(searchString)) {
+            conversationsAdapter.setSearchString(searchString);
+        } else {
+            conversationsAdapter.setSearchString(null);
+        }
+        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
+            peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
+            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            peopleAndGroupsQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
+            peopleAndGroupsQuery.setLimit(100);
+            if (skip != 0) {
+                peopleAndGroupsQuery.setSkip(skip);
+            }
+            peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
+
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if (e == null) {
+                        if (objects != null && !objects.isEmpty()) {
+                            if (skip == 0) {
+                                conversations.clear();
+                            }
+                            sortConversations();
+                            loadAdapter(objects);
+                            if (!conversations.isEmpty()) {
+                                cacheConversations();
+                            }
+                        } else {
+                            if (skip == 0) {
+                                showConversationEmptyViewAsNecessary(-1);
+                            }
+                        }
+                        invalidateEmptyView();
+                        swipeRefreshLayout.setRefreshing(false);
+                    } else {
+                        if (skip == 0) {
+                            showConversationEmptyViewAsNecessary(e.getCode());
+                        }
+                    }
+                }
+
+            });
+        } else {
+            UiUtils.toggleFlipperState(contentFlipper, 1);
+        }
     }
 
 }

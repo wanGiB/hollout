@@ -168,7 +168,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private void invalidateItemView(Activity activity, int objectHashCode) {
         parentView.setBackgroundColor(AppConstants.selectedPeoplePositions.get(objectHashCode)
-                ? ContextCompat.getColor(activity, R.color.blue_100) :android.R.attr.selectableItemBackground);
+                ? ContextCompat.getColor(activity, R.color.blue_100) : android.R.attr.selectableItemBackground);
     }
 
     private void applyProfilePicture(String profileUrl) {
@@ -701,7 +701,11 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private void setupMessageBodyOnlyMessage(EMMessage message) {
         EMTextMessageBody emTextMessageBody = (EMTextMessageBody) message.getBody();
-        userStatusOrLastMessageView.setText(emTextMessageBody.getMessage());
+        String messageBody = emTextMessageBody.getMessage();
+        if (messageBody.equals("You have an incoming call")) {
+            messageBody = "&#128222; You had a miss call";
+        }
+        userStatusOrLastMessageView.setText(UiUtils.fromHtml(messageBody));
         UiUtils.removeAllDrawablesFromTextView(userStatusOrLastMessageView);
         UiUtils.showView(reactionsIndicatorView, false);
         AppConstants.reactionsOpenPositions.put(getMessageId(), false);

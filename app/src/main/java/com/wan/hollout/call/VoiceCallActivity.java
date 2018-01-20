@@ -71,9 +71,6 @@ public class VoiceCallActivity extends CallActivity {
     @BindView(R.id.text_call_username)
     TextView mUsernameView;
 
-    @BindView(R.id.btn_exit_full_screen)
-    ImageButton mExitFullScreenBtn;
-
     @BindView(R.id.btn_mic_switch)
     ImageButton mMicSwitch;
 
@@ -124,6 +121,11 @@ public class VoiceCallActivity extends CallActivity {
                     if (StringUtils.isNotEmpty(userCoverPhotoUrl)) {
                         UiUtils.loadImage(VoiceCallActivity.this, userCoverPhotoUrl, mCallBackgroundView);
                         mCallBackgroundView.setColorFilter(ContextCompat.getColor(VoiceCallActivity.this, R.color.black_transparent_70percent), PorterDuff.Mode.SRC_ATOP);
+                    } else {
+                        if (StringUtils.isNotEmpty(userPhotoUrl)) {
+                            UiUtils.loadImage(VoiceCallActivity.this, userPhotoUrl, mCallBackgroundView);
+                            mCallBackgroundView.setColorFilter(ContextCompat.getColor(VoiceCallActivity.this, R.color.black_transparent_70percent), PorterDuff.Mode.SRC_ATOP);
+                        }
                     }
                     if (isInComingCall) {
                         mCallStatusView.setText("Incoming Call");
@@ -237,15 +239,11 @@ public class VoiceCallActivity extends CallActivity {
      * widget onClick
      */
     @OnClick({
-            R.id.btn_exit_full_screen, R.id.btn_mic_switch, R.id.btn_speaker_switch,
+           R.id.btn_mic_switch, R.id.btn_speaker_switch,
             R.id.fab_reject_call, R.id.fab_end_call, R.id.fab_answer_call
     })
     void onClick(View v) {
         switch (v.getId()) {
-            case R.id.btn_exit_full_screen:
-                // Minimize the view
-                exitFullScreen();
-                break;
             case R.id.btn_mic_switch:
                 // Microphone switch
                 onMicrophone();
@@ -456,7 +454,11 @@ public class VoiceCallActivity extends CallActivity {
                     break;
                 case CONNECTED:
                     // Set call state view show content
-                    mCallStatusView.setText(getString(R.string.ringing));
+                    if (isInComingCall) {
+                        mCallStatusView.setText("Incoming Call");
+                    } else {
+                        mCallStatusView.setText(getString(R.string.ringing));
+                    }
                     break;
                 case ACCEPTED:
                     if (mTimer != null) {
@@ -601,4 +603,5 @@ public class VoiceCallActivity extends CallActivity {
         mAudioManager.setMode(AudioManager.MODE_NORMAL);
         localBroadcastManager.unregisterReceiver(broadcastReceiver);
     }
+
 }

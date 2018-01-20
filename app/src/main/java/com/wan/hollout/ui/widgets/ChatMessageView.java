@@ -715,6 +715,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void setupMessageBodyOnlyMessage(EMTextMessageBody messageBody, String searchString) {
         String message = messageBody.getMessage();
+        if (message.equals("You have an incoming call")) {
+            message = "&#128222; You had a miss call";
+        }
         if (StringUtils.isNotEmpty(message)) {
             UiUtils.showView(messageBodyView, true);
             ArrayList includedLinks = UiUtils.pullLinks(message);

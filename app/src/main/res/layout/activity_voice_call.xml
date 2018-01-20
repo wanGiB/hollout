@@ -18,6 +18,13 @@
         android:scaleType="centerCrop"
         tools:ignore="ContentDescription" />
 
+    <ImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="end"
+        android:layout_margin="16dp"
+        android:src="@mipmap/ic_launcher" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -41,8 +48,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
-                    android:textSize="17sp"
-                    android:textColor="@color/em_white_87" />
+                    android:textColor="@color/em_white_87"
+                    android:textSize="17sp" />
 
                 <com.wan.hollout.ui.widgets.MyChronometer
                     android:id="@+id/chronometer_call_time"
@@ -114,20 +121,13 @@
                     android:background="@drawable/em_btn_rectangle_white"
                     android:src="@drawable/em_checkbox_mic" />
 
-                <!--Exit full screen-->
-                <ImageButton
-                    android:id="@+id/btn_exit_full_screen"
-                    android:layout_width="@dimen/call_switch_width"
-                    android:layout_height="@dimen/call_switch_height"
-                    android:background="@drawable/em_btn_rectangle_white"
-                    android:src="@drawable/em_ic_fullscreen_exit_white_24dp" />
-
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <!--Reject call-->
                 <android.support.design.widget.FloatingActionButton
                     android:id="@+id/fab_reject_call"

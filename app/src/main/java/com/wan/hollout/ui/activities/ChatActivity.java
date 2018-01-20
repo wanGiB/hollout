@@ -2200,7 +2200,6 @@ public class ChatActivity extends BaseActivity implements
             newMessage.setAttribute(AppConstants.REPLIED_MESSAGE_ID, AppConstants.selectedMessages.get(0).getMsgId());
         }
         EMClient.getInstance().chatManager().sendMessage(newMessage);
-        //Send message here
         messages.add(0, newMessage);
         messagesAdapter.notifyDataSetChanged();
         invalidateEmptyView();

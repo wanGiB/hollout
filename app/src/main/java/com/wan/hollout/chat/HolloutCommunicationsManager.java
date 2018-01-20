@@ -357,10 +357,12 @@ public class HolloutCommunicationsManager {
      * activityList.size() <= 0 means all activities already in background or not in Activity Stack
      */
     private void registerMessageListener() {
+
         if (messageListener != null) {
             EMClient.getInstance().chatManager().removeMessageListener(messageListener);
             messageListener = null;
         }
+
         messageListener = new EMMessageListener() {
 
             @Override
@@ -368,18 +370,16 @@ public class HolloutCommunicationsManager {
                 List<String> unreadConversationItems = new ArrayList<>();
                 for (EMMessage emMessage : messages) {
                     Log.d("MessageTracker", "New Message Received with body = " + emMessage.toString());
-                    if (!unreadConversationItems.contains(emMessage.getFrom()) && isAContact(AuthUtil.getCurrentUser(), emMessage.getFrom())) {
+                    if (!unreadConversationItems.contains(emMessage.getFrom())) {
                         if (HolloutUtils.isAContact(emMessage.getFrom())) {
                             unreadConversationItems.add(emMessage.getFrom());
                         }
                         HolloutPreferences.updateConversationTime(emMessage.getFrom());
                     }
                 }
-
                 if (EMClient.getInstance().chatManager().getUnreadMessageCount() > 0 && !unreadConversationItems.isEmpty()) {
                     HolloutPreferences.saveTotalUnreadChats(unreadConversationItems);
                 }
-
                 ParseObject signedInUser = AuthUtil.getCurrentUser();
                 if (signedInUser != null) {
                     String signedInUserStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);

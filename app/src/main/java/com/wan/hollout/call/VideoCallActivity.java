@@ -68,9 +68,6 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
     // Video call data processor
     private CameraDataProcessor mCameraDataProcessor;
 
-    // Update video call info
-    private boolean mMonitor = true;
-
     private Timer mTimer;
 
     // SurfaceView state, 0 local is small, 1 opposite is small
@@ -89,27 +86,6 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
     @BindView(R.id.surface_view_opposite)
     EMCallSurfaceView mOppositeSurfaceView;
 
-    @BindView(R.id.layout_call_info)
-    View mCallInfoView;
-
-    @BindView(R.id.text_resolution)
-    TextView mResolutionView;
-
-    @BindView(R.id.text_time_latency)
-    TextView mTimeLatencyView;
-
-    @BindView(R.id.text_frame_rate)
-    TextView mFrameRateView;
-
-    @BindView(R.id.text_lost_rate)
-    TextView mLostRateView;
-
-    @BindView(R.id.text_local_bitrate)
-    TextView mLocalBitrateView;
-
-    @BindView(R.id.text_remote_bitrate)
-    TextView mRemoteBitrateView;
-
     @BindView(R.id.img_call_background)
     ImageView mCallBackgroundView;
 
@@ -118,12 +94,6 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
 
     @BindView(R.id.btn_change_camera_switch)
     ImageButton mChangeCameraSwitch;
-
-    @BindView(R.id.btn_call_info)
-    ImageButton mCallInfoBtn;
-
-    @BindView(R.id.btn_exit_full_screen)
-    ImageButton mExitFullScreenBtn;
 
     @BindView(R.id.btn_camera_switch)
     ImageButton mCameraSwitch;
@@ -230,9 +200,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
         }
 
         // Set local and opposite SurfaceView
-        EMClient.getInstance()
-                .callManager()
-                .setSurfaceView(mLocalSurfaceView, mOppositeSurfaceView);
+        EMClient.getInstance().callManager().setSurfaceView(mLocalSurfaceView, mOppositeSurfaceView);
 
         mCameraDataProcessor = new CameraDataProcessor();
         // Set video call data processor
@@ -330,8 +298,8 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
      */
     @OnClick({
             R.id.img_call_background, R.id.layout_call_control, R.id.surface_view_local,
-            R.id.surface_view_opposite, R.id.btn_exit_full_screen, R.id.btn_change_camera_switch,
-            R.id.btn_call_info, R.id.layout_call_info, R.id.btn_mic_switch, R.id.btn_camera_switch,
+            R.id.surface_view_opposite, R.id.btn_change_camera_switch,
+            R.id.btn_mic_switch, R.id.btn_camera_switch,
             R.id.btn_speaker_switch, R.id.fab_reject_call, R.id.fab_end_call, R.id.fab_answer_call
     })
     void onClick(View v) {
@@ -354,19 +322,9 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                     onControlLayout();
                 }
                 break;
-            case R.id.btn_exit_full_screen:
-                // Minimize the layout
-                exitFullScreen();
-                break;
             case R.id.btn_change_camera_switch:
                 // Change camera
                 changeCamera();
-                break;
-            case R.id.btn_call_info:
-                mCallInfoView.setVisibility(View.VISIBLE);
-                break;
-            case R.id.layout_call_info:
-                mCallInfoView.setVisibility(View.GONE);
                 break;
             case R.id.btn_mic_switch:
                 // Microphone switch
@@ -634,17 +592,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
      * Set surfaceView
      */
     private void surfaceViewProcessor() {
-
-        // display the caller party's view
         mOppositeSurfaceView.setVisibility(View.VISIBLE);
-
-        //RelativeLayout.LayoutParams lp =
-        //        (RelativeLayout.LayoutParams) mLocalSurfaceView.getLayoutParams();
-        //lp.width = mActivity.getResources().getDimensionPixelSize(R.dimen.call_small_width);
-        //lp.height = mActivity.getResources().getDimensionPixelSize(R.dimen.call_small_height);
-        //lp.setMargins(0, mActivity.getResources().getDimensionPixelOffset(R.dimen.call_small_width),
-        //        0, 0);
-        //mLocalSurfaceView.setLayoutParams(lp);
     }
 
     /**
@@ -700,7 +648,11 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                     break;
                 case CONNECTED:
                     // Set call state view show content
-                    mCallStatusView.setText(getString(R.string.em_call_connected));
+                    if (isInComingCall) {
+                        mCallStatusView.setText("Incoming Call");
+                    } else {
+                        mCallStatusView.setText(getString(R.string.ringing));
+                    }
                     break;
                 case ACCEPTED:
                     if (mTimer != null) {
@@ -717,7 +669,6 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                     // Start time
                     mChronometer.setBase(SystemClock.elapsedRealtime());
                     mChronometer.start();
-                    startMonitor();
                     break;
                 case DISCONNECTED:
                     mChronometer.stop();
@@ -789,49 +740,10 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
     }
 
     /**
-     * refresh call info; for debug & testing, you can remove this when release
-     */
-    private void startMonitor() {
-        mMonitor = true;
-        new Thread(new Runnable() {
-            public void run() {
-                while (mMonitor) {
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            mResolutionView.setText(mVideoCallHelper.getVideoWidth()
-                                    + " x "
-                                    + mVideoCallHelper.getVideoHeight()
-                                    + " px");
-                            mTimeLatencyView.setText(mVideoCallHelper.getVideoLatency() + " ms");
-                            mFrameRateView.setText(mVideoCallHelper.getVideoFrameRate() + " fps");
-                            mLostRateView.setText(mVideoCallHelper.getVideoLostRate() + "%");
-                            mLocalBitrateView.setText(mVideoCallHelper.getLocalBitrate() + " KB");
-                            mRemoteBitrateView.setText(mVideoCallHelper.getRemoteBitrate() + " KB");
-                        }
-                    });
-                    try {
-                        Thread.sleep(1500);
-                    } catch (InterruptedException e) {
-                    }
-                }
-            }
-        }, "CallMonitor").start();
-    }
-
-    /**
-     * stop refresh call info
-     */
-    private void stopMonitor() {
-        mMonitor = false;
-    }
-
-    /**
      * Call end finish activity
      */
     @Override
     protected void onFinish() {
-        stopMonitor();
-        // Call end release SurfaceView
         mLocalSurfaceView = null;
         mOppositeSurfaceView = null;
         mAudioManager.setMode(AudioManager.MODE_NORMAL);

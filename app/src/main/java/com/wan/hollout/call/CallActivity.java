@@ -5,7 +5,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
 import android.media.SoundPool;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -52,6 +55,8 @@ public abstract class CallActivity extends AppCompatActivity {
     // Vibration
     protected Vibrator mVibrator;
 
+    protected MediaPlayer mediaPlayer;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +72,6 @@ public abstract class CallActivity extends AppCompatActivity {
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 
         EventBus.getDefault().post(AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER);
-
     }
 
     /**
@@ -93,10 +97,12 @@ public abstract class CallActivity extends AppCompatActivity {
         if (CallStatus.getInstance().getCallState() == CallStatus.CALL_STATUS_NORMAL) {
             // load sound
             if (isInComingCall) {
-                loadId = mSoundPool.load(mActivity, R.raw.sound_call_incoming, 1);
-            } else {
-                loadId = mSoundPool.load(mActivity, R.raw.progress_tone, 1);
+                loadDefaultIncomingCallRingtone();
+                return;
             }
+
+            loadId = mSoundPool.load(mActivity, R.raw.progress_tone, 1);
+
             // Load SoundPool listener
             mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
                 @Override
@@ -104,6 +110,17 @@ public abstract class CallActivity extends AppCompatActivity {
                     playCallSound();
                 }
             });
+        }
+    }
+
+    public void loadDefaultIncomingCallRingtone() {
+        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE);
+        if (uri != null) {
+            mediaPlayer = MediaPlayer.create(this, uri);
+            mediaPlayer.setLooping(true);
+            if (mediaPlayer != null) {
+                mediaPlayer.start();
+            }
         }
     }
 
@@ -200,6 +217,15 @@ public abstract class CallActivity extends AppCompatActivity {
             // release
             mSoundPool.release();
             mSoundPool = null;
+        }
+        if (mediaPlayer != null) {
+            try {
+                mediaPlayer.pause();
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }catch (IllegalStateException ignored){
+
+            }
         }
     }
 
