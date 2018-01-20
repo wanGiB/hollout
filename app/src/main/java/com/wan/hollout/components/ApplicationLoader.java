@@ -60,6 +60,7 @@ public class ApplicationLoader extends Application {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 EventBus.getDefault().post(new ConnectivityChangedAction(true));
+                HolloutCommunicationsManager.getInstance().init(ApplicationLoader.getInstance());
             }
         }
     };

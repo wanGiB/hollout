@@ -15,9 +15,9 @@
         android:id="@+id/filter_people"
         android:title="@string/filter_people" />
 
-    <item
-        android:id="@+id/create_new_group"
-        android:title="@string/create_new_group"
-        app:showAsAction="never" />
+    <!--<item-->
+        <!--android:id="@+id/create_new_group"-->
+        <!--android:title="@string/create_new_group"-->
+        <!--app:showAsAction="never" />-->
 
 </menu>

@@ -83,9 +83,9 @@ public class FullChatRequestsActivity extends BaseActivity {
         searchItem.setVisible(false);
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
-        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
+//        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
 
-        createNewGroupItem.setVisible(false);
+//        createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
         supportInvalidateOptionsMenu();
         return super.onPrepareOptionsMenu(menu);

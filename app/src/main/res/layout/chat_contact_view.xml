@@ -3,12 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/launch_user_profile"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/actionBarSize"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
-    tools:ignore="RtlHardcoded"
-    android:focusable="true">
+    android:focusable="true"
+    tools:ignore="RtlHardcoded">
 
     <com.wan.hollout.ui.widgets.CircleImageView
         android:id="@+id/contact_photo"

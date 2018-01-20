@@ -12,13 +12,12 @@
     <com.wan.hollout.ui.widgets.FixedFrameLayout
         android:id="@+id/fixed_frame_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:animateLayoutChanges="true">
 
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/colorPrimary"
+            android:layout_height="?attr/actionBarSize"
             android:fitsSystemWindows="true">
 
             <android.support.v7.widget.Toolbar
@@ -62,7 +61,8 @@
             <com.wan.hollout.ui.widgets.MaterialSearchView
                 android:id="@+id/main_search_view"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="?attr/actionBarSize"
+                android:hint="@string/search_messages"
                 android:textColorHint="@color/text_hint_primary_dark" />
 
         </FrameLayout>
@@ -175,6 +175,7 @@
     </com.wan.hollout.ui.widgets.FixedFrameLayout>
 
     <View
+        android:id="@+id/bottom_shadow"
         android:layout_width="match_parent"
         android:layout_height="2dip"
         android:background="@drawable/bottom_shadow_color_primary" />

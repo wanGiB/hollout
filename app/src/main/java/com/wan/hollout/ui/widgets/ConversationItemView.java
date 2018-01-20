@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.support.annotation.Nullable;
@@ -40,16 +41,20 @@ import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.activities.ChatActivity;
+import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -161,6 +166,12 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         invalidateViewOnScroll();
     }
 
+    private void invalidateItemView(Activity activity, int objectHashCode) {
+        parentView.setBackgroundColor(AppConstants.selectedPeoplePositions.get(objectHashCode)
+                ? ContextCompat.getColor(activity, R.color.blue_100) :
+                ContextCompat.getColor(activity, R.color.white));
+    }
+
     private void applyProfilePicture(String profileUrl) {
         if (!TextUtils.isEmpty(profileUrl)) {
             Glide.with(activity).load(profileUrl)
@@ -207,7 +218,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     }
 
     public int getMessageId() {
-        return parseObject.getString(AppConstants.REAL_OBJECT_ID).hashCode();
+        return getCurrentConversationHashCode();
     }
 
     public void setupConversation(final ParseObject parseObject, String searchString) {
@@ -235,6 +246,14 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             // display profile image
             applyProfilePicture(userProfilePhoto);
             applyIconAnimation();
+
+            if (HolloutUtils.isUserBlocked(parseObject.getString(AppConstants.REAL_OBJECT_ID))) {
+                userStatusOrLastMessageView.setText(activity.getString(R.string.user_blocked));
+                userPhotoView.setColorFilter(ContextCompat.getColor(activity, R.color.black_transparent_70percent), PorterDuff.Mode.SRC_ATOP);
+                listenToUserPresence(parseObject);
+                return;
+            }
+
             if (emConversation != null) {
                 int unreadMessagesCount = emConversation.getUnreadMsgCount();
                 if (unreadMessagesCount > 0 && lastMessage != null && lastMessage.direct() == EMMessage.Direct.RECEIVE) {
@@ -271,30 +290,15 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 } else {
                     setupDefaults();
                 }
-            } else {
-                HolloutLogger.d("LastMessageTracker", "Sorry, conversation does not even exist. Lolz.");
             }
+
             if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-                UiUtils.showView(userOnlineStatusView, true);
-                String userOnlineStatus = parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS);
-                if (userOnlineStatus != null && UiUtils.canShowPresence(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
-                    if (parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)
-                            && HolloutUtils.isNetWorkConnected(activity)) {
-                        userOnlineStatusView.setImageResource(R.drawable.ic_online);
-                        AppConstants.onlinePositions.put(getMessageId(), true);
-                    } else {
-                        userOnlineStatusView.setImageResource(R.drawable.ic_offline_grey);
-                        AppConstants.onlinePositions.put(getMessageId(), false);
-                    }
-                } else {
-                    userOnlineStatusView.setImageResource(R.drawable.ic_offline_grey);
-                    AppConstants.onlinePositions.put(getMessageId(), false);
-                }
-                AppConstants.parseUserAvailableOnlineStatusPositions.put(getMessageId(), true);
+                listenToUserPresence(parseObject);
             } else {
                 UiUtils.showView(userOnlineStatusView, false);
                 AppConstants.parseUserAvailableOnlineStatusPositions.put(getMessageId(), false);
             }
+
             userPhotoView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -304,19 +308,79 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                     }
                 }
             });
+
             messageContainer.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     ConversationItemView.this.performClick();
                 }
             });
+
             iconContainer.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     ConversationItemView.this.performClick();
                 }
             });
+
+            usernameEntryView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ConversationItemView.this.performClick();
+                }
+            });
+            userStatusOrLastMessageView.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ConversationItemView.this.performClick();
+                }
+            });
+
+            View.OnLongClickListener onLongClickListener = new OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    switch (v.getId()) {
+                        case R.id.icon_profile:
+                        case R.id.message_container:
+                        case R.id.icon_container:
+                        case R.id.from:
+                        case R.id.txt_secondary:
+                            ConversationItemView.this.performLongClick();
+                            break;
+                    }
+                    return true;
+                }
+            };
+
+            userPhotoView.setOnLongClickListener(onLongClickListener);
+            usernameEntryView.setOnLongClickListener(onLongClickListener);
+            userStatusOrLastMessageView.setOnLongClickListener(onLongClickListener);
+            iconContainer.setOnLongClickListener(onLongClickListener);
+            messageContainer.setOnLongClickListener(onLongClickListener);
+
         }
+
+        invalidateItemView(activity, getCurrentConversationHashCode());
+
+    }
+
+    private void listenToUserPresence(ParseObject parseObject) {
+        UiUtils.showView(userOnlineStatusView, true);
+        String userOnlineStatus = parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS);
+        if (userOnlineStatus != null && UiUtils.canShowPresence(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
+            if (parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)
+                    && HolloutUtils.isNetWorkConnected(activity)) {
+                userOnlineStatusView.setImageResource(R.drawable.ic_online);
+                AppConstants.onlinePositions.put(getMessageId(), true);
+            } else {
+                userOnlineStatusView.setImageResource(R.drawable.ic_offline_grey);
+                AppConstants.onlinePositions.put(getMessageId(), false);
+            }
+        } else {
+            userOnlineStatusView.setImageResource(R.drawable.ic_offline_grey);
+            AppConstants.onlinePositions.put(getMessageId(), false);
+        }
+        AppConstants.parseUserAvailableOnlineStatusPositions.put(getMessageId(), true);
     }
 
     private void setupDefaults() {
@@ -429,6 +493,46 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     @Override
     public void onClick(View v) {
+        if (MainActivity.isActionModeActivated()) {
+            if (!AppConstants.selectedPeople.contains(getConversationItem())) {
+                AppConstants.selectedPeople.add(getConversationItem());
+                AppConstants.selectedPeoplePositions.put(getCurrentConversationHashCode(), true);
+            } else {
+                AppConstants.selectedPeople.remove(getConversationItem());
+                AppConstants.selectedPeoplePositions.put(getCurrentConversationHashCode(), false);
+            }
+            EventBus.getDefault().post(AppConstants.CHECK_SELECTED_CONVERSATIONS);
+        } else {
+            initChat();
+        }
+    }
+
+    public ConversationItem getConversationItem() {
+        return new ConversationItem(parseObject, HolloutPreferences.getLastConversationTime(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (!MainActivity.isActionModeActivated()) {
+            AppConstants.selectedPeople.add(getConversationItem());
+            AppConstants.selectedPeoplePositions.put(getCurrentConversationHashCode(), true);
+            MainActivity.activateActionMode();
+            MainActivity.vibrateVibrator();
+        } else {
+            if (AppConstants.selectedPeople.contains(getConversationItem())) {
+                AppConstants.selectedPeople.remove(getConversationItem());
+                AppConstants.selectedPeoplePositions.put(getCurrentConversationHashCode(), false);
+            }
+        }
+        EventBus.getDefault().post(AppConstants.CHECK_SELECTED_CONVERSATIONS);
+        return true;
+    }
+
+    private int getCurrentConversationHashCode() {
+        return parseObject.getString(AppConstants.REAL_OBJECT_ID).hashCode();
+    }
+
+    private void initChat() {
         Intent viewProfileIntent = new Intent(activity, ChatActivity.class);
         parseObject.put(AppConstants.CHAT_TYPE, (getObjectType().equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                 ? AppConstants.CHAT_TYPE_SINGLE : getObjectType().equals(AppConstants.OBJECT_TYPE_GROUP)
@@ -439,11 +543,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private String getObjectType() {
         return parseObject.getString(AppConstants.OBJECT_TYPE);
-    }
-
-    @Override
-    public boolean onLongClick(View v) {
-        return false;
     }
 
     public void setupLastMessage(EMMessage message) {
@@ -492,7 +591,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 setupMessageBodyOnlyMessage(message);
             }
         }
-
         if (messageType == EMMessage.Type.IMAGE) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_cam, UiUtils.DrawableDirection.LEFT);
             try {
@@ -506,7 +604,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 e.printStackTrace();
             }
         }
-
         if (messageType == EMMessage.Type.VIDEO) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_video, UiUtils.DrawableDirection.LEFT);
             try {
@@ -520,7 +617,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 e.printStackTrace();
             }
         }
-
         if (messageType == EMMessage.Type.LOCATION) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_location, UiUtils.DrawableDirection.LEFT);
             EMLocationMessageBody emLocationMessageBody = (EMLocationMessageBody) message.getBody();
@@ -531,20 +627,14 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 userStatusOrLastMessageView.setText(activity.getString(R.string.location));
             }
         }
-
         if (messageType == EMMessage.Type.VOICE) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
             userStatusOrLastMessageView.setText(activity.getString(R.string.voice));
         }
-
         if (messageType == EMMessage.Type.FILE) {
-
             String messageBody;
-
             try {
-
                 String fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
-
                 switch (fileType) {
                     case AppConstants.FILE_TYPE_CONTACT:
                         messageBody = "Contact";
@@ -561,15 +651,11 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                         UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.icon_file_doc_grey_mini, UiUtils.DrawableDirection.LEFT);
                         userStatusOrLastMessageView.setText(messageBody);
                         break;
-
                 }
-
             } catch (HyphenateException e) {
                 e.printStackTrace();
             }
-
         }
-
     }
 
     private void loadLastMessageGif(String gifUrl) {

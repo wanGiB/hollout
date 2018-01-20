@@ -1,10 +1,12 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
@@ -31,6 +33,7 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.soundcloud.android.crop.Crop;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
@@ -57,6 +60,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -633,56 +637,27 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         } else if (requestCode == ImagePicker.IMAGE_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
             List<String> mPaths = (List<String>) data.getSerializableExtra(ImagePicker.EXTRA_IMAGE_PATH);
             if (mPaths != null && !mPaths.isEmpty()) {
-                String pickedPhotoFilePath = mPaths.get(0);
+                final String pickedPhotoFilePath = mPaths.get(0);
                 if (pickedPhotoFilePath != null) {
-                    int currentAction = getCurrentUploadAction();
+                    final int currentAction = getCurrentUploadAction();
                     if (currentAction == UPLOAD_ACTION_TYPE_COVER_PHOTO || currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
-                        if (currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
-                            UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Profile Photo");
-                        } else {
-                            UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Cover Photo");
-                        }
-                        HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
+                        AlertDialog.Builder cropConsentDialog = new AlertDialog.Builder(UserProfileActivity.this);
+                        cropConsentDialog.setMessage("Crop Photo ?");
+                        cropConsentDialog.setPositiveButton("CROP", new DialogInterface.OnClickListener() {
                             @Override
-                            public void done(final String result, final Exception e) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (e == null && result != null) {
-                                            ParseObject signedInUser = AuthUtil.getCurrentUser();
-                                            if (signedInUser != null) {
-                                                signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.APP_USER_PROFILE_PHOTO_URL : AppConstants.APP_USER_COVER_PHOTO, result);
-                                                signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.USER_PROFILE_PHOTO_UPLOAD_TIME : AppConstants.USER_COVER_PHOTO_UPLOAD_TIME, System.currentTimeMillis());
-                                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                                                    @Override
-                                                    public void done(Boolean result, Exception e) {
-                                                        UiUtils.dismissProgressDialog();
-                                                        if (e == null) {
-                                                            UiUtils.showSafeToast("Upload Success");
-                                                            if (parseUser != null) {
-                                                                loadUserDetails(AuthUtil.getCurrentUser());
-                                                            }
-                                                        } else {
-                                                            UiUtils.showSafeToast("An error occurred while updating photo please try again");
-                                                        }
-                                                    }
-                                                });
-                                            } else {
-                                                UiUtils.showSafeToast("An error occurred while updating photo.Invalid session");
-                                                Intent splashIntent = new Intent(UserProfileActivity.this, SplashActivity.class);
-                                                startActivity(splashIntent);
-                                                finish();
-                                            }
-                                        } else {
-                                            UiUtils.dismissProgressDialog();
-                                            UiUtils.showSafeToast("An error occurred while updating photo. Please try again.");
-                                        }
-                                    }
-                                });
+                            public void onClick(DialogInterface dialog, int which) {
+                                Crop.of(Uri.fromFile(new File(pickedPhotoFilePath)), Uri.fromFile(new File(getCacheDir(), "CropIt")))
+                                        .asSquare().start(UserProfileActivity.this);
+                            }
+                        }).setNegativeButton("DON'T CROP", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                prepareForUpload(pickedPhotoFilePath, currentAction);
                             }
                         });
+                        cropConsentDialog.create().show();
                     } else {
-                        UiUtils.showProgressDialog(UserProfileActivity.this, "Adding Feature Photo");
+                        UiUtils.showProgressDialog(UserProfileActivity.this, "Featuring Photo");
                         HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
                             @Override
                             public void done(final String result, final Exception e) {
@@ -730,11 +705,64 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                 });
                             }
                         });
-
                     }
                 }
             }
+        } else if (requestCode == Crop.REQUEST_CROP) {
+            if (resultCode == Activity.RESULT_OK) {
+                Uri result = Uri.fromFile(new File(getCacheDir(), "CropIt"));
+                if (result != null) {
+                    prepareForUpload(result.getPath(), getCurrentUploadAction());
+                }
+            }
         }
+    }
+
+    private void prepareForUpload(String pickedPhotoFilePath, int currentAction) {
+        if (currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
+            UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Profile Photo");
+        } else {
+            UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Cover Photo");
+        }
+        HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
+            @Override
+            public void done(final String result, final Exception e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (e == null && result != null) {
+                            ParseObject signedInUser = AuthUtil.getCurrentUser();
+                            if (signedInUser != null) {
+                                signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.APP_USER_PROFILE_PHOTO_URL : AppConstants.APP_USER_COVER_PHOTO, result);
+                                signedInUser.put(getCurrentUploadAction() == UPLOAD_ACTION_TYPE_PROFILE_PHOTO ? AppConstants.USER_PROFILE_PHOTO_UPLOAD_TIME : AppConstants.USER_COVER_PHOTO_UPLOAD_TIME, System.currentTimeMillis());
+                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                                    @Override
+                                    public void done(Boolean result, Exception e) {
+                                        UiUtils.dismissProgressDialog();
+                                        if (e == null) {
+                                            UiUtils.showSafeToast("Upload Success");
+                                            if (parseUser != null) {
+                                                loadUserDetails(AuthUtil.getCurrentUser());
+                                            }
+                                        } else {
+                                            UiUtils.showSafeToast("An error occurred while updating photo please try again");
+                                        }
+                                    }
+                                });
+                            } else {
+                                UiUtils.showSafeToast("An error occurred while updating photo.Invalid session");
+                                Intent splashIntent = new Intent(UserProfileActivity.this, SplashActivity.class);
+                                startActivity(splashIntent);
+                                finish();
+                            }
+                        } else {
+                            UiUtils.dismissProgressDialog();
+                            UiUtils.showSafeToast("An error occurred while updating photo. Please try again.");
+                        }
+                    }
+                });
+            }
+        });
     }
 
     private void openPhotoViewActivity(String photo, List<String> photos, ParseObject parseUser) {
@@ -770,9 +798,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         searchItem.setVisible(false);
 
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
-        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
+//        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
 
-        createNewGroupItem.setVisible(false);
+//        createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
 
         supportInvalidateOptionsMenu();

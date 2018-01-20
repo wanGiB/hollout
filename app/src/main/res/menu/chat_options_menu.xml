@@ -21,11 +21,6 @@
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/view_shared_media"
-        android:title="@string/view_shared_media"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/block_user"
         android:title="@string/block_user"
         app:showAsAction="never" />

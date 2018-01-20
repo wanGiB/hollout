@@ -49,7 +49,7 @@
                     android:id="@+id/document_icon"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@drawable/attach_contact"
+                    android:src="@drawable/attach_file"
                     tools:ignore="ContentDescription" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
@@ -61,14 +61,17 @@
                     android:layout_marginStart="10dp"
                     android:textColor="@color/black"
                     android:textSize="16sp"
-                    app:textStyle="bold" />
+                    app:textStyle="none" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/document_data_layout"
                 android:layout_gravity="bottom|end"
+                android:layout_toEndOf="@+id/document_data_layout"
+                android:layout_toRightOf="@+id/document_data_layout"
                 android:orientation="horizontal"
                 android:paddingEnd="5dp"
                 android:paddingLeft="5dp"
@@ -87,8 +90,7 @@
             </LinearLayout>
 
         </RelativeLayout>
-
-
+        
     </RelativeLayout>
 
 </com.wan.hollout.ui.widgets.ChatMessageView>

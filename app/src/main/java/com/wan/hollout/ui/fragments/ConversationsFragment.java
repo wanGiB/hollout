@@ -65,8 +65,8 @@ public class ConversationsFragment extends Fragment {
     @BindView(R.id.no_hollout_users_text_view)
     HolloutTextView errorTextView;
 
-    private ConversationsAdapter conversationsAdapter;
-    private List<ConversationItem> conversations = new ArrayList<>();
+    public static ConversationsAdapter conversationsAdapter;
+    public static List<ConversationItem> conversations = new ArrayList<>();
     private ParseObject signedInUser;
 
     private void initSignedInUser() {

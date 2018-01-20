@@ -85,8 +85,9 @@ public class PeopleFragment extends Fragment {
     @BindView(R.id.nested_scroll_view)
     NestedScrollView nestedScrollView;
 
-    private PeopleAdapter peopleAdapter;
-    private List<NearbyPerson> people = new ArrayList<>();
+    @SuppressLint("StaticFieldLeak")
+    public PeopleAdapter peopleAdapter;
+    public List<NearbyPerson> people = new ArrayList<>();
     private ParseObject signedInUser;
 
     private View footerView;

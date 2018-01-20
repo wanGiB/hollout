@@ -59,6 +59,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int INCOMING_MESSAGE_WITH_REACTION = 14;
     private static final int INCOMING_MESSAGE_WITH_GIF = 15;
 
+    private String searchString;
+
     public MessagesAdapter(Activity context, List<EMMessage> messages) {
         this.context = context;
         this.messages = messages;
@@ -186,7 +188,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         MessageItemsHolder messageItemsHolder = (MessageItemsHolder) holder;
         EMMessage messageObject = messages.get(position);
         if (messageObject != null) {
-            messageItemsHolder.bindMessage(context, messageObject);
+            messageItemsHolder.bindMessage(context, messageObject, getSearchString());
         }
     }
 
@@ -218,6 +220,14 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         return messages != null ? messages.size() : 0;
     }
 
+    public void setSearchString(String searchString) {
+        this.searchString = searchString;
+    }
+
+    public String getSearchString() {
+        return searchString;
+    }
+
     @SuppressWarnings("WeakerAccess")
     static class MessageItemsHolder extends RecyclerView.ViewHolder {
 
@@ -229,8 +239,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ButterKnife.bind(this, itemView);
         }
 
-        public void bindMessage(Activity context, EMMessage emMessage) {
-            chatMessageView.bindData(context, emMessage);
+        public void bindMessage(Activity context, EMMessage emMessage, String searchString) {
+            chatMessageView.bindData(context, emMessage,searchString);
             if (AppConstants.bounceablePositions.get(emMessage.getMsgId().hashCode())) {
                 itemView.setBackground(ContextCompat.getDrawable(context, R.drawable.background_color_transition));
                 TransitionDrawable transition = (TransitionDrawable) itemView.getBackground();

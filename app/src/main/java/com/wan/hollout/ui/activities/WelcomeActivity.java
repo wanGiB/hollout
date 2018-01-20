@@ -38,6 +38,8 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.exceptions.HyphenateException;
 import com.parse.DeleteCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -161,6 +163,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                             if (success && e == null) {
                                 HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
                                 setupCrashlyticsUser(firebaseUser);
+                                syncBlackList();
                                 finishUp();
                             } else {
                                 createNewUserOnParse(firebaseUser);
@@ -180,6 +183,15 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                 }
             }
         });
+    }
+
+    private void syncBlackList() {
+        try {
+            // sync blacklist
+            EMClient.getInstance().contactManager().getBlackListFromServer();
+        } catch (HyphenateException hyphenatException) {
+            hyphenatException.printStackTrace();
+        }
     }
 
     private void finishUp() {
@@ -264,6 +276,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                                         if (e == null && success) {
                                             UiUtils.dismissProgressDialog();
                                             HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
+                                            syncBlackList();
                                             finishUp();
                                         } else {
                                             terminateAuthentication(newHolloutUser, e);

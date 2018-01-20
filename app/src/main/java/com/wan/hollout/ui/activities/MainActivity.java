@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
@@ -27,6 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -35,6 +37,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.hyphenate.EMCallBack;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMConversation;
 import com.hyphenate.chat.EMMessage;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -51,12 +55,14 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.chat.ChatUtils;
 import com.wan.hollout.chat.HolloutCommunicationsManager;
 import com.wan.hollout.chat.NotificationUtils;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.eventbuses.UnreadFeedsBadge;
+import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
@@ -107,8 +113,20 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     @BindView(R.id.search_view)
     MaterialSearchView materialSearchView;
 
-    @BindView(R.id.action_mode_bar)
-    View actionModeBar;
+    //=======Action Mode Shits=====//
+    public static View actionModeBar;
+
+    @BindView(R.id.destroy_action_mode)
+    ImageView destroyActionModeView;
+
+    @BindView(R.id.action_item_selection_count)
+    TextView selectionActionsCountView;
+
+    @BindView(R.id.delete_conversation)
+    ImageView deleteConversation;
+
+    @BindView(R.id.block_user)
+    ImageView blockUser;
 
     private HolloutPermissions holloutPermissions;
 
@@ -122,12 +140,15 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     private IProfile currentProfile;
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
 
+    public static Vibrator vibrator;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        actionModeBar = findViewById(R.id.action_mode_bar);
         setSupportActionBar(toolbar);
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (viewPager != null) {
@@ -139,6 +160,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         }
         fetchUnreadMessagesCount();
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         initAndroidPermissions();
         setupNavigationDrawer(savedInstanceState, signedInUser);
         displaySignedInUserInfo(signedInUser);
@@ -152,6 +174,95 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         attachEventHandlers();
         NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
         NotificationUtils.getNotificationManager().cancel(AppConstants.NEARBY_KIND_NOTIFICATION_ID);
+        initEventHandlers();
+    }
+
+    private void initEventHandlers() {
+        View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.block_user:
+                        ConversationItem selectedUserToBlock = AppConstants.selectedPeople.get(0);
+                        if (selectedUserToBlock != null) {
+                            ParseObject selectedUserObject = selectedUserToBlock.getRecipient();
+                            if (selectedUserObject != null) {
+                                String userId = selectedUserObject.getString(AppConstants.REAL_OBJECT_ID);
+                                if (!HolloutUtils.isUserBlocked(userId)) {
+                                    UiUtils.showProgressDialog(MainActivity.this, "Blocking User. Please wait...");
+                                    HolloutUtils.blockUser(MainActivity.this, userId, new DoneCallback<Boolean>() {
+                                        @Override
+                                        public void done(Boolean success, Exception e) {
+                                            UiUtils.dismissProgressDialog();
+                                            if (success) {
+                                                UiUtils.showSafeToast("User blocked successfully!");
+                                                ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
+                                                destroyActionMode();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    UiUtils.showProgressDialog(MainActivity.this, "Unblocking User. Please wait...");
+                                    HolloutUtils.unBlockUser(MainActivity.this, userId, new DoneCallback<Boolean>() {
+                                        @Override
+                                        public void done(Boolean success, Exception e) {
+                                            UiUtils.dismissProgressDialog();
+                                            if (success) {
+                                                UiUtils.showSafeToast("User Unblocked successfully!");
+                                                ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
+                                                destroyActionMode();
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                        break;
+                    case R.id.delete_conversation:
+                        AlertDialog.Builder deleteConversationConsentDialog = new AlertDialog.Builder(MainActivity.this);
+                        deleteConversationConsentDialog.setMessage("Delete "
+                                + (AppConstants.selectedPeople.size() == 1 ? "this conversation ? " : AppConstants.selectedPeople.size() + " conversations?"));
+                        deleteConversationConsentDialog.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                List<EMConversation> emConversations = new ArrayList<>();
+                                for (ConversationItem conversationItem : AppConstants.selectedPeople) {
+                                    String recipientId = conversationItem.getRecipient().getString(AppConstants.REAL_OBJECT_ID);
+                                    EMConversation mConversation = EMClient.getInstance()
+                                            .chatManager()
+                                            .getConversation(recipientId, ChatUtils.getConversationType(AppConstants.CHAT_TYPE_SINGLE), true);
+                                    emConversations.add(mConversation);
+                                }
+                                HolloutUtils.dissolveConversations(MainActivity.this, emConversations, new DoneCallback<Boolean>() {
+                                    @Override
+                                    public void done(Boolean success, Exception e) {
+                                        if (success) {
+                                            ConversationsFragment.conversations.removeAll(AppConstants.selectedPeople);
+                                            ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
+                                            destroyActionMode();
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        deleteConversationConsentDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                        deleteConversationConsentDialog.create().show();
+                        break;
+                    case R.id.destroy_action_mode:
+                        destroyActionMode();
+                        break;
+                }
+            }
+        };
+        blockUser.setOnClickListener(onClickListener);
+        deleteConversation.setOnClickListener(onClickListener);
+        destroyActionModeView.setOnClickListener(onClickListener);
     }
 
     private void attachEventHandlers() {
@@ -509,6 +620,10 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                         case AppConstants.TURN_OFF_ALL_TAB_LAYOUTS:
                             toggleViews();
                             break;
+                        case AppConstants.CHECK_SELECTED_CONVERSATIONS:
+                            updateActionMode();
+                            ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
+                            break;
                     }
                 } else if (o instanceof UnreadFeedsBadge) {
                     UnreadFeedsBadge unreadFeedsBadge = (UnreadFeedsBadge) o;
@@ -574,6 +689,10 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     @Override
     public void onBackPressed() {
+        if (actionModeBar.getVisibility() == View.VISIBLE) {
+            destroyActionMode();
+            return;
+        }
         if (viewPager.getCurrentItem() != 0) {
             viewPager.setCurrentItem(0);
             return;
@@ -598,12 +717,23 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     }
 
+    public static void destroyActionMode() {
+        UiUtils.showView(actionModeBar, false);
+        AppConstants.selectedPeople.clear();
+        AppConstants.selectedPeoplePositions.clear();
+        ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
+    }
+
+    public static boolean isActionModeActivated() {
+        return actionModeBar.getVisibility() == View.VISIBLE;
+    }
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
-        MenuItem createNewGroupChatItem = menu.findItem(R.id.create_new_group);
+//        MenuItem createNewGroupChatItem = menu.findItem(R.id.create_new_group);
         filterPeopleMenuItem.setVisible(viewPager.getCurrentItem() == 0);
-        createNewGroupChatItem.setVisible(viewPager.getCurrentItem() == 1);
+//        createNewGroupChatItem.setVisible(viewPager.getCurrentItem() == 1);
         supportInvalidateOptionsMenu();
         return super.onPrepareOptionsMenu(menu);
     }
@@ -817,6 +947,22 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         if (AuthUtil.getCurrentUser() != null) {
             signedInUserIntent.putExtra(AppConstants.USER_PROPERTIES, AuthUtil.getCurrentUser());
             startActivity(signedInUserIntent);
+        }
+    }
+
+    public static void vibrateVibrator() {
+        vibrator.vibrate(100);
+    }
+
+    public static void activateActionMode() {
+        UiUtils.showView(actionModeBar, true);
+    }
+
+    public void updateActionMode() {
+        selectionActionsCountView.setText(String.valueOf(AppConstants.selectedPeople.size()));
+        UiUtils.showView(blockUser, AppConstants.selectedPeople.size() == 1);
+        if (AppConstants.selectedPeople.isEmpty()) {
+            destroyActionMode();
         }
     }
 

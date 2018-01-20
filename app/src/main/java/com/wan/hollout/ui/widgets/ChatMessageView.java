@@ -1,20 +1,27 @@
 package com.wan.hollout.ui.widgets;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.text.Html;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,21 +52,27 @@ import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
+import com.wan.hollout.eventbuses.PlaceCallEvent;
 import com.wan.hollout.ui.activities.ChatActivity;
+import com.wan.hollout.ui.activities.EaseShowImageActivity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.FileUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -168,11 +181,11 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         super(context, attrs, defStyleAttr);
     }
 
-    public void bindData(Activity context, EMMessage messageObject) {
+    public void bindData(Activity context, EMMessage messageObject, String searchString) {
         this.activity = context;
         this.message = messageObject;
         setupMessageBubble();
-        setupMessageBody();
+        setupMessageBody(searchString);
         setupMessageTimeAndDeliveryStatus();
         refreshViews();
         setOnClickListener(this);
@@ -211,14 +224,14 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         return message.direct();
     }
 
-    private void setupMessageBody() {
+    private void setupMessageBody(String searchString) {
 
         EMMessage.Type messageType = getMessageType();
 
         EMMessageBody messageBody = message.getBody();
 
         if (messageType == EMMessage.Type.TXT) {
-            setupTxtMessage((EMTextMessageBody) messageBody);
+            setupTxtMessage((EMTextMessageBody) messageBody, searchString);
         }
 
         if (messageType == EMMessage.Type.IMAGE) {
@@ -257,7 +270,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         }
 
         EMMessage.Status status = message.status();
-
         if (status == EMMessage.Status.FAIL) {
             resendMessage(message);
         }
@@ -350,17 +362,37 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
             UiUtils.loadImage(activity, locationStaticMap, attachedPhotoOrVideoThumbnailView);
         }
-
     }
 
     private void setupVoiceMessage(EMVoiceMessageBody emFileMessageBody) {
-        String audioDuration = UiUtils.getTimeString(emFileMessageBody.getLength());
         String fileCaption = "Voice Note";
         File localFilePath = new File(emFileMessageBody.getLocalUrl());
         if (localFilePath.exists()) {
-            audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, audioDuration);
+            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+            mmr.setDataSource(activity, Uri.fromFile(localFilePath));
+            String durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+            int millSecond = Integer.parseInt(durationStr);
+            audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, UiUtils.getTimeString(millSecond));
         } else {
-            audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, audioDuration);
+            audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, "00:00");
+            if (message.status() == EMMessage.Status.FAIL) {
+                DownloadAttachment downloadAttachment = new DownloadAttachment();
+                downloadAttachment.execute(message);
+            }
+        }
+    }
+
+    static class DownloadAttachment extends AsyncTask<EMMessage, Void, Void> {
+
+        @Override
+        protected Void doInBackground(EMMessage... params) {
+            EMClient.getInstance().chatManager().downloadAttachment(params[0]);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
         }
     }
 
@@ -374,7 +406,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                 setupAudioMessage(messageBody);
             }
             if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)) {
-                setupDocumentMessage(messageBody);
+                setupDocumentMessage();
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
@@ -382,15 +414,13 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         }
     }
 
-    private void setupDocumentMessage(EMFileMessageBody messageBody) {
+    private void setupDocumentMessage() {
         try {
             String documentName = message.getStringAttribute(AppConstants.FILE_NAME);
             String documentSize = message.getStringAttribute(AppConstants.FILE_SIZE);
             if (StringUtils.isNotEmpty(documentName)) {
                 documentNameAndSizeView.setText(documentName + "\n" + documentSize);
             }
-            String documentLocalUrl = messageBody.getLocalUrl();
-            String documentRemoteUrl = messageBody.getRemoteUrl();
         } catch (HyphenateException e) {
             e.printStackTrace();
         }
@@ -434,14 +464,16 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             String audioDuration = message.getStringAttribute(AppConstants.AUDIO_DURATION);
             String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION) != null ?
                     message.getStringAttribute(AppConstants.FILE_CAPTION) : activity.getString(R.string.audio);
-
             File localFilePath = new File(emFileMessageBody.getLocalUrl());
-
             if (localFilePath.exists()) {
                 //Local File exists
                 audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, audioDuration);
             } else {
                 audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, audioDuration);
+                if (message.status() == EMMessage.Status.FAIL) {
+                    DownloadAttachment downloadAttachment = new DownloadAttachment();
+                    downloadAttachment.execute(message);
+                }
             }
         } catch (HyphenateException e) {
             e.printStackTrace();
@@ -457,10 +489,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
             if (contactPhoneNumbersView != null) {
                 if (getMessageDirection() == EMMessage.Direct.SEND) {
-                    contactPhoneNumbersView.setText(UiUtils.fromHtml(purifiedPhoneNumber + getOutGoingNonBreakingSpace()));
+                    contactPhoneNumbersView.setText(UiUtils.fromHtml(purifiedPhoneNumber + " " + getOutGoingNonBreakingSpace()));
                 } else {
-                    contactPhoneNumbersView.setText(UiUtils.fromHtml(purifiedPhoneNumber
-                            + getIncomingNonBreakingSpace()));
+                    contactPhoneNumbersView.setText(UiUtils.fromHtml(purifiedPhoneNumber + " " + getIncomingNonBreakingSpace()));
                 }
             }
         } catch (HyphenateException e) {
@@ -574,6 +605,13 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
         });
 
+        attachedPhotoOrVideoThumbnailView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                playMediaIfVideoIcon.performClick();
+            }
+        });
+
     }
 
     public void loadVideoFromPath(ImageView videoView, String videoPath) {
@@ -588,7 +626,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         }
     }
 
-    private void setupTxtMessage(EMTextMessageBody messageBody) {
+    private void setupTxtMessage(EMTextMessageBody messageBody, String searchString) {
         try {
             String messageAttributeType = message.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
             if (messageAttributeType != null) {
@@ -600,7 +638,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                             AppConstants.messageBodyPositions.put(getMessageHash(), false);
                             setupReactionMessage();
                         } else {
-                            setupMessageBodyOnlyMessage(messageBody);
+                            setupMessageBodyOnlyMessage(messageBody, searchString);
                         }
                         break;
                     case AppConstants.MESSAGE_ATTR_TYPE_GIF:
@@ -608,18 +646,18 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                         if (gifUrl != null) {
                             setUpGifMessage(gifUrl);
                         } else {
-                            setupMessageBodyOnlyMessage(messageBody);
+                            setupMessageBodyOnlyMessage(messageBody, searchString);
                         }
                         break;
                     default:
-                        setupMessageBodyOnlyMessage(messageBody);
+                        setupMessageBodyOnlyMessage(messageBody, searchString);
                         break;
                 }
             } else {
-                setupMessageBodyOnlyMessage(messageBody);
+                setupMessageBodyOnlyMessage(messageBody, searchString);
             }
         } catch (HyphenateException e) {
-            setupMessageBodyOnlyMessage(messageBody);
+            setupMessageBodyOnlyMessage(messageBody, searchString);
         }
         acknowledgeMessageRead();
     }
@@ -675,14 +713,12 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         return (LoadingImageView) attachedPhotoOrVideoThumbnailView;
     }
 
-    private void setupMessageBodyOnlyMessage(EMTextMessageBody messageBody) {
+    private void setupMessageBodyOnlyMessage(EMTextMessageBody messageBody, String searchString) {
         String message = messageBody.getMessage();
         if (StringUtils.isNotEmpty(message)) {
             UiUtils.showView(messageBodyView, true);
-
             ArrayList includedLinks = UiUtils.pullLinks(message);
             AppConstants.messageBodyPositions.put(getMessageHash(), true);
-
             if (includedLinks != null && !includedLinks.isEmpty()) {
                 setupLinkPreviewMessage(includedLinks);
                 AppConstants.linkPreviewPositions.put(getMessageHash(), true);
@@ -691,12 +727,17 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                 AppConstants.linkPreviewPositions.put(getMessageHash(), false);
                 UiUtils.showView(linkPreview, false);
             }
-
             if (messageBodyView != null) {
                 if (getMessageDirection() == EMMessage.Direct.SEND) {
-                    messageBodyView.setText(UiUtils.fromHtml(message + getOutGoingNonBreakingSpace()));
+                    messageBodyView.setText(StringUtils.isNotEmpty(searchString)
+                            ? UiUtils.fromHtml(Html.toHtml(UiUtils.highlightTextIfNecessary(searchString, message, ContextCompat.getColor(activity, R.color.colorAccent)))
+                            + getOutGoingNonBreakingSpace()) :
+                            UiUtils.fromHtml(message + getOutGoingNonBreakingSpace()));
                 } else {
-                    messageBodyView.setText(UiUtils.fromHtml(message + getIncomingNonBreakingSpace()));
+                    messageBodyView.setText(StringUtils.isNotEmpty(searchString)
+                            ? UiUtils.fromHtml(Html.toHtml(UiUtils.highlightTextIfNecessary(searchString, message, ContextCompat.getColor(activity, R.color.colorAccent)))
+                            + getIncomingNonBreakingSpace()) :
+                            UiUtils.fromHtml(message + getIncomingNonBreakingSpace()));
                 }
             }
         } else {
@@ -855,9 +896,161 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     updateActionMode();
                 } else {
                     UiUtils.blinkView(v);
+                    if (message.getType() == EMMessage.Type.FILE) {
+                        String fileType;
+                        try {
+                            fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
+                            EMFileMessageBody emFileMessageBody = (EMFileMessageBody) message.getBody();
+                            if (fileType.equals(AppConstants.FILE_TYPE_CONTACT)) {
+                                String contactPhoneNumber = message.getStringAttribute(AppConstants.CONTACT_NUMBER);
+                                String contactName = message.getStringAttribute(AppConstants.CONTACT_NAME);
+                                placeCallOrAddToContacts(contactName, contactPhoneNumber);
+                            }
+                            if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)) {
+                                String documentRemoteFilePath = emFileMessageBody.getRemoteUrl();
+                                String documentLocalFilePath = emFileMessageBody.getLocalUrl();
+                                File file = new File(documentLocalFilePath);
+                                if (file != null && file.exists()) {
+                                    // open files if it exist
+                                    FileUtils.openFile(file, activity);
+                                } else {
+                                    downloadFile(emFileMessageBody, documentRemoteFilePath, documentLocalFilePath, file);
+                                }
+                            }
+
+                        } catch (HyphenateException e) {
+                            e.printStackTrace();
+                        }
+
+                    } else if (message.getType() == EMMessage.Type.IMAGE) {
+                        EMImageMessageBody emImageMessageBody = (EMImageMessageBody) message.getBody();
+                        String filePath = emImageMessageBody.getLocalUrl();
+                        File file = new File(filePath);
+                        if (file.exists()) {
+                            filePath = emImageMessageBody.getLocalUrl();
+                            openImage(filePath);
+                        } else {
+                            filePath = emImageMessageBody.getRemoteUrl();
+                            openImage(filePath);
+                        }
+                    } else if (message.getType() == EMMessage.Type.LOCATION) {
+                        EMLocationMessageBody emLocationMessageBody = (EMLocationMessageBody) message.getBody();
+                        double lat = emLocationMessageBody.getLatitude();
+                        double lng = emLocationMessageBody.getLongitude();
+                        Uri gmmIntentUri = Uri.parse("geo:" + LocationUtils.getLocationFromMessage(String.valueOf(lat), String.valueOf(lng)));
+                        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                        mapIntent.setPackage("com.google.android.apps.maps");
+                        if (mapIntent.resolveActivity(activity.getPackageManager()) != null) {
+                            activity.startActivity(mapIntent);
+                        } else {
+                            UiUtils.showSafeToast("Failed to find an application that can open this");
+                        }
+                    }
                 }
                 break;
         }
+    }
+
+    private void downloadFile(EMFileMessageBody emFileMessageBody, String documentRemoteFilePath, String documentLocalFilePath, final File file) {
+        UiUtils.showSafeToast("Downloading File. File Would open after downloading...");
+        final Map<String, String> maps = new HashMap<>();
+        if (!TextUtils.isEmpty(emFileMessageBody.getSecret())) {
+            maps.put("share-secret", emFileMessageBody.getSecret());
+        }
+        //download file
+        EMClient.getInstance().chatManager().downloadFile(documentRemoteFilePath, documentLocalFilePath, maps,
+                new EMCallBack() {
+
+                    @Override
+                    public void onSuccess() {
+                        activity.runOnUiThread(new Runnable() {
+                            public void run() {
+                                FileUtils.openFile(file, activity);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onProgress(final int progress, String status) {
+                        activity.runOnUiThread(new Runnable() {
+                            public void run() {
+
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void onError(int error, final String msg) {
+                        activity.runOnUiThread(new Runnable() {
+                            public void run() {
+                                if (file != null && file.exists() && file.isFile())
+                                    file.delete();
+                                String str4 = getResources().getString(R.string.failed_to_download_file);
+                                UiUtils.showSafeToast(str4);
+                            }
+                        });
+                    }
+                });
+    }
+
+    private void openImage(String filePath) {
+        Intent imageIntent = new Intent(activity, EaseShowImageActivity.class);
+        imageIntent.putExtra(AppConstants.FILE_PATH, filePath);
+        activity.startActivity(imageIntent);
+    }
+
+    private void placeCallOrAddToContacts(final String contactName, final String contactPhoneNumber) {
+        final AlertDialog.Builder contactOptions = new AlertDialog.Builder(activity);
+        contactOptions.setItems(new CharSequence[]{"Call", "Add to contacts"}, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                switch (which) {
+                    case 0:
+                        String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
+                        final String[] numbers = purifiedPhoneNumber.split(",");
+                        if (numbers.length > 1) {
+                            AlertDialog.Builder numbersToCall = new AlertDialog.Builder(activity);
+                            numbersToCall.setTitle("Select Number to Call");
+                            numbersToCall.setItems(numbers, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                    EventBus.getDefault().post(new PlaceCallEvent(numbers[which]));
+                                }
+                            });
+                            numbersToCall.create().show();
+                        } else {
+                            EventBus.getDefault().post(new PlaceCallEvent(purifiedPhoneNumber));
+                        }
+                        break;
+                    case 1:
+                        addAsContactConfirmed(activity, contactName, contactPhoneNumber.split(","));
+                        break;
+                }
+            }
+        });
+        contactOptions.create().show();
+    }
+
+    public static void addAsContactConfirmed(final Context context, String name, String[] phones) {
+        Intent intent = new Intent(Intent.ACTION_INSERT);
+        intent.setType(ContactsContract.Contacts.CONTENT_TYPE);
+        intent.putExtra(ContactsContract.Intents.Insert.NAME, name);
+        intent.putExtra(ContactsContract.Intents.Insert.PHONE, phones[0]);
+        try {
+            String secondaryPhone = phones[1];
+            String tertiaryPhone = phones[2];
+            if (secondaryPhone != null) {
+                intent.putExtra(ContactsContract.Intents.Insert.SECONDARY_PHONE, secondaryPhone);
+            }
+            if (tertiaryPhone != null) {
+                intent.putExtra(ContactsContract.Intents.Insert.TERTIARY_PHONE, tertiaryPhone);
+            }
+        } catch (ArrayIndexOutOfBoundsException ignored) {
+
+        }
+        context.startActivity(intent);
     }
 
     public ChatActivity getChatActivity() {

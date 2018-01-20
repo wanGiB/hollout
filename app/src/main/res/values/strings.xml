@@ -325,5 +325,8 @@
     <string name="requests">REQUESTS</string>
     <string name="nearby">NEARBY</string>
     <string name="new_clip">new_clip</string>
+    <string name="failed_to_download_file">Failed to download file. Please try again</string>
+    <string name="user_blocked">User Blocked!</string>
+    <string name="unblock_user">Unblock User</string>
 
 </resources>

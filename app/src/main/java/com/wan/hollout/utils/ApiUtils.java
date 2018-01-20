@@ -114,10 +114,10 @@ public class ApiUtils {
         if (httpUrl != null) {
             HttpUrl.Builder urlBuilder = httpUrl.newBuilder();
             attachApiKey(urlBuilder);
-            urlBuilder.addQueryParameter("q",searchKey);
+            urlBuilder.addQueryParameter("q", searchKey);
             urlBuilder.addQueryParameter("limit", "25");
             urlBuilder.addQueryParameter("rating", "G");
-            urlBuilder.addQueryParameter("lang","en");
+            urlBuilder.addQueryParameter("lang", "en");
             urlBuilder.addQueryParameter("offset", String.valueOf(page));
 
             Request request = new Request.Builder().url(urlBuilder.build().toString()).get().build();
@@ -126,7 +126,7 @@ public class ApiUtils {
 
                 @Override
                 public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    doneCallback.done(null,e);
+                    doneCallback.done(null, e);
                 }
 
                 @Override

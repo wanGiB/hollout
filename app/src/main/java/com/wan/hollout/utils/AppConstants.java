@@ -249,6 +249,8 @@ public class AppConstants {
     public static final String FORWARDED_MESSAGE_RESULT = "forwarded_message_result";
     public static final boolean RESULT_OK = true;
     public static final String USER_FRIENDABLE = "user_friendable";
+    public static final String FILE_PATH = "file_path";
+    public static final String CHECK_SELECTED_CONVERSATIONS = "check_selected_conversations";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

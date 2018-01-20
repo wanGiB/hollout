@@ -47,7 +47,10 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.hyphenate.chat.EMClient;
+import com.hyphenate.chat.EMConversation;
 import com.hyphenate.chat.EMMessage;
+import com.hyphenate.exceptions.HyphenateException;
 import com.hyphenate.util.EMLog;
 import com.hyphenate.util.PathUtil;
 import com.parse.ParseInstallation;
@@ -56,6 +59,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.bean.AudioFile;
 import com.wan.hollout.callbacks.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.ui.activities.ChatActivity;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 
@@ -591,6 +595,10 @@ public class HolloutUtils {
         return !StringUtils.startsWithAny(fileMime, "image", "photo", "audio", "video");
     }
 
+    public static boolean isImage(String fileMime) {
+        return StringUtils.startsWith("image", fileMime);
+    }
+
     public static boolean isAudio(String fileMime) {
         return StringUtils.startsWith(fileMime, "audio");
     }
@@ -1008,6 +1016,75 @@ public class HolloutUtils {
             return (signedInUserChats != null && signedInUserChats.contains(recipientId.toLowerCase()));
         }
         return false;
+    }
+
+    public static boolean isUserBlocked(String userId) {
+        List<String> blockedUsers = EMClient.getInstance().contactManager().getBlackListUsernames();
+        return blockedUsers != null && !blockedUsers.isEmpty() && blockedUsers.contains(userId);
+    }
+
+    public static void blockUser(final Activity activity, final String userId, final DoneCallback<Boolean> blockDoneCallBack) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean success = true;
+                try {
+                    EMClient.getInstance().contactManager().addUserToBlackList(userId, false);
+                } catch (HyphenateException e) {
+                    e.printStackTrace();
+                    success = false;
+                }
+                final boolean finalSuccess = success;
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        blockDoneCallBack.done(finalSuccess, null);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    public static void unBlockUser(final Activity activity, final String userId, final DoneCallback<Boolean> unblockDoneCallBack) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                boolean success = true;
+                try {
+                    EMClient.getInstance().contactManager().removeUserFromBlackList(userId);
+                } catch (HyphenateException e) {
+                    e.printStackTrace();
+                    success = false;
+                }
+                final boolean finalSuccess = success;
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        unblockDoneCallBack.done(finalSuccess, null);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    public static void dissolveConversations(Activity activity, List<EMConversation> conversations, DoneCallback<Boolean> deleteDoneCallBack) {
+        String message;
+        if (activity instanceof ChatActivity) {
+            message = "Deleting conversation. Please wait...";
+        } else {
+            int conversationCount = conversations.size();
+            if (conversationCount == 1) {
+                message = "Deleting 1 conversation";
+            } else {
+                message = "Deleting " + conversationCount + " conversations";
+            }
+        }
+        UiUtils.showProgressDialog(activity, message);
+        for (EMConversation emConversation : conversations) {
+            EMClient.getInstance().chatManager().deleteConversation(emConversation.conversationId(), true);
+        }
+        UiUtils.dismissProgressDialog();
+        deleteDoneCallBack.done(true, null);
     }
 
 }

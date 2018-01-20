@@ -21,6 +21,7 @@ import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.eventbuses.SearchMessages;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.SelectPeopleToForwardMessageActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
@@ -97,6 +98,12 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     @BindView(R.id.action_item_selection_count)
     TextView selectedItemCountView;
+
+    @BindView(R.id.main_search_view)
+    MaterialSearchView searchView;
+
+    @BindView(R.id.bottom_shadow)
+    View bottomShadow;
 
     public ChatActivity mContext;
 
@@ -317,6 +324,51 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     public void openUserOrGroupProfile() {
         launchUserProfile.performClick();
+    }
+
+    public void openSearchView() {
+        searchView.showSearch(true);
+        UiUtils.showView(bottomShadow, false);
+        searchView.setHint(getContext().getString(R.string.search_messages));
+        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                EventBus.getDefault().post(new SearchMessages(newText));
+                return false;
+            }
+        });
+        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        UiUtils.showKeyboard(searchView);
+                    }
+                }, 500);
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+
+            }
+
+        });
+
+    }
+
+    public boolean isSearchViewOpen() {
+        return searchView.isSearchOpen();
+    }
+
+    public void closeSearch() {
+        searchView.closeSearch();
+        UiUtils.showView(bottomShadow, true);
     }
 
     @Override

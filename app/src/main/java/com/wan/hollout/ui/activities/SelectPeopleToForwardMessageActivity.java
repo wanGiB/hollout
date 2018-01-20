@@ -187,8 +187,8 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
         MenuItem filterPeopleItem = menu.findItem(R.id.filter_people);
         filterPeopleItem.setVisible(false);
 
-        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
-        createNewGroupItem.setVisible(false);
+//        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
+//        createNewGroupItem.setVisible(false);
 
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchView.setMenuItem(searchItem);
