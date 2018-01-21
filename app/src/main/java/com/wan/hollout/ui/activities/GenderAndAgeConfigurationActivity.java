@@ -21,7 +21,7 @@ import android.widget.RadioGroup;
 
 import com.parse.ParseObject;
 import com.wan.hollout.R;
-import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;

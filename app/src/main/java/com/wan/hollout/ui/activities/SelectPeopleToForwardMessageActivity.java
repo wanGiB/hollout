@@ -18,7 +18,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
-import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
+import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.adapters.SelectPeopleAdapter;
 import com.wan.hollout.ui.widgets.MaterialSearchView;

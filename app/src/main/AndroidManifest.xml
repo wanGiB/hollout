@@ -102,7 +102,7 @@
             android:exported="false" />
 
         <receiver
-            android:name=".chat.GCMPushReceiver"
+            android:name=".receivers.GCMPushReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.hyphenate.sdk.push" />
@@ -147,7 +147,7 @@
 
         <!-- Video call activity -->
         <activity
-            android:name=".call.VideoCallActivity"
+            android:name=".ui.activities.VideoCallActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
@@ -155,7 +155,7 @@
 
         <!-- Voice call activity -->
         <activity
-            android:name=".call.VoiceCallActivity"
+            android:name=".ui.activities.VoiceCallActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"

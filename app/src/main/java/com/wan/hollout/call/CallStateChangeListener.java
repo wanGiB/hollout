@@ -6,6 +6,8 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.hyphenate.chat.EMCallStateChangeListener;
 import com.hyphenate.util.EMLog;
+import com.wan.hollout.ui.activities.VideoCallActivity;
+import com.wan.hollout.ui.activities.VoiceCallActivity;
 import com.wan.hollout.utils.AppConstants;
 
 /**

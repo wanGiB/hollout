@@ -31,7 +31,7 @@ import com.wan.hollout.R;
 import java.util.Locale;
 
 /**
- * Created by wan on 2/23/17.
+ * @author Wan Clem
  */
 
 public class PagerSlidingTabStrip extends HorizontalScrollView {

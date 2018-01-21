@@ -3,7 +3,7 @@ package com.wan.hollout.utils;
 import android.support.annotation.NonNull;
 
 import com.wan.hollout.BuildConfig;
-import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 
 import org.apache.commons.lang3.StringUtils;

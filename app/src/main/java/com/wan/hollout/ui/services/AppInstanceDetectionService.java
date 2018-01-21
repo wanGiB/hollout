@@ -24,7 +24,7 @@ import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
-import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppStateManager;

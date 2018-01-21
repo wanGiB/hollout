@@ -34,6 +34,7 @@
         android:orientation="vertical"
         android:paddingBottom="2.0dip"
         android:paddingLeft="4.0dip"
+        android:animateLayoutChanges="true"
         android:paddingTop="0.0dip"
         tools:ignore="RtlHardcoded,RtlSymmetry">
 

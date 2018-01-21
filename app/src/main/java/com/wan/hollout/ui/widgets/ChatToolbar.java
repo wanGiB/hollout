@@ -150,15 +150,20 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     public void setLastSeenText(final long userLastSeen) {
-        contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
-        final String fullLastSeenTExt = getLastSeen(userLastSeen);
-        contactSubTitle.setText(fullLastSeenTExt);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                contactSubTitle.setText(StringUtils.strip(StringUtils.remove(StringUtils.remove(fullLastSeenTExt, "Active"), "on")));
-            }
-        }, 2000);
+        if (UiUtils.canShowPresence(recipientObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
+            UiUtils.showView(contactSubtitleLayout, true);
+            contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+            final String fullLastSeenTExt = getLastSeen(userLastSeen);
+            contactSubTitle.setText(fullLastSeenTExt);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    contactSubTitle.setText(StringUtils.strip(StringUtils.remove(StringUtils.remove(fullLastSeenTExt, "Active"), "on")));
+                }
+            }, 2000);
+        } else {
+            UiUtils.showView(contactSubtitleLayout, false);
+        }
     }
 
     public static String getLastSeen(long longTime) {
@@ -231,14 +236,17 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                 if (chatStateToSignedInUser != null) {
                     if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
+                        UiUtils.showView(contactSubtitleLayout, true);
                         contactSubTitle.setText(mContext.getString(R.string.online));
                         UiUtils.showView(typingIndicator, false);
                     } else if (chatStateToSignedInUser.contains(mContext.getString(R.string.typing)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
+                        UiUtils.showView(contactSubtitleLayout, true);
                         UiUtils.showView(typingIndicator, true);
                         contactSubTitle.setText(StringUtils.strip(mContext.getString(R.string.typing_), "…"));
                         UiUtils.bangSound(getContext(), R.raw.typing);
                     } else {
                         if (userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
+                            UiUtils.showView(contactSubtitleLayout, true);
                             contactSubTitle.setText(mContext.getString(R.string.online));
                             UiUtils.showView(typingIndicator, false);
                         } else {
@@ -248,6 +256,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                     }
                 } else {
                     if (userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
+                        UiUtils.showView(contactSubtitleLayout, true);
                         contactSubTitle.setText(mContext.getString(R.string.online));
                         UiUtils.showView(typingIndicator, false);
                     } else {
@@ -258,6 +267,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             } else {
                 String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                 if (userOnlineStatus != null && userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
+                    UiUtils.showView(contactSubtitleLayout, true);
                     contactSubTitle.setText(mContext.getString(R.string.online));
                 } else {
                     setLastSeenText(userLastSeen);

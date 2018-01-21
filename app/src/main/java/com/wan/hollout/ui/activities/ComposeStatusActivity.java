@@ -10,7 +10,7 @@ import android.view.View;
 
 import com.parse.ParseObject;
 import com.wan.hollout.R;
-import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.CircularProgressButton;
 import com.wan.hollout.ui.widgets.MaterialEditText;

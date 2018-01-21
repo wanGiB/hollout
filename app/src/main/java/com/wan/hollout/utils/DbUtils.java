@@ -5,12 +5,10 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
-import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.CallLog;
 import com.wan.hollout.models.HolloutEntity;
 import com.wan.hollout.models.HolloutEntity_Table;
-import com.wan.hollout.models.MeetPoint;
-import com.wan.hollout.models.MeetPoint_Table;
 import com.wan.hollout.models.PathEntity;
 import com.wan.hollout.models.PathEntity_Table;
 
@@ -23,15 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("WeakerAccess")
 public class DbUtils {
-
-    public static String getMeetPoint(String senderId) {
-        MeetPoint meetPoint = SQLite.select().from(MeetPoint.class).where(MeetPoint_Table.senderId.eq(senderId)).querySingle();
-        if (meetPoint != null) {
-            return meetPoint.getMeetPoint();
-        } else {
-            return null;
-        }
-    }
 
     public static void getEntityName(int entityType, final String entityId, final DoneCallback<String> entityNameCallback) {
         String entityNameFromDb = getEntityName(entityId);

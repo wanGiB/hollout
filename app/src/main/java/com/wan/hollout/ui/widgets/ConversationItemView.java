@@ -39,7 +39,7 @@ import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
-import com.wan.hollout.chat.ChatUtils;
+import com.wan.hollout.utils.ChatUtils;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.activities.ChatActivity;

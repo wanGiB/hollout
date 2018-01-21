@@ -35,7 +35,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.soundcloud.android.crop.Crop;
 import com.wan.hollout.R;
-import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
 import com.wan.hollout.ui.adapters.FeaturedPhotosRectangleAdapter;

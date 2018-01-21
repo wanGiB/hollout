@@ -57,7 +57,7 @@ import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.AudioFile;
-import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.ChatActivity;
 

@@ -47,8 +47,8 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
-import com.wan.hollout.callbacks.DoneCallback;
-import com.wan.hollout.chat.HolloutCommunicationsManager;
+import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.managers.HolloutCommunicationsManager;
 import com.wan.hollout.eventbuses.TypingFinishedBus;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.ShimmerFrameLayout;
@@ -112,7 +112,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     private int fieldIndex = 0;
 
     private String[] sentences = {
-            "Your Sport Team Fans",
+            "Your sport team fans",
             "People in your field of study",
             "People who share in your passion",
             "People who share in your interests",

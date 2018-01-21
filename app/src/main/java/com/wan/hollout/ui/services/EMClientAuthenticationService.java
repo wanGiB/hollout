@@ -6,8 +6,8 @@ import android.support.annotation.Nullable;
 
 import com.hyphenate.chat.EMClient;
 import com.parse.ParseObject;
-import com.wan.hollout.callbacks.DoneCallback;
-import com.wan.hollout.chat.HolloutCommunicationsManager;
+import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.managers.HolloutCommunicationsManager;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 

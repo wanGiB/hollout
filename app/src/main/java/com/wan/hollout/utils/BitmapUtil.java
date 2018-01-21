@@ -23,7 +23,6 @@ import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.load.resource.bitmap.Downsampler;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
 import com.wan.hollout.exceptions.BitmapDecodingException;
-import com.wan.hollout.media.MediaConstraints;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -40,61 +39,6 @@ import javax.microedition.khronos.egl.EGLDisplay;
 public class BitmapUtil {
 
     private static final String TAG = BitmapUtil.class.getSimpleName();
-
-    private static final int MAX_COMPRESSION_QUALITY = 90;
-    private static final int MIN_COMPRESSION_QUALITY = 45;
-    private static final int MAX_COMPRESSION_ATTEMPTS = 5;
-    private static final int MIN_COMPRESSION_QUALITY_DECREASE = 5;
-
-    public static <T> byte[] createScaledBytes(Context context, T model, MediaConstraints constraints)
-            throws BitmapDecodingException {
-        int quality = MAX_COMPRESSION_QUALITY;
-        int attempts = 0;
-        byte[] bytes;
-
-        Bitmap scaledBitmap = Downsampler.AT_MOST.decode(getInputStreamForModel(context, model),
-                Glide.get(context).getBitmapPool(),
-                constraints.getImageMaxWidth(context),
-                constraints.getImageMaxHeight(context),
-                DecodeFormat.PREFER_RGB_565);
-
-        if (scaledBitmap == null) {
-            throw new BitmapDecodingException("Unable to decode image");
-        }
-
-        try {
-            do {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                scaledBitmap.compress(CompressFormat.JPEG, quality, baos);
-                bytes = baos.toByteArray();
-
-                Log.w(TAG, "iteration with quality " + quality + " size " + (bytes.length / 1024) + "kb");
-                if (quality == MIN_COMPRESSION_QUALITY) break;
-
-                int nextQuality = (int) Math.floor(quality * Math.sqrt((double) constraints.getImageMaxSize() / bytes.length));
-                if (quality - nextQuality < MIN_COMPRESSION_QUALITY_DECREASE) {
-                    nextQuality = quality - MIN_COMPRESSION_QUALITY_DECREASE;
-                }
-                quality = Math.max(nextQuality, MIN_COMPRESSION_QUALITY);
-            }
-            while (bytes.length > constraints.getImageMaxSize() && attempts++ < MAX_COMPRESSION_ATTEMPTS);
-            if (bytes.length > constraints.getImageMaxSize()) {
-                throw new BitmapDecodingException("Unable to scale image below: " + bytes.length);
-            }
-            Log.w(TAG, "createScaledBytes(" + model.toString() + ") -> quality " + Math.min(quality, MAX_COMPRESSION_QUALITY) + ", " + attempts + " attempt(s)");
-            return bytes;
-        } finally {
-            if (scaledBitmap != null) scaledBitmap.recycle();
-        }
-    }
-
-    public static <T> Bitmap createScaledBitmap(Context context, T model, int maxWidth, int maxHeight)
-            throws BitmapDecodingException {
-        final Pair<Integer, Integer> dimensions = getDimensions(getInputStreamForModel(context, model));
-        final Pair<Integer, Integer> clamped = clampDimensions(dimensions.first, dimensions.second,
-                maxWidth, maxHeight);
-        return createScaledBitmapInto(context, model, clamped.first, clamped.second);
-    }
 
     private static <T> InputStream getInputStreamForModel(Context context, T model)
             throws BitmapDecodingException {

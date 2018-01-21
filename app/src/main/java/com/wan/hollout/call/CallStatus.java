@@ -1,9 +1,8 @@
 package com.wan.hollout.call;
 
 /**
- * Created by lzan13 on 2016/10/13.
- * Voice and video call status class, which is a singleton class, because there is only one call at
- * the same time
+ * @author Wan Clem
+ *
  */
 public class CallStatus {
 

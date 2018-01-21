@@ -81,7 +81,6 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.8@aar') {
         transitive = true
     }
-    compile files('libs/YouTubeAndroidPlayerApi.jar')
     //noinspection GradleCompatible
     compile 'com.android.support:design:27.0.2'
     compile 'com.android.support:appcompat-v7:27.0.2'

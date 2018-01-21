@@ -17,7 +17,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -68,14 +67,12 @@ import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.bean.HolloutFile;
-import com.wan.hollout.call.VideoCallActivity;
-import com.wan.hollout.call.VoiceCallActivity;
-import com.wan.hollout.callbacks.DoneCallback;
-import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
-import com.wan.hollout.chat.ChatUtils;
-import com.wan.hollout.chat.HolloutCommunicationsManager;
-import com.wan.hollout.chat.MessageNotifier;
-import com.wan.hollout.chat.NotificationUtils;
+import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
+import com.wan.hollout.utils.ChatUtils;
+import com.wan.hollout.managers.HolloutCommunicationsManager;
+import com.wan.hollout.utils.MessageNotifier;
+import com.wan.hollout.utils.NotificationUtils;
 import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.eventbuses.GifMessageEvent;
 import com.wan.hollout.eventbuses.MessageChangedEvent;
@@ -2043,20 +2040,6 @@ public class ChatActivity extends BaseActivity implements
     protected void onDestroy() {
         checkAnUnRegEventBus();
         super.onDestroy();
-    }
-
-    public String getMeetPointWithUser() {
-        JSONObject signedInUserMeetPoints = signedInUser.getJSONObject(AppConstants.MEET_POINTS);
-        if (signedInUserMeetPoints == null) {
-            return DbUtils.getMeetPoint(recipientId);
-        } else {
-            String meetPoint = signedInUserMeetPoints.optString(AppConstants.MEET_POINT_WITH + recipientId);
-            if (meetPoint != null) {
-                return meetPoint;
-            } else {
-                return DbUtils.getMeetPoint(recipientId);
-            }
-        }
     }
 
     @NonNull

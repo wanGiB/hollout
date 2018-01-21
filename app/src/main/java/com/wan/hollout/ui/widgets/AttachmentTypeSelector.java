@@ -35,8 +35,8 @@ import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAda
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
-import com.wan.hollout.callbacks.DoneCallback;
-import com.wan.hollout.callbacks.EndlessRecyclerViewScrollListener;
+import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.listeners.OnSingleClickListener;
 import com.wan.hollout.ui.adapters.GifsAdapter;
 import com.wan.hollout.utils.ApiUtils;

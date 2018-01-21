@@ -13,7 +13,7 @@ import android.widget.ImageView;
 
 import com.parse.ParseObject;
 import com.wan.hollout.R;
-import com.wan.hollout.callbacks.DoneCallback;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;

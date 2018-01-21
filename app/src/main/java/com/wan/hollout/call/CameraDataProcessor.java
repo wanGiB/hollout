@@ -5,7 +5,7 @@ import android.hardware.Camera;
 import com.hyphenate.chat.EMCallManager;
 
 /**
- * Created by lzan13 on 2016/8/9.
+ * @author Wan Clem
  */
 public class CameraDataProcessor implements EMCallManager.EMCameraDataProcessor {
 
