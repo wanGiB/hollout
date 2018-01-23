@@ -783,7 +783,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
 
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
         builder.setLargeIcon(largeIcon);
-        builder.setSmallIcon(R.mipmap.ic_launcher_round);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
         builder.setPriority(Notification.PRIORITY_HIGH);
         builder.setAutoCancel(true);
         builder.setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_LIGHTS);

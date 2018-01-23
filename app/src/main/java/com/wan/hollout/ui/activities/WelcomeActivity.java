@@ -279,12 +279,12 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                                             syncBlackList();
                                             finishUp();
                                         } else {
-                                            terminateAuthentication(newHolloutUser, e);
+                                            terminateAuthenticationSession(newHolloutUser, e);
                                         }
                                     }
                                 });
                             } else {
-                                terminateAuthentication(newHolloutUser, e);
+                                terminateAuthenticationSession(newHolloutUser, e);
                             }
                         }
                     });
@@ -310,7 +310,7 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         return firebaseUser.getUid().trim().toLowerCase();
     }
 
-    private void terminateAuthentication(final ParseObject newHolloutUser, final Exception gobe) {
+    private void terminateAuthenticationSession(final ParseObject newHolloutUser, final Exception gobe) {
         newHolloutUser.deleteInBackground(new DeleteCallback() {
             @Override
             public void done(ParseException e) {

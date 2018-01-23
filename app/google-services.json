@@ -1,45 +1,21 @@
 {
   "project_info": {
-    "project_number": "805027156034",
-    "firebase_url": "https://hollout-825b4.firebaseio.com",
-    "project_id": "hollout-825b4",
-    "storage_bucket": "hollout-825b4.appspot.com"
+    "project_number": "815201272443",
+    "firebase_url": "https://hollout-860db.firebaseio.com",
+    "project_id": "hollout-860db",
+    "storage_bucket": "hollout-860db.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:805027156034:android:b739d41662be8af5",
+        "mobilesdk_app_id": "1:815201272443:android:b739d41662be8af5",
         "android_client_info": {
           "package_name": "com.wan.hollout"
         }
       },
       "oauth_client": [
         {
-          "client_id": "805027156034-8eatab65nd1ad6bt0q4c53jng633ffh8.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.wan.hollout",
-            "certificate_hash": "2f59dfc85ac256a3e7b1c535dada9a7a9d6e64c8"
-          }
-        },
-        {
-          "client_id": "805027156034-mdr1js8vitrj54vmdh8jimt2sb13ncgt.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.wan.hollout",
-            "certificate_hash": "94540ec84273165e8df478fe8da9f292c5f3b38b"
-          }
-        },
-        {
-          "client_id": "805027156034-8lg7a04tqbkkj8i764k1ea3857mt8t7a.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.wan.hollout",
-            "certificate_hash": "43fdcec76ff81d44101d70a550f83c65517f2b65"
-          }
-        },
-        {
-          "client_id": "805027156034-etmca90h2qbghcerocc3vehjvgs4hqd1.apps.googleusercontent.com",
+          "client_id": "815201272443-g17qn50vj7hjsocp4731vdt740l4larr.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.wan.hollout",
@@ -47,21 +23,21 @@
           }
         },
         {
-          "client_id": "805027156034-0euf26cm0ltv4vqttp12mb518c8r57tv.apps.googleusercontent.com",
+          "client_id": "815201272443-inakc7pr4suodlul21kc0cs41q7l6nhq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.wan.hollout",
-            "certificate_hash": "7b3886462578e58b9752f44d2e28f40ce83b654b"
+            "certificate_hash": "3fe7c378e3a7eedd9e5ea3a5b7b83d19c414ddb6"
           }
         },
         {
-          "client_id": "805027156034-mojt1l00os3r841eklbavbic4sqoqu51.apps.googleusercontent.com",
+          "client_id": "815201272443-o014lvotvm8j8m6otnjdvpvn0t6jgfs1.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyB0rdPX8ZCdSqCHsl0wwmng7tFYhd-xyLg"
+          "current_key": "AIzaSyCSmp5TOlZxErlcoQoDksrtYvkic2D7wPU"
         }
       ],
       "services": {
@@ -72,7 +48,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "805027156034-mojt1l00os3r841eklbavbic4sqoqu51.apps.googleusercontent.com",
+              "client_id": "815201272443-o014lvotvm8j8m6otnjdvpvn0t6jgfs1.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

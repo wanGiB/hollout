@@ -160,7 +160,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
     }
 
     private void setupTermsAndConditionsView() {
-        acceptLicenseCheck.setText(UiUtils.fromHtml("By continuing, you agree to our <a href=https://www.google.com>Privacy Policy</a>"));
+        acceptLicenseCheck.setText(UiUtils.fromHtml("By continuing, you agree to our <a href=https://firebasestorage.googleapis.com/v0/b/hollout-860db.appspot.com/o/privacy_policy.html?alt=media&token=1aa10939-7463-4ac0-ad84-7f04ac6804f5>Privacy Policy</a>"));
         acceptLicenseCheck.setMovementMethod(LinkMovementMethod.getInstance());
         acceptLicenseCheck.setClickable(true);
     }

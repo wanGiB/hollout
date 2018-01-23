@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
@@ -55,6 +56,10 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
+import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
+import com.wan.hollout.ui.widgets.sharesheet.ShareSheetStyle;
+import com.wan.hollout.ui.widgets.sharesheet.SharingHelper;
 import com.wan.hollout.utils.ChatUtils;
 import com.wan.hollout.managers.HolloutCommunicationsManager;
 import com.wan.hollout.utils.NotificationUtils;
@@ -417,11 +422,64 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                 launchSettings(AppConstants.PRIVACY_AND_SECURITY_FRAGMENT);
                             } else if (drawerItem.getIdentifier() == 6) {
                                 launchSettings(AppConstants.SUPPORT_SETTINGS_FRAGMENT);
+                            } else if (drawerItem.getIdentifier() == 7) {
+                                initSharing();
                             }
                         }
                         return false;
                     }
                 }).withSavedInstance(savedInstanceState).build();
+    }
+
+    private void initSharing() {
+        // Create your link properties
+        LinkProperties linkProperties = new LinkProperties()
+                .setFeature("sharing");
+        // Customize the appearance of your share sheet
+        ShareSheetStyle shareSheetStyle = new ShareSheetStyle(this, "Check this out!",
+                "The easiest way to connect with people of shared interests and profession around you")
+                .setCopyUrlStyle(ContextCompat.getDrawable(this, R.drawable.ic_content_copy_black_48dp), "Copy link",
+                        "Link added to clipboard!")
+                .setMoreOptionStyle(ContextCompat.getDrawable(this, R.drawable.ic_expand_more_black_48dp), "Show more")
+                .setSharingTitle("Invite Friends Via")
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.FACEBOOK)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.EMAIL)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.WHATS_APP)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.FLICKR)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.FACEBOOK_MESSENGER)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.GMAIL)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.HANGOUT)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.INSTAGRAM)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.PINTEREST)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.MESSAGE)
+                .addPreferredSharingOption(SharingHelper.SHARE_WITH.TWITTER);
+        ShareSheet shareSheet = new ShareSheet();
+        shareSheet.setImageUrl("https://image.ibb.co/nuKUzk/app_logo.png");
+        shareSheet.setCanonicalUrl_("https://play.google.com/store/apps/details?id=com.wan.hollout");
+        shareSheet.showShareSheet(this, linkProperties, shareSheetStyle, new ShareSheet.BranchLinkShareListener() {
+
+            @Override
+            public void onShareLinkDialogLaunched() {
+
+            }
+
+            @Override
+            public void onShareLinkDialogDismissed() {
+
+            }
+
+            @Override
+            public void onLinkShareResponse(String sharedLink, String sharedChannel, Exception error) {
+
+            }
+
+            @Override
+            public void onChannelSelected(String channelName) {
+
+            }
+
+        });
+
     }
 
     private void displaySignedInUserInfo(ParseObject signedInUser) {
