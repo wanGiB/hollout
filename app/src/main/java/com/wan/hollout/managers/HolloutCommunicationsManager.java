@@ -236,9 +236,7 @@ public class HolloutCommunicationsManager {
                     public void onProgress(int progress, String status) {
 
                     }
-
                 });
-
             }
         });
     }

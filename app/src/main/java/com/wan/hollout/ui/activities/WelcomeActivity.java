@@ -38,6 +38,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.hyphenate.EMError;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.exceptions.HyphenateException;
 import com.parse.DeleteCallback;
@@ -270,21 +271,18 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                         @Override
                         public void done(Boolean result, Exception e) {
                             if (e == null) {
-                                HolloutCommunicationsManager.getInstance().logInEMClient(getValidAppUserId(firebaseUser), getValidAppUserId(firebaseUser), new DoneCallback<Boolean>() {
-                                    @Override
-                                    public void done(Boolean success, Exception e) {
-                                        if (e == null && success) {
-                                            UiUtils.dismissProgressDialog();
-                                            HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
-                                            syncBlackList();
-                                            finishUp();
-                                        } else {
-                                            terminateAuthenticationSession(newHolloutUser, e);
-                                        }
-                                    }
-                                });
+                                loginInAndContinue(firebaseUser, newHolloutUser);
                             } else {
-                                terminateAuthenticationSession(newHolloutUser, e);
+                                if (e instanceof HyphenateException) {
+                                    HyphenateException exception = (HyphenateException) e;
+                                    if (exception.getErrorCode() == EMError.USER_ALREADY_EXIST) {
+                                        loginInAndContinue(firebaseUser, newHolloutUser);
+                                    } else {
+                                        terminateAuthenticationSession(newHolloutUser, e);
+                                    }
+                                } else {
+                                    terminateAuthenticationSession(newHolloutUser, e);
+                                }
                             }
                         }
                     });
@@ -300,6 +298,22 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                         UiUtils.showSafeToast("An unresolvable error occurred during authentication. Please try again ");
                         Crashlytics.logException(e);
                     }
+                }
+            }
+        });
+    }
+
+    private void loginInAndContinue(final FirebaseUser firebaseUser, final ParseObject newHolloutUser) {
+        HolloutCommunicationsManager.getInstance().logInEMClient(getValidAppUserId(firebaseUser), getValidAppUserId(firebaseUser), new DoneCallback<Boolean>() {
+            @Override
+            public void done(Boolean success, Exception e) {
+                if (e == null && success) {
+                    UiUtils.dismissProgressDialog();
+                    HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
+                    syncBlackList();
+                    finishUp();
+                } else {
+                    terminateAuthenticationSession(newHolloutUser, e);
                 }
             }
         });
@@ -566,7 +580,8 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
                                 @Override
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (!task.isSuccessful()) {
-                                        UiUtils.showSafeToast("LogIn Aborted");
+                                        UiUtils.showSafeToast("Log In Aborted ");
+                                        UiUtils.dismissProgressDialog();
                                     }
                                 }
                             });

@@ -361,7 +361,7 @@ public class PeopleFragment extends Fragment {
                     if (signedInUserGeoPoint != null) {
                         peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 1000.0);
                     }
-                    peopleQuery.setLimit(50);
+                    peopleQuery.setLimit(100);
                     if (skip != 0) {
                         peopleQuery.setSkip(skip);
                     }
