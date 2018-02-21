@@ -10,15 +10,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMMessage;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
+import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.adapters.SelectPeopleAdapter;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
@@ -27,6 +27,7 @@ import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -108,7 +109,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
     private void sendMessage() {
         int peopleCount = AppConstants.selectedPeople.size();
         UiUtils.showProgressDialog(this, "Forwarding Message to (" + (peopleCount == 1 ? "1 person)" : peopleCount + "persons)") + ")");
-        EMMessage message = AppConstants.selectedMessages.get(0);
+        ChatMessage message = AppConstants.selectedMessages.get(0);
         for (ConversationItem conversationItem : AppConstants.selectedPeople) {
             sendNewMessage(message, conversationItem.getRecipient());
         }
@@ -123,20 +124,19 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
         finish();
     }
 
-    protected void sendNewMessage(EMMessage message, ParseObject recipientProps) {
+    protected void sendNewMessage(ChatMessage message, ParseObject recipientProps) {
         if (signedInUser != null) {
-            EMMessage newMessage = EMMessage.createSendMessage(message.getType());
-            newMessage.addBody(message.getBody());
-            newMessage.setTo(recipientProps.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
+            message.setTo(recipientProps.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
             String signedInUserDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
-            newMessage.setAttribute(AppConstants.APP_USER_DISPLAY_NAME, signedInUserDisplayName);
+            message.setFromName(signedInUserDisplayName);
             if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
-                newMessage.setAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL, signedInUserPhotoUrl);
+                message.setFromPhotoUrl(signedInUserPhotoUrl);
             }
-            newMessage.setAttribute(AppConstants.REAL_OBJECT_ID, signedInUserId.toLowerCase());
-            EMClient.getInstance().chatManager().sendMessage(newMessage);
+            message.setFrom(signedInUserId.toLowerCase());
+            message.setMessageId(RandomStringUtils.random(6, true, true) + System.currentTimeMillis());
+            ChatClient.getInstance().sendMessage(message);
             HolloutPreferences.updateConversationTime(recipientProps.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
             prioritizeConversation(recipientProps);
         }

@@ -31,8 +31,8 @@
         <FrameLayout
             android:id="@+id/content_view"
             android:layout_width="200dp"
-            android:layout_below="@+id/message_reply_recycler_item_view"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/message_reply_recycler_item_view">
 
             <com.wan.hollout.ui.widgets.RoundedImageView
                 android:id="@+id/attached_photo_or_video_thumbnail"
@@ -81,39 +81,6 @@
                 app:wave_hz="normal"
                 app:wave_length="middle" />
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:layout_marginBottom="2dp"
-                android:background="#9b000000"
-                android:orientation="horizontal"
-                android:paddingEnd="5dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:paddingStart="5dp">
-
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:id="@+id/textview_time"
-                    style="@style/chat_timings"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:layout_marginRight="4dp"
-                    android:textColor="@color/white"
-                    app:textStyle="none" />
-
-                <ImageView
-                    android:id="@+id/delivery_status_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:paddingBottom="3dp"
-                    android:src="@drawable/msg_status_client_received"
-                    tools:ignore="ContentDescription" />
-
-            </LinearLayout>
-
         </FrameLayout>
 
         <com.wan.hollout.ui.widgets.ChatMessageTextView
@@ -130,5 +97,37 @@
             tools:ignore="RtlSymmetry" />
 
     </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/message_container"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:orientation="horizontal"
+        tools:ignore="UseCompoundDrawables">
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/textview_time"
+            style="@style/chat_timings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            app:textStyle="none" />
+
+        <ImageView
+            android:id="@+id/delivery_status_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:paddingBottom="3dp"
+            android:src="@drawable/msg_status_client_received"
+            tools:ignore="ContentDescription" />
+
+    </LinearLayout>
 
 </com.wan.hollout.ui.widgets.ChatMessageView>

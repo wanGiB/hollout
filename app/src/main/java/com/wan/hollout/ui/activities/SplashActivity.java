@@ -2,6 +2,8 @@ package com.wan.hollout.ui.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.parse.GetCallback;
@@ -9,6 +11,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.wan.hollout.R;
+import com.wan.hollout.ui.widgets.ShimmerFrameLayout;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
@@ -24,6 +27,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
@@ -31,6 +35,11 @@ import butterknife.ButterKnife;
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class SplashActivity extends AppCompatActivity {
+
+    @Nullable
+    @BindView(R.id.shimmer_view_container)
+    ShimmerFrameLayout shimmerFrameLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,16 +75,40 @@ public class SplashActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (!HolloutUtils.checkGooglePlayServices(this)) {
-            return;
+        startShimmerAnimation();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!HolloutUtils.checkGooglePlayServices(SplashActivity.this)) {
+                    return;
+                }
+                checkAuthStatus();
+            }
+        }, 500);
+    }
+
+    private void startShimmerAnimation() {
+        if (shimmerFrameLayout != null) {
+            shimmerFrameLayout.startShimmerAnimation();
         }
-        checkAuthStatus();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopShimmerAnimation();
+    }
+
+    private void stopShimmerAnimation() {
+        if (shimmerFrameLayout != null) {
+            shimmerFrameLayout.stopShimmerAnimation();
+        }
     }
 
     @Override

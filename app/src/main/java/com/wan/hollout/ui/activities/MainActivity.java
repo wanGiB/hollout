@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,10 +38,6 @@ import android.widget.TextView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.hyphenate.EMCallBack;
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMConversation;
-import com.hyphenate.chat.EMMessage;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -53,34 +50,31 @@ import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
-import com.parse.ParseConfig;
 import com.parse.ParseObject;
-import com.parse.ParseRole;
 import com.wan.hollout.R;
-import com.wan.hollout.interfaces.DoneCallback;
-import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
-import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
-import com.wan.hollout.ui.widgets.sharesheet.ShareSheetStyle;
-import com.wan.hollout.ui.widgets.sharesheet.SharingHelper;
-import com.wan.hollout.utils.ChatUtils;
-import com.wan.hollout.managers.HolloutCommunicationsManager;
-import com.wan.hollout.utils.NotificationUtils;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.eventbuses.UnreadFeedsBadge;
+import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
-import com.wan.hollout.ui.services.EMClientAuthenticationService;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
+import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
+import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
+import com.wan.hollout.ui.widgets.sharesheet.ShareSheetStyle;
+import com.wan.hollout.ui.widgets.sharesheet.SharingHelper;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.NotificationUtils;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
@@ -100,6 +94,7 @@ import butterknife.ButterKnife;
 
 import static com.wan.hollout.utils.UiUtils.showView;
 
+@SuppressWarnings("RedundantCast")
 public class MainActivity extends BaseActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     @BindView(R.id.footerAd)
@@ -149,6 +144,8 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     public static Vibrator vibrator;
 
+    private ProgressDialog deleteConversationProgressDialog;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -165,6 +162,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             tabLayout.setupWithViewPager(viewPager);
             setupTabs(adapter);
         }
+
         fetchUnreadMessagesCount();
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -182,6 +180,20 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
         NotificationUtils.getNotificationManager().cancel(AppConstants.NEARBY_KIND_NOTIFICATION_ID);
         initEventHandlers();
+        createDeleteConversationProgressDialog();
+    }
+
+    private void createDeleteConversationProgressDialog() {
+        deleteConversationProgressDialog = new ProgressDialog(this);
+        deleteConversationProgressDialog.setIndeterminate(false);
+        deleteConversationProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        deleteConversationProgressDialog.setMax(100);
+    }
+
+    private void checkDismissConversationProgressDialog() {
+        if (deleteConversationProgressDialog != null && deleteConversationProgressDialog.isShowing()) {
+            deleteConversationProgressDialog.dismiss();
+        }
     }
 
     private void initEventHandlers() {
@@ -197,7 +209,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                 String userId = selectedUserObject.getString(AppConstants.REAL_OBJECT_ID);
                                 if (!HolloutUtils.isUserBlocked(userId)) {
                                     UiUtils.showProgressDialog(MainActivity.this, "Blocking User. Please wait...");
-                                    HolloutUtils.blockUser(MainActivity.this, userId, new DoneCallback<Boolean>() {
+                                    HolloutUtils.blockUser(userId, new DoneCallback<Boolean>() {
                                         @Override
                                         public void done(Boolean success, Exception e) {
                                             UiUtils.dismissProgressDialog();
@@ -212,7 +224,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                     });
                                 } else {
                                     UiUtils.showProgressDialog(MainActivity.this, "Unblocking User. Please wait...");
-                                    HolloutUtils.unBlockUser(MainActivity.this, userId, new DoneCallback<Boolean>() {
+                                    HolloutUtils.unBlockUser(userId, new DoneCallback<Boolean>() {
                                         @Override
                                         public void done(Boolean success, Exception e) {
                                             UiUtils.dismissProgressDialog();
@@ -237,24 +249,29 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                List<EMConversation> emConversations = new ArrayList<>();
                                 for (ConversationItem conversationItem : AppConstants.selectedPeople) {
+                                    deleteConversationProgressDialog.show();
+                                    deleteConversationProgressDialog.setTitle("Deleting Conversation" + (AppConstants.selectedPeople.size() > 1 ? (AppConstants.selectedPeople.size()) : ""));
                                     String recipientId = conversationItem.getRecipient().getString(AppConstants.REAL_OBJECT_ID);
-                                    EMConversation mConversation = EMClient.getInstance()
-                                            .chatManager()
-                                            .getConversation(recipientId, ChatUtils.getConversationType(AppConstants.CHAT_TYPE_SINGLE), true);
-                                    emConversations.add(mConversation);
-                                }
-                                HolloutUtils.dissolveConversations(MainActivity.this, emConversations, new DoneCallback<Boolean>() {
-                                    @Override
-                                    public void done(Boolean success, Exception e) {
-                                        if (success) {
-                                            ConversationsFragment.conversations.removeAll(AppConstants.selectedPeople);
-                                            ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
-                                            destroyActionMode();
+                                    DbUtils.batchDelete(recipientId, new DoneCallback<Long[]>() {
+                                        @Override
+                                        public void done(Long[] progressValues, Exception e) {
+                                            long current = progressValues[0];
+                                            long total = progressValues[1];
+                                            if (current != -1 && total != 0) {
+                                                double percentage = (100.0 * (current + 1)) / total;
+                                                deleteConversationProgressDialog.setProgress((int) percentage);
+                                                if (percentage == 100) {
+                                                    checkDismissConversationProgressDialog();
+                                                    UiUtils.showSafeToast("Conversation cleared");
+                                                }
+                                            } else {
+                                                checkDismissConversationProgressDialog();
+                                                UiUtils.showSafeToast("No conversation to clear.");
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
                         });
                         deleteConversationConsentDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
@@ -373,7 +390,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                         if (profile instanceof IDrawerItem && profile.getIdentifier() == PROFILE_SETTING) {
                             attemptLogOut();
                         }
-                        return false;
+                        return true;
                     }
                 }).withOnAccountHeaderProfileImageListener(new AccountHeader.OnAccountHeaderProfileImageListener() {
                     @Override
@@ -560,11 +577,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         fetchUnreadMessagesCount();
     }
 
-    private void startEMClientAuthenticationService() {
-        Intent emcService = new Intent(MainActivity.this, EMClientAuthenticationService.class);
-        startService(emcService);
-    }
-
     private void setupTabs(Adapter pagerAdapter) {
         for (int i = 0; i < tabLayout.getTabCount(); i++) {
             TabLayout.Tab tab = tabLayout.getTabAt(i);
@@ -694,16 +706,14 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     updateTab(2, unreadFeedsBadge.getUnreadFeedsSize());
                 } else if (o instanceof MessageReceivedEvent) {
                     MessageReceivedEvent messageReceivedEvent = (MessageReceivedEvent) o;
-                    EMMessage message = messageReceivedEvent.getMessage();
+                    ChatMessage message = messageReceivedEvent.getMessage();
                     String sender = message.getFrom();
-
                     if (!HolloutUtils.isAContact(sender)) {
                         EventBus.getDefault().post(AppConstants.CHECK_FOR_NEW_CHAT_REQUESTS);
                     } else {
                         fetchUnreadMessagesCount();
                     }
                 }
-
             }
         });
     }
@@ -723,20 +733,15 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     }
 
     private void tryAskForPermissions() {
-
         if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfPermissionForLocation(this)) {
             holloutPermissions.requestLocationPermissions();
             return;
         }
-
         if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfForStoragePermission(this)) {
             holloutPermissions.requestStoragePermissions();
             return;
         }
-
         startAppInstanceDetectionService();
-        startEMClientAuthenticationService();
-
     }
 
     private void startAppInstanceDetectionService() {
@@ -891,6 +896,12 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     });
                 }
             });
+            peopleFilterDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
             peopleFilterDialog.create().show();
 
         }
@@ -944,37 +955,14 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
-                                            HolloutCommunicationsManager.getInstance().signOut(new EMCallBack() {
-
-                                                @Override
-                                                public void onSuccess() {
-                                                    HolloutPreferences.clearUnreadMessagesCount();
-                                                    runOnUiThread(new Runnable() {
-                                                        @Override
-                                                        public void run() {
-                                                            finishUp();
-                                                        }
-                                                    });
-                                                }
-
-                                                @Override
-                                                public void onError(int code, String error) {
-                                                    UiUtils.dismissProgressDialog();
-                                                    UiUtils.showSafeToast("Failed to sign you out.Please try again");
-                                                }
-
-                                                @Override
-                                                public void onProgress(int progress, String status) {
-
-                                                }
-
-                                            });
-
+                                            finishUp();
                                         } else {
                                             UiUtils.dismissProgressDialog();
                                             UiUtils.showSafeToast("Failed to sign you out.Please try again");
                                         }
+
                                     }
+
                                 });
                     } else {
                         UiUtils.dismissProgressDialog();
@@ -1030,6 +1018,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         }
     }
 
+    @SuppressWarnings("RedundantCast")
     private static class Adapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragments = new ArrayList<>();
         private final List<String> mFragmentTitles = new ArrayList<>();

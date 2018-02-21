@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
-import com.hyphenate.chat.EMMessage;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
@@ -23,23 +22,26 @@ import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseLiveQueryClient;
 import com.parse.ParseLiveQueryClientCallbacks;
+import com.raizlabs.android.dbflow.config.DatabaseConfig;
+import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
+import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
+import com.tonyodev.fetch2.Fetch;
 import com.wan.hollout.R;
-import com.wan.hollout.interfaces.DoneCallback;
-import com.wan.hollout.managers.HolloutCommunicationsManager;
+import com.wan.hollout.clients.ChatClient;
+import com.wan.hollout.db.HolloutDb;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
-import com.wan.hollout.utils.HolloutUtils;
 
 import org.greenrobot.eventbus.EventBus;
+import org.intellij.lang.annotations.Flow;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
 import io.fabric.sdk.android.Fabric;
 import okhttp3.OkHttpClient;
@@ -58,9 +60,13 @@ public class ApplicationLoader extends Application {
     BroadcastReceiver connectivityChangedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
-                EventBus.getDefault().post(new ConnectivityChangedAction(true));
-                HolloutCommunicationsManager.getInstance().init(ApplicationLoader.getInstance());
+            if (intent != null) {
+                if (intent.getAction() != null) {
+                    if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
+                        EventBus.getDefault().post(new ConnectivityChangedAction(true));
+                        ChatClient.getInstance().startChatClient();
+                    }
+                }
             }
         }
     };
@@ -73,22 +79,23 @@ public class ApplicationLoader extends Application {
         initParse();
         initDrawer();
         Fabric.with(this, new Crashlytics());
-        FlowManager.init(this);
+        setupDatabase();
         startAppInstanceDetector();
         defaultSystemEmojiPref();
-        HolloutCommunicationsManager.getInstance().init(this);
+    }
 
-        HolloutUtils.deserializeMessages(AppConstants.UNREAD_MESSAGES, new DoneCallback<List<EMMessage>>() {
+    public Fetch getMainFetch() {
+        return new Fetch.Builder(this, "Main")
+                .setDownloadConcurrentLimit(10) // Allows Fetch to download 10 downloads in Parallel.
+                .enableLogging(true)
+                .build();
+    }
 
-            @Override
-            public void done(List<EMMessage> result, Exception e) {
-                if (result != null && !result.isEmpty()) {
-                    HolloutCommunicationsManager.getInstance().getNotifier().onNewMsg(result);
-                }
-            }
-
-        });
-
+    private void setupDatabase() {
+        FlowManager.init(new FlowConfig.Builder(this)
+                .addDatabaseConfig(new DatabaseConfig.Builder(HolloutDb.class)
+                        .modelNotifier(DirectModelNotifier.get())
+                        .build()).build());
     }
 
     private void initDrawer() {
@@ -106,9 +113,6 @@ public class ApplicationLoader extends Application {
 
             @Override
             public Drawable placeholder(Context ctx, String tag) {
-                //define different placeholders for different imageView targets
-                //default tags are accessible via the DrawerImageLoader.Tags
-                //custom ones can be checked via string. see the CustomUrlBasePrimaryDrawerItem LINE 111
                 if (DrawerImageLoader.Tags.PROFILE.name().equals(tag)) {
                     return DrawerUIUtils.getPlaceHolder(ctx);
                 } else if (DrawerImageLoader.Tags.ACCOUNT_HEADER.name().equals(tag)) {
@@ -119,7 +123,6 @@ public class ApplicationLoader extends Application {
                 return super.placeholder(ctx, tag);
             }
         });
-
     }
 
     private void startAppInstanceDetector() {
@@ -137,13 +140,15 @@ public class ApplicationLoader extends Application {
     }
 
     private void configureParse() {
+        Parse.enableLocalDatastore(this);
         Parse.initialize(new Parse.Configuration.Builder(ApplicationLoader.this)
-                .applicationId(AppKeys.APPLICATION_ID) // should correspond to APP_ID env variable
-                .clientKey(AppKeys.SERVER_CLIENT_KEY)  // set explicitly blank unless clientKey is configured on Parse server
+                .applicationId(AppKeys.APPLICATION_ID)
+                .clientKey(AppKeys.SERVER_CLIENT_KEY)
                 .server(AppKeys.SERVER_ENDPOINT)
                 .enableLocalDataStore()
                 .clientBuilder(getOkHttpClientBuilder())
                 .build());
+        ChatClient.getInstance().startChatClient();
         try {
             parseLiveQueryClient = ParseLiveQueryClient.Factory.getClient(new URI(AppKeys.SERVER_ENDPOINT));
             parseLiveQueryClient.registerListener(new ParseLiveQueryClientCallbacks() {
@@ -229,10 +234,6 @@ public class ApplicationLoader extends Application {
                 HolloutPreferences.defaultToSystemEmojis(AppConstants.SYSTEM_EMOJI_PREF, false);
             }
         }).start();
-    }
-
-    private void persistReactionsToLocalDatabase() {
-
     }
 
 }

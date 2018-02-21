@@ -14,8 +14,8 @@ import android.text.Spanned;
 
 import com.parse.ParseObject;
 import com.wan.hollout.R;
+import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.managers.HolloutCommunicationsManager;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +52,7 @@ public class NotificationUtils {
 
     public static void displayIndividualChatRequestNotification(final ParseObject requester) {
 
-        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+        ChatClient.getInstance().execute(new Runnable() {
 
             @Override
             public void run() {
@@ -100,7 +100,7 @@ public class NotificationUtils {
 
     public static void displayKindIsNearbyNotification(final ParseObject requester) {
 
-        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+        ChatClient.getInstance().execute(new Runnable() {
 
             @Override
             public void run() {
@@ -157,7 +157,6 @@ public class NotificationUtils {
 
     private static Bitmap getBitmapFromURL(final String strURL) {
         Callable<Bitmap> bitmapCallable = new Callable<Bitmap>() {
-
             @Override
             public Bitmap call() throws Exception {
                 try {
@@ -172,13 +171,10 @@ public class NotificationUtils {
                     return null;
                 }
             }
-
         };
-
         FutureTask<Bitmap> bitmapFutureTask = new FutureTask<>(bitmapCallable);
         ExecutorService executorService = Executors.newCachedThreadPool();
         executorService.execute(bitmapFutureTask);
-
         try {
             return bitmapFutureTask.get();
         } catch (InterruptedException | ExecutionException e) {

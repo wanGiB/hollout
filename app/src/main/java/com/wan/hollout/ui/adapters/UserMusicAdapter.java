@@ -44,14 +44,14 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
  */
 public class UserMusicAdapter extends RecyclerView.Adapter<UserMusicAdapter.AudioRowHolder> implements StickyRecyclerHeadersAdapter<UserMusicAdapter.AudioHeaderHolder>, Filterable {
 
-    public ArrayList<AudioFile> audioFiles;
+    private ArrayList<AudioFile> audioFiles;
     public LayoutInflater layoutInflater;
-    public ArrayList<AudioFile> filteredAudioFiles = null;
-    public AudioItemsFilter audioItemsFilter;
-    public String queryString;
+    private ArrayList<AudioFile> filteredAudioFiles = null;
+    private AudioItemsFilter audioItemsFilter;
+    private String queryString;
 
     private GalleryActivity galleryActivity;
-    public static SparseBooleanArray selectedIndices;
+    static SparseBooleanArray selectedIndices;
 
     public UserMusicAdapter(GalleryActivity galleryActivity, ArrayList<AudioFile> audioFiles) {
         this.galleryActivity = galleryActivity;
@@ -63,11 +63,11 @@ public class UserMusicAdapter extends RecyclerView.Adapter<UserMusicAdapter.Audi
         audioItemsFilter = new AudioItemsFilter();
     }
 
-    public void setQueryString(String queryString) {
+    private void setQueryString(String queryString) {
         this.queryString = queryString;
     }
 
-    public String getQueryString() {
+    private String getQueryString() {
         return queryString;
     }
 
@@ -185,26 +185,26 @@ public class UserMusicAdapter extends RecyclerView.Adapter<UserMusicAdapter.Audi
         return filteredAudioFiles.size();
     }
 
-    public class AudioRowHolder extends RecyclerView.ViewHolder {
+    static class AudioRowHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.audio_icon)
-        public RoundedImageView audioIcon;
+        RoundedImageView audioIcon;
 
         @BindView(R.id.audio_name)
-        public HolloutTextView audioTitle;
+        HolloutTextView audioTitle;
 
         @BindView(R.id.audio_album)
-        public HolloutTextView audioAlbum;
+        HolloutTextView audioAlbum;
 
         @BindView(R.id.audio_size)
-        public HolloutTextView audioSize;
+        HolloutTextView audioSize;
 
         @BindView(R.id.audio_check)
-        public CheckBox audioCheck;
+        CheckBox audioCheck;
 
         @BindView(R.id.audio_item_parent)
-        public LinearLayout audioItemParent;
+        LinearLayout audioItemParent;
 
-        public AudioRowHolder(View view) {
+        AudioRowHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
         }
@@ -214,7 +214,7 @@ public class UserMusicAdapter extends RecyclerView.Adapter<UserMusicAdapter.Audi
         @BindView(R.id.header)
         public HolloutTextView header;
 
-        public AudioHeaderHolder(View view) {
+        AudioHeaderHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
         }

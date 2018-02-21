@@ -15,7 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.hyphenate.chat.EMMessage;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
@@ -409,10 +408,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             UiUtils.showView(replyToMessageView, true);
             UiUtils.showView(forwardMessageView, true);
             if (!AppConstants.selectedMessages.isEmpty()) {
-                EMMessage emMessage = AppConstants.selectedMessages.get(0);
-                if (emMessage != null) {
-                    UiUtils.showView(copyMessageView, emMessage.getType() == EMMessage.Type.TXT);
-                }
+//                EMMessage emMessage = AppConstants.selectedMessages.get(0);
+//                if (emMessage != null) {
+//                    UiUtils.showView(copyMessageView, emMessage.getType() == EMMessage.Type.TXT);
+//                }
             }
         }
         destroyActionModeView.setOnClickListener(new OnClickListener() {

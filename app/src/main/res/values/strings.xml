@@ -204,7 +204,7 @@
     <string name="delete_conversation">Delete conversation</string>
 
     <string name="cant_find_pictures">"Can't find pictures"</string>
-    <string name="File_does_not_exist">File does not exist</string>
+    <string name="file_does_not_exist">File does not exist</string>
     <string name="file_greater_than_max">The file can not be larger than 10MB</string>
     <string name="Is_download_voice_click_later">Downloading the voice message, click later</string>
     <string name="send_failure_please">Send failure, please test whether the server connection</string>

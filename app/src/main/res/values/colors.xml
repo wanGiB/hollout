@@ -39,9 +39,9 @@
     <color name="conversation_list_item_background_unread_dark">#ff333333</color>
     <color name="background_tab_pressed">#6633B5E5</color>
     <color name="info_message_background_color">#f6f6f6</color>
-    <color name="colorPrimary">#00628F</color>
-    <color name="colorPrimaryDark">#00547A</color>
-    <color name="colorPrimaryDarker">#00547A</color>
+    <color name="colorPrimary">#35465c</color>
+    <color name="colorPrimaryDark">#2f3e51</color>
+    <color name="colorPrimaryDarker">#2f3e51</color>
     <color name="bubble_tint">#F6F4F6</color>
     <color name="colorAccent">#E8A723</color>
     <color name="conversation_sent_item_tint_color">#FDF8ED</color>

@@ -38,16 +38,16 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View convertView = layoutInflater.inflate(R.layout.chat_request_recycler_view_item,parent, false);
+        View convertView = layoutInflater.inflate(R.layout.chat_request_recycler_view_item, parent, false);
         return new ChatRequestsHolder(convertView);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ChatRequestsHolder chatRequestsHolder = (ChatRequestsHolder)holder;
+        ChatRequestsHolder chatRequestsHolder = (ChatRequestsHolder) holder;
         ParseObject chatRequest = chatRequests.get(position);
-        if (chatRequest!=null){
-            chatRequestsHolder.bindData(activity,this,chatRequest);
+        if (chatRequest != null) {
+            chatRequestsHolder.bindData(activity, this, chatRequest);
         }
     }
 
@@ -65,12 +65,12 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         public ChatRequestsHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
         }
 
-        public void bindData(Activity activity,ChatRequestsAdapter chatRequestsAdapter,ParseObject chatRequest){
+        public void bindData(Activity activity, ChatRequestsAdapter chatRequestsAdapter, ParseObject chatRequest) {
             if (chatRequestView != null) {
-                chatRequestView.bindData(activity,chatRequestsAdapter,chatRequest);
+                chatRequestView.bindData(activity, chatRequestsAdapter, chatRequest);
             }
         }
 

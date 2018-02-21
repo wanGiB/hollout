@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,8 +20,11 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
+import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
 import com.wan.hollout.ui.helpers.DividerItemDecoration;
@@ -67,6 +71,7 @@ public class ConversationsFragment extends Fragment {
     @BindView(R.id.no_hollout_users_text_view)
     HolloutTextView errorTextView;
 
+    @SuppressLint("StaticFieldLeak")
     public static ConversationsAdapter conversationsAdapter;
     public static List<ConversationItem> conversations = new ArrayList<>();
     private ParseObject signedInUser;
@@ -78,6 +83,31 @@ public class ConversationsFragment extends Fragment {
             signedInUser = AuthUtil.getCurrentUser();
         }
     }
+
+    private DirectModelNotifier.ModelChangedListener onModelStateChangedListener = new DirectModelNotifier.ModelChangedListener<ChatMessage>() {
+
+        @Override
+        public void onTableChanged(@Nullable Class<?> tableChanged, @NonNull BaseModel.Action action) {
+
+        }
+
+        @Override
+        public void onModelChanged(@NonNull ChatMessage model, @NonNull BaseModel.Action action) {
+            //Check for the model that just changed
+            if (!conversations.isEmpty()) {
+                for (ConversationItem conversationItem : conversations) {
+                    String conversationId = conversationItem.getObjectId();
+                    if (model.getConversationId().equals(conversationId)) {
+                        int indexOfConversation = conversations.indexOf(conversationItem);
+                        if (indexOfConversation != -1) {
+                            conversationsAdapter.notifyItemChanged(indexOfConversation);
+                        }
+                    }
+                }
+            }
+        }
+    };
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -104,7 +134,6 @@ public class ConversationsFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         conversationsRecyclerView.setLayoutManager(linearLayoutManager);
         conversationsRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        conversationsRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
         conversationsRecyclerView.setAdapter(conversationsAdapter);
         nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
@@ -302,12 +331,14 @@ public class ConversationsFragment extends Fragment {
         super.onStart();
         initSignedInUser();
         invalidateAdapter();
+        DirectModelNotifier.get().registerForModelChanges(ChatMessage.class, onModelStateChangedListener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
         checkAnUnRegEventBus();
+        DirectModelNotifier.get().unregisterForModelChanges(ChatMessage.class, onModelStateChangedListener);
     }
 
     @Override

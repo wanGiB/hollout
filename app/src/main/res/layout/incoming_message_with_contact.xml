@@ -68,28 +68,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content">
 
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="bottom|end"
-                            android:orientation="horizontal"
-                            android:paddingEnd="5dp"
-                            android:paddingLeft="5dp"
-                            android:paddingRight="5dp"
-                            android:paddingStart="5dp">
-
-                            <com.wan.hollout.ui.widgets.HolloutTextView
-                                android:id="@+id/textview_time"
-                                style="@style/chat_timings"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="4dp"
-                                android:layout_marginRight="4dp"
-                                android:paddingTop="5dp"
-                                app:textStyle="none" />
-
-                        </LinearLayout>
-
                         <com.wan.hollout.ui.widgets.ChatMessageTextView
                             android:id="@+id/contact_phone_numbers"
                             android:layout_width="wrap_content"
@@ -111,5 +89,25 @@
         </FrameLayout>
 
     </RelativeLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/message_container"
+        android:layout_alignEnd="@+id/message_container"
+        android:layout_alignRight="@+id/message_container"
+        android:layout_below="@+id/message_container"
+        android:layout_gravity="bottom|end"
+        android:orientation="horizontal">
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/textview_time"
+            style="@style/chat_timings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_marginRight="4dp"
+            app:textStyle="none" />
+
+    </LinearLayout>
 
 </com.wan.hollout.ui.widgets.ChatMessageView>

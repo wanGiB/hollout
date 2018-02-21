@@ -1,18 +1,23 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
 import android.media.MediaRecorder;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -41,54 +46,40 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
-import com.hyphenate.EMError;
-import com.hyphenate.EMValueCallBack;
-import com.hyphenate.chat.EMChatRoom;
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMConversation;
-import com.hyphenate.chat.EMFileMessageBody;
-import com.hyphenate.chat.EMImageMessageBody;
-import com.hyphenate.chat.EMLocationMessageBody;
-import com.hyphenate.chat.EMMessage;
-import com.hyphenate.chat.EMMessageBody;
-import com.hyphenate.chat.EMTextMessageBody;
-import com.hyphenate.chat.EMVideoMessageBody;
-import com.hyphenate.chat.EMVoiceMessageBody;
-import com.hyphenate.exceptions.HyphenateException;
 import com.parse.DeleteCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
+import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
+import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.bean.HolloutFile;
-import com.wan.hollout.interfaces.DoneCallback;
-import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
-import com.wan.hollout.utils.ChatUtils;
-import com.wan.hollout.managers.HolloutCommunicationsManager;
-import com.wan.hollout.utils.MessageNotifier;
-import com.wan.hollout.utils.NotificationUtils;
+import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.emoji.EmojiDrawer;
+import com.wan.hollout.enums.MessageDirection;
+import com.wan.hollout.enums.MessageStatus;
+import com.wan.hollout.enums.MessageType;
 import com.wan.hollout.eventbuses.GifMessageEvent;
-import com.wan.hollout.eventbuses.MessageChangedEvent;
-import com.wan.hollout.eventbuses.MessageDeliveredEvent;
-import com.wan.hollout.eventbuses.MessageReadEvent;
-import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.PlaceLocalCallEvent;
 import com.wan.hollout.eventbuses.ReactionMessageEvent;
 import com.wan.hollout.eventbuses.ScrollToMessageEvent;
 import com.wan.hollout.eventbuses.SearchMessages;
+import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.language.DynamicLanguage;
 import com.wan.hollout.listeners.OnVerticalScrollListener;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
 import com.wan.hollout.ui.adapters.MessagesAdapter;
 import com.wan.hollout.ui.adapters.PickedMediaFilesAdapter;
 import com.wan.hollout.ui.services.ContactService;
+import com.wan.hollout.ui.utils.FileUploader;
 import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
 import com.wan.hollout.ui.widgets.ChatToolbar;
 import com.wan.hollout.ui.widgets.CircleImageView;
@@ -111,6 +102,8 @@ import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.HolloutVCFParser;
 import com.wan.hollout.utils.LocationUtils;
+import com.wan.hollout.utils.MessageNotifier;
+import com.wan.hollout.utils.NotificationUtils;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.SafeLayoutManager;
@@ -121,19 +114,21 @@ import com.wan.hollout.utils.ViewUtil;
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 import net.alhazmy13.mediapicker.Video.VideoPicker;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
-import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -156,7 +151,7 @@ public class ChatActivity extends BaseActivity implements
         KeyboardAwareLinearLayout.OnKeyboardShownListener,
         ActivityCompat.OnRequestPermissionsResultCallback, InputPanel.Listener, View.OnClickListener {
 
-    private static final int REQUEST_CODE_PICK_FILE = 9;
+    private static final int REQUEST_CODE_PICK_DOCUMENT = 9;
     private static final int REQUEST_CODE_CONTACT_SHARE = 15;
     private static final int PLACE_LOCATION_PICKER_REQUEST_CODE = 20;
     protected static final int MESSAGE_TYPE_RECEIVED_CALL = 1;
@@ -268,15 +263,13 @@ public class ChatActivity extends BaseActivity implements
 
     private File recorderAudioCaptureFilePath;
 
-    private List<EMMessage> messages = new ArrayList<>();
-    private List<EMMessage> tempReceivedMessages = new ArrayList<>();
+    private List<ChatMessage> messages = new ArrayList<>();
+    private List<ChatMessage> tempReceivedMessages = new ArrayList<>();
 
     private MessagesAdapter messagesAdapter;
-
     private LinearLayoutManager messagesLayoutManager;
-    protected EMConversation mConversation;
-    private int chatType;
 
+    private int chatType;
     private boolean onScrolledUp = true;
     /**
      * load 20 messages at one time
@@ -288,11 +281,11 @@ public class ChatActivity extends BaseActivity implements
 
     private boolean userFriendable = false;
 
-    private Comparator<EMMessage> messageComparator = new Comparator<EMMessage>() {
+    private Comparator<ChatMessage> messageComparator = new Comparator<ChatMessage>() {
         @Override
-        public int compare(EMMessage o1, EMMessage o2) {
+        public int compare(ChatMessage o1, ChatMessage o2) {
             if (o1 != null && o2 != null) {
-                return Long.valueOf(o2.getMsgTime()).compareTo(o1.getMsgTime());
+                return Long.valueOf(o2.getTimeStamp()).compareTo(o1.getTimeStamp());
             }
             return 0;
         }
@@ -300,10 +293,60 @@ public class ChatActivity extends BaseActivity implements
 
     private static KeyframesDrawable imageDrawable;
     private static InputStream stream;
-
-    private List<EMMessage> kryoUnreadMessages = new ArrayList<>();
-
+    private List<ChatMessage> allUnreadMessages = new ArrayList<>();
     private String phoneNumberToCall;
+
+    private ProgressDialog deleteConversationProgressDialog;
+
+    private DirectModelNotifier.ModelChangedListener<ChatMessage> onModelStateChangedListener = new DirectModelNotifier.ModelChangedListener<ChatMessage>() {
+
+        @Override
+        public void onTableChanged(@Nullable Class<?> tableChanged, @NonNull BaseModel.Action action) {
+
+        }
+
+        @Override
+        public void onModelChanged(@NonNull final ChatMessage model, @NonNull final BaseModel.Action action) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (action == BaseModel.Action.INSERT || action == BaseModel.Action.SAVE) {
+                        checkAndAddNewMessage(model);
+                        if (model.getFrom().equals(getRecipient())) {
+                            if (onScrolledUp) {
+                                tempReceivedMessages.add(model);
+                            } else {
+                                messagesRecyclerView.smoothScrollToPosition(0);
+                            }
+                            UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
+                            prioritizeConversation();
+                            refreshPendingUnseenMessages();
+                        } else {
+                            MessageNotifier.getInstance().notifyOnUnreadMessages();
+                        }
+                    } else if (action == BaseModel.Action.UPDATE) {
+                        int indexOfMessage = messages.indexOf(model);
+                        if (indexOfMessage != -1) {
+                            messagesAdapter.notifyItemChanged(indexOfMessage);
+                            if (model.getMessageDirection() == MessageDirection.OUTGOING && model.getMessageStatus() == MessageStatus.READ) {
+                                UiUtils.bangSound(ChatActivity.this, R.raw.pop);
+                            }
+                        }
+                    } else if (action == BaseModel.Action.DELETE) {
+                        int indexOfMessage = messages.indexOf(model);
+                        if (indexOfMessage != -1) {
+                            messages.remove(indexOfMessage);
+                            notifyDataSetChanged();
+                        }
+                        invalidateEmptyView();
+                    }
+                }
+
+            });
+
+        }
+
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -332,16 +375,33 @@ public class ChatActivity extends BaseActivity implements
             setupChatRecipient(recipientProperties);
             if (chatType == AppConstants.CHAT_TYPE_ROOM) {
                 messagesEmptyView.setText(getString(R.string.cleaning_up_room));
-                joinRoom();
             }
         }
         initializeViews();
         setupAttachmentManager();
         setupMessagesAdapter();
         initConversation();
-        tryOffloadLastMessage();
-        decrementTotalUnreadMessages();
+        clearAllUnreadMessagesFromRecipient();
         checkIsUserBlocked();
+        createDeleteConversationProgressDialog();
+        setActiveChat();
+    }
+
+    private void setActiveChat() {
+        AppConstants.activeChatId = getRecipient();
+    }
+
+    private void createDeleteConversationProgressDialog() {
+        deleteConversationProgressDialog = new ProgressDialog(this);
+        deleteConversationProgressDialog.setIndeterminate(false);
+        deleteConversationProgressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        deleteConversationProgressDialog.setMax(100);
+    }
+
+    private void checkDismissConversationProgressDialog() {
+        if (deleteConversationProgressDialog != null && deleteConversationProgressDialog.isShowing()) {
+            deleteConversationProgressDialog.dismiss();
+        }
     }
 
     public void setPhoneNumberToCall(String phoneNumberToCall) {
@@ -360,7 +420,8 @@ public class ChatActivity extends BaseActivity implements
         return this.userFriendable;
     }
 
-    private void decrementTotalUnreadMessages() {
+    private void clearAllUnreadMessagesFromRecipient() {
+        HolloutPreferences.clearUnreadMessagesCountFrom(getRecipient());
         Set<String> totalUnreadMessages = HolloutPreferences.getTotalUnreadChats();
         if (totalUnreadMessages != null) {
             if (totalUnreadMessages.contains(getRecipient())) {
@@ -379,7 +440,7 @@ public class ChatActivity extends BaseActivity implements
         if (StringUtils.isNotEmpty(lastAttemptedMessageForRecipient)) {
             composeText.setText(lastAttemptedMessageForRecipient);
         } else {
-            if (!isAContact()) {
+            if (!isAContact() && messages.isEmpty()) {
                 composeText.setText(getString(R.string.nice_to_meet_you));
             }
         }
@@ -397,93 +458,63 @@ public class ChatActivity extends BaseActivity implements
         checkAndRegEventBus();
     }
 
-    private void joinRoom() {
-        EMClient.getInstance().chatroomManager().joinChatRoom(recipientId, new EMValueCallBack<EMChatRoom>() {
-
-            @Override
-            public void onSuccess(EMChatRoom value) {
-                initConversation();
-            }
-
-            @Override
-            public void onError(final int error, String errorMsg) {
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        switch (error) {
-                            case EMError.CHATROOM_INVALID_ID:
-                                UiUtils.showSafeToast("Sorry, we lost the key to this room. Please try again");
-                                break;
-                            case EMError.CHATROOM_PERMISSION_DENIED:
-                                UiUtils.showSafeToast("Sorry, the admin would have to grant you permissions before you can join this room");
-                                break;
-                            case EMError.CHATROOM_MEMBERS_FULL:
-                                UiUtils.showSafeToast("Sorry, the room is already congested");
-                                break;
-                        }
-                        finish();
-                    }
-                });
-
-            }
-
-        });
-    }
-
-    /**
-     * init conversation
-     * If it is a chat room, Need to join the chat room after the success of initialization
-     */
     private void initConversation() {
-        //get the mConversation
-        mConversation = EMClient.getInstance()
-                .chatManager()
-                .getConversation(recipientId, ChatUtils.getConversationType(chatType), true);
-        mConversation.markAllMessagesAsRead();
-        // the number of messages loaded into mConversation is getChatOptions().getNumberOfMessagesLoaded
-        // you can change this number
         fetchMessages();
-        invalidateEmptyView();
     }
 
     private void fetchMessages() {
-        final List<EMMessage> msgs = new ArrayList<>(mConversation.getAllMessages());
-        int msgCount = msgs.size();
-        if (msgCount < mConversation.getAllMsgCount() && msgCount < pageSize) {
-            String msgId = null;
-            if (msgs.size() > 0) {
-                msgId = msgs.get(0).getMsgId();
+        DbUtils.fetchMessagesInConversation(getRecipient(), new DoneCallback<List<ChatMessage>>() {
+            @Override
+            public void done(final List<ChatMessage> result, final Exception e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (e == null && result != null && !result.isEmpty()) {
+                            if (!result.isEmpty()) {
+                                for (ChatMessage emMessage : result) {
+                                    if (!messages.contains(emMessage)) {
+                                        messages.add(0, emMessage);
+                                    }
+                                }
+                                sortMessages();
+                                notifyDataSetChanged();
+                                NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
+                                markMessagesAsRead();
+                            }
+                        }
+                        tryOffloadLastMessage();
+                        invalidateEmptyView();
+                    }
+                });
             }
-            List<EMMessage> moreMessages = mConversation.loadMoreMsgFromDB(msgId, pageSize - msgCount);
-            if (moreMessages != null && !moreMessages.isEmpty()) {
-                msgs.addAll(moreMessages);
-            }
-        }
+        });
+        NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
+    }
 
-        if (!msgs.isEmpty()) {
-            HolloutUtils.deserializeMessages(AppConstants.UNREAD_MESSAGES, new DoneCallback<List<EMMessage>>() {
-                @Override
-                public void done(List<EMMessage> result, Exception e) {
-                    if (e == null && result != null) {
-                        kryoUnreadMessages.clear();
-                        kryoUnreadMessages.addAll(result);
+    private void markMessagesAsRead() {
+        final List<ChatMessage> unreadMessagesInThisConversation = new ArrayList<>();
+        HolloutUtils.deserializeMessages(AppConstants.ALL_UNREAD_MESSAGES, new DoneCallback<List<ChatMessage>>() {
+            @Override
+            public void done(List<ChatMessage> result, Exception e) {
+                if (e == null && result != null) {
+                    allUnreadMessages.clear();
+                    allUnreadMessages.addAll(result);
+                }
+                if (!messages.isEmpty() && !allUnreadMessages.isEmpty()) {
+                    for (ChatMessage message : messages) {
+                        if (allUnreadMessages.contains(message)) {
+                            if (!unreadMessagesInThisConversation.contains(message)) {
+                                unreadMessagesInThisConversation.add(message);
+                            }
+                            allUnreadMessages.remove(message);
+                        }
                     }
                 }
-            });
-            for (EMMessage emMessage : msgs) {
-                if (!messages.contains(emMessage)) {
-                    messages.add(0, emMessage);
-                }
-                if (kryoUnreadMessages.contains(emMessage)) {
-                    kryoUnreadMessages.remove(emMessage);
-                }
             }
-            HolloutUtils.serializeMessages(kryoUnreadMessages, AppConstants.UNREAD_MESSAGES);
-            sortMessages();
-            messagesAdapter.notifyDataSetChanged();
-            mConversation.markAllMessagesAsRead();
-            NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
+        });
+        HolloutUtils.serializeMessages(allUnreadMessages, AppConstants.ALL_UNREAD_MESSAGES);
+        if (!unreadMessagesInThisConversation.isEmpty()) {
+            ChatClient.getInstance().markMessagesAsRead(unreadMessagesInThisConversation);
         }
     }
 
@@ -542,23 +573,37 @@ public class ChatActivity extends BaseActivity implements
 
     }
 
-    private void loadMoreMessages(DoneCallback<Boolean> messageLoadDoneCallback) {
-        EMMessage lastMessage = messages.get(messages.size() - 1);
-        if (lastMessage != null) {
-            List<EMMessage> moreMessages = mConversation.loadMoreMsgFromDB(lastMessage.getMsgId(), pageSize);
-            if (moreMessages != null && !moreMessages.isEmpty()) {
-                for (EMMessage emMessage : moreMessages) {
-                    if (!messages.contains(emMessage)) {
-                        messages.add(emMessage);
-                        messagesAdapter.notifyItemInserted(messages.size() - 1);
+    private void loadMoreMessages(final DoneCallback<Boolean> messageLoadDoneCallback) {
+        int messageSize = messages.size();
+        if (messageSize > 1) {
+            ChatMessage lastMessage = messages.get(messages.size() - 1);
+            if (lastMessage != null) {
+                DbUtils.fetchMoreMessagesInConversation(getRecipient(), messages.size(), new DoneCallback<List<ChatMessage>>() {
+                    @Override
+                    public void done(final List<ChatMessage> moreMessages, final Exception e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (e == null && moreMessages != null && !moreMessages.isEmpty()) {
+                                    if (moreMessages != null && !moreMessages.isEmpty()) {
+                                        for (ChatMessage emMessage : moreMessages) {
+                                            if (!messages.contains(emMessage)) {
+                                                messages.add(emMessage);
+                                                messagesAdapter.notifyItemInserted(messages.size() - 1);
+                                            }
+                                        }
+                                        if (messageLoadDoneCallback != null) {
+                                            messageLoadDoneCallback.done(true, null);
+                                        }
+                                    }
+                                }
+                            }
+                        });
                     }
-                }
-                if (messageLoadDoneCallback != null) {
-                    messageLoadDoneCallback.done(true, null);
-                }
+                });
+            } else {
+                UiUtils.showSafeToast("Last Message is null");
             }
-        } else {
-            UiUtils.showSafeToast("Last Message is null");
         }
     }
 
@@ -774,7 +819,7 @@ public class ChatActivity extends BaseActivity implements
         }
         if (chatToolbar.isActionModeActivated()) {
             chatToolbar.updateActionMode(0);
-            messagesAdapter.notifyDataSetChanged();
+            notifyDataSetChanged();
             return;
         }
         if (messageReplyView.getVisibility() == View.VISIBLE) {
@@ -881,7 +926,7 @@ public class ChatActivity extends BaseActivity implements
                 UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
                 if (recordingInProgress) {
                     inputPanel.stopRecording();
-                    int seconds = (int) inputPanel.getStartTime().get();//Send voice note
+                    long seconds = inputPanel.getElapsedTime(); //Get the Elapsed Time of this Voice Note
                     sendVoiceMessage(recorderAudioCaptureFilePath.getPath(), seconds);
                 } else {
                     if (!pickedMediaFiles.isEmpty()) {
@@ -915,17 +960,20 @@ public class ChatActivity extends BaseActivity implements
                     break;
                 case AppConstants.FILE_TYPE_AUDIO:
                     //Send file message with file type audio
-                    HashMap<String, String> moreMessageProps = new HashMap<>();
-                    moreMessageProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_AUDIO);
-                    moreMessageProps.put(AppConstants.AUDIO_DURATION, UiUtils.getTimeString(HolloutUtils.getVideoDuration(holloutFile.getLocalFilePath())));
-                    moreMessageProps.put(AppConstants.FILE_CAPTION, holloutFile.getFileName());
-                    sendFileMessage(holloutFile.getLocalFilePath(), moreMessageProps);
+                    ChatMessage audioMessage = new ChatMessage();
+                    attachRequiredPropsToMessage(audioMessage, MessageType.AUDIO);
+                    audioMessage.setAudioDuration(UiUtils.getTimeString(HolloutUtils.getVideoDuration(holloutFile.getLocalFilePath())));
+                    audioMessage.setFileCaption(holloutFile.getFileName());
+                    audioMessage.setLocalUrl(holloutFile.getLocalFilePath());
+                    checkAndAddNewMessage(audioMessage);
+                    DbUtils.createMessage(audioMessage);
+                    emptyComposeText();
+                    FileUploader.getInstance().uploadFile(holloutFile.getLocalFilePath(), AppConstants.AUDIOS_DIRECTORY, audioMessage.getMessageId());
                     break;
                 case AppConstants.FILE_TYPE_VIDEO:
-                    sendVideoMessage(holloutFile.getLocalFilePath(),
-                            holloutFile.getLocalFilePath(),
-                            (int) (new File(holloutFile.getLocalFilePath()).length() / 1000),
-                            composeText.getText().toString().trim());
+                    sendVideoMessage(holloutFile.getLocalFilePath(), holloutFile.getLocalFilePath(),
+                            StringUtils.isNotEmpty(composeText.getText().toString().trim())
+                                    ? composeText.getText().toString().trim() : "Video");
                     break;
             }
         }
@@ -933,20 +981,15 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private class AttachButtonListener implements View.OnClickListener {
-
         @Override
         public void onClick(View v) {
-
             if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfForStoragePermission(ChatActivity.this)) {
                 holloutPermissions.requestStoragePermissions();
                 setLastPermissionInitiationAction(AppConstants.REQUEST_STORAGE_ACCESS_FOR_GALLERY);
                 return;
             }
-
             handleAddAttachment();
-
         }
-
     }
 
     public void snackOutMessageReplyView(final View view) {
@@ -956,149 +999,111 @@ public class ChatActivity extends BaseActivity implements
         composeText.setHint(getString(R.string.compose_message));
     }
 
+    @SuppressLint("SetTextI18n")
     public void snackInMessageReplyView(View view) {
         UiUtils.showView(view, true);
-        EMMessage messageToReplyTo = AppConstants.selectedMessages.get(0);
+        ChatMessage messageToReplyTo = AppConstants.selectedMessages.get(0);
         composeText.setHint("Reply this message");
         if (messageToReplyTo != null) {
-            EMMessageBody messageBody = messageToReplyTo.getBody();
-            try {
-                String senderName = messageToReplyTo.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
-                String senderId = messageToReplyTo.getStringAttribute(AppConstants.REAL_OBJECT_ID);
-                if (senderId != null && senderName != null) {
-                    replyMessageTitleView.setText(StringUtils.capitalize(senderId.equals(signedInUser.getString(AppConstants.REAL_OBJECT_ID))
+            String senderName = messageToReplyTo.getFromName();
+            String senderId = messageToReplyTo.getFrom();
+            if (senderId != null && senderName != null) {
+                replyMessageTitleView.setText(StringUtils.capitalize(senderId.equals(signedInUser.getString(AppConstants.REAL_OBJECT_ID))
+                        ? getString(R.string.you) : senderName));
+            } else {
+                if (senderName != null) {
+                    replyMessageTitleView.setText(StringUtils.capitalize(messageToReplyTo.getMessageDirection() == MessageDirection.OUTGOING
                             ? getString(R.string.you) : senderName));
+                }
+            }
+            MessageType messageType = getMessageType(messageToReplyTo);
+            if (messageType == MessageType.TXT) {
+                replyMessageSubTitleView.setText(messageToReplyTo.getMessageBody());
+            } else if (messageType == MessageType.GIF) {
+                String gifUrl = messageToReplyTo.getGifUrl();
+                UiUtils.showView(replyIconView, true);
+                UiUtils.showView(playReplyMessageIfVideo, false);
+                replyMessageSubTitleView.setText(UiUtils.fromHtml("<b>" + getString(R.string.gif) + "</b>"));
+                loadGif(gifUrl);
+            } else if (messageType == MessageType.REACTION) {
+                String reactionValue = messageToReplyTo.getReactionValue();
+                UiUtils.showView(playReplyMessageIfVideo, false);
+                UiUtils.showView(replyIconView, true);
+                loadDrawables(ChatActivity.this, replyIconView, reactionValue);
+                replyMessageSubTitleView.setText(StringUtils.strip(reactionValue.split("/")[1], ".json"));
+            } else if (messageType == MessageType.IMAGE) {
+                String filePath = messageToReplyTo.getLocalUrl();
+                File file = new File(filePath);
+                if (file.exists()) {
+                    filePath = messageToReplyTo.getLocalUrl();
                 } else {
-                    if (senderName != null) {
-                        replyMessageTitleView.setText(StringUtils.capitalize(messageToReplyTo.direct() == EMMessage.Direct.SEND ? getString(R.string.you) : senderName));
-                    }
+                    filePath = messageToReplyTo.getRemoteUrl();
                 }
-                EMMessage.Type messageType = getMessageType(messageToReplyTo);
-                if (messageType == EMMessage.Type.TXT) {
-                    EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageBody;
-                    String messageAttributeType = messageToReplyTo.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
-                    if (messageAttributeType != null) {
-                        HolloutLogger.d("MessageType", "Message Type is Text");
-                        switch (messageAttributeType) {
-                            case AppConstants.MESSAGE_ATTR_TYPE_GIF:
-                                String gifUrl = messageToReplyTo.getStringAttribute(AppConstants.GIF_URL);
-                                if (gifUrl != null) {
-                                    UiUtils.showView(replyIconView, true);
-                                    replyMessageSubTitleView.setText(UiUtils.fromHtml("<b>" + getString(R.string.gif) + "</b>"));
-                                    loadGif(gifUrl);
-                                } else {
-                                    replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
-                                }
-                                break;
-                            case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
-                                String reactionValue = messageToReplyTo.getStringAttribute(AppConstants.REACTION_VALUE);
-                                if (reactionValue != null) {
-                                    UiUtils.showView(replyIconView, true);
-                                    loadDrawables(ChatActivity.this, replyIconView, reactionValue);
-                                    replyMessageSubTitleView.setText(StringUtils.strip(reactionValue.split("/")[1], ".json"));
-                                } else {
-                                    replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
-                                }
-                                break;
-                            default:
-                                replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
-                                break;
-                        }
-                    } else {
-                        replyMessageSubTitleView.setText(emTextMessageBody.getMessage());
-                    }
+                UiUtils.showView(replyIconView, true);
+                UiUtils.showView(playReplyMessageIfVideo, false);
+                UiUtils.loadImage(ChatActivity.this, filePath, replyIconView);
+                String fileCaption = messageToReplyTo.getFileCaption();
+                if (StringUtils.isNotEmpty(fileCaption)) {
+                    replyMessageSubTitleView.setText(fileCaption);
+                } else {
+                    replyMessageSubTitleView.setText(getString(R.string.photo));
                 }
-                if (messageType == EMMessage.Type.IMAGE) {
-                    EMImageMessageBody emImageMessageBody = (EMImageMessageBody) messageBody;
-                    String filePath = emImageMessageBody.getLocalUrl();
-                    File file = new File(filePath);
-                    if (file.exists()) {
-                        filePath = emImageMessageBody.getLocalUrl();
-                    } else {
-                        filePath = emImageMessageBody.getRemoteUrl();
-                    }
-                    UiUtils.showView(replyIconView, true);
-                    UiUtils.loadImage(ChatActivity.this, filePath, replyIconView);
-                    String fileCaption = messageToReplyTo.getStringAttribute(AppConstants.FILE_CAPTION);
-                    if (StringUtils.isNotEmpty(fileCaption)) {
-                        replyMessageSubTitleView.setText(fileCaption);
-                    } else {
-                        replyMessageSubTitleView.setText(getString(R.string.photo));
-                    }
-                }
-                if (messageType == EMMessage.Type.VIDEO) {
-                    EMVideoMessageBody emVideoMessageBody = (EMVideoMessageBody) messageBody;
-                    String remoteVideoThumbnailUrl = emVideoMessageBody.getThumbnailUrl();
-                    File localThumbFile = new File(emVideoMessageBody.getLocalThumb());
-                    UiUtils.showView(replyIconView, true);
+            } else if (messageType == MessageType.VIDEO) {
+                String remoteVideoThumbnailUrl = messageToReplyTo.getThumbnailUrl();
+                File localThumbFile = new File(messageToReplyTo.getLocalThumb());
+                UiUtils.showView(replyIconView, true);
+                UiUtils.showView(playReplyMessageIfVideo, true);
+                if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
+                    HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
+                    UiUtils.loadImage(ChatActivity.this, messageToReplyTo.getThumbnailUrl(), replyIconView);
                     UiUtils.showView(playReplyMessageIfVideo, true);
-                    if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
-                        HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
-                        UiUtils.loadImage(ChatActivity.this, emVideoMessageBody.getThumbnailUrl(), replyIconView);
-                        UiUtils.showView(playReplyMessageIfVideo, true);
-                    } else {
-                        if (localThumbFile.exists()) {
-                            HolloutLogger.d("VideoThumbnailPath", "Local Video Thumb exists with value = " + localThumbFile);
-                            loadVideoFromPath(replyIconView, emVideoMessageBody.getLocalThumb());
-                        }
-                    }
-                    String videoCaption = messageToReplyTo.getStringAttribute(AppConstants.FILE_CAPTION);
-                    if (videoCaption != null) {
-                        replyMessageSubTitleView.setText(videoCaption);
-                    } else {
-                        replyMessageSubTitleView.setText(getString(R.string.video));
+                } else {
+                    if (localThumbFile.exists()) {
+                        HolloutLogger.d("VideoThumbnailPath", "Local Video Thumb exists with value = " + localThumbFile);
+                        loadVideoFromPath(replyIconView, messageToReplyTo.getLocalThumb());
                     }
                 }
-                if (messageType == EMMessage.Type.LOCATION) {
-                    EMLocationMessageBody emLocationMessageBody = (EMLocationMessageBody) messageBody;
-                    String locationName = emLocationMessageBody.getAddress();
-                    if (StringUtils.isNotEmpty(locationName)) {
-                        replyMessageSubTitleView.setText(locationName);
-                    } else {
-                        replyMessageSubTitleView.setText(getString(R.string.location));
-                    }
-                    String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(emLocationMessageBody.getLatitude()),
-                            String.valueOf(emLocationMessageBody.getLongitude()));
-                    if (StringUtils.isNotEmpty(locationStaticMap)) {
-                        UiUtils.showView(replyIconView, true);
-                        UiUtils.loadImage(ChatActivity.this, locationStaticMap, replyIconView);
-                    }
+                String videoCaption = messageToReplyTo.getFileCaption();
+                if (videoCaption != null) {
+                    replyMessageSubTitleView.setText(videoCaption);
+                } else {
+                    replyMessageSubTitleView.setText(getString(R.string.video));
                 }
-                if (messageType == EMMessage.Type.FILE) {
-                    EMFileMessageBody emFileMessageBody = ((EMFileMessageBody) messageBody);
-                    String fileType = messageToReplyTo.getStringAttribute(AppConstants.FILE_TYPE);
-                    if (fileType.equals(AppConstants.FILE_TYPE_CONTACT)) {
-                        String contactName = messageToReplyTo.getStringAttribute(AppConstants.CONTACT_NAME);
-                        String contactPhoneNumber = messageToReplyTo.getStringAttribute(AppConstants.CONTACT_NUMBER);
-                        String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
-                        replyMessageSubTitleView.setText(contactName + ":" + purifiedPhoneNumber);
-                    }
-                    if (fileType.equals(AppConstants.FILE_TYPE_AUDIO)) {
-                        replyMessageSubTitleView.setText(getString(R.string.audio));
-                    }
-                    if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)) {
-                        String documentName = messageToReplyTo.getStringAttribute(AppConstants.FILE_NAME);
-                        String documentSize = messageToReplyTo.getStringAttribute(AppConstants.FILE_SIZE);
-                        if (StringUtils.isNotEmpty(documentName)) {
-                            replyMessageSubTitleView.setText(documentName + "\n" + documentSize);
-                        }
-                    }
+            } else if (messageType == MessageType.LOCATION) {
+                String locationName = messageToReplyTo.getLocationAddress();
+                if (StringUtils.isNotEmpty(locationName)) {
+                    replyMessageSubTitleView.setText(locationName);
+                } else {
+                    replyMessageSubTitleView.setText(getString(R.string.location));
                 }
-                if (messageType == EMMessage.Type.VOICE) {
-                    EMVoiceMessageBody emVoiceMessageBody = (EMVoiceMessageBody) messageBody;
-                    String audioDuration = UiUtils.getTimeString(emVoiceMessageBody.getLength());
-                    String fileCaption = "Voice Note";
-                    replyMessageSubTitleView.setText(audioDuration + ":" + fileCaption);
+                UiUtils.showView(playReplyMessageIfVideo, false);
+                String locationStaticMap = LocationUtils.loadStaticMap(messageToReplyTo.getLatitude(),
+                        messageToReplyTo.getLongitude());
+                if (StringUtils.isNotEmpty(locationStaticMap)) {
+                    UiUtils.showView(replyIconView, true);
+                    UiUtils.loadImage(ChatActivity.this, locationStaticMap, replyIconView);
                 }
-            } catch (HyphenateException e) {
-                e.printStackTrace();
-                HolloutLogger.d("MessageType", e.getMessage());
-                if (e.getMessage().contains(AppConstants.MESSAGE_ATTR_TYPE)) {
-                    replyMessageSubTitleView.setText(((EMTextMessageBody) messageBody).getMessage());
+            } else if (messageType == MessageType.CONTACT) {
+                UiUtils.showView(playReplyMessageIfVideo, false);
+                String contactName = messageToReplyTo.getContactName();
+                String contactPhoneNumber = messageToReplyTo.getContactNumber();
+                String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
+                replyMessageSubTitleView.setText(contactName + ":" + purifiedPhoneNumber);
+            } else if (messageType == MessageType.AUDIO) {
+                UiUtils.showView(playReplyMessageIfVideo, false);
+                replyMessageSubTitleView.setText(getString(R.string.audio));
+            } else if (messageType == MessageType.DOCUMENT) {
+                UiUtils.showView(playReplyMessageIfVideo, false);
+                String documentName = messageToReplyTo.getDocumentName();
+                String documentSize = messageToReplyTo.getDocumentSize();
+                if (StringUtils.isNotEmpty(documentName)) {
+                    replyMessageSubTitleView.setText(documentName + "\n" + documentSize);
                 }
-                if (e.getMessage().contains(AppConstants.FILE_CAPTION)) {
-                    replyMessageSubTitleView.setText((getString(R.string.photo)));
-                }
+            } else if (messageType == MessageType.VOICE) {
+                UiUtils.showView(playReplyMessageIfVideo, false);
+                String audioDuration = messageToReplyTo.getAudioDuration();
+                String fileCaption = "Voice Note";
+                replyMessageSubTitleView.setText(audioDuration + ":" + fileCaption);
             }
             closeReplyMessageView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1178,8 +1183,8 @@ public class ChatActivity extends BaseActivity implements
         }
     }
 
-    private EMMessage.Type getMessageType(EMMessage message) {
-        return message.getType();
+    private MessageType getMessageType(ChatMessage message) {
+        return message.getMessageType();
     }
 
     @Override
@@ -1207,7 +1212,7 @@ public class ChatActivity extends BaseActivity implements
                             List<String> recipientBlackList = recipientProperties.getList(AppConstants.USER_BLACK_LIST);
                             switch (which) {
                                 case 0:
-                                    //Check to see if the user this user is trying to call has him in his contacts
+                                    //Check to see if this user is trying to call has him in his contacts
                                     if (recipientBlackList == null) {
                                         //Is this user in the recipient contact list?
                                         checkAndStartOnlineVoiceCall(intent);
@@ -1247,15 +1252,23 @@ public class ChatActivity extends BaseActivity implements
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        List<EMConversation> emConversations = new ArrayList<>();
-                        emConversations.add(mConversation);
-                        HolloutUtils.dissolveConversations(ChatActivity.this, emConversations, new DoneCallback<Boolean>() {
+                        deleteConversationProgressDialog.show();
+                        deleteConversationProgressDialog.setTitle("Deleting Conversation");
+                        DbUtils.batchDelete(getRecipient(), new DoneCallback<Long[]>() {
                             @Override
-                            public void done(Boolean success, Exception e) {
-                                if (e == null && success) {
-                                    messages.clear();
-                                    messagesAdapter.notifyDataSetChanged();
-                                    invalidateEmptyView();
+                            public void done(Long[] progressValues, Exception e) {
+                                long current = progressValues[0];
+                                long total = progressValues[1];
+                                if (current != -1 && total != 0) {
+                                    double percentage = (100.0 * (current + 1)) / total;
+                                    deleteConversationProgressDialog.setProgress((int) percentage);
+                                    if (percentage == 100) {
+                                        checkDismissConversationProgressDialog();
+                                        UiUtils.showSafeToast("Conversation cleared");
+                                    }
+                                } else {
+                                    checkDismissConversationProgressDialog();
+                                    UiUtils.showSafeToast("No conversation to clear.");
                                 }
                             }
                         });
@@ -1310,24 +1323,24 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void startOnlineVoiceCall(Intent intent) {
-        intent.setClass(ChatActivity.this, VoiceCallActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
-        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
-        startActivity(intent);
+//        intent.setClass(ChatActivity.this, VoiceCallActivity.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
+//        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
+//        startActivity(intent);
     }
 
     private void startOnlineVideoCall(Intent intent) {
-        intent.setClass(ChatActivity.this, VideoCallActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
-        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
-        startActivity(intent);
+//        intent.setClass(ChatActivity.this, VideoCallActivity.class);
+//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
+//        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
+//        startActivity(intent);
     }
 
     private void attemptToUnBlockUser() {
         UiUtils.showProgressDialog(ChatActivity.this, "Trying to unblock user. Please wait...");
-        HolloutUtils.unBlockUser(ChatActivity.this, getRecipient(), new DoneCallback<Boolean>() {
+        HolloutUtils.unBlockUser(getRecipient(), new DoneCallback<Boolean>() {
             @Override
             public void done(Boolean success, Exception e) {
                 UiUtils.dismissProgressDialog();
@@ -1348,7 +1361,7 @@ public class ChatActivity extends BaseActivity implements
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 UiUtils.showProgressDialog(ChatActivity.this, "Trying to block user. Please wait...");
-                HolloutUtils.blockUser(ChatActivity.this, getRecipient(), new DoneCallback<Boolean>() {
+                HolloutUtils.blockUser(getRecipient(), new DoneCallback<Boolean>() {
                     @Override
                     public void done(Boolean success, Exception e) {
                         UiUtils.dismissProgressDialog();
@@ -1450,6 +1463,8 @@ public class ChatActivity extends BaseActivity implements
     protected void onStart() {
         super.onStart();
         checkAndRegEventBus();
+        DirectModelNotifier.get().registerForModelChanges(ChatMessage.class, onModelStateChangedListener);
+        setActiveChat();
     }
 
     @Override
@@ -1538,7 +1553,7 @@ public class ChatActivity extends BaseActivity implements
         final Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
-        startActivityForResult(intent, REQUEST_CODE_PICK_FILE);
+        startActivityForResult(intent, REQUEST_CODE_PICK_DOCUMENT);
     }
 
     public void openCameraToTakePhoto() {
@@ -1625,6 +1640,7 @@ public class ChatActivity extends BaseActivity implements
             UiUtils.showView(singleMediaViewer, false);
             UiUtils.showView(cancelPickedSingleMedia, false);
             UiUtils.showView(multiplePickedMediaFilesRecyclerView, true);
+            multiplePickedMediaFilesRecyclerView.getRecycledViewPool().clear();
             pickedMediaFilesAdapter.notifyDataSetChanged();
         }
         composeText.setHint("Add caption");
@@ -1639,6 +1655,7 @@ public class ChatActivity extends BaseActivity implements
                 UiUtils.showView(singleMediaViewer, false);
                 UiUtils.showView(cancelPickedSingleMedia, false);
                 UiUtils.showView(multiplePickedMediaFilesRecyclerView, true);
+                multiplePickedMediaFilesRecyclerView.getRecycledViewPool().clear();
                 pickedMediaFilesAdapter.notifyDataSetChanged();
                 composeText.setHint("Add caption");
                 displayActiveSendButton();
@@ -1680,23 +1697,23 @@ public class ChatActivity extends BaseActivity implements
                     }
                 }
             }
-        } else if (requestCode == REQUEST_CODE_PICK_FILE && resultCode == RESULT_OK) {
+        } else if (requestCode == REQUEST_CODE_PICK_DOCUMENT && resultCode == RESULT_OK) {
             if (data != null) {
                 Uri uri = data.getData();
                 if (uri != null) {
-                    sendFileByUri(uri);
+                    sendDocument(uri);
                 }
             }
         } else if (requestCode == REQUEST_CODE_CONTACT_SHARE && resultCode == RESULT_OK) {
-            File vCradFile;
+            File vCardFile;
             try {
-                vCradFile = new ContactService(ChatActivity.this).vCard(data.getData());
-                if (vCradFile != null) {
+                vCardFile = new ContactService(ChatActivity.this).vCard(data.getData());
+                if (vCardFile != null) {
                     HolloutFile contactFile = new HolloutFile();
-                    contactFile.setLocalFilePath(vCradFile.getPath());
+                    contactFile.setLocalFilePath(vCardFile.getPath());
                     contactFile.setLocalFilePath(AppConstants.FILE_TYPE_CONTACT);
 
-                    String filePath = FilePathFinder.getPath(ChatActivity.this, Uri.fromFile(vCradFile));
+                    String filePath = FilePathFinder.getPath(ChatActivity.this, Uri.fromFile(vCardFile));
 
                     HolloutVCFParser parser = new HolloutVCFParser();
                     VCFContactData vcfContactData = parser.parseCVFContactData(filePath);
@@ -1710,20 +1727,16 @@ public class ChatActivity extends BaseActivity implements
                         contactPhoneNumber = StringUtils.strip(numberParts[0], ",");
                     }
 
-                    HashMap<String, String> contactProps = new HashMap<>();
-
-                    contactProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_CONTACT);
-
+                    ChatMessage contactMessage = new ChatMessage();
+                    attachRequiredPropsToMessage(contactMessage, MessageType.CONTACT);
                     if (StringUtils.isNotEmpty(contactName)) {
-                        contactProps.put(AppConstants.CONTACT_NAME, contactName);
+                        contactMessage.setContactName(contactName);
                     }
-
                     if (StringUtils.isNotEmpty(contactPhoneNumber)) {
-                        contactProps.put(AppConstants.CONTACT_NUMBER, contactPhoneNumber);
+                        contactMessage.setContactNumber(contactPhoneNumber);
                     }
-
-                    sendFileMessage(filePath, contactProps);
-
+                    checkAndAddNewMessage(contactMessage);
+                    sendContactMessage(contactMessage);
                 } else {
                     UiUtils.showSafeToast("Oops! Failed");
                 }
@@ -1737,32 +1750,35 @@ public class ChatActivity extends BaseActivity implements
                 double latitude = place.getLatLng().latitude;
                 double longitude = place.getLatLng().longitude;
                 String locationAddress = (String) place.getAddress();
-
                 if (StringUtils.isNotEmpty(locationAddress)) {
                     sendLocationMessage(latitude, longitude, locationAddress);
                 } else {
                     UiUtils.showSafeToast(getString(R.string.unable_to_get_locatio));
                 }
-
             }
         } else if (requestCode == RequestCodes.FORWARD_MESSAGE) {
             if (resultCode == RESULT_OK) {
                 chatToolbar.updateActionMode(0);
-                messagesAdapter.notifyDataSetChanged();
+                notifyDataSetChanged();
             }
         }
+    }
 
+    public void notifyDataSetChanged() {
+        messagesRecyclerView.getRecycledViewPool().clear();
+        messagesAdapter.notifyDataSetChanged();
     }
 
     @SuppressLint("Recycle")
-    protected void sendFileByUri(Uri uri) {
+    protected void sendDocument(Uri uri) {
+        ChatMessage documentMessage = new ChatMessage();
+        attachRequiredPropsToMessage(documentMessage, MessageType.DOCUMENT);
         String filePath = FileUtils.getPath(this, uri);
-        HashMap<String, String> moreMessageProps = new HashMap<>();
         File file;
         if (filePath != null) {
             file = new File(filePath);
             if (!file.exists()) {
-                UiUtils.showSafeToast(getString(R.string.File_does_not_exist));
+                UiUtils.showSafeToast(getString(R.string.file_does_not_exist));
             } else {
                 //limit the size < 10M
                 if (file.length() > 10 * 1024 * 1024) {
@@ -1776,11 +1792,14 @@ public class ChatActivity extends BaseActivity implements
                             UiUtils.showSafeToast("Not a valid document");
                         }
                     } else {
-                        moreMessageProps.put(AppConstants.FILE_TYPE, AppConstants.FILE_TYPE_DOCUMENT);
-                        moreMessageProps.put(AppConstants.FILE_MIME_TYPE, fileMime);
-                        moreMessageProps.put(AppConstants.FILE_NAME, file.getName());
-                        moreMessageProps.put(AppConstants.FILE_SIZE, HolloutUtils.getFileSize(ChatActivity.this, uri));
-                        sendFileMessage(filePath, moreMessageProps);
+                        documentMessage.setLocalUrl(filePath);
+                        documentMessage.setFileMimeType(fileMime);
+                        documentMessage.setDocumentName(file.getName());
+                        documentMessage.setDocumentSize(HolloutUtils.getFileSize(ChatActivity.this, uri));
+                        checkAndAddNewMessage(documentMessage);
+                        DbUtils.createMessage(documentMessage);
+                        emptyComposeText();
+                        sendDocumentMessage(documentMessage);
                     }
                 }
             }
@@ -1801,14 +1820,14 @@ public class ChatActivity extends BaseActivity implements
                         case AppConstants.REPLY_MESSAGE:
                             snackInMessageReplyView(messageReplyView);
                             getChatToolbar().justHideActionMode();
-                            messagesAdapter.notifyDataSetChanged();
+                            notifyDataSetChanged();
                             break;
                         case AppConstants.HIDE_MESSAGE_REPLY_VIEW:
                             snackOutMessageReplyView(messageReplyView);
                             break;
                         case AppConstants.REFRESH_MESSAGES_ADAPTER:
                             try {
-                                messagesAdapter.notifyDataSetChanged();
+                                notifyDataSetChanged();
                             } catch (IllegalStateException ignored) {
 
                             }
@@ -1817,13 +1836,9 @@ public class ChatActivity extends BaseActivity implements
                             break;
                         case AppConstants.DELETE_ALL_SELECTED_MESSAGES:
                             if (AppConstants.selectedMessages != null && !AppConstants.selectedMessages.isEmpty()) {
-                                for (EMMessage emMessage : AppConstants.selectedMessages) {
-                                    mConversation.removeMessage(emMessage.getMsgId());
-                                    if (messages.contains(emMessage)) {
-                                        messages.remove(emMessage);
-                                    }
+                                for (ChatMessage emMessage : AppConstants.selectedMessages) {
+                                    DbUtils.deleteMessage(emMessage);
                                 }
-                                messagesAdapter.notifyDataSetChanged();
                             }
                             getChatToolbar().updateActionMode(0);
                             if (messages.isEmpty()) {
@@ -1836,78 +1851,32 @@ public class ChatActivity extends BaseActivity implements
                             }
                             break;
                     }
-                } else if (o instanceof MessageReceivedEvent) {
-                    MessageReceivedEvent messageReceivedEvent = (MessageReceivedEvent) o;
-                    EMMessage emMessage = messageReceivedEvent.getMessage();
-                    if (emMessage != null && emMessage.getFrom().equals(recipientId)) {
-                        messages.add(0, emMessage);
-                        messagesAdapter.notifyDataSetChanged();
-                        if (onScrolledUp) {
-                            tempReceivedMessages.add(emMessage);
-                        } else {
-                            messagesRecyclerView.smoothScrollToPosition(0);
-                        }
-                        UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
-                        prioritizeConversation();
-                        refreshPendingUnseenMessages();
-                    } else {
-                        List<EMMessage> emMessages = new ArrayList<>();
-                        emMessages.add(emMessage);
-                        MessageNotifier.getInstance().onNewMsg(emMessages);
-                    }
-                } else if (o instanceof MessageDeliveredEvent) {
-                    MessageDeliveredEvent messageDeliveredEvent = (MessageDeliveredEvent) o;
-                    EMMessage emMessage = messageDeliveredEvent.getMessage();
-                    int indexOfMessage = messages.indexOf(emMessage);
-                    if (indexOfMessage != -1) {
-                        messages.set(indexOfMessage, emMessage);
-                        messagesAdapter.notifyDataSetChanged();
-                    }
-                } else if (o instanceof MessageReadEvent) {
-                    MessageReadEvent messageReadEvent = (MessageReadEvent) o;
-                    EMMessage emMessage = messageReadEvent.getMessage();
-                    int indexOfMessage = messages.indexOf(emMessage);
-                    if (indexOfMessage != -1) {
-                        messages.set(indexOfMessage, emMessage);
-                        messagesAdapter.notifyDataSetChanged();
-                        UiUtils.bangSound(ChatActivity.this, R.raw.pop);
-                    }
-                } else if (o instanceof MessageChangedEvent) {
-                    MessageChangedEvent messageChangedEvent = (MessageChangedEvent) o;
-                    int indexOfMessage = messages.indexOf(messageChangedEvent.getMessage());
-                    if (indexOfMessage != -1) {
-                        messages.set(indexOfMessage, messageChangedEvent.getMessage());
-                        messagesAdapter.notifyDataSetChanged();
-                        UiUtils.bangSound(ChatActivity.this, R.raw.pop);
-                    }
                 } else if (o instanceof ReactionMessageEvent) {
                     ReactionMessageEvent reactionMessageEvent = (ReactionMessageEvent) o;
                     String reaction = reactionMessageEvent.getReaction();
-                    HashMap<String, String> reactionProps = new HashMap<>();
-                    reactionProps.put(AppConstants.MESSAGE_ATTR_TYPE, AppConstants.MESSAGE_ATTR_TYPE_REACTION);
-                    reactionProps.put(AppConstants.REACTION_VALUE, reaction);
-                    EMMessage message = EMMessage.createTxtSendMessage(reaction, getRecipient());
-                    addPropsToMessage(reactionProps, message);
+                    ChatMessage chatMessage = new ChatMessage();
+                    attachRequiredPropsToMessage(chatMessage, MessageType.REACTION);
+                    chatMessage.setReactionValue(reaction);
                     UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
-                    sendNewMessage(message);
+                    checkAndAddNewMessage(chatMessage);
+                    sendNewMessage(chatMessage);
                 } else if (o instanceof GifMessageEvent) {
                     GifMessageEvent gifMessageEvent = (GifMessageEvent) o;
-                    HashMap<String, String> reactionProps = new HashMap<>();
-                    reactionProps.put(AppConstants.MESSAGE_ATTR_TYPE, AppConstants.MESSAGE_ATTR_TYPE_GIF);
-                    reactionProps.put(AppConstants.GIF_URL, gifMessageEvent.getGifUrl());
-                    EMMessage message = EMMessage.createTxtSendMessage(gifMessageEvent.getGifUrl(), getRecipient());
-                    addPropsToMessage(reactionProps, message);
+                    ChatMessage chatMessage = new ChatMessage();
+                    attachRequiredPropsToMessage(chatMessage, MessageType.GIF);
+                    chatMessage.setGifUrl(gifMessageEvent.getGifUrl());
                     UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
-                    sendNewMessage(message);
+                    checkAndAddNewMessage(chatMessage);
+                    sendNewMessage(chatMessage);
                 } else if (o instanceof ScrollToMessageEvent) {
                     ScrollToMessageEvent scrollToMessageEvent = (ScrollToMessageEvent) o;
-                    final EMMessage emMessage = scrollToMessageEvent.getEmMessage();
+                    final ChatMessage emMessage = scrollToMessageEvent.getEmMessage();
                     if (emMessage != null) {
                         int indexOfMessage = messages.indexOf(emMessage);
                         if (indexOfMessage != -1) {
                             ((LinearLayoutManager) messagesRecyclerView.getLayoutManager()).scrollToPositionWithOffset(indexOfMessage, 5);
-                            AppConstants.bounceablePositions.put(emMessage.getMsgId().hashCode(), true);
-                            messagesAdapter.notifyDataSetChanged();
+                            AppConstants.bounceablePositions.put(emMessage.getMessageId().hashCode(), true);
+                            notifyDataSetChanged();
                         } else {
                             loadMoreMessages(new DoneCallback<Boolean>() {
                                 @Override
@@ -1916,8 +1885,8 @@ public class ChatActivity extends BaseActivity implements
                                         int indexOfMessage = messages.indexOf(emMessage);
                                         if (indexOfMessage != -1) {
                                             messagesLayoutManager.scrollToPositionWithOffset(indexOfMessage, 5);
-                                            AppConstants.bounceablePositions.put(emMessage.getMsgId().hashCode(), true);
-                                            messagesAdapter.notifyDataSetChanged();
+                                            AppConstants.bounceablePositions.put(emMessage.getMessageId().hashCode(), true);
+                                            notifyDataSetChanged();
                                         }
                                     }
                                 }
@@ -1940,31 +1909,40 @@ public class ChatActivity extends BaseActivity implements
         });
     }
 
-    private void searchMessages(String searchString) {
+    private void searchMessages(final String searchString) {
         if (StringUtils.isNotEmpty(searchString)) {
-            List<EMMessage> result = mConversation.searchMsgFromDB(searchString, 0, 100, null, null);
-            if (result != null && !result.isEmpty()) {
-                messages.clear();
-                messages.addAll(result);
-                messagesAdapter.setSearchString(searchString);
-                messagesAdapter.notifyDataSetChanged();
-            }
+            DbUtils.searchMessages(searchString,
+                    new DoneCallback<List<ChatMessage>>() {
+                        @Override
+                        public void done(final List<ChatMessage> result, final Exception e) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (e == null && result != null && !result.isEmpty()) {
+                                        messages.clear();
+                                        messages.addAll(result);
+                                        messagesAdapter.setSearchString(searchString);
+                                        notifyDataSetChanged();
+                                    }
+                                }
+                            });
+                        }
+                    });
         } else {
             messages.clear();
-            messagesAdapter.setSearchString(searchString);
-            messagesAdapter.notifyDataSetChanged();
+            messagesAdapter.setSearchString(null);
+            notifyDataSetChanged();
             fetchMessages();
         }
     }
 
     private void copyMessageToClipBoard() {
-        EMMessage message = AppConstants.selectedMessages.get(0);
-        if (message.getType() == EMMessage.Type.TXT) {
-            EMTextMessageBody messageBody = (EMTextMessageBody) message.getBody();
-            if (copyToClipboard(messageBody.getMessage())) {
+        ChatMessage message = AppConstants.selectedMessages.get(0);
+        if (message.getMessageType() == MessageType.TXT) {
+            if (copyToClipboard(message.getMessageBody())) {
                 UiUtils.showSafeToast("Message successfully copied ");
                 chatToolbar.updateActionMode(0);
-                messagesAdapter.notifyDataSetChanged();
+                notifyDataSetChanged();
             } else {
                 UiUtils.showSafeToast("Failed to copy message");
             }
@@ -2034,6 +2012,7 @@ public class ChatActivity extends BaseActivity implements
         if (StringUtils.isNotEmpty(composeText.getText().toString().trim())) {
             HolloutPreferences.saveLastAttemptedMsg(recipientId, composeText.getText().toString().trim());
         }
+        DirectModelNotifier.get().unregisterForModelChanges(ChatMessage.class, onModelStateChangedListener);
     }
 
     @Override
@@ -2047,63 +2026,118 @@ public class ChatActivity extends BaseActivity implements
         return recipientId.toLowerCase();
     }
 
+    private void attachRequiredPropsToMessage(ChatMessage chatMessage, MessageType messageType) {
+        chatMessage.setMessageId(RandomStringUtils.random(6, true, true) + System.currentTimeMillis());
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            String userRealObjectId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
+            String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+            String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
+            if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
+                chatMessage.setFromPhotoUrl(signedInUserPhotoUrl);
+            }
+            if (StringUtils.isNotEmpty(userDisplayName)) {
+                chatMessage.setFromName(userDisplayName);
+            }
+            chatMessage.setFrom(userRealObjectId.toLowerCase());
+            if (messageReplyView.getVisibility() == View.VISIBLE && !AppConstants.selectedMessages.isEmpty()) {
+                chatMessage.setRepliedMessageId(AppConstants.selectedMessages.get(0).getMessageId());
+            }
+            chatMessage.setMessageDirection(MessageDirection.OUTGOING);
+            chatMessage.setMessageType(messageType);
+            chatMessage.setMessageStatus(MessageStatus.SENT);
+            chatMessage.setTo(getRecipient());
+            chatMessage.setTimeStamp(System.currentTimeMillis());
+            chatMessage.setConversationId(getRecipient());
+        }
+    }
+
     protected void sendTextMessage(String content) {
-        // create a message
-        EMMessage message = EMMessage.createTxtSendMessage(content, getRecipient());
-        // send message
+        ChatMessage message = new ChatMessage();
+        attachRequiredPropsToMessage(message, MessageType.TXT);
+        message.setMessageBody(content);
+        checkAndAddNewMessage(message);
         sendNewMessage(message);
     }
 
-    protected void sendVoiceMessage(String filePath, int length) {
-        EMMessage message = EMMessage.createVoiceSendMessage(filePath, length, getRecipient());
-        sendNewMessage(message);
+    protected void sendVoiceMessage(String filePath, long duration) {
+        String voiceNoteDuration = UiUtils.getTimeString(duration);
+        ChatMessage message = new ChatMessage();
+        attachRequiredPropsToMessage(message, MessageType.VOICE);
+        message.setAudioDuration(String.valueOf(voiceNoteDuration));
+        message.setLocalUrl(filePath);
+        checkAndAddNewMessage(message);
+        DbUtils.createMessage(message);
+        emptyComposeText();
+        FileUploader.getInstance().uploadFile(filePath, AppConstants.VOICE_NOTES, message.getMessageId());
     }
 
     @SuppressLint("CommitPrefEdits")
     protected void sendImageMessage(String imagePath, String caption) {
         String fileCaption;
-        EMMessage message = EMMessage.createImageSendMessage(imagePath, true, getRecipient());
+        ChatMessage chatMessage = new ChatMessage();
+        attachRequiredPropsToMessage(chatMessage, MessageType.IMAGE);
         if (StringUtils.isNotEmpty(caption)) {
             HolloutPreferences.setLastFileCaption(caption);
             fileCaption = caption;
         } else {
             fileCaption = HolloutPreferences.getLastFileCaption();
         }
-        message.setAttribute(AppConstants.FILE_CAPTION, fileCaption);
-        sendNewMessage(message);
-    }
-
-    protected void sendLocationMessage(double latitude, double longitude, String locationAddress) {
-        EMMessage message = EMMessage.createLocationSendMessage(latitude, longitude, locationAddress, getRecipient());
-        sendNewMessage(message);
+        chatMessage.setLocalUrl(imagePath);
+        chatMessage.setFileCaption(fileCaption);
+        checkAndAddNewMessage(chatMessage);
+        DbUtils.createMessage(chatMessage);
+        emptyComposeText();
+        FileUploader.getInstance().uploadFile(imagePath, AppConstants.PHOTO_DIRECTORY, chatMessage.getMessageId());
     }
 
     @SuppressLint("CommitPrefEdits")
-    protected void sendVideoMessage(String videoPath, String thumbPath, int videoLength, String caption) {
+    protected void sendVideoMessage(String videoPath, String thumbPath, String caption) {
         String fileCaption;
+        ChatMessage chatMessage = new ChatMessage();
+        attachRequiredPropsToMessage(chatMessage, MessageType.VIDEO);
         if (StringUtils.isNotEmpty(caption)) {
             HolloutPreferences.setLastFileCaption(caption);
             fileCaption = caption;
         } else {
             fileCaption = HolloutPreferences.getLastFileCaption();
         }
-        EMMessage message = EMMessage.createVideoSendMessage(videoPath, thumbPath, videoLength, getRecipient());
-        message.setAttribute(AppConstants.FILE_CAPTION, fileCaption);
-        sendNewMessage(message);
-    }
-
-    protected void sendFileMessage(String filePath, HashMap<String, String> moreMessageProps) {
-        EMMessage message = EMMessage.createFileSendMessage(filePath, getRecipient());
-        addPropsToMessage(moreMessageProps, message);
-        sendNewMessage(message);
-    }
-
-    private void addPropsToMessage(HashMap<String, String> moreMessageProps, EMMessage message) {
-        if (moreMessageProps != null && !moreMessageProps.isEmpty()) {
-            for (String key : moreMessageProps.keySet()) {
-                message.setAttribute(key, moreMessageProps.get(key));
-            }
+        chatMessage.setFileCaption(fileCaption);
+        chatMessage.setLocalUrl(videoPath);
+        chatMessage.setVideoDuration(HolloutUtils.getVideoDuration(videoPath));
+        Bitmap videoThumb = ThumbnailUtils.createVideoThumbnail(videoPath, MediaStore.Images.Thumbnails.MINI_KIND);
+        try {
+            File thumbOutPutFile = HolloutUtils.getFilePath(System.currentTimeMillis() + "VideoThumb", this, "thumb", true);
+            OutputStream outputStream = new FileOutputStream(thumbOutPutFile);
+            videoThumb.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            chatMessage.setLocalThumb(thumbOutPutFile.getPath());
+            checkAndAddNewMessage(chatMessage);
+            DbUtils.createMessage(chatMessage);
+            emptyComposeText();
+            FileUploader.getInstance().uploadVideoThumbnailAndProceed(thumbOutPutFile.getPath(), videoPath, AppConstants.THUMBS_DIRECTORY,
+                    AppConstants.VIDEOS_DIRECTORY, chatMessage.getMessageId());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
+    }
+
+    protected void sendLocationMessage(double latitude, double longitude, String locationAddress) {
+        ChatMessage chatMessage = new ChatMessage();
+        attachRequiredPropsToMessage(chatMessage, MessageType.LOCATION);
+        chatMessage.setLatitude(String.valueOf(latitude));
+        chatMessage.setLongitude(String.valueOf(longitude));
+        chatMessage.setLocationAddress(locationAddress);
+        checkAndAddNewMessage(chatMessage);
+        sendNewMessage(chatMessage);
+    }
+
+    private void sendContactMessage(ChatMessage contactMessage) {
+        sendNewMessage(contactMessage);
+    }
+
+    protected void sendDocumentMessage(ChatMessage documentMessage) {
+        FileUploader.getInstance().uploadFile(documentMessage.getLocalUrl(), AppConstants.DOCUMENTS, documentMessage.getMessageId());
     }
 
     private void checkAndSendChatRequest() {
@@ -2170,23 +2204,8 @@ public class ChatActivity extends BaseActivity implements
     /**
      * set message Extension attributes
      */
-    protected void sendNewMessage(EMMessage newMessage) {
-        String signedInUserDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-        String signedInUserPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-        String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
-        newMessage.setAttribute(AppConstants.APP_USER_DISPLAY_NAME, signedInUserDisplayName);
-        if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
-            newMessage.setAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL, signedInUserPhotoUrl);
-        }
-        newMessage.setAttribute(AppConstants.REAL_OBJECT_ID, signedInUserId.toLowerCase());
-        if (messageReplyView.getVisibility() == View.VISIBLE && !AppConstants.selectedMessages.isEmpty()) {
-            newMessage.setAttribute(AppConstants.REPLIED_MESSAGE_ID, AppConstants.selectedMessages.get(0).getMsgId());
-        }
-        EMClient.getInstance().chatManager().sendMessage(newMessage);
-        messages.add(0, newMessage);
-        messagesAdapter.notifyDataSetChanged();
-        invalidateEmptyView();
-        messagesRecyclerView.smoothScrollToPosition(0);
+    protected void sendNewMessage(ChatMessage newMessage) {
+        ChatClient.getInstance().sendMessage(newMessage);
         emptyComposeText();
         HolloutPreferences.updateConversationTime(recipientId);
         snackOutMessageReplyView(messageReplyView);
@@ -2198,21 +2217,20 @@ public class ChatActivity extends BaseActivity implements
         sendAChatRequest();
     }
 
+    private void checkAndAddNewMessage(ChatMessage newMessage) {
+        if (!messages.contains(newMessage)) {
+            messages.add(0, newMessage);
+        }
+        notifyDataSetChanged();
+        invalidateEmptyView();
+        messagesRecyclerView.smoothScrollToPosition(0);
+    }
+
     private void sendAChatRequest() {
         if (!isAContact()) {
             if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
                 checkAndSendChatRequest();
             }
-            HolloutCommunicationsManager.getInstance().execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        EMClient.getInstance().contactManager().addContact(recipientId, "Hi, let's connect");
-                    } catch (HyphenateException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
         }
     }
 
@@ -2227,37 +2245,30 @@ public class ChatActivity extends BaseActivity implements
             public void done(final ParseObject returnedFeedObject, ParseException e) {
                 if (e == null && returnedFeedObject != null) {
                     //The user sent me a friend request...Accept invitation here
-                    ChatUtils.acceptChatInvitation(getRecipient(), new DoneCallback<Boolean>() {
+                    List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+                    if (signedInUserChats != null && !signedInUserChats.contains(getRecipient())) {
+                        signedInUserChats.add(getRecipient());
+                    }
+                    if (signedInUserChats == null) {
+                        signedInUserChats = new ArrayList<>();
+                        signedInUserChats.add(getRecipient());
+                    }
+                    signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
+                    AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                         @Override
                         public void done(Boolean result, Exception e) {
                             if (e == null) {
-                                List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-                                if (signedInUserChats != null && !signedInUserChats.contains(getRecipient())) {
-                                    signedInUserChats.add(getRecipient());
-                                }
-                                if (signedInUserChats == null) {
-                                    signedInUserChats = new ArrayList<>();
-                                    signedInUserChats.add(getRecipient());
-                                }
-                                signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
-                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                                    @Override
-                                    public void done(Boolean result, Exception e) {
-                                        if (e == null) {
-                                            setUserFriendable(false);
-                                            if (returnedFeedObject != null) {
-                                                returnedFeedObject.deleteInBackground(new DeleteCallback() {
-                                                    @Override
-                                                    public void done(ParseException e) {
-                                                        if (e != null) {
-                                                            returnedFeedObject.deleteEventually();
-                                                        }
-                                                    }
-                                                });
+                                setUserFriendable(false);
+                                if (returnedFeedObject != null) {
+                                    returnedFeedObject.deleteInBackground(new DeleteCallback() {
+                                        @Override
+                                        public void done(ParseException e) {
+                                            if (e != null) {
+                                                returnedFeedObject.deleteEventually();
                                             }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
                         }
                     });
@@ -2287,13 +2298,6 @@ public class ChatActivity extends BaseActivity implements
         displayInactiveSendButton();
         composeText.setText("");
         composeText.setHint("Compose message");
-    }
-
-    @SuppressWarnings("unused")
-    public void resendMessage(EMMessage message) {
-        message.setStatus(EMMessage.Status.CREATE);
-        EMClient.getInstance().chatManager().sendMessage(message);
-        messagesAdapter.notifyDataSetChanged();
     }
 
     @SuppressLint("MissingPermission")

@@ -47,19 +47,14 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMConversation;
-import com.hyphenate.chat.EMMessage;
-import com.hyphenate.exceptions.HyphenateException;
-import com.hyphenate.util.EMLog;
-import com.hyphenate.util.PathUtil;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.AudioFile;
-import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.ui.activities.ChatActivity;
+import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.models.ChatMessage;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 
@@ -115,14 +110,13 @@ public class HolloutUtils {
         checkDisplaySize(ApplicationLoader.getInstance(), null);
     }
 
-
     public static Kryo getKryoInstance() {
         Kryo kryo = new Kryo();
-        kryo.register(EMMessage.class, new EMMessageSerializer());
+        kryo.register(ChatMessage.class, new ChatMessageSerializer());
         return kryo;
     }
 
-    public static synchronized void serializeMessages(List<EMMessage> tObjects, String serializableName) {
+    public static synchronized void serializeMessages(List<ChatMessage> tObjects, String serializableName) {
         Kryo kryo = getKryoInstance();
         try {
             FileOutputStream fileOutputStream = ApplicationLoader.getInstance().openFileOutput(serializableName, Context.MODE_PRIVATE);
@@ -137,11 +131,11 @@ public class HolloutUtils {
     }
 
     @SuppressWarnings("unchecked")
-    public static synchronized void deserializeMessages(String fileName, DoneCallback<List<EMMessage>> doneCallback) {
+    public static synchronized void deserializeMessages(String fileName, DoneCallback<List<ChatMessage>> doneCallback) {
         Kryo kryo = getKryoInstance();
         try {
             Input input = new Input(ApplicationLoader.getInstance().openFileInput(fileName));
-            ArrayList<EMMessage> previouslySerializedChats = kryo.readObject(input, ArrayList.class);
+            ArrayList<ChatMessage> previouslySerializedChats = kryo.readObject(input, ArrayList.class);
             if (doneCallback != null) {
                 doneCallback.done(previouslySerializedChats, null);
             }
@@ -685,7 +679,7 @@ public class HolloutUtils {
     private static final String HOLLOUT_THUMBNAIL_SUFFIX = "/.Thumbnail";
     private static final String MAIN_FOLDER_META_DATA = "Hollout";
 
-    private static File getFilePath(String fileName, Context context, String contentType, boolean isThumbnail) {
+    public static File getFilePath(String fileName, Context context, String contentType, boolean isThumbnail) {
         File filePath;
         File dir;
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
@@ -960,20 +954,20 @@ public class HolloutUtils {
         return ageRanges;
     }
 
-    public static String getThumbnailImagePath(String thumbRemoteUrl) {
-        String thumbImageName = thumbRemoteUrl.substring(thumbRemoteUrl.lastIndexOf("/") + 1, thumbRemoteUrl.length());
-        String path = PathUtil.getInstance().getImagePath() + "/" + "th" + thumbImageName;
-        EMLog.d("msg", "thum image path:" + path);
-        return path;
-    }
+//    public static String getThumbnailImagePath(String thumbRemoteUrl) {
+//        String thumbImageName = thumbRemoteUrl.substring(thumbRemoteUrl.lastIndexOf("/") + 1, thumbRemoteUrl.length());
+//        String path = PathUtil.getInstance().getImagePath() + "/" + "th" + thumbImageName;
+//        EMLog.d("msg", "thum image path:" + path);
+//        return path;
+//    }
 
-    private static EMMessage.Type getMessageType(EMMessage message) {
-        return message.getType();
-    }
+//    private static EMMessage.Type getMessageType(EMMessage message) {
+//        return message.getType();
+//    }
 
-    private static EMMessage.Direct getMessageDirection(EMMessage message) {
-        return message.direct();
-    }
+//    private static EMMessage.Direct getMessageDirection(EMMessage message) {
+//        return message.direct();
+//    }
 
     public static boolean checkGooglePlayServices(Activity activity) {
         final int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity);
@@ -1019,107 +1013,68 @@ public class HolloutUtils {
     }
 
     public static boolean isUserBlocked(String userId) {
-        List<String> blockedUsers = EMClient.getInstance().contactManager().getBlackListUsernames();
+        List<String> blockedUsers = ChatClient.getInstance().getBlackList();
         return blockedUsers != null && !blockedUsers.isEmpty() && blockedUsers.contains(userId);
     }
 
-    public static void blockUser(final Activity activity, final String userId, final DoneCallback<Boolean> blockDoneCallBack) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                boolean success = true;
+    public String getAppName(Context context, int pID) {
+        String processName;
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (am != null) {
+            List l = am.getRunningAppProcesses();
+            for (Object aL : l) {
+                ActivityManager.RunningAppProcessInfo info =
+                        (ActivityManager.RunningAppProcessInfo) (aL);
                 try {
-                    EMClient.getInstance().contactManager().addUserToBlackList(userId, false);
-                    ParseObject signedInUser = AuthUtil.getCurrentUser();
-                    if (signedInUser != null) {
-                        List<String> userBlackList = signedInUser.getList(AppConstants.USER_BLACK_LIST);
-                        if (userBlackList != null && !userBlackList.isEmpty()) {
-                            if (!userBlackList.contains(userId)) {
-                                userBlackList.add(userId);
-                            }
-                        } else {
-                            userBlackList = new ArrayList<>();
-                            userBlackList.add(userId);
-                        }
-                        signedInUser.put(AppConstants.USER_BLACK_LIST, userBlackList);
-                        AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                            @Override
-                            public void done(Boolean result, Exception e) {
-
-                            }
-                        });
+                    if (info.pid == pID) {
+                        processName = info.processName;
+                        return processName;
                     }
-                } catch (HyphenateException e) {
-                    e.printStackTrace();
-                    success = false;
+                } catch (Exception ignored) {
+
                 }
-                final boolean finalSuccess = success;
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        blockDoneCallBack.done(finalSuccess, null);
-                    }
-                });
-            }
-        }).start();
-    }
-
-    public static void unBlockUser(final Activity activity, final String userId, final DoneCallback<Boolean> unblockDoneCallBack) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                boolean success = true;
-                try {
-                    EMClient.getInstance().contactManager().removeUserFromBlackList(userId);
-                    ParseObject signedInUser = AuthUtil.getCurrentUser();
-                    if (signedInUser != null) {
-                        List<String> userBlackList = signedInUser.getList(AppConstants.USER_BLACK_LIST);
-                        if (userBlackList != null && !userBlackList.isEmpty()) {
-                            if (userBlackList.contains(userId)) {
-                                userBlackList.remove(userId);
-                            }
-                        }
-                        signedInUser.put(AppConstants.USER_BLACK_LIST, userBlackList);
-                        AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                            @Override
-                            public void done(Boolean result, Exception e) {
-
-                            }
-                        });
-                    }
-                } catch (HyphenateException e) {
-                    e.printStackTrace();
-                    success = false;
-                }
-                final boolean finalSuccess = success;
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        unblockDoneCallBack.done(finalSuccess, null);
-                    }
-                });
-            }
-        }).start();
-    }
-
-    public static void dissolveConversations(Activity activity, List<EMConversation> conversations, DoneCallback<Boolean> deleteDoneCallBack) {
-        String message;
-        if (activity instanceof ChatActivity) {
-            message = "Deleting conversation. Please wait...";
-        } else {
-            int conversationCount = conversations.size();
-            if (conversationCount == 1) {
-                message = "Deleting 1 conversation";
-            } else {
-                message = "Deleting " + conversationCount + " conversations";
             }
         }
-        UiUtils.showProgressDialog(activity, message);
-        for (EMConversation emConversation : conversations) {
-            EMClient.getInstance().chatManager().deleteConversation(emConversation.conversationId(), true);
+        return null;
+    }
+
+    public static void blockUser(final String userId, final DoneCallback<Boolean> blockDoneCallBack) {
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        if (signedInUserObject != null) {
+            List<String> userBlackList = signedInUserObject.getList(AppConstants.USER_BLACK_LIST);
+            if (userBlackList == null || userBlackList.isEmpty()) {
+                userBlackList = new ArrayList<>();
+            }
+            if (!userBlackList.contains(userId)) {
+                userBlackList.add(userId);
+            }
+            signedInUserObject.put(AppConstants.USER_BLACK_LIST, userBlackList);
+            AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean success, Exception e) {
+                    blockDoneCallBack.done(success, e);
+                }
+            });
         }
-        UiUtils.dismissProgressDialog();
-        deleteDoneCallBack.done(true, null);
+    }
+
+    public static void unBlockUser(final String userId, final DoneCallback<Boolean> unblockDoneCallBack) {
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        if (signedInUserObject != null) {
+            List<String> userBlackList = signedInUserObject.getList(AppConstants.USER_BLACK_LIST);
+            if (userBlackList != null && !userBlackList.isEmpty()) {
+                if (userBlackList.contains(userId)) {
+                    userBlackList.remove(userId);
+                    signedInUserObject.put(AppConstants.USER_BLACK_LIST, signedInUserObject);
+                    AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
+                        @Override
+                        public void done(Boolean result, Exception e) {
+                            unblockDoneCallBack.done(result, e);
+                        }
+                    });
+                }
+            }
+        }
     }
 
 }

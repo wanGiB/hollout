@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import com.wan.hollout.components.ApplicationLoader;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static com.wan.hollout.utils.AppConstants.ENTER_SENDS_PREF;
@@ -147,30 +146,18 @@ public class HolloutPreferences {
     }
 
     public static Set<String> getTotalUnreadChats() {
-        return getInstance().getStringSet(AppConstants.TOTAL_UNREAD_CHATS, null);
+        return getInstance().getStringSet(AppConstants.TOTAL_UNREAD_CHATS, new HashSet<String>());
     }
 
-    public static void saveTotalUnreadChats(List<String> unreadMessages) {
-        Set<String>unreadMessageSet=new HashSet<>();
-        for (String s:unreadMessages){
-            unreadMessageSet.add(s);
-        }
+    public static void saveTotalUnreadChats(Set<String> unreadMessageSet) {
         getInstance().edit().putStringSet(AppConstants.TOTAL_UNREAD_CHATS, unreadMessageSet).commit();
-    }
-
-    public static void saveTotalUnreadChats(Set<String>unreadMessageSet) {
-        getInstance().edit().putStringSet(AppConstants.TOTAL_UNREAD_CHATS, unreadMessageSet).commit();
-    }
-
-    public static void clearUnreadMessagesCount() {
-        getInstance().edit().putStringSet(AppConstants.TOTAL_UNREAD_CHATS, null).commit();
     }
 
     public static String getLastAttemptedMessage(String recipientId) {
         return getInstance().getString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, null);
     }
 
-    public static void clearPreviousAttemptedMessage(String recipientId){
+    public static void clearPreviousAttemptedMessage(String recipientId) {
         getInstance().edit().putString(AppConstants.LAST_ATTEMPTED_MESSAGE_FOR + recipientId, null).apply();
     }
 
@@ -179,19 +166,40 @@ public class HolloutPreferences {
     }
 
     public static Long getLastConversationTime(String recipient) {
-        return getInstance().getLong(AppConstants.LAST_CONVERSATION_TIME_WITH +"_"+recipient,0);
+        return getInstance().getLong(AppConstants.LAST_CONVERSATION_TIME_WITH + "_" + recipient, 0);
     }
 
-    public static void updateConversationTime(String recipient){
-        getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH +"_"+recipient,System.currentTimeMillis()).commit();
+    public static void updateConversationTime(String recipient) {
+        getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH + "_" + recipient, System.currentTimeMillis()).commit();
     }
 
-    public static int getViewWidth(String messageId){
-        return getInstance().getInt(messageId,0);
+    public static int getViewWidth(String messageId) {
+        return getInstance().getInt(messageId, 0);
     }
 
-    public static void saveViewWidth(String messageId,int width){
-        getInstance().edit().putInt(messageId,width).commit();
+    public static void saveViewWidth(String messageId, int width) {
+        getInstance().edit().putInt(messageId, width).commit();
+    }
+
+    public static void incrementUnreadMessagesFrom(String from) {
+        int currentUnreadMsgsCountFromSender = getInstance().getInt(AppConstants.UNREAD_MESSAGES_COUNT_FROM + from, 0);
+        getInstance().edit().putInt(AppConstants.UNREAD_MESSAGES_COUNT_FROM + from, currentUnreadMsgsCountFromSender + 1).commit();
+    }
+
+    public static int getUnreadMessagesCountFrom(String from) {
+        return getInstance().getInt(AppConstants.UNREAD_MESSAGES_COUNT_FROM + from, 0);
+    }
+
+    public static void clearUnreadMessagesCountFrom(String from) {
+        getInstance().edit().putInt(AppConstants.UNREAD_MESSAGES_COUNT_FROM + from, 0).commit();
+    }
+
+    public static int getTotalUnreadMessagesCount() {
+        return getInstance().getInt(AppConstants.TOTAL_UNREAD_MESSAGES_COUNT, 0);
+    }
+
+    public static void setTotalUnreadMessagesCount(int size) {
+        getInstance().edit().putInt(AppConstants.TOTAL_UNREAD_MESSAGES_COUNT, size).commit();
     }
 
 }

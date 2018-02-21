@@ -77,9 +77,6 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
     @BindView(R.id.icon_profile)
     ImageView userPhotoView;
 
-    @BindView(R.id.message_container)
-    LinearLayout messageContainer;
-
     @BindView(R.id.icon_container)
     RelativeLayout iconContainer;
 
@@ -255,15 +252,6 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
                 public void onClick(View view) {
                     UiUtils.blinkView(view);
                     UiUtils.loadUserData(activity, person);
-                }
-
-            });
-
-            messageContainer.setOnClickListener(new OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    NearbyPersonView.this.performClick();
                 }
 
             });

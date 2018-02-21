@@ -1,27 +1,22 @@
 package com.wan.hollout.ui.widgets;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.Html;
-import android.text.TextUtils;
+import android.text.SpannableString;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,24 +30,28 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.hyphenate.EMCallBack;
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMFileMessageBody;
-import com.hyphenate.chat.EMImageMessageBody;
-import com.hyphenate.chat.EMLocationMessageBody;
-import com.hyphenate.chat.EMMessage;
-import com.hyphenate.chat.EMMessageBody;
-import com.hyphenate.chat.EMTextMessageBody;
-import com.hyphenate.chat.EMVideoMessageBody;
-import com.hyphenate.chat.EMVoiceMessageBody;
-import com.hyphenate.exceptions.HyphenateException;
 import com.john.waveview.WaveView;
+import com.tonyodev.fetch2.Download;
+import com.tonyodev.fetch2.Error;
+import com.tonyodev.fetch2.Fetch;
+import com.tonyodev.fetch2.FetchListener;
+import com.tonyodev.fetch2.Func;
+import com.tonyodev.fetch2.NetworkType;
+import com.tonyodev.fetch2.Priority;
+import com.tonyodev.fetch2.Request;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
+import com.wan.hollout.clients.ChatClient;
+import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.enums.MessageDirection;
+import com.wan.hollout.enums.MessageStatus;
+import com.wan.hollout.enums.MessageType;
+import com.wan.hollout.eventbuses.FileUploadProgressEvent;
 import com.wan.hollout.eventbuses.PlaceLocalCallEvent;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.EaseShowImageActivity;
 import com.wan.hollout.utils.AppConstants;
@@ -64,15 +63,15 @@ import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -160,10 +159,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @BindView(R.id.content_view)
     ViewGroup contentView;
 
-    private EMMessage message;
+    private ChatMessage message;
+
     private Activity activity;
 
-    protected EMCallBack messageStatusCallback;
     protected Handler handler = new Handler(Looper.getMainLooper());
 
     private static KeyframesDrawable imageDrawable;
@@ -181,7 +180,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         super(context, attrs, defStyleAttr);
     }
 
-    public void bindData(Activity context, EMMessage messageObject, String searchString) {
+    public void bindData(Activity context, ChatMessage messageObject, String searchString) {
         this.activity = context;
         this.message = messageObject;
         setupMessageBubble();
@@ -192,22 +191,16 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         setOnLongClickListener(this);
         messageBubbleLayout.setOnClickListener(this);
         messageBubbleLayout.setOnLongClickListener(this);
+        HolloutLogger.d("MessageInAdapterProps", messageObject.toString());
+        checkAndRegEventBus();
     }
 
     private void setupMessageBubble() {
-        if (message.direct() == EMMessage.Direct.SEND) {
-            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.bubble_outgoing));
-            tintDrawable(messageBubbleLayout.getBackground(), ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.light_blue_50)));
+        if (message.getMessageDirection() == MessageDirection.OUTGOING) {
+            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.outgoing_chat_bubble));
         } else {
-            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.bubble_incoming));
-            tintDrawable(messageBubbleLayout.getBackground(), ColorStateList.valueOf(ContextCompat.getColor(activity, R.color.grey_50)));
+            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.incoming_chat_bubble));
         }
-    }
-
-    public Drawable tintDrawable(Drawable drawable, ColorStateList colors) {
-        final Drawable wrappedDrawable = DrawableCompat.wrap(drawable);
-        DrawableCompat.setTintList(wrappedDrawable, colors);
-        return wrappedDrawable;
     }
 
     @Override
@@ -216,98 +209,94 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         ButterKnife.bind(this);
     }
 
-    private EMMessage.Type getMessageType() {
-        return message.getType();
+    private MessageType getMessageType() {
+        return message.getMessageType();
     }
 
-    public EMMessage.Direct getMessageDirection() {
-        return message.direct();
+    public MessageDirection getMessageDirection() {
+        return message.getMessageDirection();
     }
 
     private void setupMessageBody(String searchString) {
 
-        EMMessage.Type messageType = getMessageType();
+        MessageType messageType = getMessageType();
 
-        EMMessageBody messageBody = message.getBody();
-
-        if (messageType == EMMessage.Type.TXT) {
-            setupTxtMessage((EMTextMessageBody) messageBody, searchString);
+        if (messageType == MessageType.TXT) {
+            setupTxtMessage(searchString);
         }
 
-        if (messageType == EMMessage.Type.IMAGE) {
-            setupImageMessage((EMImageMessageBody) messageBody);
+        if (messageType == MessageType.GIF) {
+            setUpGifMessage(message.getGifUrl());
         }
 
-        if (messageType == EMMessage.Type.VIDEO) {
-            setupVideoMessage((EMVideoMessageBody) messageBody);
+        if (messageType == MessageType.REACTION) {
+            setupReactionMessage();
         }
 
-        if (messageType == EMMessage.Type.FILE) {
-            setupFileMessage((EMFileMessageBody) messageBody);
+        if (messageType == MessageType.IMAGE) {
+            setupImageMessage(searchString);
         }
 
-        if (messageType == EMMessage.Type.VOICE) {
-            setupVoiceMessage((EMVoiceMessageBody) messageBody);
+        if (messageType == MessageType.VIDEO) {
+            setupVideoMessage(searchString);
         }
 
-        if (messageType == EMMessage.Type.LOCATION) {
-            setupLocationMessage((EMLocationMessageBody) messageBody);
+        if (messageType == MessageType.CONTACT) {
+            setupContactMessage(searchString);
         }
+
+        if (messageType == MessageType.DOCUMENT) {
+            setupDocumentMessage(searchString);
+        }
+
+        if (messageType == MessageType.VOICE) {
+            setupVoiceMessage(searchString);
+        }
+
+        if (messageType == MessageType.AUDIO) {
+            setupAudioMessage(searchString);
+        }
+
+        if (messageType == MessageType.LOCATION) {
+            setupLocationMessage(searchString);
+        }
+
+        setMessageStatusCallback(message.getFileUploadProgress());
         handleRepliedMessageIfAvailable();
         registerViewTreeObserver();
         handleCommonalities();
-
         refreshViews();
-
         if (attachedPhotoOrVideoThumbnailView != null) {
             attachedPhotoOrVideoThumbnailView.setOnClickListener(this);
             attachedPhotoOrVideoThumbnailView.setOnLongClickListener(this);
         }
-
         if (audioView != null) {
             audioView.setOnClickListener(this);
             audioView.setOnLongClickListener(this);
         }
-
-        EMMessage.Status status = message.status();
-        if (status == EMMessage.Status.FAIL) {
-            resendMessage(message);
-        }
-
-    }
-
-    public void resendMessage(EMMessage message) {
-        message.setStatus(EMMessage.Status.CREATE);
-        EMClient.getInstance().chatManager().sendMessage(message);
     }
 
     //Setup message reply
     private void handleRepliedMessageIfAvailable() {
-        try {
-            String repliedMessageId = message.getStringAttribute(AppConstants.REPLIED_MESSAGE_ID);
-            if (repliedMessageId != null) {
-                EMMessage repliedMessage = EMClient.getInstance().chatManager().getMessage(repliedMessageId);
-                if (repliedMessage != null) {
-                    UiUtils.showView(messageReplyRecyclerItemView, true);
-                    AppConstants.repliedMessagePositions.put(getMessageHash(), true);
-                    messageReplyRecyclerItemView.bindMessageReply(activity, repliedMessage);
-                } else {
-                    UiUtils.showView(messageReplyRecyclerItemView, false);
-                    AppConstants.repliedMessagePositions.put(getMessageHash(), false);
-                }
+        String repliedMessageId = message.getRepliedMessageId();
+        if (repliedMessageId != null) {
+            ChatMessage repliedMessage = ChatClient.getInstance().getMessage(repliedMessageId);
+            if (repliedMessage != null) {
+                UiUtils.showView(messageReplyRecyclerItemView, true);
+                AppConstants.repliedMessagePositions.put(getMessageHash(), true);
+                messageReplyRecyclerItemView.bindMessageReply(activity, repliedMessage);
             } else {
                 UiUtils.showView(messageReplyRecyclerItemView, false);
                 AppConstants.repliedMessagePositions.put(getMessageHash(), false);
             }
-        } catch (HyphenateException e) {
-            e.printStackTrace();
+        } else {
             UiUtils.showView(messageReplyRecyclerItemView, false);
             AppConstants.repliedMessagePositions.put(getMessageHash(), false);
         }
     }
 
     private void registerViewTreeObserver() {
-        int viewWidth = HolloutPreferences.getViewWidth(message.getMsgId());
+        int viewWidth = HolloutPreferences.getViewWidth(message.getMessageId());
         if (viewWidth != 0) {
             checkAndRedrawSomeViews(viewWidth);
         } else {
@@ -319,7 +308,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                         getViewTreeObserver().removeOnPreDrawListener(this);
                         int messageBubbleWidth = messageBubbleLayout.getWidth();
                         checkAndRedrawSomeViews(messageBubbleWidth);
-                        HolloutPreferences.saveViewWidth(message.getMsgId(), messageBubbleWidth);
+                        HolloutPreferences.saveViewWidth(message.getMessageId(), messageBubbleWidth);
                         return true;
                     }
                 });
@@ -329,7 +318,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void checkAndRedrawSomeViews(int messageBubbleWidth) {
         if (contentView != null && messageReplyRecyclerItemView != null && messageReplyRecyclerItemView.getVisibility() == VISIBLE) {
-            HolloutLogger.d("ViewParams", "BubbleWidth for " + message.getMsgId() + " is = " + messageBubbleWidth);
+            HolloutLogger.d("ViewParams", "BubbleWidth for " + message.getMessageId() + " is = " + messageBubbleWidth);
             ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
             layoutParams.width = messageBubbleWidth;
             contentView.setLayoutParams(layoutParams);
@@ -342,21 +331,18 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         }
     }
 
-    private void setupLocationMessage(EMLocationMessageBody messageBody) {
-        String locationName = messageBody.getAddress();
-
+    private void setupLocationMessage(String searchString) {
+        String locationName = message.getLocationAddress();
         if (StringUtils.isNotEmpty(locationName)) {
             UiUtils.showView(messageBodyView, true);
-            messageBodyView.setText(locationName);
+            messageBodyView.setText(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, locationName, ContextCompat.getColor(activity, R.color.colorAccent)) : locationName);
             AppConstants.messageBodyPositions.put(getMessageHash(), true);
         } else {
             UiUtils.showView(messageBodyView, false);
             AppConstants.messageBodyPositions.put(getMessageHash(), false);
         }
-
-        String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(messageBody.getLatitude()),
-                String.valueOf(messageBody.getLongitude()));
-
+        String locationStaticMap = LocationUtils.loadStaticMap(String.valueOf(message.getLatitude()),
+                String.valueOf(message.getLongitude()));
         if (StringUtils.isNotEmpty(locationStaticMap)) {
             UiUtils.showView(fileSizeDurationView, false);
             AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
@@ -364,65 +350,23 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         }
     }
 
-    private void setupVoiceMessage(EMVoiceMessageBody emFileMessageBody) {
+    private void setupVoiceMessage(String searchString) {
         String fileCaption = "Voice Note";
-        File localFilePath = new File(emFileMessageBody.getLocalUrl());
+        File localFilePath = new File(message.getLocalUrl());
+        String voiceContentDuration = message.getAudioDuration();
         if (localFilePath.exists()) {
-            MediaMetadataRetriever mmr = new MediaMetadataRetriever();
-            mmr.setDataSource(activity, Uri.fromFile(localFilePath));
-            String durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-            int millSecond = Integer.parseInt(durationStr);
-            audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, UiUtils.getTimeString(millSecond));
+            audioView.setAudio(message.getLocalUrl(), StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)) : fileCaption, voiceContentDuration);
         } else {
-            audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, "00:00");
-            if (message.status() == EMMessage.Status.FAIL) {
-                DownloadAttachment downloadAttachment = new DownloadAttachment();
-                downloadAttachment.execute(message);
-            }
+            audioView.setAudio(message.getRemoteUrl(), StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)) : fileCaption, voiceContentDuration);
         }
     }
 
-    static class DownloadAttachment extends AsyncTask<EMMessage, Void, Void> {
-
-        @Override
-        protected Void doInBackground(EMMessage... params) {
-            EMClient.getInstance().chatManager().downloadAttachment(params[0]);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-        }
-    }
-
-    private void setupFileMessage(EMFileMessageBody messageBody) {
-        try {
-            String fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
-            if (fileType.equals(AppConstants.FILE_TYPE_CONTACT)) {
-                setupContactMessage();
-            }
-            if (fileType.equals(AppConstants.FILE_TYPE_AUDIO)) {
-                setupAudioMessage(messageBody);
-            }
-            if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)) {
-                setupDocumentMessage();
-            }
-        } catch (HyphenateException e) {
-            e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
-        }
-    }
-
-    private void setupDocumentMessage() {
-        try {
-            String documentName = message.getStringAttribute(AppConstants.FILE_NAME);
-            String documentSize = message.getStringAttribute(AppConstants.FILE_SIZE);
-            if (StringUtils.isNotEmpty(documentName)) {
-                documentNameAndSizeView.setText(documentName + "\n" + documentSize);
-            }
-        } catch (HyphenateException e) {
-            e.printStackTrace();
+    @SuppressLint("SetTextI18n")
+    private void setupDocumentMessage(String searchString) {
+        String documentName = message.getDocumentName();
+        String documentSize = message.getDocumentSize();
+        if (StringUtils.isNotEmpty(documentName)) {
+            documentNameAndSizeView.setText(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, documentName, ContextCompat.getColor(activity, R.color.colorAccent)) : documentName + "\n" + documentSize);
         }
     }
 
@@ -449,148 +393,114 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         UiUtils.showView(messageBodyView, false);
         AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
         AppConstants.messageBodyPositions.put(getMessageHash(), false);
-        try {
-            String reactionValue = message.getStringAttribute(AppConstants.REACTION_VALUE);
-            if (StringUtils.isNotEmpty(reactionValue)) {
-                loadDrawables(activity, attachedPhotoOrVideoThumbnailView, reactionValue);
-            }
-        } catch (HyphenateException e) {
-            e.printStackTrace();
+        String reactionValue = message.getReactionValue();
+        if (StringUtils.isNotEmpty(reactionValue)) {
+            loadDrawables(activity, attachedPhotoOrVideoThumbnailView, reactionValue);
         }
     }
 
-    private void setupAudioMessage(EMFileMessageBody emFileMessageBody) {
-        try {
-            String audioDuration = message.getStringAttribute(AppConstants.AUDIO_DURATION);
-            String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION) != null ?
-                    message.getStringAttribute(AppConstants.FILE_CAPTION) : activity.getString(R.string.audio);
-            File localFilePath = new File(emFileMessageBody.getLocalUrl());
-            if (localFilePath.exists()) {
-                //Local File exists
-                audioView.setAudio(emFileMessageBody.getLocalUrl(), fileCaption, audioDuration);
+    private void setupAudioMessage(String searchString) {
+        String audioDuration = message.getAudioDuration();
+        String fileCaption = message.getFileCaption() != null ?
+                message.getFileCaption() : activity.getString(R.string.audio);
+        File localFilePath = new File(message.getLocalUrl());
+        if (localFilePath.exists()) {
+            //Local File exists
+            audioView.setAudio(message.getLocalUrl(), StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)) : fileCaption, audioDuration);
+        } else {
+            audioView.setAudio(message.getRemoteUrl(), StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)) : fileCaption, audioDuration);
+        }
+    }
+
+    private void setupContactMessage(String searchString) {
+        String contactName = message.getContactName();
+        String contactPhoneNumber = message.getContactNumber();
+        contactNameView.setText(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, contactName, ContextCompat.getColor(activity, R.color.colorAccent)) : contactName);
+        String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
+        if (contactPhoneNumbersView != null) {
+            if (getMessageDirection() == MessageDirection.OUTGOING) {
+                contactPhoneNumbersView.setText(UiUtils.fromHtml(Html.toHtml(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, purifiedPhoneNumber, ContextCompat.getColor(activity, R.color.colorAccent))
+                        : new SpannableString(purifiedPhoneNumber))));
             } else {
-                audioView.setAudio(emFileMessageBody.getRemoteUrl(), fileCaption, audioDuration);
-                if (message.status() == EMMessage.Status.FAIL) {
-                    DownloadAttachment downloadAttachment = new DownloadAttachment();
-                    downloadAttachment.execute(message);
-                }
+                contactPhoneNumbersView.setText(UiUtils.fromHtml(Html.toHtml(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, purifiedPhoneNumber, ContextCompat.getColor(activity, R.color.colorAccent))
+                        : new SpannableString(purifiedPhoneNumber))));
             }
-        } catch (HyphenateException e) {
-            e.printStackTrace();
-            HolloutLogger.e(TAG, "Audio Exception = " + e.getMessage());
         }
-    }
-
-    private void setupContactMessage() {
-        try {
-            String contactName = message.getStringAttribute(AppConstants.CONTACT_NAME);
-            String contactPhoneNumber = message.getStringAttribute(AppConstants.CONTACT_NUMBER);
-            contactNameView.setText(contactName);
-            String purifiedPhoneNumber = StringUtils.stripEnd(contactPhoneNumber, ",");
-            if (contactPhoneNumbersView != null) {
-                if (getMessageDirection() == EMMessage.Direct.SEND) {
-                    contactPhoneNumbersView.setText(UiUtils.fromHtml(purifiedPhoneNumber + " " + getOutGoingNonBreakingSpace()));
-                } else {
-                    contactPhoneNumbersView.setText(UiUtils.fromHtml(purifiedPhoneNumber + " " + getIncomingNonBreakingSpace()));
-                }
-            }
-        } catch (HyphenateException e) {
-            e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
-        }
-    }
-
-    @NonNull
-    private String getIncomingNonBreakingSpace() {
-        return " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;";
-    }
-
-    @NonNull
-    private String getOutGoingNonBreakingSpace() {
-        return " &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;" +
-                "&#160;&#160;&#160;&#160;&#160;";
     }
 
     private void handleCommonalities() {
         handleMessageReadOnClickOfImageView();
-        setMessageStatusCallback();
     }
 
     public int getMessageHash() {
-        return message.getMsgId().hashCode();
+        return message.getMessageId().hashCode();
     }
 
-    private void setupImageMessage(EMImageMessageBody messageBody) {
-
-        String filePath = messageBody.getLocalUrl();
+    private void setupImageMessage(String searchString) {
+        String filePath = message.getLocalUrl();
         File file = new File(filePath);
         if (file.exists()) {
-            filePath = messageBody.getLocalUrl();
+            filePath = message.getLocalUrl();
         } else {
-            filePath = messageBody.getRemoteUrl();
-            if (StringUtils.isNotEmpty(messageBody.getRemoteUrl())) {
+            filePath = message.getRemoteUrl();
+            if (StringUtils.isNotEmpty(message.getRemoteUrl())) {
                 UiUtils.showView(photoVideoProgressView, false);
             }
         }
-
         UiUtils.loadImage(activity, filePath, attachedPhotoOrVideoThumbnailView);
         UiUtils.showView(fileSizeDurationView, false);
         AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
-
-        try {
-            String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION);
-            if (StringUtils.isNotEmpty(fileCaption)) {
-                UiUtils.showView(messageBodyView, true);
-                messageBodyView.setText(fileCaption);
-                AppConstants.messageBodyPositions.put(getMessageHash(), true);
-            } else {
-                UiUtils.showView(messageBodyView, false);
-                AppConstants.messageBodyPositions.put(getMessageHash(), false);
-            }
-        } catch (HyphenateException e) {
-            e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
+        String fileCaption = message.getFileCaption();
+        if (StringUtils.isNotEmpty(fileCaption)) {
+            UiUtils.showView(messageBodyView, true);
+            messageBodyView.setText(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)) : fileCaption);
+            AppConstants.messageBodyPositions.put(getMessageHash(), true);
+        } else {
+            UiUtils.showView(messageBodyView, false);
+            AppConstants.messageBodyPositions.put(getMessageHash(), false);
         }
     }
 
-    public void setupVideoMessage(final EMVideoMessageBody upVideoMessage) {
-        String remoteVideoThumbnailUrl = upVideoMessage.getThumbnailUrl();
-        File localThumbFile = new File(upVideoMessage.getLocalThumb());
+    private void checkAndRegEventBus() {
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+    }
 
+    private void checkAnUnRegEventBus() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+        }
+    }
+
+    public void setupVideoMessage(String searchString) {
+        String remoteVideoThumbnailUrl = message.getThumbnailUrl();
+        File localThumbFile = new File(message.getLocalThumb());
         if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
             HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
             UiUtils.showView(photoVideoProgressView, false);
-            UiUtils.loadImage(activity, upVideoMessage.getThumbnailUrl(), attachedPhotoOrVideoThumbnailView);
+            UiUtils.loadImage(activity, message.getThumbnailUrl(), attachedPhotoOrVideoThumbnailView);
         } else {
             if (localThumbFile.exists()) {
                 HolloutLogger.d("VideoThumbnailPath", "Local Video Thumb exists with value = " + localThumbFile);
-                loadVideoFromPath(attachedPhotoOrVideoThumbnailView, upVideoMessage.getLocalThumb());
+                loadVideoFromPath(attachedPhotoOrVideoThumbnailView, message.getLocalThumb());
             }
         }
-
         UiUtils.showView(fileSizeDurationView, true);
         AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), true);
-
-        long videoLength = upVideoMessage.getDuration();
+        long videoLength = message.getVideoDuration();
         fileSizeDurationView.setText(UiUtils.getTimeString(videoLength));
-
         UiUtils.showView(playMediaIfVideoIcon, true);
         AppConstants.playableVideoPositions.put(getMessageHash(), true);
-
-        try {
-            String fileCaption = message.getStringAttribute(AppConstants.FILE_CAPTION);
-            if (fileCaption != null && StringUtils.isNotEmpty(fileCaption) && !StringUtils.containsIgnoreCase(fileCaption, activity.getString(R.string.photo))) {
-                UiUtils.showView(messageBodyView, true);
-                messageBodyView.setText(fileCaption);
-                AppConstants.messageBodyPositions.put(getMessageHash(), true);
-            } else {
-                UiUtils.showView(messageBodyView, false);
-                AppConstants.messageBodyPositions.put(getMessageHash(), false);
-                messageBodyView.setText(activity.getString(R.string.video));
-            }
-        } catch (HyphenateException e) {
-            e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
+        String fileCaption = message.getFileCaption();
+        if (fileCaption != null && StringUtils.isNotEmpty(fileCaption) && !StringUtils.containsIgnoreCase(fileCaption, activity.getString(R.string.photo))) {
+            UiUtils.showView(messageBodyView, true);
+            messageBodyView.setText(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)) : fileCaption);
+            AppConstants.messageBodyPositions.put(getMessageHash(), true);
+        } else {
+            UiUtils.showView(messageBodyView, false);
+            AppConstants.messageBodyPositions.put(getMessageHash(), false);
+            messageBodyView.setText(activity.getString(R.string.video));
         }
 
         playMediaIfVideoIcon.setOnClickListener(new OnClickListener() {
@@ -599,7 +509,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             public void onClick(View v) {
                 UiUtils.blinkView(v);
                 Intent mViewVideoIntent = new Intent(Intent.ACTION_VIEW);
-                mViewVideoIntent.setDataAndType(Uri.parse(new File(upVideoMessage.getLocalUrl()).exists() ? upVideoMessage.getLocalUrl() : upVideoMessage.getRemoteUrl()), "video/*");
+                mViewVideoIntent.setDataAndType(Uri.parse(new File(message.getLocalUrl()).exists() ? message.getLocalUrl() : message.getRemoteUrl()), "video/*");
                 activity.startActivity(mViewVideoIntent);
             }
 
@@ -626,40 +536,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         }
     }
 
-    private void setupTxtMessage(EMTextMessageBody messageBody, String searchString) {
-        try {
-            String messageAttributeType = message.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
-            if (messageAttributeType != null) {
-                switch (messageAttributeType) {
-                    case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
-                        String reaction = message.getStringAttribute(AppConstants.REACTION_VALUE);
-                        if (reaction != null) {
-                            UiUtils.showView(messageBodyView, false);
-                            AppConstants.messageBodyPositions.put(getMessageHash(), false);
-                            setupReactionMessage();
-                        } else {
-                            setupMessageBodyOnlyMessage(messageBody, searchString);
-                        }
-                        break;
-                    case AppConstants.MESSAGE_ATTR_TYPE_GIF:
-                        String gifUrl = message.getStringAttribute(AppConstants.GIF_URL);
-                        if (gifUrl != null) {
-                            setUpGifMessage(gifUrl);
-                        } else {
-                            setupMessageBodyOnlyMessage(messageBody, searchString);
-                        }
-                        break;
-                    default:
-                        setupMessageBodyOnlyMessage(messageBody, searchString);
-                        break;
-                }
-            } else {
-                setupMessageBodyOnlyMessage(messageBody, searchString);
-            }
-        } catch (HyphenateException e) {
-            setupMessageBodyOnlyMessage(messageBody, searchString);
-        }
-        acknowledgeMessageRead();
+    private void setupTxtMessage(String searchString) {
+        setupMessageBodyOnlyMessage(searchString);
     }
 
     private void setUpGifMessage(String gifUrl) {
@@ -713,14 +591,11 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         return (LoadingImageView) attachedPhotoOrVideoThumbnailView;
     }
 
-    private void setupMessageBodyOnlyMessage(EMTextMessageBody messageBody, String searchString) {
-        String message = messageBody.getMessage();
-        if (message.equals("You have an incoming call")) {
-            message = "&#128222; You had a miss call";
-        }
-        if (StringUtils.isNotEmpty(message)) {
+    private void setupMessageBodyOnlyMessage(String searchString) {
+        String messageBody = message.getMessageBody();
+        if (StringUtils.isNotEmpty(messageBody)) {
             UiUtils.showView(messageBodyView, true);
-            ArrayList includedLinks = UiUtils.pullLinks(message);
+            ArrayList includedLinks = UiUtils.pullLinks(messageBody);
             AppConstants.messageBodyPositions.put(getMessageHash(), true);
             if (includedLinks != null && !includedLinks.isEmpty()) {
                 setupLinkPreviewMessage(includedLinks);
@@ -731,16 +606,14 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                 UiUtils.showView(linkPreview, false);
             }
             if (messageBodyView != null) {
-                if (getMessageDirection() == EMMessage.Direct.SEND) {
+                if (getMessageDirection() == MessageDirection.OUTGOING) {
                     messageBodyView.setText(StringUtils.isNotEmpty(searchString)
-                            ? UiUtils.fromHtml(Html.toHtml(UiUtils.highlightTextIfNecessary(searchString, message, ContextCompat.getColor(activity, R.color.colorAccent)))
-                            + getOutGoingNonBreakingSpace()) :
-                            UiUtils.fromHtml(message + getOutGoingNonBreakingSpace()));
+                            ? UiUtils.fromHtml(Html.toHtml(UiUtils.highlightTextIfNecessary(searchString, messageBody, ContextCompat.getColor(activity, R.color.colorAccent)))) :
+                            UiUtils.fromHtml(messageBody));
                 } else {
                     messageBodyView.setText(StringUtils.isNotEmpty(searchString)
-                            ? UiUtils.fromHtml(Html.toHtml(UiUtils.highlightTextIfNecessary(searchString, message, ContextCompat.getColor(activity, R.color.colorAccent)))
-                            + getIncomingNonBreakingSpace()) :
-                            UiUtils.fromHtml(message + getIncomingNonBreakingSpace()));
+                            ? UiUtils.fromHtml(Html.toHtml(UiUtils.highlightTextIfNecessary(searchString, messageBody, ContextCompat.getColor(activity, R.color.colorAccent)))) :
+                            UiUtils.fromHtml(messageBody));
                 }
             }
         } else {
@@ -763,101 +636,28 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             attachedPhotoOrVideoThumbnailView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    acknowledgeMessageRead();
+
                 }
             });
         }
     }
 
     private void setupMessageTimeAndDeliveryStatus() {
-        Date messageDate = new Date(message.getMsgTime());
+        Date messageDate = new Date(message.getTimeStamp());
         String messageTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(messageDate);
         if (timeTextView != null) {
             timeTextView.setText(messageTime);
             timeTextView.setTextColor(ContextCompat.getColor(activity, R.color.grey_500));
         }
-        if (getMessageDirection() == EMMessage.Direct.SEND && deliveryStatusView != null) {
-            if (message.isAcked()) {
+        if (getMessageDirection() == MessageDirection.OUTGOING && deliveryStatusView != null) {
+            if (message.getMessageStatus() == MessageStatus.READ) {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.isListened()) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.isDelivered()) {
-                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_client_received_white : R.drawable.msg_status_client_received);
+            } else if (message.getMessageStatus() == MessageStatus.DELIVERED) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_received);
             } else {
-                deliveryStatusView.setImageResource(hashDrawable() ? R.drawable.msg_status_server_received_white : R.drawable.msg_status_server_receive);
+                deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
             }
         }
-    }
-
-    /**
-     * set callback for  message
-     */
-    protected void setMessageStatusCallback() {
-        if (messageStatusCallback == null) {
-            //Outgoing and incoming message callback....As per say to ask if the message has being delivered or a new message has being received
-            messageStatusCallback = new EMCallBack() {
-
-                @Override
-                public void onSuccess() {
-                    if (message.getType() != EMMessage.Type.TXT && photoVideoProgressView != null) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                UiUtils.showView(photoVideoProgressView, false);
-                                AppConstants.wavePositions.put(getMessageHash(), false);
-                            }
-                        });
-                    }
-                }
-
-                @Override
-                public void onProgress(final int progress, String status) {
-                    if (message.getType() != EMMessage.Type.TXT && photoVideoProgressView != null) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                UiUtils.showView(photoVideoProgressView, true);
-                                photoVideoProgressView.setProgress(progress);
-                                if (progress >= 99) {
-                                    UiUtils.showView(photoVideoProgressView, false);
-                                    AppConstants.wavePositions.put(getMessageHash(), false);
-                                }
-                            }
-
-                        });
-
-                    }
-
-                }
-
-                @Override
-                public void onError(int code, String error) {
-
-                }
-
-            };
-
-        }
-
-        message.setMessageStatusCallback(messageStatusCallback);
-
-    }
-
-    private void acknowledgeMessageRead() {
-        if (message.direct() == EMMessage.Direct.RECEIVE && !message.isAcked() && message.getChatType() == EMMessage.ChatType.Chat) {
-            try {
-                EMClient.getInstance().chatManager().ackMessageRead(message.getFrom(), message.getMsgId());
-            } catch (HyphenateException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public boolean hashDrawable() {
-        return (message.getType() == EMMessage.Type.IMAGE
-                || message.getType() == EMMessage.Type.VIDEO
-                || message.getType() == EMMessage.Type.LOCATION)
-                && message.direct() == EMMessage.Direct.SEND;
     }
 
     private void refreshViews() {
@@ -873,16 +673,23 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
             setBackgroundColor(ContextCompat.getColor(activity, R.color.lighter_blue));
-            HolloutLogger.d("SelectionTag", "Selected MessageId = " + message.getMsgId());
+            HolloutLogger.d("SelectionTag", "Selected MessageId = " + message.getMessageId());
         } else {
             setBackgroundColor(Color.TRANSPARENT);
-            HolloutLogger.d("SelectionTag", "UnSelected MessageId = " + message.getMsgId());
+            HolloutLogger.d("SelectionTag", "UnSelected MessageId = " + message.getMessageId());
         }
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        checkAndRegEventBus();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        checkAnUnRegEventBus();
         if (audioView != null) {
             audioView.cleanup();
         }
@@ -899,47 +706,32 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     updateActionMode();
                 } else {
                     UiUtils.blinkView(v);
-                    if (message.getType() == EMMessage.Type.FILE) {
-                        String fileType;
-                        try {
-                            fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
-                            EMFileMessageBody emFileMessageBody = (EMFileMessageBody) message.getBody();
-                            if (fileType.equals(AppConstants.FILE_TYPE_CONTACT)) {
-                                String contactPhoneNumber = message.getStringAttribute(AppConstants.CONTACT_NUMBER);
-                                String contactName = message.getStringAttribute(AppConstants.CONTACT_NAME);
-                                placeCallOrAddToContacts(contactName, contactPhoneNumber);
-                            }
-                            if (fileType.equals(AppConstants.FILE_TYPE_DOCUMENT)) {
-                                String documentRemoteFilePath = emFileMessageBody.getRemoteUrl();
-                                String documentLocalFilePath = emFileMessageBody.getLocalUrl();
-                                File file = new File(documentLocalFilePath);
-                                if (file != null && file.exists()) {
-                                    // open files if it exist
-                                    FileUtils.openFile(file, activity);
-                                } else {
-                                    downloadFile(emFileMessageBody, documentRemoteFilePath, documentLocalFilePath, file);
-                                }
-                            }
-
-                        } catch (HyphenateException e) {
-                            e.printStackTrace();
+                    if (message.getMessageType() == MessageType.CONTACT) {
+                        String contactPhoneNumber = message.getContactNumber();
+                        String contactName = message.getContactName();
+                        placeCallOrAddToContacts(contactName, contactPhoneNumber);
+                    } else if (message.getMessageType() == MessageType.DOCUMENT) {
+                        String documentRemoteFilePath = message.getRemoteUrl();
+                        String documentLocalFilePath = message.getLocalUrl();
+                        File file = new File(documentLocalFilePath);
+                        if (file != null && file.exists()) {
+                            FileUtils.openFile(file, activity);
+                        } else {
+                            downloadFile(documentRemoteFilePath, documentLocalFilePath, file);
                         }
-
-                    } else if (message.getType() == EMMessage.Type.IMAGE) {
-                        EMImageMessageBody emImageMessageBody = (EMImageMessageBody) message.getBody();
-                        String filePath = emImageMessageBody.getLocalUrl();
+                    } else if (message.getMessageType() == MessageType.IMAGE) {
+                        String filePath = message.getLocalUrl();
                         File file = new File(filePath);
                         if (file.exists()) {
-                            filePath = emImageMessageBody.getLocalUrl();
+                            filePath = message.getLocalUrl();
                             openImage(filePath);
                         } else {
-                            filePath = emImageMessageBody.getRemoteUrl();
+                            filePath = message.getRemoteUrl();
                             openImage(filePath);
                         }
-                    } else if (message.getType() == EMMessage.Type.LOCATION) {
-                        EMLocationMessageBody emLocationMessageBody = (EMLocationMessageBody) message.getBody();
-                        double lat = emLocationMessageBody.getLatitude();
-                        double lng = emLocationMessageBody.getLongitude();
+                    } else if (message.getMessageType() == MessageType.LOCATION) {
+                        String lat = message.getLatitude();
+                        String lng = message.getLongitude();
                         Uri gmmIntentUri = Uri.parse("geo:" + LocationUtils.getLocationFromMessage(String.valueOf(lat), String.valueOf(lng)));
                         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                         mapIntent.setPackage("com.google.android.apps.maps");
@@ -952,48 +744,84 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                 }
                 break;
         }
+
     }
 
-    private void downloadFile(EMFileMessageBody emFileMessageBody, String documentRemoteFilePath, String documentLocalFilePath, final File file) {
+    private void downloadFile(String documentRemoteFilePath, String documentLocalFilePath, final File file) {
         UiUtils.showSafeToast("Downloading File. File Would open after downloading...");
-        final Map<String, String> maps = new HashMap<>();
-        if (!TextUtils.isEmpty(emFileMessageBody.getSecret())) {
-            maps.put("share-secret", emFileMessageBody.getSecret());
-        }
-        //download file
-        EMClient.getInstance().chatManager().downloadFile(documentRemoteFilePath, documentLocalFilePath, maps,
-                new EMCallBack() {
+        Request request = new Request(documentRemoteFilePath, documentLocalFilePath);
+        request.setPriority(Priority.HIGH);
+        request.setNetworkType(NetworkType.ALL);
+        Fetch fetch = ApplicationLoader.getInstance().getMainFetch();
+        fetch.enqueue(request, new Func<Download>() {
+            @Override
+            public void call(Download download) {
 
-                    @Override
-                    public void onSuccess() {
-                        activity.runOnUiThread(new Runnable() {
-                            public void run() {
-                                FileUtils.openFile(file, activity);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onProgress(final int progress, String status) {
-                        activity.runOnUiThread(new Runnable() {
-                            public void run() {
-
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError(int error, final String msg) {
-                        activity.runOnUiThread(new Runnable() {
-                            public void run() {
-                                if (file != null && file.exists() && file.isFile())
-                                    file.delete();
-                                String str4 = getResources().getString(R.string.failed_to_download_file);
-                                UiUtils.showSafeToast(str4);
-                            }
-                        });
+            }
+        }, new Func<Error>() {
+            @Override
+            public void call(Error error) {
+                activity.runOnUiThread(new Runnable() {
+                    @SuppressWarnings("ResultOfMethodCallIgnored")
+                    public void run() {
+                        if (file != null && file.exists() && file.isFile())
+                            file.delete();
+                        String str4 = getResources().getString(R.string.failed_to_download_file);
+                        UiUtils.showSafeToast(str4);
                     }
                 });
+            }
+        });
+        fetch.addListener(new FetchListener() {
+            @Override
+            public void onQueued(Download download) {
+
+            }
+
+            @Override
+            public void onCompleted(Download download) {
+                activity.runOnUiThread(new Runnable() {
+                    public void run() {
+                        FileUtils.openFile(file, activity);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Download download) {
+
+            }
+
+            @Override
+            public void onProgress(Download download, long l, long l1) {
+
+            }
+
+            @Override
+            public void onPaused(Download download) {
+
+            }
+
+            @Override
+            public void onResumed(Download download) {
+
+            }
+
+            @Override
+            public void onCancelled(Download download) {
+
+            }
+
+            @Override
+            public void onRemoved(Download download) {
+
+            }
+
+            @Override
+            public void onDeleted(Download download) {
+
+            }
+        });
     }
 
     private void openImage(String filePath) {
@@ -1083,6 +911,50 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             AppConstants.selectedMessagesPositions.put(getMessageHash(), false);
         }
         invalidateMessageBubble();
+    }
+
+    /**
+     * set callback for  message
+     */
+    public void setMessageStatusCallback(final double progress) {
+        if (message.getMessageType() != MessageType.TXT && photoVideoProgressView != null) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (progress >= 99) {
+                        message.setFileUploadProgress(progress);
+                        photoVideoProgressView.setProgress(100);
+                        UiUtils.showView(photoVideoProgressView, false);
+                        AppConstants.wavePositions.put(getMessageHash(), false);
+                        refreshViews();
+                        return;
+                    }
+                    UiUtils.showView(photoVideoProgressView, true);
+                    photoVideoProgressView.setProgress((int) progress);
+                    message.setFileUploadProgress(progress);
+                }
+            });
+        }
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
+    public void onEventAsync(final Object o) {
+        UiUtils.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                if (o instanceof FileUploadProgressEvent) {
+                    FileUploadProgressEvent fileUploadProgressEvent = (FileUploadProgressEvent) o;
+                    String uploadFileUrl = fileUploadProgressEvent.getFilePath();
+                    double progress = fileUploadProgressEvent.getProgress();
+                    String uniqueIdOfProcessInitiator = fileUploadProgressEvent.getPollableUniqueId();
+                    if (uniqueIdOfProcessInitiator.equals(message.getMessageId()) && !fileUploadProgressEvent.isFromThumbnail()) {
+                        message.setFileUploadProgress(progress);
+                        setMessageStatusCallback(progress);
+                    }
+                }
+            }
+        });
     }
 
 }

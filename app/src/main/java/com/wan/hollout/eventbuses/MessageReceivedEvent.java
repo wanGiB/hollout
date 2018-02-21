@@ -1,6 +1,6 @@
 package com.wan.hollout.eventbuses;
 
-import com.hyphenate.chat.EMMessage;
+import com.wan.hollout.models.ChatMessage;
 
 /**
  * @author Wan Clem
@@ -8,13 +8,13 @@ import com.hyphenate.chat.EMMessage;
 
 public class MessageReceivedEvent {
 
-    private EMMessage message;
+    private ChatMessage message;
 
-    public MessageReceivedEvent(EMMessage message) {
+    public MessageReceivedEvent(ChatMessage message) {
         this.message = message;
     }
 
-    public EMMessage getMessage() {
+    public ChatMessage getMessage() {
         return message;
     }
 

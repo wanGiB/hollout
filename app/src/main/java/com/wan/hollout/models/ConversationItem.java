@@ -9,6 +9,7 @@ import com.wan.hollout.utils.AppConstants;
  * @author Wan Clem
  */
 
+@SuppressWarnings("WeakerAccess")
 public class ConversationItem implements Comparable<ConversationItem> {
 
     private ParseObject recipient;
@@ -27,7 +28,7 @@ public class ConversationItem implements Comparable<ConversationItem> {
         return recipient;
     }
 
-    private String getObjectId() {
+    public String getObjectId() {
         return recipient.getString(AppConstants.REAL_OBJECT_ID);
     }
 

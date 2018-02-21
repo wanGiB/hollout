@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 
 /**
@@ -24,6 +25,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                 Intent mAppInstanceDetectIntent = new Intent(context, AppInstanceDetectionService.class);
                 context.startService(mAppInstanceDetectIntent);
+                ChatClient.getInstance().startChatClient();
             } else {
 
             }

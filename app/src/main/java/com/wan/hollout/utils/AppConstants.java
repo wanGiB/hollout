@@ -3,8 +3,8 @@ package com.wan.hollout.utils;
 import android.provider.MediaStore;
 import android.util.SparseBooleanArray;
 
-import com.hyphenate.chat.EMMessage;
 import com.parse.ParseObject;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 
 import java.text.SimpleDateFormat;
@@ -150,7 +150,7 @@ public class AppConstants {
     public static final String PLEASE_REQUEST_LOCATION_ACCESSS = "request_location_access";
     public static final String APP_USER_COVER_PHOTO = "app_user_cover_photo_url";
     public static final java.lang.String CAN_LAUNCH_MAIN = "can_launch_main";
-    public static final String HOLLOUT_FILES_BUCKET = "gs://hollout-825b4.appspot.com";
+    public static final String HOLLOUT_FILES_BUCKET = "gs://hollout-860db.appspot.com";
     public static final String PHOTO_DIRECTORY = "Photos";
     public static final String USER_COVER_PHOTO_UPLOAD_TIME = "app_user_cover_photo_upload_time";
 
@@ -238,7 +238,7 @@ public class AppConstants {
     public static final String DELETE_ALL_SELECTED_MESSAGES = "delete_all_selected_messages";
     public static final String FILE_NAME = "file_name";
     public static final String FILE_SIZE = "file_size";
-    public static final String UNREAD_MESSAGES = "unread_messages_";
+    public static final String ALL_UNREAD_MESSAGES = "all_unread_messages";
     public static final String REPLIED_MESSAGE_ID = "replied_message_id";
     public static final String SHOW_APPROPRIATE_VIEWS = "show_appropriate_views";
     public static final String REMOVE_SOMETHING = "remove_something_o";
@@ -252,6 +252,14 @@ public class AppConstants {
     public static final String FILE_PATH = "file_path";
     public static final String CHECK_SELECTED_CONVERSATIONS = "check_selected_conversations";
     public static final String USER_BLACK_LIST = "user_black_list";
+    public static final String MESSAGE_DELIVERY_STATUS = "MessageDeliveryStatus";
+    public static final String VOICE_NOTES = "VoiceNotes";
+    public static final String VIDEOS_DIRECTORY = "Videos";
+    public static final String AUDIOS_DIRECTORY = "Audio";
+    public static final String THUMBS_DIRECTORY = "ThumbsDirectory";
+    public static final String DOCUMENTS = "Documents";
+    public static final String UNREAD_MESSAGES_COUNT_FROM = "UnreadMessagesCountFrom_";
+    public static final String TOTAL_UNREAD_MESSAGES_COUNT = "total_unread_messages_count";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
@@ -357,12 +365,13 @@ public class AppConstants {
 
     public static final String START_AGE_FILTER_VALUE = "start_age_filter_value";
     public static final String END_AGE_FILTER_VALUE = "end_age_filter_value";
-    public static ArrayList<EMMessage> selectedMessages = new ArrayList<>();
+    public static ArrayList<ChatMessage> selectedMessages = new ArrayList<>();
     public static SparseBooleanArray selectedMessagesPositions = new SparseBooleanArray();
     public static SparseBooleanArray linkPreviewPositions = new SparseBooleanArray();
 
     public static List<ConversationItem> selectedPeople = new ArrayList<>();
     public static SparseBooleanArray selectedPeoplePositions = new SparseBooleanArray();
 
+    public static String activeChatId = null;
 }
 

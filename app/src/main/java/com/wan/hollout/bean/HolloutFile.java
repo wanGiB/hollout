@@ -15,6 +15,7 @@ import java.util.ArrayList;
  * * Created by Wan on 6/17/2016.
  */
 public class HolloutFile implements Parcelable, Comparable<HolloutFile>, Serializable {
+
     public String localFilePath;
     public String remoteFilePath;
     public String mediaThumb;
@@ -27,6 +28,7 @@ public class HolloutFile implements Parcelable, Comparable<HolloutFile>, Seriali
     public String cappFileCaption;
     public String fileName;
     public long fileDate;
+    public long fileDuration;
     public Uri fileUri;
 
     //Requires a no argument constructor for firebase mapping
@@ -41,6 +43,7 @@ public class HolloutFile implements Parcelable, Comparable<HolloutFile>, Seriali
     protected HolloutFile(Parcel in) {
         localFilePath = in.readString();
         remoteFilePath = in.readString();
+        mediaThumb = in.readString();
         fileType = in.readString();
         fileKey = in.readString();
         remoteFilePathPlaceHolder = in.readString();
@@ -49,10 +52,10 @@ public class HolloutFile implements Parcelable, Comparable<HolloutFile>, Seriali
         cappFileCaption = in.readString();
         fileName = in.readString();
         fileDate = in.readLong();
+        fileDuration = in.readLong();
         fileUri = in.readParcelable(Uri.class.getClassLoader());
         holloutFiles = in.createTypedArrayList(HolloutFile.CREATOR);
         contactId = in.readString();
-        mediaThumb = in.readString();
     }
 
     public static final Creator<HolloutFile> CREATOR = new Creator<HolloutFile>() {
@@ -81,6 +84,22 @@ public class HolloutFile implements Parcelable, Comparable<HolloutFile>, Seriali
 
     public String getRemoteFilePathPlaceHolder() {
         return remoteFilePathPlaceHolder;
+    }
+
+    public void setFileDuration(long fileDuration) {
+        this.fileDuration = fileDuration;
+    }
+
+    public void setContactId(String contactId) {
+        this.contactId = contactId;
+    }
+
+    public long getFileDuration() {
+        return fileDuration;
+    }
+
+    public String getContactId() {
+        return contactId;
     }
 
     public void setFileDate(long fileDate) {
@@ -237,6 +256,7 @@ public class HolloutFile implements Parcelable, Comparable<HolloutFile>, Seriali
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(localFilePath);
         dest.writeString(remoteFilePath);
+        dest.writeString(mediaThumb);
         dest.writeString(fileType);
         dest.writeString(fileKey);
         dest.writeString(remoteFilePathPlaceHolder);
@@ -245,10 +265,9 @@ public class HolloutFile implements Parcelable, Comparable<HolloutFile>, Seriali
         dest.writeString(cappFileCaption);
         dest.writeString(fileName);
         dest.writeLong(fileDate);
+        dest.writeLong(fileDuration);
         dest.writeParcelable(fileUri, flags);
         dest.writeTypedList(holloutFiles);
         dest.writeString(contactId);
-        dest.writeString(mediaThumb);
     }
-
 }

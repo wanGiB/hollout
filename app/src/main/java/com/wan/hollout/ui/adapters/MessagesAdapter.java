@@ -9,10 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.hyphenate.chat.EMMessage;
-import com.hyphenate.chat.EMTextMessageBody;
-import com.hyphenate.exceptions.HyphenateException;
 import com.wan.hollout.R;
+import com.wan.hollout.enums.MessageDirection;
+import com.wan.hollout.enums.MessageType;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.ui.utils.DateUtils;
 import com.wan.hollout.ui.widgets.ChatMessageView;
 import com.wan.hollout.utils.AppConstants;
@@ -36,7 +36,7 @@ import butterknife.ButterKnife;
 public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements
         StickyRecyclerHeadersAdapter<MessagesAdapter.MessagedDatesHeaderHolder> {
 
-    private List<EMMessage> messages;
+    private List<ChatMessage> messages;
     private Activity context;
     private LayoutInflater layoutInflater;
     private Calendar calendar;
@@ -61,7 +61,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private String searchString;
 
-    public MessagesAdapter(Activity context, List<EMMessage> messages) {
+    public MessagesAdapter(Activity context, List<ChatMessage> messages) {
         this.context = context;
         this.messages = messages;
         this.layoutInflater = LayoutInflater.from(context);
@@ -131,54 +131,37 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public int getItemViewType(int position) {
-        EMMessage messageObject = messages.get(position);
-        EMMessage.Direct messageDirection = messageObject.direct();
-        EMMessage.Type messageType = messageObject.getType();
-        if (messageType == EMMessage.Type.IMAGE || messageType == EMMessage.Type.VIDEO || messageType == EMMessage.Type.LOCATION) {
-            return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO : INCOMING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO;
+        ChatMessage messageObject = messages.get(position);
+        MessageDirection messageDirection = messageObject.getMessageDirection();
+        MessageType messageType = messageObject.getMessageType();
+        if (messageType == MessageType.IMAGE || messageType == MessageType.VIDEO || messageType == MessageType.LOCATION) {
+            return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO : INCOMING_MESSAGE_WITH_PHOTO_LOCATION_OR_VIDEO;
         }
-        if (messageType == EMMessage.Type.FILE) {
-            try {
-                String fileType = messageObject.getStringAttribute(AppConstants.FILE_TYPE);
-                switch (fileType) {
-                    case AppConstants.FILE_TYPE_CONTACT:
-                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_CONTACT : INCOMING_MESSAGE_WITH_CONTACT;
-                    case AppConstants.FILE_TYPE_AUDIO:
-                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_AUDIO : INCOMING_MESSAGE_WITH_AUDIO;
-                    case AppConstants.FILE_TYPE_DOCUMENT:
-                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE : INCOMING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE;
-                }
-            } catch (HyphenateException e) {
-                return -1;
+        if (messageType == MessageType.CONTACT) {
+            return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_WITH_CONTACT : INCOMING_MESSAGE_WITH_CONTACT;
+        }
+        if (messageType == MessageType.AUDIO) {
+            return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_WITH_AUDIO : INCOMING_MESSAGE_WITH_AUDIO;
+        }
+        if (messageType == MessageType.DOCUMENT) {
+            return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE : INCOMING_MESSAGE_WITH_DOCUMENT_OR_OTHER_FILE;
+        }
+        if (messageType == MessageType.VOICE) {
+            return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_WITH_AUDIO : INCOMING_MESSAGE_WITH_AUDIO;
+        }
+        if (messageType == MessageType.TXT) {
+            List<String> links = UiUtils.pullLinks(messageObject.getMessageBody());
+            if (!links.isEmpty()) {
+                return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_WITH_LINK_PREVIEW : INCOMING_MESSAGE_WITH_LINK_PREVIEW;
+            } else {
+                return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
             }
         }
-        if (messageType == EMMessage.Type.VOICE) {
-            return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_AUDIO : INCOMING_MESSAGE_WITH_AUDIO;
+        if (messageType == MessageType.REACTION) {
+            return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_WITH_REACTION : INCOMING_MESSAGE_WITH_REACTION;
         }
-        if (messageType == EMMessage.Type.TXT) {
-            EMTextMessageBody emTextMessageBody = (EMTextMessageBody) messageObject.getBody();
-            List<String> links = UiUtils.pullLinks(emTextMessageBody.getMessage());
-            String messageAttributeType;
-            try {
-                messageAttributeType = messageObject.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
-                if (messageAttributeType != null) {
-                    switch (messageAttributeType) {
-                        case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
-                            return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_REACTION : INCOMING_MESSAGE_WITH_REACTION;
-                        case AppConstants.MESSAGE_ATTR_TYPE_GIF:
-                            return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_GIF : INCOMING_MESSAGE_WITH_GIF;
-                    }
-                } else {
-                    if (!links.isEmpty()) {
-                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_WITH_LINK_PREVIEW : INCOMING_MESSAGE_WITH_LINK_PREVIEW;
-                    } else {
-                        return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
-                    }
-                }
-            } catch (HyphenateException e) {
-                e.printStackTrace();
-                return messageDirection == EMMessage.Direct.SEND ? OUTGOING_MESSAGE_TEXT_ONLY : INCOMING_MESSAGE_TEXT_ONLY;
-            }
+        if (messageType == MessageType.GIF) {
+            return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_WITH_GIF : INCOMING_MESSAGE_WITH_GIF;
         }
         return -1;
     }
@@ -186,7 +169,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         MessageItemsHolder messageItemsHolder = (MessageItemsHolder) holder;
-        EMMessage messageObject = messages.get(position);
+        ChatMessage messageObject = messages.get(position);
         if (messageObject != null) {
             messageItemsHolder.bindMessage(context, messageObject, getSearchString());
         }
@@ -194,8 +177,8 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public String getHeaderId(int position) {
-        EMMessage parseObject = messages.get(position);
-        Date createdAt = new Date(parseObject.getMsgTime());
+        ChatMessage chatMessage = messages.get(position);
+        Date createdAt = new Date(chatMessage.getTimeStamp());
         calendar.setTime(createdAt);
         return String.valueOf(HolloutUtils.hashCode(calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR)));
     }
@@ -208,9 +191,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     @Override
     public void onBindHeaderViewHolder(MessagedDatesHeaderHolder holder, int position) {
-        EMMessage message = messages.get(position);
+        ChatMessage message = messages.get(position);
         if (message != null) {
-            Date createdAt = new Date(message.getMsgTime());
+            Date createdAt = new Date(message.getTimeStamp());
             holder.bindHeader(DateUtils.getRelativeDate(context, Locale.getDefault(), createdAt.getTime()));
         }
     }
@@ -239,9 +222,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             ButterKnife.bind(this, itemView);
         }
 
-        public void bindMessage(Activity context, EMMessage emMessage, String searchString) {
-            chatMessageView.bindData(context, emMessage,searchString);
-            if (AppConstants.bounceablePositions.get(emMessage.getMsgId().hashCode())) {
+        public void bindMessage(Activity context, ChatMessage emMessage, String searchString) {
+            chatMessageView.bindData(context, emMessage, searchString);
+            if (AppConstants.bounceablePositions.get(emMessage.getMessageId().hashCode())) {
                 itemView.setBackground(ContextCompat.getDrawable(context, R.drawable.background_color_transition));
                 TransitionDrawable transition = (TransitionDrawable) itemView.getBackground();
                 transition.setCrossFadeEnabled(true);

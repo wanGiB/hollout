@@ -17,15 +17,13 @@ import android.graphics.RectF;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spanned;
 
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMMessage;
-import com.hyphenate.chat.EMTextMessageBody;
-import com.hyphenate.chat.EMVideoMessageBody;
-import com.hyphenate.exceptions.HyphenateException;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
+import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.managers.HolloutCommunicationsManager;
+import com.wan.hollout.enums.MessageType;
+import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.services.FetchUserInfoService;
@@ -48,6 +46,7 @@ import java.util.concurrent.FutureTask;
 /**
  * @author Wan Clem
  */
+@SuppressWarnings("deprecation")
 public class MessageNotifier {
 
     private final static String[] msgStandIns = {"&#x1f4f7; Photo", "&#x1f3a4; Voice Note",
@@ -65,92 +64,79 @@ public class MessageNotifier {
         return this;
     }
 
-    public void onNewMsg(List<EMMessage> emMessages) {
-        if (!emMessages.isEmpty()) {
-            if (emMessages.size() == 1) {
+    public void notifyOnUnreadMessages() {
+        HolloutUtils.deserializeMessages(AppConstants.ALL_UNREAD_MESSAGES, new DoneCallback<List<ChatMessage>>() {
+            @Override
+            public void done(List<ChatMessage> result, Exception e) {
+                if (result != null && !result.isEmpty()) {
+                    onNewMsg(result);
+                }
+            }
+        });
+    }
+
+    private void onNewMsg(List<ChatMessage> chatMessages) {
+        if (!chatMessages.isEmpty()) {
+            if (chatMessages.size() == 1) {
                 Intent userInfoIntent = new Intent(appContext, FetchUserInfoService.class);
-                userInfoIntent.putExtra(AppConstants.EXTRA_USER_ID, emMessages.get(0).getFrom());
-                userInfoIntent.putExtra(AppConstants.UNREAD_MESSAGE, emMessages.get(0));
+                userInfoIntent.putExtra(AppConstants.EXTRA_USER_ID, chatMessages.get(0).getFrom());
+                userInfoIntent.putExtra(AppConstants.UNREAD_MESSAGE, chatMessages.get(0));
                 userInfoIntent.putExtra(AppConstants.NOTIFICATION_TYPE, AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE);
                 appContext.startService(userInfoIntent);
             } else {
-                if (fromSameSender(emMessages)) {
+                if (fromSameSender(chatMessages)) {
                     Intent userInfoIntent = new Intent(appContext, FetchUserInfoService.class);
-                    userInfoIntent.putExtra(AppConstants.EXTRA_USER_ID, emMessages.get(0).getFrom());
-                    userInfoIntent.putParcelableArrayListExtra(AppConstants.UNREAD_MESSAGES_FROM_SAME_SENDER, new ArrayList<>(emMessages));
+                    userInfoIntent.putExtra(AppConstants.EXTRA_USER_ID, chatMessages.get(0).getFrom());
+                    userInfoIntent.putParcelableArrayListExtra(AppConstants.UNREAD_MESSAGES_FROM_SAME_SENDER, new ArrayList<>(chatMessages));
                     userInfoIntent.putExtra(AppConstants.NOTIFICATION_TYPE, AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE);
                     appContext.startService(userInfoIntent);
                 } else {
-                    sendMultipleSendersNotification(emMessages);
+                    sendMultipleSendersNotification(chatMessages);
                 }
             }
         }
     }
 
-    public String getMessage(EMMessage message) {
-        if (message.getType() == EMMessage.Type.TXT) {
-            try {
-                String messageAttributeType = message.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
-                if (messageAttributeType != null) {
-                    switch (messageAttributeType) {
-                        case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
-                            return msgStandIns[8];
-                        case AppConstants.MESSAGE_ATTR_TYPE_GIF:
-                            return msgStandIns[7];
-                    }
-                } else {
-                    return ((EMTextMessageBody) message.getBody()).getMessage();
-                }
-            } catch (HyphenateException e) {
-                e.printStackTrace();
-                return ((EMTextMessageBody) message.getBody()).getMessage();
-            }
-            return ((EMTextMessageBody) message.getBody()).getMessage();
-        } else if (message.getType() == EMMessage.Type.IMAGE) {
+    public String getMessage(ChatMessage message) {
+        MessageType messageType = message.getMessageType();
+        if (messageType == MessageType.TXT) {
+            return message.getMessageBody();
+        } else if (messageType == MessageType.REACTION) {
+            return msgStandIns[8];
+        } else if (messageType == MessageType.GIF) {
+            return msgStandIns[7];
+        } else if (messageType == MessageType.IMAGE) {
             return msgStandIns[0];
-        } else if (message.getType() == EMMessage.Type.VOICE) {
+        } else if (messageType == MessageType.VOICE) {
             return msgStandIns[1];
-        } else if (message.getType() == EMMessage.Type.LOCATION) {
+        } else if (messageType == MessageType.LOCATION) {
             return msgStandIns[2];
-        } else if (message.getType() == EMMessage.Type.VIDEO) {
-            long videoLength = ((EMVideoMessageBody) message.getBody()).getDuration();
+        } else if (messageType == MessageType.VIDEO) {
+            long videoLength = message.getVideoDuration();
             return msgStandIns[3] + "<b> (" + UiUtils.getTimeString(videoLength) + ")</b>)";
-        } else if (message.getType() == EMMessage.Type.FILE) {
-            try {
-                String fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
-                switch (fileType) {
-                    case AppConstants.FILE_TYPE_AUDIO:
-                        return msgStandIns[4];
-                    case AppConstants.FILE_TYPE_CONTACT:
-                        return msgStandIns[5];
-                    default:
-                        return msgStandIns[6];
-                }
-            } catch (HyphenateException e) {
-                e.printStackTrace();
-            }
+        } else if (messageType == MessageType.AUDIO) {
+            return msgStandIns[4];
+        } else if (messageType == MessageType.CONTACT) {
+            return msgStandIns[5];
+        } else {
+            return msgStandIns[6];
         }
-        return "New Message";
     }
 
-    private boolean fromSameSender(List<EMMessage> messages) {
+    private boolean fromSameSender(List<ChatMessage> messages) {
         List<String> senders = new ArrayList<>();
-        for (EMMessage emMessage : messages) {
-            try {
-                String senderName = emMessage.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
-                if (!senders.contains(senderName.trim().toLowerCase())) {
-                    senders.add(senderName.trim().toLowerCase());
-                }
-            } catch (HyphenateException e) {
-                e.printStackTrace();
+        for (ChatMessage emMessage : messages) {
+            String senderName = emMessage.getFromName();
+            if (!senders.contains(senderName.trim().toLowerCase())) {
+                senders.add(senderName.trim().toLowerCase());
             }
         }
         return senders.size() == 1;
     }
 
-    private List<String> getConversationIds(List<EMMessage> messages) {
+    private List<String> getConversationIds(List<ChatMessage> messages) {
         List<String> conversationIds = new ArrayList<>();
-        for (EMMessage emMessage : messages) {
+        for (ChatMessage emMessage : messages) {
             String conversationId = emMessage.getFrom();
             if (!conversationIds.contains(conversationId)) {
                 conversationIds.add(conversationId);
@@ -159,29 +145,20 @@ public class MessageNotifier {
         return conversationIds;
     }
 
-    public void sendSingleNotification(final EMMessage message, final ParseObject sender) {
+    public void sendSingleNotification(final ChatMessage message, final ParseObject sender) {
         if (appContext == null) {
             appContext = ApplicationLoader.getInstance();
         }
-        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+        ChatClient.getInstance().execute(new Runnable() {
 
             @Override
             public void run() {
                 Intent userProfileIntent = new Intent(appContext, ChatActivity.class);
                 userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, sender);
                 PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                String senderName = appContext.getString(R.string.app_name);
-                try {
-                    senderName = message.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME);
-                } catch (HyphenateException e) {
-                    e.printStackTrace();
-                }
-                String senderPhoto = null;
-                try {
-                    senderPhoto = message.getStringAttribute(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-                } catch (HyphenateException e) {
-                    e.printStackTrace();
-                }
+                String senderName = message.getFromName();
+                String senderPhoto = message.getFromPhotoUrl();
+
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
                 builder.setContentTitle(WordUtils.capitalize(senderName));
                 Spanned messageSpannable = UiUtils.fromHtml(getMessage(message));
@@ -196,7 +173,10 @@ public class MessageNotifier {
                     Resources res = appContext.getResources();
                     int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
                     int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
-                    notificationInitiatorBitmap = getCircleBitmap(Bitmap.createScaledBitmap(getBitmapFromURL(senderPhoto), width, height, false));
+                    Bitmap senderBitmap = getBitmapFromURL(senderPhoto);
+                    if (senderBitmap != null) {
+                        notificationInitiatorBitmap = getCircleBitmap(Bitmap.createScaledBitmap(senderBitmap, width, height, false));
+                    }
                 }
 
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
@@ -221,11 +201,11 @@ public class MessageNotifier {
         });
     }
 
-    public void sendSameSenderNotification(final List<EMMessage> emMessages, final ParseObject parseUser) {
+    public void sendSameSenderNotification(final List<ChatMessage> chatMessages, final ParseObject parseUser) {
         if (appContext == null) {
             appContext = ApplicationLoader.getInstance();
         }
-        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+        ChatClient.getInstance().execute(new Runnable() {
             @Override
             public void run() {
                 Intent userProfileIntent = new Intent(appContext, ChatActivity.class);
@@ -234,7 +214,7 @@ public class MessageNotifier {
                 String senderName = WordUtils.capitalize(parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
                 String senderPhoto = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
-                Spanned messageSpannable = UiUtils.fromHtml(EMClient.getInstance().chatManager().getUnreadMessageCount() + " new messages");
+                Spanned messageSpannable = UiUtils.fromHtml(HolloutPreferences.getTotalUnreadMessagesCount() + " new messages");
                 builder.setTicker(messageSpannable);
                 builder.setSmallIcon(R.mipmap.ic_launcher);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
@@ -244,8 +224,10 @@ public class MessageNotifier {
                     Resources res = appContext.getResources();
                     int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
                     int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
-                    notificationInitiatorBitmap = getCircleBitmap(Bitmap.createScaledBitmap(getBitmapFromURL(senderPhoto), width, height, false));
-
+                    Bitmap senderBitmap = getBitmapFromURL(senderPhoto);
+                    if (senderBitmap != null) {
+                        notificationInitiatorBitmap = getCircleBitmap(Bitmap.createScaledBitmap(senderBitmap, width, height, false));
+                    }
                 }
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                 builder.setAutoCancel(true);
@@ -253,10 +235,10 @@ public class MessageNotifier {
                 builder.setContentTitle(WordUtils.capitalize(senderName))
                         .setLargeIcon(notificationInitiatorBitmap)
                         .setContentIntent(pendingIntent)
-                        .setNumber(emMessages.size())
+                        .setNumber(chatMessages.size())
                         .setStyle(inboxStyle)
-                        .setSubText((emMessages.size() == 1 ? "1 new message " : emMessages.size() + " new messages"));
-                for (EMMessage message : emMessages) {
+                        .setSubText((chatMessages.size() == 1 ? "1 new message " : chatMessages.size() + " new messages"));
+                for (ChatMessage message : chatMessages) {
                     inboxStyle.addLine(UiUtils.fromHtml(getMessage(message)));
                 }
                 Notification notification = builder.build();
@@ -270,18 +252,18 @@ public class MessageNotifier {
         });
     }
 
-    private void sendMultipleSendersNotification(final List<EMMessage> emMessages) {
+    private void sendMultipleSendersNotification(final List<ChatMessage> chatMessages) {
         if (appContext == null) {
             appContext = ApplicationLoader.getInstance();
         }
-        HolloutCommunicationsManager.getInstance().execute(new Runnable() {
+        ChatClient.getInstance().execute(new Runnable() {
 
             @Override
             public void run() {
                 Intent mainIntent = new Intent(appContext, MainActivity.class);
                 PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
-                Spanned messageSpannable = UiUtils.fromHtml(EMClient.getInstance().chatManager().getUnreadMessageCount() + " new messages");
+                Spanned messageSpannable = UiUtils.fromHtml(HolloutPreferences.getTotalUnreadMessagesCount() + " new messages");
                 builder.setTicker(messageSpannable);
                 builder.setSmallIcon(R.mipmap.ic_launcher);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
@@ -302,15 +284,11 @@ public class MessageNotifier {
                 builder.setContentTitle(WordUtils.capitalize(appContext.getString(R.string.app_name)))
                         .setLargeIcon(notificationInitiatorBitmap)
                         .setContentIntent(pendingIntent)
-                        .setNumber(emMessages.size())
+                        .setNumber(chatMessages.size())
                         .setStyle(inboxStyle)
-                        .setSubText((emMessages.size() == 1 ? "1 new message " : emMessages.size() + " new messages") + " from " + ((getConversationIds(emMessages).size() == 1) ? " 1 chat " : (getConversationIds(emMessages).size() + " chats")));
-                for (EMMessage message : emMessages) {
-                    try {
-                        inboxStyle.addLine(UiUtils.fromHtml(message.getStringAttribute(AppConstants.APP_USER_DISPLAY_NAME) + ":" + getMessage(message)));
-                    } catch (HyphenateException e) {
-                        e.printStackTrace();
-                    }
+                        .setSubText((chatMessages.size() == 1 ? "1 new message " : chatMessages.size() + " new messages") + " from " + ((getConversationIds(chatMessages).size() == 1) ? " 1 chat " : (getConversationIds(chatMessages).size() + " chats")));
+                for (ChatMessage message : chatMessages) {
+                    inboxStyle.addLine(UiUtils.fromHtml(message.getFromName() + ":" + getMessage(message)));
                 }
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;

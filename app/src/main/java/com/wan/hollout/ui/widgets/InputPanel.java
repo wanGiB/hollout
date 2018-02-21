@@ -156,6 +156,10 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
         return recordTime.getStartTime();
     }
 
+    public long getElapsedTime() {
+        return recordTime.getElapsedTime();
+    }
+
     @Override
     public void onKeyboardShown() {
         emojiToggle.setToEmoji();
@@ -184,6 +188,7 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
         private final TextView recordTimeView;
 
         private final AtomicLong startTime = new AtomicLong(0);
+        private long elapsedTime;
         private final Handler handler = new Handler();
 
         private RecordTime(TextView recordTimeView) {
@@ -198,17 +203,17 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
         }
 
         long hide() {
-            long elapsedtime = System.currentTimeMillis() - startTime.get();
+            elapsedTime = System.currentTimeMillis() - startTime.get();
             this.startTime.set(0);
             ViewUtil.fadeOut(this.recordTimeView, FADE_TIME, View.INVISIBLE);
-            return elapsedtime;
+            return elapsedTime;
         }
 
         @Override
         public void run() {
             long localStartTime = startTime.get();
             if (localStartTime > 0) {
-                long elapsedTime = System.currentTimeMillis() - localStartTime;
+                elapsedTime = System.currentTimeMillis() - localStartTime;
                 recordTimeView.setText(DateUtils.formatElapsedTime(TimeUnit.MILLISECONDS.toSeconds(elapsedTime)));
                 handler.postDelayed(this, TimeUnit.SECONDS.toMillis(1));
             }
@@ -216,6 +221,11 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
 
         AtomicLong getStartTime() {
             return startTime;
+        }
+
+
+        public long getElapsedTime() {
+            return elapsedTime;
         }
 
     }

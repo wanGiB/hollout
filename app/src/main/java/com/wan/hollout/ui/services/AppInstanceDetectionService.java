@@ -1,6 +1,6 @@
 package com.wan.hollout.ui.services;
 
-import android.app.Service;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -8,9 +8,9 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.JobIntentService;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,8 +24,8 @@ import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
-import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppStateManager;
 import com.wan.hollout.utils.AuthUtil;
@@ -46,7 +46,8 @@ import java.util.Locale;
  * @author Wan Clem
  */
 
-public class AppInstanceDetectionService extends Service implements
+@SuppressWarnings("ConstantConditions")
+public class AppInstanceDetectionService extends JobIntentService implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
@@ -58,7 +59,7 @@ public class AppInstanceDetectionService extends Service implements
     private LocationRequest mLocationRequest;
     private String TAG = AppInstanceDetectionService.class.getSimpleName();
 
-    private ParseObject signedInUser;
+    private static ParseObject signedInUser;
 
     private AppStateManager appStateManager;
 
@@ -87,14 +88,8 @@ public class AppInstanceDetectionService extends Service implements
         appStateManager = AppStateManager.init(ApplicationLoader.getInstance());
     }
 
-    @Nullable
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    protected void onHandleWork(@NonNull Intent intent) {
         if (signedInUser == null) {
             signedInUser = AuthUtil.getCurrentUser();
         }
@@ -108,7 +103,6 @@ public class AppInstanceDetectionService extends Service implements
 
             }
         }
-        return START_STICKY;
     }
 
     @Override
@@ -123,8 +117,9 @@ public class AppInstanceDetectionService extends Service implements
         }
     }
 
-    private class GetLocationTask extends AsyncTask<Location, Void, Void> {
+    private static class GetLocationTask extends AsyncTask<Location, Void, Void> {
 
+        @SuppressLint("StaticFieldLeak")
         private Context context;
         // Create a list to contain the result address
         private List<Address> addresses;
@@ -241,7 +236,7 @@ public class AppInstanceDetectionService extends Service implements
         }
     }
 
-    private void updateSignedInUserProps(final boolean sendPushNotification) {
+    private static void updateSignedInUserProps(final boolean sendPushNotification) {
         if (signedInUser != null) {
             AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                 @Override
@@ -271,7 +266,7 @@ public class AppInstanceDetectionService extends Service implements
         }
     }
 
-    private void sendAmNearbyPushNotification() {
+    private static void sendAmNearbyPushNotification() {
         String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
         List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
@@ -290,26 +285,26 @@ public class AppInstanceDetectionService extends Service implements
                 }
                 peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
             }
-            peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE,AppConstants.OBJECT_TYPE_INDIVIDUAL);
+            peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
             peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, aboutUser);
             peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 10.0);
             peopleQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> parseUsers, ParseException e) {
-                    if (e==null && parseUsers!=null && !parseUsers.isEmpty()){
-                        List<String>appUserIds = new ArrayList<>();
-                        for (ParseObject parseUser:parseUsers){
+                    if (e == null && parseUsers != null && !parseUsers.isEmpty()) {
+                        List<String> appUserIds = new ArrayList<>();
+                        for (ParseObject parseUser : parseUsers) {
                             String appUserId = parseUser.getString(AppConstants.REAL_OBJECT_ID);
                             appUserIds.add(appUserId);
                         }
-                        if (!appUserIds.isEmpty()){
-                            final ParseQuery<ParseInstallation>parseInstallationParseQuery = ParseInstallation.getQuery();
-                            parseInstallationParseQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID,appUserIds);
+                        if (!appUserIds.isEmpty()) {
+                            final ParseQuery<ParseInstallation> parseInstallationParseQuery = ParseInstallation.getQuery();
+                            parseInstallationParseQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, appUserIds);
                             parseInstallationParseQuery.findInBackground(new FindCallback<ParseInstallation>() {
                                 @Override
                                 public void done(List<ParseInstallation> objects, ParseException e) {
-                                    if (e==null && objects!=null){
-                                        NotificationCenter.sendAmNearbyNotification(signedInUser.getString(AppConstants.REAL_OBJECT_ID),parseInstallationParseQuery);
+                                    if (e == null && objects != null) {
+                                        NotificationCenter.sendAmNearbyNotification(signedInUser.getString(AppConstants.REAL_OBJECT_ID), parseInstallationParseQuery);
                                     }
                                 }
                             });

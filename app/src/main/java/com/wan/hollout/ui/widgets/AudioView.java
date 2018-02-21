@@ -9,6 +9,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.text.Spanned;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -90,6 +91,15 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
     }
 
     public void setAudio(final @NonNull String audioFilePath, String audioTitle, String audioDuration) {
+        this.audioSlide = audioFilePath;
+        controlToggle.displayQuick(playButton);
+        seekBar.setEnabled(true);
+        this.audioSlidePlayer = AudioSlidePlayer.createFor(getContext(), audioFilePath, this);
+        this.timestamp.setText(audioDuration);
+        this.audioTitleView.setText(audioTitle);
+    }
+
+    public void setAudio(final @NonNull String audioFilePath, CharSequence audioTitle, String audioDuration) {
         this.audioSlide = audioFilePath;
         controlToggle.displayQuick(playButton);
         seekBar.setEnabled(true);

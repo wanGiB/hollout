@@ -38,18 +38,13 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.hyphenate.EMError;
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.exceptions.HyphenateException;
-import com.parse.DeleteCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
-import com.wan.hollout.interfaces.DoneCallback;
-import com.wan.hollout.managers.HolloutCommunicationsManager;
+import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.eventbuses.TypingFinishedBus;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.ShimmerFrameLayout;
@@ -117,7 +112,6 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             "People in your field of study",
             "People who share in your passion",
             "People who share in your interests",
-            "People who share in your concerns",
             "People of like minds",
             "Any one like you!!!"
     };
@@ -157,20 +151,11 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             public void done(ParseObject object, ParseException e) {
                 if (e == null && object != null) {
                     AuthUtil.createLocalUser(object);
-                    HolloutCommunicationsManager.getInstance().logInEMClient(getValidAppUserId(firebaseUser), getValidAppUserId(firebaseUser), new DoneCallback<Boolean>() {
-                        @Override
-                        public void done(Boolean success, Exception e) {
-                            UiUtils.dismissProgressDialog();
-                            if (success && e == null) {
-                                HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
-                                setupCrashlyticsUser(firebaseUser);
-                                syncBlackList();
-                                finishUp();
-                            } else {
-                                createNewUserOnParse(firebaseUser);
-                            }
-                        }
-                    });
+                    HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
+                    setupCrashlyticsUser(firebaseUser);
+                    startChatClient();
+                    UiUtils.dismissProgressDialog();
+                    finishUp();
                 } else {
                     if (e != null) {
                         if (e.getCode() == ParseException.USERNAME_MISSING || e.getCode() == ParseException.OBJECT_NOT_FOUND) {
@@ -186,13 +171,9 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         });
     }
 
-    private void syncBlackList() {
-        try {
-            // sync blacklist
-            EMClient.getInstance().contactManager().getBlackListFromServer();
-        } catch (HyphenateException hyphenatException) {
-            hyphenatException.printStackTrace();
-        }
+    private void startChatClient() {
+        // sync blacklist
+        ChatClient.getInstance().startChatClient();
     }
 
     private void finishUp() {
@@ -267,25 +248,10 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
             public void done(ParseException e) {
                 if (e == null) {
                     AuthUtil.createLocalUser(newHolloutUser);
-                    HolloutCommunicationsManager.getInstance().signUpEMClient(getValidAppUserId(firebaseUser), getValidAppUserId(firebaseUser), new DoneCallback<Boolean>() {
-                        @Override
-                        public void done(Boolean result, Exception e) {
-                            if (e == null) {
-                                loginInAndContinue(firebaseUser, newHolloutUser);
-                            } else {
-                                if (e instanceof HyphenateException) {
-                                    HyphenateException exception = (HyphenateException) e;
-                                    if (exception.getErrorCode() == EMError.USER_ALREADY_EXIST) {
-                                        loginInAndContinue(firebaseUser, newHolloutUser);
-                                    } else {
-                                        terminateAuthenticationSession(newHolloutUser, e);
-                                    }
-                                } else {
-                                    terminateAuthenticationSession(newHolloutUser, e);
-                                }
-                            }
-                        }
-                    });
+                    HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
+                    startChatClient();
+                    UiUtils.dismissProgressDialog();
+                    finishUp();
                 } else {
                     String errorMessage = e.getMessage();
                     if (StringUtils.isNotEmpty(errorMessage)) {
@@ -303,58 +269,9 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
         });
     }
 
-    private void loginInAndContinue(final FirebaseUser firebaseUser, final ParseObject newHolloutUser) {
-        HolloutCommunicationsManager.getInstance().logInEMClient(getValidAppUserId(firebaseUser), getValidAppUserId(firebaseUser), new DoneCallback<Boolean>() {
-            @Override
-            public void done(Boolean success, Exception e) {
-                if (e == null && success) {
-                    UiUtils.dismissProgressDialog();
-                    HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
-                    syncBlackList();
-                    finishUp();
-                } else {
-                    terminateAuthenticationSession(newHolloutUser, e);
-                }
-            }
-        });
-    }
-
     @NonNull
     private String getValidAppUserId(FirebaseUser firebaseUser) {
         return firebaseUser.getUid().trim().toLowerCase();
-    }
-
-    private void terminateAuthenticationSession(final ParseObject newHolloutUser, final Exception gobe) {
-        newHolloutUser.deleteInBackground(new DeleteCallback() {
-            @Override
-            public void done(ParseException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        UiUtils.dismissProgressDialog();
-                    }
-                });
-                if (e == null) {
-                    AuthUtil.dissolveAuthenticatedUser(null);
-                    HolloutPreferences.setUserWelcomed(false);
-                    HolloutPreferences.clearPersistedCredentials();
-                    UiUtils.showSafeToast("Sorry, an error occurred while authenticating you. Please try again.");
-                } else {
-                    newHolloutUser.deleteEventually(new DeleteCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (e == null) {
-                                AuthUtil.dissolveAuthenticatedUser(null);
-                                HolloutPreferences.setUserWelcomed(false);
-                                HolloutPreferences.clearPersistedCredentials();
-                            }
-                        }
-                    });
-                    UiUtils.showSafeToast("Sorry, an error occurred while authenticating you. Please try again.");
-                    Crashlytics.logException(gobe);
-                }
-            }
-        });
     }
 
     private void setupCrashlyticsUser(FirebaseUser firebaseUser) {

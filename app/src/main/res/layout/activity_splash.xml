@@ -1,8 +1,47 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
     tools:context="com.wan.hollout.ui.activities.SplashActivity">
 
+    <com.wan.hollout.ui.widgets.ShimmerFrameLayout
+        android:id="@+id/shimmer_view_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="3dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="5dp"
+        android:padding="10dp"
+        app:base_alpha="0.8"
+        app:duration="2500">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/clobb"
+                android:textColor="@color/ease_white"
+                android:textSize="25sp"
+                app:textStyle="bold" />
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/it"
+                android:textColor="@color/light_gray"
+                android:textSize="25sp"
+                app:textStyle="light" />
+
+        </LinearLayout>
+
+    </com.wan.hollout.ui.widgets.ShimmerFrameLayout>
 
 </FrameLayout>

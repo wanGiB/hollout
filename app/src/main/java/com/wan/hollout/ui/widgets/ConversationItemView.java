@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.widgets;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -15,7 +16,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -24,13 +24,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
-import com.hyphenate.EMCallBack;
-import com.hyphenate.chat.EMClient;
-import com.hyphenate.chat.EMConversation;
-import com.hyphenate.chat.EMLocationMessageBody;
-import com.hyphenate.chat.EMMessage;
-import com.hyphenate.chat.EMTextMessageBody;
-import com.hyphenate.exceptions.HyphenateException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
@@ -39,14 +32,18 @@ import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
-import com.wan.hollout.utils.ChatUtils;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.enums.MessageDirection;
+import com.wan.hollout.enums.MessageStatus;
+import com.wan.hollout.enums.MessageType;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -67,7 +64,8 @@ import butterknife.ButterKnife;
 /**
  * @author Wan Clem
  */
-@SuppressWarnings("FieldCanBeLocal")
+@SuppressWarnings({"FieldCanBeLocal", "SameParameterValue"})
+@SuppressLint("SetTextI18n")
 public class ConversationItemView extends RelativeLayout implements View.OnClickListener, View.OnLongClickListener {
 
     @BindView(R.id.user_online_status)
@@ -97,9 +95,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     @BindView(R.id.icon_profile)
     ImageView userPhotoView;
 
-    @BindView(R.id.message_container)
-    LinearLayout messageContainer;
-
     @BindView(R.id.icon_container)
     RelativeLayout iconContainer;
 
@@ -112,9 +107,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     @BindView(R.id.reactions_indicator)
     ImageView reactionsIndicatorView;
 
-    protected EMCallBack messageSendCallback;
-    protected EMCallBack messageReceiveCallback;
-
     public ParseObject parseObject;
     public Activity activity;
 
@@ -122,8 +114,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private String searchString;
 
-    private EMConversation emConversation;
-    private EMMessage lastMessage;
+    private ChatMessage lastMessage;
 
     private ParseObject signedInUserObject;
 
@@ -154,13 +145,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         this.activity = activity;
         this.signedInUserObject = AuthUtil.getCurrentUser();
         this.parseObject = parseObject;
-        this.emConversation = EMClient.getInstance()
-                .chatManager().getConversation(parseObject.getString(AppConstants.REAL_OBJECT_ID),
-                        ChatUtils.getConversationType(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                                ? AppConstants.CHAT_TYPE_SINGLE
-                                : (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_GROUP))
-                                ? AppConstants.CHAT_TYPE_GROUP : AppConstants.CHAT_TYPE_ROOM), true);
-
         init();
         setupConversation(parseObject, searchString);
         invalidateViewOnScroll();
@@ -226,11 +210,9 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             String userName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME)
                     : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-
             String userProfilePhoto = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL)
                     : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
-
             if (StringUtils.isNotEmpty(userName)) {
                 if (StringUtils.isNotEmpty(searchString)) {
                     usernameEntryView.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(userName),
@@ -238,26 +220,21 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 } else {
                     usernameEntryView.setText(WordUtils.capitalize(userName));
                 }
-                // displaying the first letter of From in icon text
                 iconText.setText(WordUtils.capitalize(userName.substring(0, 1)));
             }
-
-            // display profile image
             applyProfilePicture(userProfilePhoto);
             applyIconAnimation();
-
             attachEventHandlers(parseObject);
-
             if (HolloutUtils.isUserBlocked(parseObject.getString(AppConstants.REAL_OBJECT_ID))) {
                 userStatusOrLastMessageView.setText(activity.getString(R.string.user_blocked));
                 userPhotoView.setColorFilter(ContextCompat.getColor(activity, R.color.black_transparent_70percent), PorterDuff.Mode.SRC_ATOP);
                 listenToUserPresence(parseObject);
                 return;
             }
-
-            if (emConversation != null) {
-                int unreadMessagesCount = emConversation.getUnreadMsgCount();
-                if (unreadMessagesCount > 0 && lastMessage != null && lastMessage.direct() == EMMessage.Direct.RECEIVE) {
+            lastMessage = DbUtils.getLastMessageInConversation(getConversationId());
+            if (lastMessage != null) {
+                int unreadMessagesCount = HolloutPreferences.getUnreadMessagesCountFrom(getConversationId());
+                if (unreadMessagesCount > 0 && lastMessage != null && lastMessage.getMessageDirection() == MessageDirection.INCOMING) {
                     UiUtils.showView(unreadMessagesCountView, true);
                     unreadMessagesCountView.setText(String.valueOf(unreadMessagesCount));
                     AppConstants.unreadMessagesPositions.put(getMessageId(), true);
@@ -269,7 +246,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                     userStatusOrLastMessageView.setTypeface(null, Typeface.NORMAL);
                     userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(activity, R.color.message));
                 }
-                lastMessage = emConversation.getLastMessage();
                 if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                     JSONObject chatStates = parseObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
                     if (chatStates != null) {
@@ -289,21 +265,16 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                         setupDefaults();
                     }
                 } else {
+                    UiUtils.showView(userOnlineStatusView, false);
+                    AppConstants.parseUserAvailableOnlineStatusPositions.put(getMessageId(), false);
                     setupDefaults();
                 }
-            }
-
-            if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                 listenToUserPresence(parseObject);
             } else {
-                UiUtils.showView(userOnlineStatusView, false);
-                AppConstants.parseUserAvailableOnlineStatusPositions.put(getMessageId(), false);
+                setupDefaults();
             }
-
         }
-
         invalidateItemView(activity, getCurrentConversationHashCode());
-
     }
 
     private void attachEventHandlers(final ParseObject parseObject) {
@@ -314,13 +285,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                     UiUtils.loadUserData(activity, parseObject);
                 }
-            }
-        });
-
-        messageContainer.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ConversationItemView.this.performClick();
             }
         });
 
@@ -364,7 +328,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         usernameEntryView.setOnLongClickListener(onLongClickListener);
         userStatusOrLastMessageView.setOnLongClickListener(onLongClickListener);
         iconContainer.setOnLongClickListener(onLongClickListener);
-        messageContainer.setOnLongClickListener(onLongClickListener);
     }
 
     private void listenToUserPresence(ParseObject parseObject) {
@@ -390,7 +353,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         if (lastMessage != null) {
             HolloutLogger.d("LastMessageTracker", "Last Message in conversation is not null");
             UiUtils.showView(msgTimeStampView, true);
-            long lastMessageTime = lastMessage.getMsgTime();
+            long lastMessageTime = lastMessage.getTimeStamp();
             parseObject.put(AppConstants.LAST_CONVERSATION_TIME_WITH, lastMessageTime);
             Date msgDate = new Date(lastMessageTime);
             if (msgDate.equals(new Date())) {
@@ -430,7 +393,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         UiUtils.showView(msgTimeStampView, AppConstants.lastMessageAvailablePositions.get(getMessageId()));
         UiUtils.showView(userOnlineStatusView, AppConstants.parseUserAvailableOnlineStatusPositions.get(getMessageId()));
         userOnlineStatusView.setImageResource(AppConstants.onlinePositions.get(getMessageId()) ? R.drawable.ic_online : R.drawable.ic_offline_grey);
-        if (AppConstants.lastMessageAvailablePositions.get(getMessageId()) && lastMessage != null && lastMessage.direct() == EMMessage.Direct.SEND) {
+        if (AppConstants.lastMessageAvailablePositions.get(getMessageId()) && lastMessage != null && lastMessage.getMessageDirection() == MessageDirection.OUTGOING) {
             setupMessageReadStatus(lastMessage);
         } else {
             UiUtils.showView(deliveryStatusView, false);
@@ -442,7 +405,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     private void subscribeToUserChanges() {
         if (parseObject != null) {
             objectStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-            objectStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, parseObject.getString(AppConstants.REAL_OBJECT_ID));
+            objectStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, getConversationId());
             try {
                 SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(objectStateQuery);
                 subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
@@ -452,7 +415,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                             @Override
                             public void run() {
                                 String newObjectRealId = object.getString(AppConstants.REAL_OBJECT_ID);
-                                String personId = parseObject.getString(AppConstants.REAL_OBJECT_ID);
+                                String personId = getConversationId();
                                 HolloutLogger.d("ObjectUpdate", "A new object has changed. Object Id = " + newObjectRealId + " RefObjectId = " + personId);
                                 if (newObjectRealId.equals(personId)) {
                                     setupConversation(object, searchString);
@@ -511,7 +474,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     }
 
     public ConversationItem getConversationItem() {
-        return new ConversationItem(parseObject, HolloutPreferences.getLastConversationTime(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
+        return new ConversationItem(parseObject, HolloutPreferences.getLastConversationTime(getConversationId()));
     }
 
     @Override
@@ -532,7 +495,11 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     }
 
     private int getCurrentConversationHashCode() {
-        return parseObject.getString(AppConstants.REAL_OBJECT_ID).hashCode();
+        return getConversationId().hashCode();
+    }
+
+    private String getConversationId() {
+        return parseObject.getString(AppConstants.REAL_OBJECT_ID);
     }
 
     private void initChat() {
@@ -548,117 +515,81 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         return parseObject.getString(AppConstants.OBJECT_TYPE);
     }
 
-    public void setupLastMessage(EMMessage message) {
-        EMMessage.Type messageType = message.getType();
-        if (message.direct() == EMMessage.Direct.SEND) {
+    public void setupLastMessage(ChatMessage message) {
+        MessageType messageType = message.getMessageType();
+        if (message.getMessageDirection() == MessageDirection.OUTGOING) {
             UiUtils.showView(deliveryStatusView, true);
-            setMessageSendCallback();
             setupMessageReadStatus(message);
         } else {
-            setMessageReceiveCallback();
             UiUtils.showView(deliveryStatusView, false);
         }
-        if (messageType == EMMessage.Type.TXT) {
-            try {
-                String messageAttrType = message.getStringAttribute(AppConstants.MESSAGE_ATTR_TYPE);
-                if (messageAttrType != null) {
-                    switch (messageAttrType) {
-                        case AppConstants.MESSAGE_ATTR_TYPE_REACTION:
-                            String reaction = message.getStringAttribute(AppConstants.REACTION_VALUE);
-                            if (reaction != null) {
-                                UiUtils.showView(reactionsIndicatorView, true);
-                                AppConstants.reactionsOpenPositions.put(getMessageId(), true);
-                                UiUtils.showView(userStatusOrLastMessageView, false);
-                                loadDrawables(activity, reactionsIndicatorView, reaction);
-                            } else {
-                                setupMessageBodyOnlyMessage(message);
-                            }
-                            break;
-                        case AppConstants.MESSAGE_ATTR_TYPE_GIF:
-                            UiUtils.showView(reactionsIndicatorView, true);
-                            AppConstants.reactionsOpenPositions.put(getMessageId(), true);
-                            UiUtils.showView(userStatusOrLastMessageView, true);
-                            userStatusOrLastMessageView.setText(UiUtils.fromHtml("<b>" + activity.getString(R.string.gif) + "</b>"));
-                            String gifUrl = message.getStringAttribute(AppConstants.GIF_URL);
-                            loadLastMessageGif(gifUrl);
-                            break;
-                        default:
-                            setupMessageBodyOnlyMessage(message);
-                            break;
-                    }
-                } else {
-                    setupMessageBodyOnlyMessage(message);
-                }
-            } catch (HyphenateException e) {
-                e.printStackTrace();
-                setupMessageBodyOnlyMessage(message);
-            }
+        if (messageType == MessageType.TXT) {
+            setupMessageBodyOnlyMessage(message);
         }
-        if (messageType == EMMessage.Type.IMAGE) {
+        if (messageType == MessageType.REACTION) {
+            String reaction = message.getReactionValue();
+            UiUtils.showView(reactionsIndicatorView, true);
+            AppConstants.reactionsOpenPositions.put(getMessageId(), true);
+            UiUtils.showView(userStatusOrLastMessageView, false);
+            loadDrawables(activity, reactionsIndicatorView, reaction);
+        }
+        if (messageType == MessageType.GIF) {
+            UiUtils.showView(reactionsIndicatorView, true);
+            AppConstants.reactionsOpenPositions.put(getMessageId(), true);
+            UiUtils.showView(userStatusOrLastMessageView, true);
+            userStatusOrLastMessageView.setText(UiUtils.fromHtml("<b>" + activity.getString(R.string.gif) + "</b>"));
+            String gifUrl = message.getGifUrl();
+            loadLastMessageGif(gifUrl);
+        }
+        if (messageType == MessageType.IMAGE) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_cam, UiUtils.DrawableDirection.LEFT);
-            try {
-                String messageBody = message.getStringAttribute(AppConstants.FILE_CAPTION);
-                if (StringUtils.isNotEmpty(messageBody)) {
-                    userStatusOrLastMessageView.setText(messageBody);
-                } else {
-                    userStatusOrLastMessageView.setText(activity.getString(R.string.photo));
-                }
-            } catch (HyphenateException e) {
-                e.printStackTrace();
+            String messageBody = message.getFileCaption();
+            if (StringUtils.isNotEmpty(messageBody)) {
+                userStatusOrLastMessageView.setText(messageBody);
+            } else {
+                userStatusOrLastMessageView.setText(activity.getString(R.string.photo));
             }
         }
-        if (messageType == EMMessage.Type.VIDEO) {
+        if (messageType == MessageType.VIDEO) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_video, UiUtils.DrawableDirection.LEFT);
-            try {
-                String messageBody = message.getStringAttribute(AppConstants.FILE_CAPTION);
-                if (StringUtils.isNotEmpty(messageBody)) {
-                    userStatusOrLastMessageView.setText(messageBody);
-                } else {
-                    userStatusOrLastMessageView.setText(activity.getString(R.string.video));
-                }
-            } catch (HyphenateException e) {
-                e.printStackTrace();
+            String messageBody = message.getFileCaption();
+            if (StringUtils.isNotEmpty(messageBody)) {
+                userStatusOrLastMessageView.setText(messageBody);
+            } else {
+                userStatusOrLastMessageView.setText(activity.getString(R.string.video));
             }
         }
-        if (messageType == EMMessage.Type.LOCATION) {
+        if (messageType == MessageType.LOCATION) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_location, UiUtils.DrawableDirection.LEFT);
-            EMLocationMessageBody emLocationMessageBody = (EMLocationMessageBody) message.getBody();
-            String messageBody = emLocationMessageBody.getAddress();
+            String messageBody = message.getLocationAddress();
             if (StringUtils.isNotEmpty(messageBody)) {
                 userStatusOrLastMessageView.setText(messageBody);
             } else {
                 userStatusOrLastMessageView.setText(activity.getString(R.string.location));
             }
         }
-        if (messageType == EMMessage.Type.VOICE) {
+        if (messageType == MessageType.VOICE) {
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
             userStatusOrLastMessageView.setText(activity.getString(R.string.voice));
         }
-        if (messageType == EMMessage.Type.FILE) {
-            String messageBody;
-            try {
-                String fileType = message.getStringAttribute(AppConstants.FILE_TYPE);
-                switch (fileType) {
-                    case AppConstants.FILE_TYPE_CONTACT:
-                        messageBody = "Contact";
-                        UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_contact, UiUtils.DrawableDirection.LEFT);
-                        userStatusOrLastMessageView.setText(messageBody);
-                        break;
-                    case AppConstants.FILE_TYPE_AUDIO:
-                        messageBody = "Music";
-                        UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
-                        userStatusOrLastMessageView.setText(messageBody);
-                        break;
-                    case AppConstants.FILE_TYPE_DOCUMENT:
-                        messageBody = "Document";
-                        UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.icon_file_doc_grey_mini, UiUtils.DrawableDirection.LEFT);
-                        userStatusOrLastMessageView.setText(messageBody);
-                        break;
-                }
-            } catch (HyphenateException e) {
-                e.printStackTrace();
-            }
+
+        String messageBody;
+        if (messageType == MessageType.CONTACT) {
+            messageBody = "Contact";
+            UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_contact, UiUtils.DrawableDirection.LEFT);
+            userStatusOrLastMessageView.setText(messageBody);
         }
+        if (messageType == MessageType.AUDIO) {
+            messageBody = "Music";
+            UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
+            userStatusOrLastMessageView.setText(messageBody);
+        }
+        if (messageType == MessageType.DOCUMENT) {
+            messageBody = "Document";
+            UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.icon_file_doc_grey_mini, UiUtils.DrawableDirection.LEFT);
+            userStatusOrLastMessageView.setText(messageBody);
+        }
+
     }
 
     private void loadLastMessageGif(String gifUrl) {
@@ -699,9 +630,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         }
     }
 
-    private void setupMessageBodyOnlyMessage(EMMessage message) {
-        EMTextMessageBody emTextMessageBody = (EMTextMessageBody) message.getBody();
-        String messageBody = emTextMessageBody.getMessage();
+    private void setupMessageBodyOnlyMessage(ChatMessage message) {
+        String messageBody = message.getMessageBody();
         if (messageBody.equals("You have an incoming call")) {
             messageBody = "&#128222; You had a miss call";
         }
@@ -729,74 +659,20 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         return kfImage;
     }
 
-    protected void setMessageSendCallback() {
-        if (messageSendCallback == null) {
-            messageSendCallback = new EMCallBack() {
-
-                @Override
-                public void onSuccess() {
-                    setupConversation(parseObject, searchString);
-                }
-
-                @Override
-                public void onProgress(final int progress, String status) {
-
-                }
-
-                @Override
-                public void onError(int code, String error) {
-
-                }
-
-            };
-
-        }
-
-        lastMessage.setMessageStatusCallback(messageSendCallback);
-
+    public MessageDirection getMessageDirection() {
+        return lastMessage != null ? lastMessage.getMessageDirection() : null;
     }
 
-    /**
-     * set callback for receiving message
-     */
-    protected void setMessageReceiveCallback() {
-        if (messageReceiveCallback == null) {
-
-            messageReceiveCallback = new EMCallBack() {
-
-                @Override
-                public void onSuccess() {
-                    setupConversation(parseObject, searchString);
-                }
-
-                @Override
-                public void onProgress(final int progress, String status) {
-                }
-
-                @Override
-                public void onError(int code, String error) {
-
-                }
-
-            };
-
-        }
-
-        lastMessage.setMessageStatusCallback(messageReceiveCallback);
-    }
-
-    public EMMessage.Direct getMessageDirection() {
-        return lastMessage != null ? lastMessage.direct() : null;
-    }
-
-    private void setupMessageReadStatus(EMMessage message) {
-        if (getMessageDirection() != null && getMessageDirection() == EMMessage.Direct.SEND && deliveryStatusView != null) {
+    private void setupMessageReadStatus(ChatMessage message) {
+        if (getMessageDirection() == MessageDirection.OUTGOING && deliveryStatusView != null) {
             UiUtils.showView(deliveryStatusView, true);
-            if (message.isAcked()) {
+            if (message.isAcknowledged()) {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
             } else if (message.isListened()) {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.isDelivered()) {
+            } else if (message.getMessageStatus() == MessageStatus.READ) {
+                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+            } else if (message.getMessageStatus() == MessageStatus.DELIVERED) {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_client_received);
             } else {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);

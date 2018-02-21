@@ -39,7 +39,8 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 /**
  * * Created by Wan on 6/5/2016.
  */
-public class UserVideosAdapter extends RecyclerView.Adapter<UserVideosAdapter.VideoRowHolder> implements StickyRecyclerHeadersAdapter<UserVideosAdapter.VideoHeaderHolder>, Filterable {
+public class UserVideosAdapter extends RecyclerView.Adapter<UserVideosAdapter.VideoRowHolder> implements
+        StickyRecyclerHeadersAdapter<UserVideosAdapter.VideoHeaderHolder>, Filterable {
 
     private ArrayList<HolloutUtils.MediaEntry> userVideoEntries;
     private Activity appCompatActivity;
@@ -115,17 +116,16 @@ public class UserVideosAdapter extends RecyclerView.Adapter<UserVideosAdapter.Vi
                     sendBackSelectedVideo(videoEntry);
                 }
             }
+
         });
 
         videoRowHolder.videoParent.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-
                 Intent mViewVideoIntent = new Intent(Intent.ACTION_VIEW);
                 mViewVideoIntent.setDataAndType(Uri.parse(videoPath), "video/*");
                 appCompatActivity.startActivity(mViewVideoIntent);
-
             }
 
         });
@@ -137,6 +137,7 @@ public class UserVideosAdapter extends RecyclerView.Adapter<UserVideosAdapter.Vi
         newHolloutFile.setLocalFilePath(videoEntry.path);
         newHolloutFile.setFileType(AppConstants.FILE_TYPE_VIDEO);
         newHolloutFile.setFileKey(videoEntry.path);
+        newHolloutFile.setFileDuration(videoEntry.fileDuration);
 
         //Start the chat activity with this video
         ArrayList<HolloutFile> results = new ArrayList<>();

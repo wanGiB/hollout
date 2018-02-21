@@ -35,13 +35,14 @@ import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.models.NearbyPerson;
 import com.wan.hollout.ui.activities.MeetPeopleActivity;
 import com.wan.hollout.ui.adapters.PeopleAdapter;
-import com.wan.hollout.ui.helpers.DividerItemDecoration;
+import com.wan.hollout.ui.decorators.StartOffsetItemDecoration;
 import com.wan.hollout.ui.widgets.ChatRequestsHeaderView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.SafeLayoutManager;
 import com.wan.hollout.utils.UiUtils;
 
@@ -265,7 +266,6 @@ public class PeopleFragment extends Fragment {
             SafeLayoutManager linearLayoutManager = new SafeLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
             peopleRecyclerView.setLayoutManager(linearLayoutManager);
             peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
-            peopleRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), LinearLayoutManager.VERTICAL));
             peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
             RecyclerViewUtils.setFooterView(peopleRecyclerView, footerView);
             UiUtils.showView(footerView, false);
@@ -301,7 +301,7 @@ public class PeopleFragment extends Fragment {
                         startActivity(dataSourceIntent);
                     } else {
                         Intent interestsIntent = new Intent(getActivity(), MeetPeopleActivity.class);
-                        startActivity(interestsIntent);
+                        startActivityForResult(interestsIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
                     }
 
                 }
