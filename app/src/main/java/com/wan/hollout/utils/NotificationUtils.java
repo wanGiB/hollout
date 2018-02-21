@@ -99,12 +99,10 @@ public class NotificationUtils {
     }
 
     public static void displayKindIsNearbyNotification(final ParseObject requester) {
-
         ChatClient.getInstance().execute(new Runnable() {
 
             @Override
             public void run() {
-
                 ParseObject signedInUser = AuthUtil.getCurrentUser();
                 List<String> aboutUser = requester.getList(AppConstants.ABOUT_USER);
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);

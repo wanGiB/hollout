@@ -194,7 +194,7 @@ public class HolloutPreferences {
         getInstance().edit().putInt(AppConstants.UNREAD_MESSAGES_COUNT_FROM + from, 0).commit();
     }
 
-    public static int getTotalUnreadMessagesCount() {
+    static int getTotalUnreadMessagesCount() {
         return getInstance().getInt(AppConstants.TOTAL_UNREAD_MESSAGES_COUNT, 0);
     }
 

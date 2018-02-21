@@ -38,6 +38,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,7 +70,15 @@ public class MessageNotifier {
             @Override
             public void done(List<ChatMessage> result, Exception e) {
                 if (result != null && !result.isEmpty()) {
-                    onNewMsg(result);
+                    List<ChatMessage> safeResult = new CopyOnWriteArrayList<>(result);
+                    for (ChatMessage message : safeResult) {
+                        if (AppConstants.activeChatId != null) {
+                            if (message.getFrom().equals(AppConstants.activeChatId)) {
+                                safeResult.remove(message);
+                            }
+                        }
+                    }
+                    onNewMsg(safeResult);
                 }
             }
         });
@@ -126,9 +135,9 @@ public class MessageNotifier {
     private boolean fromSameSender(List<ChatMessage> messages) {
         List<String> senders = new ArrayList<>();
         for (ChatMessage emMessage : messages) {
-            String senderName = emMessage.getFromName();
-            if (!senders.contains(senderName.trim().toLowerCase())) {
-                senders.add(senderName.trim().toLowerCase());
+            String senderId = emMessage.getFrom();
+            if (!senders.contains(senderId.trim().toLowerCase())) {
+                senders.add(senderId.trim().toLowerCase());
             }
         }
         return senders.size() == 1;

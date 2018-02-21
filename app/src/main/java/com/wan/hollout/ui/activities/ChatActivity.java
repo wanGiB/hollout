@@ -382,9 +382,14 @@ public class ChatActivity extends BaseActivity implements
         setupMessagesAdapter();
         initConversation();
         clearAllUnreadMessagesFromRecipient();
-        checkIsUserBlocked();
+        checkBlackListStatus();
         createDeleteConversationProgressDialog();
         setActiveChat();
+    }
+
+    private void checkBlackListStatus() {
+        checkDidIBlackListUser();
+        checkDidUserBlackListMe();
     }
 
     private void setActiveChat() {
@@ -826,6 +831,7 @@ public class ChatActivity extends BaseActivity implements
             snackOutMessageReplyView(messageReplyView);
             return;
         }
+        AppConstants.activeChatId = null;
         super.onBackPressed();
     }
 
@@ -1349,7 +1355,7 @@ public class ChatActivity extends BaseActivity implements
                 } else {
                     UiUtils.showSafeToast("Failed to Unblock user. Please try again.");
                 }
-                checkIsUserBlocked();
+                checkDidIBlackListUser();
             }
         });
     }
@@ -1367,7 +1373,7 @@ public class ChatActivity extends BaseActivity implements
                         UiUtils.dismissProgressDialog();
                         if (success) {
                             UiUtils.showSafeToast("User Blocked successfully!");
-                            checkIsUserBlocked();
+                            checkDidIBlackListUser();
                         } else {
                             UiUtils.showSafeToast("Sorry, an error occurred while trying to block user. Please try again.");
                         }
@@ -1384,7 +1390,7 @@ public class ChatActivity extends BaseActivity implements
         blockConsentDialog.create().show();
     }
 
-    private void checkIsUserBlocked() {
+    private void checkDidIBlackListUser() {
         if (HolloutUtils.isUserBlocked(getRecipient())) {
             composeText.setHint("User Blocked!!!");
         } else {
@@ -1396,6 +1402,14 @@ public class ChatActivity extends BaseActivity implements
         if (StringUtils.isNotEmpty(recipientId)) {
             if (chatToolbar != null) {
                 chatToolbar.refreshToolbar(result);
+                chatToolbar.setChatToolbarUserChangeListener(new ChatToolbar.ChatToolbarUserChangeListener() {
+                    @Override
+                    public void onUserChanged(ParseObject newRecipientProps) {
+                        //Boom, user details have changed
+                        recipientProperties = newRecipientProps;
+                        checkBlackListStatus();
+                    }
+                });
             }
         }
     }
@@ -1465,6 +1479,20 @@ public class ChatActivity extends BaseActivity implements
         checkAndRegEventBus();
         DirectModelNotifier.get().registerForModelChanges(ChatMessage.class, onModelStateChangedListener);
         setActiveChat();
+        checkBlackListStatus();
+    }
+
+    private void checkDidUserBlackListMe() {
+        boolean wasIBlackListed = HolloutUtils.checkDidUserBlockMe(recipientProperties);
+        if (wasIBlackListed) {
+            composeText.setEnabled(false);
+            attachButton.setEnabled(false);
+            sendOrRecordAudioButton.setEnabled(false);
+        } else {
+            composeText.setEnabled(true);
+            attachButton.setEnabled(true);
+            sendOrRecordAudioButton.setEnabled(true);
+        }
     }
 
     @Override

@@ -38,6 +38,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -71,6 +72,7 @@ import java.math.RoundingMode;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.text.DecimalFormat;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1075,6 +1077,15 @@ public class HolloutUtils {
                 }
             }
         }
+    }
+
+    public static boolean checkDidUserBlockMe(ParseObject user) {
+        if (user != null) {
+            List<String> userBlackList = user.getList(AppConstants.USER_BLACK_LIST);
+            ParseObject signedInUser = AuthUtil.getCurrentUser();
+            return signedInUser != null && userBlackList != null && userBlackList.contains(signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+        }
+        return false;
     }
 
 }

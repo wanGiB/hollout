@@ -20,7 +20,9 @@ import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.enums.MessageType;
 import com.wan.hollout.eventbuses.SearchMessages;
+import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.SelectPeopleToForwardMessageActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
@@ -114,6 +116,12 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     private ParseQuery<ParseObject> recipientObjectStateQuery;
 
+    public interface ChatToolbarUserChangeListener {
+        void onUserChanged(ParseObject newUser);
+    }
+
+    private ChatToolbarUserChangeListener chatToolbarUserChangeListener;
+
     public ChatToolbar(Context context) {
         this(context, null);
     }
@@ -163,6 +171,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         } else {
             UiUtils.showView(contactSubtitleLayout, false);
         }
+    }
+
+    public void setChatToolbarUserChangeListener(ChatToolbarUserChangeListener chatToolbarUserChangeListener) {
+        this.chatToolbarUserChangeListener = chatToolbarUserChangeListener;
     }
 
     public static String getLastSeen(long longTime) {
@@ -291,6 +303,9 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                             @Override
                             public void run() {
                                 refreshToolbar(object);
+                                if (chatToolbarUserChangeListener != null) {
+                                    chatToolbarUserChangeListener.onUserChanged(object);
+                                }
                             }
                         });
                     }
@@ -408,10 +423,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             UiUtils.showView(replyToMessageView, true);
             UiUtils.showView(forwardMessageView, true);
             if (!AppConstants.selectedMessages.isEmpty()) {
-//                EMMessage emMessage = AppConstants.selectedMessages.get(0);
-//                if (emMessage != null) {
-//                    UiUtils.showView(copyMessageView, emMessage.getType() == EMMessage.Type.TXT);
-//                }
+                ChatMessage emMessage = AppConstants.selectedMessages.get(0);
+                if (emMessage != null) {
+                    UiUtils.showView(copyMessageView, emMessage.getMessageType() == MessageType.TXT);
+                }
             }
         }
         destroyActionModeView.setOnClickListener(new OnClickListener() {
