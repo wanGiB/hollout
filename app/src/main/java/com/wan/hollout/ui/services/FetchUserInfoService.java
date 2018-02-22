@@ -14,6 +14,7 @@ import com.wan.hollout.models.PathEntity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.MessageNotifier;
 import com.wan.hollout.utils.NotificationUtils;
@@ -33,11 +34,17 @@ public class FetchUserInfoService extends JobIntentService {
         Bundle intentExtras = intent.getExtras();
         if (intentExtras != null) {
             String userIdToFetch = intentExtras.getString(AppConstants.EXTRA_USER_ID);
-            String notificationType = intentExtras.getString(AppConstants.NOTIFICATION_TYPE);
-            ChatMessage unreadMessage = intentExtras.getParcelable(AppConstants.UNREAD_MESSAGE);
-            List<ChatMessage> unreadMessagesFromSameSender = intentExtras.getParcelableArrayList(AppConstants.UNREAD_MESSAGES_FROM_SAME_SENDER);
-            if (StringUtils.isNotEmpty(userIdToFetch)) {
-                fetchUserDetails(userIdToFetch, notificationType, unreadMessage, unreadMessagesFromSameSender);
+            if (userIdToFetch != null) {
+                HolloutLogger.d("UserIdTag", userIdToFetch);
+                String notificationType = intentExtras.getString(AppConstants.NOTIFICATION_TYPE);
+                String unreadMessageId = intentExtras.getString(AppConstants.UNREAD_MESSAGE_ID);
+                ChatMessage chatMessage = DbUtils.getMessage(unreadMessageId);
+                if (chatMessage != null) {
+                    List<ChatMessage> unreadMessagesFromSameSender = intentExtras.getParcelableArrayList(AppConstants.UNREAD_MESSAGES_FROM_SAME_SENDER);
+                    if (StringUtils.isNotEmpty(userIdToFetch)) {
+                        fetchUserDetails(userIdToFetch, notificationType, chatMessage, unreadMessagesFromSameSender);
+                    }
+                }
             }
         }
     }
@@ -61,14 +68,14 @@ public class FetchUserInfoService extends JobIntentService {
                             NotificationUtils.displayIndividualChatRequestNotification(userObject);
                             return;
                         }
-                        MessageNotifier.getInstance().init(FetchUserInfoService.this).sendSingleNotification(unreadMessage, userObject);
+                        MessageNotifier.getInstance().sendSingleNotification(unreadMessage, userObject);
                         AppConstants.recentConversations.add(0, userObject);
                     } else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE) && unreadMessagesFromSameSender != null) {
                         if (!isAContact(idToFetch.toLowerCase())) {
                             NotificationUtils.displayIndividualChatRequestNotification(userObject);
                             return;
                         }
-                        MessageNotifier.getInstance().init(FetchUserInfoService.this).sendSameSenderNotification(unreadMessagesFromSameSender, userObject);
+                        MessageNotifier.getInstance().sendSameSenderNotification(unreadMessagesFromSameSender, userObject);
                         AppConstants.recentConversations.add(0, userObject);
                     }
                 }

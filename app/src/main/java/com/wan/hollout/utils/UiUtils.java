@@ -381,7 +381,6 @@ public class UiUtils {
         TOP
     }
 
-
     public static boolean canShowStatus(ParseObject parseUser, int type, HashMap<String, Object> optionalProps) {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
@@ -405,63 +404,71 @@ public class UiUtils {
     }
 
     public static boolean canShowLocation(ParseObject parseUser, int entityType, HashMap<String, Object> optionalProps) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            String signedInUserLocationVisibility = signedInUser.getString(AppConstants.LOCATION_VISIBILITY_PREF);
+            String locationVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.LOCATION_VISIBILITY_PREF) : (String) optionalProps.get(AppConstants.LOCATION_VISIBILITY_PREF);
 
-        String signedInUserLocationVisibility = AuthUtil.getCurrentUser().getString(AppConstants.LOCATION_VISIBILITY_PREF);
-        String locationVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.LOCATION_VISIBILITY_PREF) : (String) optionalProps.get(AppConstants.LOCATION_VISIBILITY_PREF);
-
-        //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
-        if (entityType == AppConstants.ENTITY_TYPE_CLOSEBY) {
-            return (locationVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
-                    || locationVisibilityOfOtherUser.equals(mContext.getString(R.string.only_closebies)))
-                    && (signedInUserLocationVisibility.equals(mContext.getString(R.string.anyone))
-                    || signedInUserLocationVisibility.equals(mContext.getString(R.string.only_closebies)));
-        } else {
-            return (locationVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
-                    || locationVisibilityOfOtherUser.equals(mContext.getString(R.string.only_chats)))
-                    && (signedInUserLocationVisibility.equals(mContext.getString(R.string.anyone))
-                    || signedInUserLocationVisibility.equals(mContext.getString(R.string.only_chats)));
+            //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
+            if (entityType == AppConstants.ENTITY_TYPE_CLOSEBY) {
+                return (locationVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
+                        || locationVisibilityOfOtherUser.equals(mContext.getString(R.string.only_closebies)))
+                        && (signedInUserLocationVisibility.equals(mContext.getString(R.string.anyone))
+                        || signedInUserLocationVisibility.equals(mContext.getString(R.string.only_closebies)));
+            } else {
+                return (locationVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
+                        || locationVisibilityOfOtherUser.equals(mContext.getString(R.string.only_chats)))
+                        && (signedInUserLocationVisibility.equals(mContext.getString(R.string.anyone))
+                        || signedInUserLocationVisibility.equals(mContext.getString(R.string.only_chats)));
+            }
         }
-
+        return false;
     }
 
     public static boolean canShowPresence(ParseObject parseUser, int type, HashMap<String, Object> optionalProps) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            String signedInUserLastSeenVisibility = signedInUser.getString(AppConstants.LAST_SEEN_VISIBILITY_PREF);
+            String lastSeenVisibilityOtherUser = parseUser != null ? parseUser.getString(AppConstants.LAST_SEEN_VISIBILITY_PREF) :
+                    (String) optionalProps.get(AppConstants.LAST_SEEN_VISIBILITY_PREF);
 
-        String signedInUserLastSeenVisibility = AuthUtil.getCurrentUser().getString(AppConstants.LAST_SEEN_VISIBILITY_PREF);
-        String lastSeenVisibilityOtherUser = parseUser != null ? parseUser.getString(AppConstants.LAST_SEEN_VISIBILITY_PREF) :
-                (String) optionalProps.get(AppConstants.LAST_SEEN_VISIBILITY_PREF);
-
-        //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
-        if (type == AppConstants.ENTITY_TYPE_CLOSEBY) {
-            return (lastSeenVisibilityOtherUser.equals(mContext.getString(R.string.anyone))
-                    || lastSeenVisibilityOtherUser.equals(mContext.getString(R.string.only_closebies)))
-                    && (signedInUserLastSeenVisibility.equals(mContext.getString(R.string.anyone))
-                    || signedInUserLastSeenVisibility.equals(mContext.getString(R.string.only_closebies)));
-        } else {
-            return (lastSeenVisibilityOtherUser.equals(mContext.getString(R.string.anyone))
-                    || lastSeenVisibilityOtherUser.equals(mContext.getString(R.string.only_chats)))
-                    && signedInUserLastSeenVisibility.equals(mContext.getString(R.string.anyone))
-                    || signedInUserLastSeenVisibility.equals(mContext.getString(R.string.only_chats));
+            //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
+            if (type == AppConstants.ENTITY_TYPE_CLOSEBY) {
+                return (lastSeenVisibilityOtherUser.equals(mContext.getString(R.string.anyone))
+                        || lastSeenVisibilityOtherUser.equals(mContext.getString(R.string.only_closebies)))
+                        && (signedInUserLastSeenVisibility.equals(mContext.getString(R.string.anyone))
+                        || signedInUserLastSeenVisibility.equals(mContext.getString(R.string.only_closebies)));
+            } else {
+                return (lastSeenVisibilityOtherUser.equals(mContext.getString(R.string.anyone))
+                        || lastSeenVisibilityOtherUser.equals(mContext.getString(R.string.only_chats)))
+                        && signedInUserLastSeenVisibility.equals(mContext.getString(R.string.anyone))
+                        || signedInUserLastSeenVisibility.equals(mContext.getString(R.string.only_chats));
+            }
         }
-
+        return false;
     }
 
     public static boolean canShowAge(ParseObject parseUser, int type, HashMap<String, Object> optionalProps) {
-        String signedInUserAgeVisibility = AuthUtil.getCurrentUser().getString(AppConstants.AGE_VISIBILITY_PREF);
-        String ageVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.AGE_VISIBILITY_PREF) :
-                (String) optionalProps.get(AppConstants.AGE_VISIBILITY_PREF);
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            String signedInUserAgeVisibility = signedInUser.getString(AppConstants.AGE_VISIBILITY_PREF);
+            String ageVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.AGE_VISIBILITY_PREF) :
+                    (String) optionalProps.get(AppConstants.AGE_VISIBILITY_PREF);
 
-        //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
-        if (type == AppConstants.ENTITY_TYPE_CLOSEBY) {
-            return (ageVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
-                    || ageVisibilityOfOtherUser.equals(mContext.getString(R.string.only_closebies)))
-                    && (signedInUserAgeVisibility.equals(mContext.getString(R.string.anyone))
-                    || signedInUserAgeVisibility.equals(mContext.getString(R.string.only_closebies)));
-        } else {
-            return (ageVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
-                    || ageVisibilityOfOtherUser.equals(mContext.getString(R.string.only_chats)))
-                    && signedInUserAgeVisibility.equals(mContext.getString(R.string.anyone))
-                    || signedInUserAgeVisibility.equals(mContext.getString(R.string.only_chats));
+            //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
+            if (type == AppConstants.ENTITY_TYPE_CLOSEBY) {
+                return (ageVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
+                        || ageVisibilityOfOtherUser.equals(mContext.getString(R.string.only_closebies)))
+                        && (signedInUserAgeVisibility.equals(mContext.getString(R.string.anyone))
+                        || signedInUserAgeVisibility.equals(mContext.getString(R.string.only_closebies)));
+            } else {
+                return (ageVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))
+                        || ageVisibilityOfOtherUser.equals(mContext.getString(R.string.only_chats)))
+                        && signedInUserAgeVisibility.equals(mContext.getString(R.string.anyone))
+                        || signedInUserAgeVisibility.equals(mContext.getString(R.string.only_chats));
+            }
         }
+        return false;
     }
 
     public static synchronized void setTextOnView(final TextView holloutTextView, final Spanned message) {

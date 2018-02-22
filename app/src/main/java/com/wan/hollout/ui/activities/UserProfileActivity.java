@@ -62,6 +62,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.BindView;
@@ -172,7 +173,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     private void resolveReceivedChatRequestIfAny() {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (signedInUser != null) {
+        if (signedInUser != null && parseUser != null) {
             ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
             chatRequestsQuery.include(AppConstants.FEED_CREATOR);
@@ -241,17 +242,27 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 if (userLocation != null) {
                     userLocationAndDistanceView.setText(userLocation);
                 } else {
-                    userLocationAndDistanceView.setText(distanceToUser + "KM from nearby kinds");
+                    String formattedDistanceToUser = HolloutUtils.formatDistanceToUser(distanceToUser);
+                    if (formattedDistanceToUser != null) {
+                        userLocationAndDistanceView.setText(formattedDistanceToUser + "KM from people Nearby");
+                    }
                 }
             } else {
-                if (UiUtils.canShowLocation(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
+                if (UiUtils.canShowLocation(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
                     if (StringUtils.isNotEmpty(userLocation)) {
-                        userLocationAndDistanceView.setText(userLocation + ", " + distanceToUser + "KM from you");
+                        String formattedDistance = HolloutUtils.formatDistanceToUser(distanceToUser);
+                        if (formattedDistance != null) {
+                            userLocationAndDistanceView.setText(userLocation + ", " + formattedDistance + "KM from you");
+                        } else {
+                            userLocationAndDistanceView.setText(userLocation + ", " + "0KM from you");
+                        }
                     } else {
-                        userLocationAndDistanceView.setText(distanceToUser + "KM from you");
+                        String formattedDistance = HolloutUtils.formatDistanceToUser(distanceToUser);
+                        userLocationAndDistanceView.setText(formattedDistance + "KM from you");
                     }
                 } else {
-                    userLocationAndDistanceView.setText(distanceToUser + "KM from you");
+                    String formattedDistance = HolloutUtils.formatDistanceToUser(distanceToUser);
+                    userLocationAndDistanceView.setText(formattedDistance + "KM from you");
                 }
             }
 
@@ -324,7 +335,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     }
                 });
             } else {
-                if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
+                if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
                     if (!userAge.equals(AppConstants.UNKNOWN)) {
                         ageView.setText(WordUtils.capitalize(", " + userAge));
                     }

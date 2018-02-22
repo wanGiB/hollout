@@ -220,7 +220,7 @@ public class AppConstants {
     public static final String PENDING_CHAT_REQUEST = "pending_chat_request";
     public static final String FILE_CAPTION = "file_caption";
     public static final String NOTIFICATION_TYPE_NEW_MESSAGE = "new_message";
-    public static final String UNREAD_MESSAGE = "unread_message";
+    public static final String UNREAD_MESSAGE_ID = "unread_message_id";
     public static final String UNREAD_MESSAGES_FROM_SAME_SENDER = "unread_messages_from_same_sender";
     public static final String OBJECT_TYPE_GROUP = "object_type_group";
     public static final String OBJECT_TYPE_ROOM = "object_type_room";
@@ -373,5 +373,6 @@ public class AppConstants {
     public static SparseBooleanArray selectedPeoplePositions = new SparseBooleanArray();
 
     public static String activeChatId = null;
+
 }
 

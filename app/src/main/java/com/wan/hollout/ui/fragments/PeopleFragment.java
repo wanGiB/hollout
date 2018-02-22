@@ -191,7 +191,9 @@ public class PeopleFragment extends Fragment {
                     if (e == null && count != 0) {
                         fetchChatRequests(count);
                     } else {
-                        UiUtils.showView(chatRequestsHeaderView, false);
+                        if (e != null) {
+                            UiUtils.showView(chatRequestsHeaderView, false);
+                        }
                     }
                 }
             });

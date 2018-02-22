@@ -1,6 +1,7 @@
 package com.wan.hollout.utils;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -32,6 +33,7 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
@@ -75,6 +77,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 import static com.wan.hollout.utils.AppConstants.LANGUAGE_PREF;
@@ -897,6 +900,54 @@ public class HolloutUtils {
 
             }
         });
+    }
+
+    public static String getDecimalFormattedString(String value) {
+        if (value != null && !value.equalsIgnoreCase("")) {
+            StringTokenizer lst = new StringTokenizer(value, ".");
+            String str1 = value;
+            String str2 = "";
+            if (lst.countTokens() > 1) {
+                str1 = lst.nextToken();
+                str2 = lst.nextToken();
+            }
+            String str3 = "";
+            int i = 0;
+            int j = -1 + str1.length();
+            if (str1.charAt(-1 + str1.length()) == '.') {
+                j--;
+                str3 = ".";
+            }
+            for (int k = j; ; k--) {
+                if (k < 0) {
+                    if (str2.length() > 0)
+                        str3 = str3 + "." + str2;
+                    return str3;
+                }
+                if (i == 3) {
+                    str3 = "," + str3;
+                    i = 0;
+                }
+                str3 = str1.charAt(k) + str3;
+                i++;
+            }
+        }
+        return "";
+    }
+
+    @SuppressLint("SetTextI18n")
+    public static String formatDistanceToUser(String value) {
+        DecimalFormat df2 = new DecimalFormat(".##");
+        String returnable;
+        try {
+            double valueOfAmount = Double.parseDouble(value);
+            String refinedAmount = df2.format(valueOfAmount);
+            returnable = HolloutUtils.getDecimalFormattedString(refinedAmount);
+            return returnable;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return "0";
     }
 
     public static boolean isAContact(String recipientId) {

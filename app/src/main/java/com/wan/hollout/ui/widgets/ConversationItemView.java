@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -333,7 +334,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     private void listenToUserPresence(ParseObject parseObject) {
         UiUtils.showView(userOnlineStatusView, true);
         String userOnlineStatus = parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS);
-        if (userOnlineStatus != null && UiUtils.canShowPresence(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
+        if (userOnlineStatus != null && UiUtils.canShowPresence(parseObject, AppConstants.ENTITY_TYPE_CHATS, new HashMap<String, Object>())) {
             if (parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)
                     && HolloutUtils.isNetWorkConnected(activity)) {
                 userOnlineStatusView.setImageResource(R.drawable.ic_online);
@@ -372,7 +373,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
             if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                 String userStatusString = parseObject.getString(AppConstants.APP_USER_STATUS);
-                if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(parseObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
+                if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(parseObject, AppConstants.ENTITY_TYPE_CHATS, new HashMap<String, Object>())) {
                     userStatusOrLastMessageView.setText(userStatusString);
                 } else {
                     userStatusOrLastMessageView.setText(activity.getString(R.string.hey_there_holla_me_on_hollout));

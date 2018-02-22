@@ -2,7 +2,6 @@ package com.wan.hollout.utils;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -54,15 +53,8 @@ public class MessageNotifier {
             "&#x2316; Location", "&#x1f4f7; Video", "&#x1f3a4; Audio", "&#x260e; Contact", "sent a Document", "Sent a GIF", "Reaction"
     };
 
-    private Context appContext;
-
     public static MessageNotifier getInstance() {
         return new MessageNotifier();
-    }
-
-    public MessageNotifier init(Context context) {
-        appContext = context;
-        return this;
     }
 
     public void notifyOnUnreadMessages() {
@@ -70,15 +62,7 @@ public class MessageNotifier {
             @Override
             public void done(List<ChatMessage> result, Exception e) {
                 if (result != null && !result.isEmpty()) {
-                    List<ChatMessage> safeResult = new CopyOnWriteArrayList<>(result);
-                    for (ChatMessage message : safeResult) {
-                        if (AppConstants.activeChatId != null) {
-                            if (message.getFrom().equals(AppConstants.activeChatId)) {
-                                safeResult.remove(message);
-                            }
-                        }
-                    }
-                    onNewMsg(safeResult);
+                    onNewMsg(result);
                 }
             }
         });
@@ -87,18 +71,26 @@ public class MessageNotifier {
     private void onNewMsg(List<ChatMessage> chatMessages) {
         if (!chatMessages.isEmpty()) {
             if (chatMessages.size() == 1) {
-                Intent userInfoIntent = new Intent(appContext, FetchUserInfoService.class);
+                String messageFrom = chatMessages.get(0).getFrom();
+                if (AppConstants.activeChatId != null && messageFrom.equals(AppConstants.activeChatId)) {
+                    return;
+                }
+                Intent userInfoIntent = new Intent(ApplicationLoader.getInstance(), FetchUserInfoService.class);
                 userInfoIntent.putExtra(AppConstants.EXTRA_USER_ID, chatMessages.get(0).getFrom());
-                userInfoIntent.putExtra(AppConstants.UNREAD_MESSAGE, chatMessages.get(0));
+                userInfoIntent.putExtra(AppConstants.UNREAD_MESSAGE_ID, chatMessages.get(0).getMessageId());
                 userInfoIntent.putExtra(AppConstants.NOTIFICATION_TYPE, AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE);
-                appContext.startService(userInfoIntent);
+                ApplicationLoader.getInstance().startService(userInfoIntent);
             } else {
                 if (fromSameSender(chatMessages)) {
-                    Intent userInfoIntent = new Intent(appContext, FetchUserInfoService.class);
+                    String messageFrom = chatMessages.get(0).getFrom();
+                    if (AppConstants.activeChatId != null && messageFrom.equals(AppConstants.activeChatId)) {
+                        return;
+                    }
+                    Intent userInfoIntent = new Intent(ApplicationLoader.getInstance(), FetchUserInfoService.class);
                     userInfoIntent.putExtra(AppConstants.EXTRA_USER_ID, chatMessages.get(0).getFrom());
                     userInfoIntent.putParcelableArrayListExtra(AppConstants.UNREAD_MESSAGES_FROM_SAME_SENDER, new ArrayList<>(chatMessages));
                     userInfoIntent.putExtra(AppConstants.NOTIFICATION_TYPE, AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE);
-                    appContext.startService(userInfoIntent);
+                    ApplicationLoader.getInstance().startService(userInfoIntent);
                 } else {
                     sendMultipleSendersNotification(chatMessages);
                 }
@@ -155,20 +147,22 @@ public class MessageNotifier {
     }
 
     public void sendSingleNotification(final ChatMessage message, final ParseObject sender) {
-        if (appContext == null) {
-            appContext = ApplicationLoader.getInstance();
-        }
         ChatClient.getInstance().execute(new Runnable() {
 
             @Override
             public void run() {
-                Intent userProfileIntent = new Intent(appContext, ChatActivity.class);
-                userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, sender);
-                PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                String senderName = message.getFromName();
+                Intent userProfileIntent;
+                if (HolloutUtils.isAContact(message.getFrom())) {
+                    userProfileIntent = new Intent(ApplicationLoader.getInstance(), ChatActivity.class);
+                    userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, sender);
+                } else {
+                    userProfileIntent = new Intent(ApplicationLoader.getInstance(), MainActivity.class);
+                }
+                PendingIntent pendingIntent = PendingIntent.getActivity(ApplicationLoader.getInstance(), 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                String senderName = WordUtils.capitalize(message.getFromName());
                 String senderPhoto = message.getFromPhotoUrl();
 
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.getInstance());
                 builder.setContentTitle(WordUtils.capitalize(senderName));
                 Spanned messageSpannable = UiUtils.fromHtml(getMessage(message));
                 builder.setContentText(messageSpannable);
@@ -176,10 +170,10 @@ public class MessageNotifier {
                 builder.setSmallIcon(R.mipmap.ic_launcher);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
 
-                Bitmap notificationInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
+                Bitmap notificationInitiatorBitmap = BitmapFactory.decodeResource(ApplicationLoader.getInstance().getResources(), R.mipmap.ic_launcher);
 
                 if (StringUtils.isNotEmpty(senderPhoto)) {
-                    Resources res = appContext.getResources();
+                    Resources res = ApplicationLoader.getInstance().getResources();
                     int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
                     int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
                     Bitmap senderBitmap = getBitmapFromURL(senderPhoto);
@@ -211,26 +205,28 @@ public class MessageNotifier {
     }
 
     public void sendSameSenderNotification(final List<ChatMessage> chatMessages, final ParseObject parseUser) {
-        if (appContext == null) {
-            appContext = ApplicationLoader.getInstance();
-        }
         ChatClient.getInstance().execute(new Runnable() {
             @Override
             public void run() {
-                Intent userProfileIntent = new Intent(appContext, ChatActivity.class);
-                userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
-                PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                Intent userProfileIntent;
+                if (HolloutUtils.isAContact(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                    userProfileIntent = new Intent(ApplicationLoader.getInstance(), ChatActivity.class);
+                    userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
+                } else {
+                    userProfileIntent = new Intent(ApplicationLoader.getInstance(), MainActivity.class);
+                }
+                PendingIntent pendingIntent = PendingIntent.getActivity(ApplicationLoader.getInstance(), 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 String senderName = WordUtils.capitalize(parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
                 String senderPhoto = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.getInstance());
                 Spanned messageSpannable = UiUtils.fromHtml(HolloutPreferences.getTotalUnreadMessagesCount() + " new messages");
                 builder.setTicker(messageSpannable);
                 builder.setSmallIcon(R.mipmap.ic_launcher);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
                 builder.setColor(Color.parseColor("#00628F"));
-                Bitmap notificationInitiatorBitmap = BitmapFactory.decodeResource(appContext.getResources(), R.mipmap.ic_launcher);
+                Bitmap notificationInitiatorBitmap = BitmapFactory.decodeResource(ApplicationLoader.getInstance().getResources(), R.mipmap.ic_launcher);
                 if (StringUtils.isNotEmpty(senderPhoto)) {
-                    Resources res = appContext.getResources();
+                    Resources res = ApplicationLoader.getInstance().getResources();
                     int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
                     int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
                     Bitmap senderBitmap = getBitmapFromURL(senderPhoto);
@@ -262,16 +258,13 @@ public class MessageNotifier {
     }
 
     private void sendMultipleSendersNotification(final List<ChatMessage> chatMessages) {
-        if (appContext == null) {
-            appContext = ApplicationLoader.getInstance();
-        }
         ChatClient.getInstance().execute(new Runnable() {
 
             @Override
             public void run() {
-                Intent mainIntent = new Intent(appContext, MainActivity.class);
-                PendingIntent pendingIntent = PendingIntent.getActivity(appContext, 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                NotificationCompat.Builder builder = new NotificationCompat.Builder(appContext);
+                Intent mainIntent = new Intent(ApplicationLoader.getInstance(), MainActivity.class);
+                PendingIntent pendingIntent = PendingIntent.getActivity(ApplicationLoader.getInstance(), 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.getInstance());
                 Spanned messageSpannable = UiUtils.fromHtml(HolloutPreferences.getTotalUnreadMessagesCount() + " new messages");
                 builder.setTicker(messageSpannable);
                 builder.setSmallIcon(R.mipmap.ic_launcher);
@@ -280,24 +273,28 @@ public class MessageNotifier {
                 builder.setAutoCancel(true);
                 NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
                 builder.setColor(Color.parseColor("#00628F"));
-                Resources res = appContext.getResources();
+                Resources res = ApplicationLoader.getInstance().getResources();
 
                 int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
                 int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
 
                 Bitmap notificationInitiatorBitmap =
-                        getCircleBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(appContext.getResources(),
+                        getCircleBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(ApplicationLoader.getInstance().getResources(),
                                 R.mipmap.ic_launcher),
                                 width, height, false));
 
-                builder.setContentTitle(WordUtils.capitalize(appContext.getString(R.string.app_name)))
+                builder.setContentTitle(WordUtils.capitalize(ApplicationLoader.getInstance().getString(R.string.app_name)))
                         .setLargeIcon(notificationInitiatorBitmap)
                         .setContentIntent(pendingIntent)
                         .setNumber(chatMessages.size())
                         .setStyle(inboxStyle)
                         .setSubText((chatMessages.size() == 1 ? "1 new message " : chatMessages.size() + " new messages") + " from " + ((getConversationIds(chatMessages).size() == 1) ? " 1 chat " : (getConversationIds(chatMessages).size() + " chats")));
                 for (ChatMessage message : chatMessages) {
-                    inboxStyle.addLine(UiUtils.fromHtml(message.getFromName() + ":" + getMessage(message)));
+                    if (HolloutUtils.isAContact(message.getFrom())) {
+                        inboxStyle.addLine(WordUtils.capitalize(message.getFromName()) + ":" + UiUtils.fromHtml(getMessage(message)));
+                    } else {
+                        inboxStyle.addLine(WordUtils.capitalize(message.getFromName()) + " wants to chat with you");
+                    }
                 }
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;

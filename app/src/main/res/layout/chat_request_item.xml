@@ -1,112 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
+        android:id="@+id/rootLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/light_blue_50"
+        android:background="?attr/selectableItemBackground"
         android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        android:orientation="horizontal"
-        android:padding="10dp"
-        android:focusable="true">
-
-        <com.wan.hollout.ui.widgets.CircleImageView
-            android:id="@+id/requester_photo"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_gravity="center_vertical"
-            android:src="@drawable/empty_profile" />
+        android:focusable="true"
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
 
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="10dp"
-            android:layout_marginStart="10dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:background="@color/light_blue_50"
+            android:orientation="horizontal"
+            android:padding="10dp">
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/requester_name"
+            <com.wan.hollout.ui.widgets.CircleImageView
+                android:id="@+id/requester_photo"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_gravity="center_vertical"
+                android:src="@drawable/empty_profile" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/requester_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/requester_name"
+                    android:textColor="@color/text_dark"
+                    android:textSize="18sp"
+                    app:textStyle="bold" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/about_requester"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="@string/android_engineer"
+                    android:textColor="@color/list_item_secondary_text"
+                    app:textStyle="medium" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/distance_to_requester"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="3dp"
+                    android:textColor="@color/ease_gray"
+                    android:textSize="12sp"
+                    app:textStyle="medium" />
+
+            </LinearLayout>
+
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="@string/requester_name"
-                android:textColor="@color/text_dark"
-                android:textSize="18sp"
-                app:textStyle="bold" />
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical">
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/about_requester"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="@string/android_engineer"
-                android:textColor="@color/list_item_secondary_text"
-                app:textStyle="medium" />
+                <TextView
+                    android:id="@+id/accept_request"
+                    android:layout_width="80dp"
+                    android:layout_height="25dp"
+                    android:background="@drawable/accept_friend_request"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:text="@string/accept"
+                    android:textColor="@color/whitesmoke"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    tools:ignore="SmallSp" />
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/distance_to_requester"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingTop="3dp"
-                android:textColor="@color/ease_gray"
-                android:textSize="12sp"
-                app:textStyle="medium" />
+                <TextView
+                    android:id="@+id/decline_request"
+                    android:layout_width="80dp"
+                    android:layout_height="25dp"
+                    android:layout_marginTop="15dp"
+                    android:background="@drawable/decline_friend_request"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:text="@string/decline"
+                    android:textColor="@color/grey500"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    tools:ignore="SmallSp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/accept_request"
-                android:layout_width="80dp"
-                android:layout_height="25dp"
-                android:background="@drawable/accept_friend_request"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:gravity="center"
-                android:text="@string/accept"
-                android:textColor="@color/whitesmoke"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                tools:ignore="SmallSp" />
-
-            <TextView
-                android:id="@+id/decline_request"
-                android:layout_width="80dp"
-                android:layout_height="25dp"
-                android:layout_marginTop="15dp"
-                android:background="@drawable/decline_friend_request"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:gravity="center"
-                android:text="@string/decline"
-                android:textColor="@color/grey500"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                tools:ignore="SmallSp" />
-
-        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/light_blue_100" />
 
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/light_blue_100" />
-
-</LinearLayout>
+</FrameLayout>
 

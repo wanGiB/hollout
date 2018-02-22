@@ -41,6 +41,7 @@ import org.json.JSONObject;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -157,7 +158,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     public void setLastSeenText(final long userLastSeen) {
-        if (UiUtils.canShowPresence(recipientObject, AppConstants.ENTITY_TYPE_CHATS, null)) {
+        if (UiUtils.canShowPresence(recipientObject, AppConstants.ENTITY_TYPE_CHATS, new HashMap<String, Object>())) {
             UiUtils.showView(contactSubtitleLayout, true);
             contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
             final String fullLastSeenTExt = getLastSeen(userLastSeen);

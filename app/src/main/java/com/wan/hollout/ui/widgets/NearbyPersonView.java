@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -188,7 +189,7 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
             applyProfilePicture(userProfilePhoto);
             applyIconAnimation();
 
-            if (UiUtils.canShowLocation(person, AppConstants.ENTITY_TYPE_CLOSEBY, null) && userName.length() <= 15) {
+            if (UiUtils.canShowLocation(person, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>()) && userName.length() <= 15) {
                 String userCurrentLocation = HolloutUtils.resolveToBestLocation(person);
                 if (userCurrentLocation != null) {
                     userLocationView.setText(userCurrentLocation.toUpperCase(Locale.getDefault()));
@@ -205,7 +206,7 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
             if (signedInUserGeoPoint != null && userGeoPoint != null) {
                 double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
                 String value = HolloutUtils.formatDistance(distanceInKills);
-                UiUtils.setTextOnView(distanceToUserView, value + "KM");
+                UiUtils.setTextOnView(distanceToUserView, HolloutUtils.formatDistanceToUser(value) + "KM");
             } else {
                 UiUtils.setTextOnView(distanceToUserView, " ");
             }
@@ -228,14 +229,14 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
             }
 
             String userStatusString = person.getString(AppConstants.APP_USER_STATUS);
-            if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(person, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
+            if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(person, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
                 userStatus.setText(userStatusString);
             } else {
                 userStatus.setText(activity.getString(R.string.hey_there_holla_me_on_hollout));
             }
 
             String userOnlineStatus = person.getString(AppConstants.APP_USER_ONLINE_STATUS);
-            if (userOnlineStatus != null && UiUtils.canShowPresence(person, AppConstants.ENTITY_TYPE_CLOSEBY, null)) {
+            if (userOnlineStatus != null && UiUtils.canShowPresence(person, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
                 if (person.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)
                         && HolloutUtils.isNetWorkConnected(activity)) {
                     userOnlineStatusView.setImageResource(R.drawable.ic_online);

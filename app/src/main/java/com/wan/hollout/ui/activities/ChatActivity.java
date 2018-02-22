@@ -102,7 +102,6 @@ import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.HolloutVCFParser;
 import com.wan.hollout.utils.LocationUtils;
-import com.wan.hollout.utils.MessageNotifier;
 import com.wan.hollout.utils.NotificationUtils;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
@@ -320,13 +319,14 @@ public class ChatActivity extends BaseActivity implements
                             }
                             UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
                             prioritizeConversation();
-                            refreshPendingUnseenMessages();
-                        } else {
-                            MessageNotifier.getInstance().notifyOnUnreadMessages();
+                            refreshUnseenMessages();
+                            clearAllUnreadMessagesFromRecipient();
+                            ChatClient.getInstance().markMessageAsRead(model);
                         }
                     } else if (action == BaseModel.Action.UPDATE) {
                         int indexOfMessage = messages.indexOf(model);
                         if (indexOfMessage != -1) {
+                            messages.set(indexOfMessage, model);
                             messagesAdapter.notifyItemChanged(indexOfMessage);
                             if (model.getMessageDirection() == MessageDirection.OUTGOING && model.getMessageStatus() == MessageStatus.READ) {
                                 UiUtils.bangSound(ChatActivity.this, R.raw.pop);
@@ -480,6 +480,7 @@ public class ChatActivity extends BaseActivity implements
                                     if (!messages.contains(emMessage)) {
                                         messages.add(0, emMessage);
                                     }
+                                    ChatClient.getInstance().markMessageAsRead(emMessage);
                                 }
                                 sortMessages();
                                 notifyDataSetChanged();
@@ -518,9 +519,6 @@ public class ChatActivity extends BaseActivity implements
             }
         });
         HolloutUtils.serializeMessages(allUnreadMessages, AppConstants.ALL_UNREAD_MESSAGES);
-        if (!unreadMessagesInThisConversation.isEmpty()) {
-            ChatClient.getInstance().markMessagesAsRead(unreadMessagesInThisConversation);
-        }
     }
 
     private void sortMessages() {
@@ -2001,7 +1999,7 @@ public class ChatActivity extends BaseActivity implements
         }
     }
 
-    private void refreshPendingUnseenMessages() {
+    private void refreshUnseenMessages() {
         UiUtils.showView(unreadMessagesIndicator, !tempReceivedMessages.isEmpty());
         if (!tempReceivedMessages.isEmpty()) {
             unreadMessagesIndicator.setText(String.valueOf(tempReceivedMessages.size()));

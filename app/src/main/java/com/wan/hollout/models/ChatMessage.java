@@ -190,6 +190,9 @@ public class ChatMessage implements Comparable<ChatMessage>, Parcelable {
         localThumb = in.readString();
         fileUploadProgress = in.readDouble();
         fileMimeType = in.readString();
+        messageStatus = (MessageStatus) in.readSerializable();
+        messageType = (MessageType) in.readSerializable();
+        messageDirection = (MessageDirection) in.readSerializable();
     }
 
     public void setMessageId(String messageId) {
@@ -523,6 +526,9 @@ public class ChatMessage implements Comparable<ChatMessage>, Parcelable {
         dest.writeLong(videoDuration);
         dest.writeDouble(fileUploadProgress);
         dest.writeString(fileMimeType);
+        dest.writeSerializable(messageStatus);
+        dest.writeSerializable(messageType);
+        dest.writeSerializable(messageDirection);
     }
 
     @Override

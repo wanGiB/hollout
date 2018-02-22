@@ -39,6 +39,7 @@ import java.util.List;
 @SuppressWarnings("RedundantCast")
 public class ChatRequestView extends LinearLayout implements View.OnClickListener, View.OnLongClickListener {
 
+    private View rootView;
     private CircleImageView requesterPhotoView;
     private HolloutTextView requesterNameView;
     private HolloutTextView aboutRequesterView;
@@ -107,7 +108,13 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                         if (signedInUserGeoPoint != null && userGeoPoint != null) {
                             double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
                             String value = HolloutUtils.formatDistance(distanceInKills);
-                            UiUtils.setTextOnView(distanceToRequesterView, value + "Km from you");
+                            String formattedDistanceToUser = HolloutUtils.formatDistanceToUser(value);
+                            if (formattedDistanceToUser != null) {
+                                UiUtils.showView(distanceToRequesterView, true);
+                                distanceToRequesterView.setText(formattedDistanceToUser.concat("KM from you"));
+                            } else {
+                                UiUtils.showView(distanceToRequesterView, false);
+                            }
                         } else {
                             UiUtils.setTextOnView(distanceToRequesterView, " ");
                         }
@@ -122,6 +129,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
             }
         }
     }
+
 
     private void declineChatRequest(final Activity activity, final ChatRequestsAdapter parent, final ParseObject feedObject, final String userDisplayName) {
         declineRequestView.setOnClickListener(new OnClickListener() {
@@ -215,12 +223,13 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     }
 
     private void init() {
-        setOnClickListener(this);
-        setOnLongClickListener(this);
         initViews();
+        rootView.setOnClickListener(this);
+        rootView.setOnLongClickListener(this);
     }
 
     private void initViews() {
+        rootView = findViewById(R.id.rootLayout);
         requesterPhotoView = (CircleImageView) findViewById(R.id.requester_photo);
         requesterNameView = (HolloutTextView) findViewById(R.id.requester_name);
         aboutRequesterView = (HolloutTextView) findViewById(R.id.about_requester);
@@ -231,9 +240,10 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
     @Override
     public void onClick(View v) {
+        UiUtils.blinkView(v);
         if (requestOriginator != null) {
             Intent requesterInfoIntent = new Intent(activity, UserProfileActivity.class);
-            requesterInfoIntent.putExtra(AppConstants.PENDING_CHAT_REQUEST, feedObject);
+            requesterInfoIntent.putExtra(AppConstants.USER_PROPERTIES, requestOriginator);
             activity.startActivity(requesterInfoIntent);
         }
     }
@@ -241,6 +251,6 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     @Override
     public boolean onLongClick(View v) {
         return false;
-
     }
+
 }
