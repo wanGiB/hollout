@@ -260,6 +260,7 @@ public class AppConstants {
     public static final String DOCUMENTS = "Documents";
     public static final String UNREAD_MESSAGES_COUNT_FROM = "UnreadMessagesCountFrom_";
     public static final String TOTAL_UNREAD_MESSAGES_COUNT = "total_unread_messages_count";
+    public static final String MESSAGES_FOR_BATCH_DELIVERY_UPDATE = "MessagesForBatchDeliveryUpdate";
 
     public static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

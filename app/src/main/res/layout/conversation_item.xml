@@ -49,10 +49,12 @@
                 android:id="@+id/icon_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
                 android:layout_toEndOf="@id/user_online_status"
                 android:layout_toRightOf="@id/user_online_status"
                 android:fillAfter="false"
-                android:fillEnabled="false">
+                android:fillEnabled="false"
+                android:gravity="center_vertical">
 
                 <ImageView
                     android:layout_width="@dimen/icon_width_height"
@@ -102,6 +104,7 @@
             android:id="@+id/message_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
             android:layout_toEndOf="@id/icon_container"
             android:layout_toRightOf="@id/icon_container"
             android:orientation="vertical"

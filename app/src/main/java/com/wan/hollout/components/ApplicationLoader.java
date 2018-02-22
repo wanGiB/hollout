@@ -29,7 +29,7 @@ import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.tonyodev.fetch2.Fetch;
 import com.wan.hollout.R;
 import com.wan.hollout.clients.ChatClient;
-import com.wan.hollout.db.HolloutDb;
+import com.wan.hollout.database.HolloutDb;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.utils.AppConstants;

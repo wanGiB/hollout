@@ -399,7 +399,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         } else {
             UiUtils.showView(deliveryStatusView, false);
         }
-        UiUtils.showView(userStatusOrLastMessageView, !AppConstants.reactionsOpenPositions.get(getMessageId()));
         UiUtils.showView(reactionsIndicatorView, AppConstants.reactionsOpenPositions.get(getMessageId()));
     }
 
@@ -530,8 +529,9 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         if (messageType == MessageType.REACTION) {
             String reaction = message.getReactionValue();
             UiUtils.showView(reactionsIndicatorView, true);
+            UiUtils.showView(userStatusOrLastMessageView, true);
             AppConstants.reactionsOpenPositions.put(getMessageId(), true);
-            UiUtils.showView(userStatusOrLastMessageView, false);
+            userStatusOrLastMessageView.setText(reaction.replace(".json", "").replace("reactions/", ""));
             loadDrawables(activity, reactionsIndicatorView, reaction);
         }
         if (messageType == MessageType.GIF) {

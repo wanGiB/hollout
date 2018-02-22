@@ -13,7 +13,7 @@ import com.raizlabs.android.dbflow.structure.database.DatabaseWrapper;
 import com.raizlabs.android.dbflow.structure.database.transaction.ProcessModelTransaction;
 import com.raizlabs.android.dbflow.structure.database.transaction.QueryTransaction;
 import com.raizlabs.android.dbflow.structure.database.transaction.Transaction;
-import com.wan.hollout.db.HolloutDb;
+import com.wan.hollout.database.HolloutDb;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.CallLog;
 import com.wan.hollout.models.ChatMessage;

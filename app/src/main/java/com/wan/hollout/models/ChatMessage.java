@@ -12,7 +12,7 @@ import com.raizlabs.android.dbflow.annotation.Table;
 import com.wan.hollout.converters.MessageDirectionConverter;
 import com.wan.hollout.converters.MessageStatusConverter;
 import com.wan.hollout.converters.MessageTypeConverter;
-import com.wan.hollout.db.HolloutDb;
+import com.wan.hollout.database.HolloutDb;
 import com.wan.hollout.enums.MessageDirection;
 import com.wan.hollout.enums.MessageStatus;
 import com.wan.hollout.enums.MessageType;
@@ -158,41 +158,20 @@ public class ChatMessage implements Comparable<ChatMessage>, Parcelable {
     @Expose
     public String fileMimeType;
 
+    @Column
+    @Expose
+    public boolean readSoundBanged;
+
     public ChatMessage() {
 
     }
 
-    protected ChatMessage(Parcel in) {
-        messageId = in.readString();
-        from = in.readString();
-        to = in.readString();
-        conversationId = in.readString();
-        acknowledged = in.readByte() != 0;
-        listened = in.readByte() != 0;
-        timeStamp = in.readLong();
-        messageBody = in.readString();
-        fileCaption = in.readString();
-        documentName = in.readString();
-        documentSize = in.readString();
-        repliedMessageId = in.readString();
-        locationAddress = in.readString();
-        latitude = in.readString();
-        longitude = in.readString();
-        localUrl = in.readString();
-        remoteUrl = in.readString();
-        reactionValue = in.readString();
-        contactName = in.readString();
-        contactNumber = in.readString();
-        audioDuration = in.readString();
-        videoDuration = in.readLong();
-        gifUrl = in.readString();
-        thumbnailUrl = in.readString();
-        localThumb = in.readString();
-        fileUploadProgress = in.readDouble();
-        fileMimeType = in.readString();
-        messageStatus = (MessageStatus) in.readSerializable();
-        messageType = (MessageType) in.readSerializable();
-        messageDirection = (MessageDirection) in.readSerializable();
+    public boolean isReadSoundBanged() {
+        return readSoundBanged;
+    }
+
+    public void setReadSoundBanged(boolean readSoundBanged) {
+        this.readSoundBanged = readSoundBanged;
     }
 
     public void setMessageId(String messageId) {
@@ -497,6 +476,40 @@ public class ChatMessage implements Comparable<ChatMessage>, Parcelable {
         return 0;
     }
 
+    protected ChatMessage(Parcel in) {
+        messageId = in.readString();
+        from = in.readString();
+        to = in.readString();
+        conversationId = in.readString();
+        acknowledged = in.readByte() != 0;
+        listened = in.readByte() != 0;
+        timeStamp = in.readLong();
+        messageBody = in.readString();
+        fileCaption = in.readString();
+        documentName = in.readString();
+        documentSize = in.readString();
+        repliedMessageId = in.readString();
+        locationAddress = in.readString();
+        latitude = in.readString();
+        longitude = in.readString();
+        localUrl = in.readString();
+        remoteUrl = in.readString();
+        reactionValue = in.readString();
+        contactName = in.readString();
+        contactNumber = in.readString();
+        audioDuration = in.readString();
+        videoDuration = in.readLong();
+        gifUrl = in.readString();
+        thumbnailUrl = in.readString();
+        localThumb = in.readString();
+        fileUploadProgress = in.readDouble();
+        fileMimeType = in.readString();
+        messageStatus = (MessageStatus) in.readSerializable();
+        messageType = (MessageType) in.readSerializable();
+        messageDirection = (MessageDirection) in.readSerializable();
+        readSoundBanged = in.readByte() != 0;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(messageId);
@@ -520,15 +533,16 @@ public class ChatMessage implements Comparable<ChatMessage>, Parcelable {
         dest.writeString(contactName);
         dest.writeString(contactNumber);
         dest.writeString(audioDuration);
+        dest.writeLong(videoDuration);
         dest.writeString(gifUrl);
         dest.writeString(thumbnailUrl);
         dest.writeString(localThumb);
-        dest.writeLong(videoDuration);
         dest.writeDouble(fileUploadProgress);
         dest.writeString(fileMimeType);
         dest.writeSerializable(messageStatus);
         dest.writeSerializable(messageType);
         dest.writeSerializable(messageDirection);
+        dest.writeByte((byte) (readSoundBanged ? 1 : 0));
     }
 
     @Override

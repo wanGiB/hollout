@@ -892,7 +892,9 @@ public class UiUtils {
 
     public static void bangSound(Context context, int soundId) {
         MediaPlayer mediaPlayer = MediaPlayer.create(context, soundId);
-        mediaPlayer.start(); // no need to call prepare(); create() does that for you
+        if (mediaPlayer != null) {
+            mediaPlayer.start();
+        }
     }
 
     public static String getTimeString(long millis) {

@@ -4,7 +4,7 @@ import com.raizlabs.android.dbflow.annotation.Column;
 import com.raizlabs.android.dbflow.annotation.PrimaryKey;
 import com.raizlabs.android.dbflow.annotation.Table;
 import com.raizlabs.android.dbflow.structure.BaseModel;
-import com.wan.hollout.db.HolloutDb;
+import com.wan.hollout.database.HolloutDb;
 
 /**
  * @author Wan Clem

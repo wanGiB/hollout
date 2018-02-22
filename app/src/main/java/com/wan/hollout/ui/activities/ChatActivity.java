@@ -78,6 +78,7 @@ import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
 import com.wan.hollout.ui.adapters.MessagesAdapter;
 import com.wan.hollout.ui.adapters.PickedMediaFilesAdapter;
+import com.wan.hollout.ui.services.BatchMessageDeliveryStatusUpdater;
 import com.wan.hollout.ui.services.ContactService;
 import com.wan.hollout.ui.utils.FileUploader;
 import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
@@ -262,7 +263,7 @@ public class ChatActivity extends BaseActivity implements
 
     private File recorderAudioCaptureFilePath;
 
-    private List<ChatMessage> messages = new ArrayList<>();
+    private ArrayList<ChatMessage> messages = new ArrayList<>();
     private List<ChatMessage> tempReceivedMessages = new ArrayList<>();
 
     private MessagesAdapter messagesAdapter;
@@ -317,7 +318,6 @@ public class ChatActivity extends BaseActivity implements
                             } else {
                                 messagesRecyclerView.smoothScrollToPosition(0);
                             }
-                            UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
                             prioritizeConversation();
                             refreshUnseenMessages();
                             clearAllUnreadMessagesFromRecipient();
@@ -329,7 +329,11 @@ public class ChatActivity extends BaseActivity implements
                             messages.set(indexOfMessage, model);
                             messagesAdapter.notifyItemChanged(indexOfMessage);
                             if (model.getMessageDirection() == MessageDirection.OUTGOING && model.getMessageStatus() == MessageStatus.READ) {
-                                UiUtils.bangSound(ChatActivity.this, R.raw.pop);
+                                if (!model.isReadSoundBanged()) {
+                                    UiUtils.bangSound(ChatActivity.this, R.raw.pop);
+                                    model.setReadSoundBanged(true);
+                                    DbUtils.updateMessage(model);
+                                }
                             }
                         }
                     } else if (action == BaseModel.Action.DELETE) {
@@ -480,7 +484,6 @@ public class ChatActivity extends BaseActivity implements
                                     if (!messages.contains(emMessage)) {
                                         messages.add(0, emMessage);
                                     }
-                                    ChatClient.getInstance().markMessageAsRead(emMessage);
                                 }
                                 sortMessages();
                                 notifyDataSetChanged();
@@ -519,6 +522,11 @@ public class ChatActivity extends BaseActivity implements
             }
         });
         HolloutUtils.serializeMessages(allUnreadMessages, AppConstants.ALL_UNREAD_MESSAGES);
+        if (!messages.isEmpty()) {
+            Intent batchMessageDeliveryUpdateIntent = new Intent(getCurrentActivityInstance(), BatchMessageDeliveryStatusUpdater.class);
+            batchMessageDeliveryUpdateIntent.putParcelableArrayListExtra(AppConstants.MESSAGES_FOR_BATCH_DELIVERY_UPDATE, messages);
+            startService(batchMessageDeliveryUpdateIntent);
+        }
     }
 
     private void sortMessages() {
@@ -2249,6 +2257,9 @@ public class ChatActivity extends BaseActivity implements
     private void checkAndAddNewMessage(ChatMessage newMessage) {
         if (!messages.contains(newMessage)) {
             messages.add(0, newMessage);
+            if (newMessage.getFrom().equals(getRecipient())) {
+                UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
+            }
         }
         notifyDataSetChanged();
         invalidateEmptyView();

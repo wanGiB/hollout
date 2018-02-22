@@ -37,6 +37,7 @@ import java.util.concurrent.Executors;
  * @author Wan Clem
  */
 
+@SuppressWarnings("unused")
 public class ChatClient {
 
     protected static final String TAG = "ChatClient";
@@ -134,10 +135,12 @@ public class ChatClient {
     }
 
     public void markMessageAsRead(final ChatMessage message) {
-        HashMap<String, Object> deliveryStatusProps = new HashMap<>();
-        deliveryStatusProps.put(AppConstants.DELIVERY_STATUS, AppConstants.READ);
-        FirebaseUtils.getMessageDeliveryStatus().child(message.getFrom()).child(message.getMessageId())
-                .setValue(deliveryStatusProps);
+        if (message.getMessageStatus() != MessageStatus.READ && message.getMessageDirection() == MessageDirection.INCOMING) {
+            final HashMap<String, Object> deliveryStatusProps = new HashMap<>();
+            deliveryStatusProps.put(AppConstants.DELIVERY_STATUS, AppConstants.READ);
+            FirebaseUtils.getMessageDeliveryStatus().child(message.getFrom()).child(message.getMessageId())
+                    .setValue(deliveryStatusProps);
+        }
     }
 
     private void listenForMessageDeliveryStatus(final String signedInUserId) {
@@ -155,17 +158,14 @@ public class ChatClient {
                             String deliveryStatus = (String) deliveryStatusMap.get(AppConstants.DELIVERY_STATUS);
                             if (deliveryStatus != null) {
                                 ChatMessage message = DbUtils.getMessage(snapshot.getKey());
-                                if (deliveryStatus.equals(AppConstants.DELIVERED)) {
-                                    message.setMessageStatus(MessageStatus.DELIVERED);
-                                } else if (deliveryStatus.equals(AppConstants.READ)) {
-                                    message.setMessageStatus(MessageStatus.READ);
-                                    FirebaseUtils.getMessageDeliveryStatus().child(signedInUserId).child(snapshot.getKey()).removeValue();
-                                }
                                 if (message != null) {
-                                    HolloutLogger.d("ReceivedMsgProps", "Message is not null with key = " + snapshot.getKey());
+                                    if (deliveryStatus.equals(AppConstants.DELIVERED)) {
+                                        message.setMessageStatus(MessageStatus.DELIVERED);
+                                    } else if (deliveryStatus.equals(AppConstants.READ)) {
+                                        message.setMessageStatus(MessageStatus.READ);
+                                        FirebaseUtils.getMessageDeliveryStatus().child(signedInUserId).child(snapshot.getKey()).removeValue();
+                                    }
                                     DbUtils.updateMessage(message);
-                                } else {
-                                    HolloutLogger.d("ReceivedMsgProps", "Message is null");
                                 }
                             }
                         } else {

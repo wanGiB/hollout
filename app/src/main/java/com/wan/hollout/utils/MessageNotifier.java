@@ -127,9 +127,11 @@ public class MessageNotifier {
     private boolean fromSameSender(List<ChatMessage> messages) {
         List<String> senders = new ArrayList<>();
         for (ChatMessage emMessage : messages) {
-            String senderId = emMessage.getFrom();
-            if (!senders.contains(senderId.trim().toLowerCase())) {
-                senders.add(senderId.trim().toLowerCase());
+            if (emMessage!=null){
+                String senderId = emMessage.getFrom();
+                if (!senders.contains(senderId.trim().toLowerCase())) {
+                    senders.add(senderId.trim().toLowerCase());
+                }
             }
         }
         return senders.size() == 1;
