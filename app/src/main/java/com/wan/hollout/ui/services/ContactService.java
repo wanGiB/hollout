@@ -41,7 +41,7 @@ public class ContactService {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "CONTACT_" + timeStamp + "_" + ".vcf";
 
-        File outputFile = HolloutUtils.getFilePath(imageFileName, context, "text/x-vcard");
+        File outputFile = HolloutUtils.getFilePath(imageFileName, context);
         fd = context.getContentResolver().openAssetFileDescriptor(uri, "r");
 
         FileInputStream fis = null;

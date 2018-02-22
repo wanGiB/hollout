@@ -1793,8 +1793,11 @@ public class ChatActivity extends BaseActivity implements
     }
 
     public void notifyDataSetChanged() {
-        messagesRecyclerView.getRecycledViewPool().clear();
-        messagesAdapter.notifyDataSetChanged();
+        try {
+            messagesAdapter.notifyDataSetChanged();
+        } catch (IllegalStateException ignored) {
+
+        }
     }
 
     @SuppressLint("Recycle")

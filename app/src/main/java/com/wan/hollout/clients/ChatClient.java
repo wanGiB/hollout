@@ -115,7 +115,7 @@ public class ChatClient {
 
     private void incrementTotalUnreadChats(ChatMessage chatMessage) {
         Set<String> totalUnreadChats = HolloutPreferences.getTotalUnreadChats();
-        if (!totalUnreadChats.contains(chatMessage.getFrom())) {
+        if (HolloutUtils.isAContact(chatMessage.getFrom()) && !totalUnreadChats.contains(chatMessage.getFrom())) {
             totalUnreadChats.add(chatMessage.getFrom());
         }
         HolloutPreferences.saveTotalUnreadChats(totalUnreadChats);

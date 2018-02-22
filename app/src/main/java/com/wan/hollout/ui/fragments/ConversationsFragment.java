@@ -27,7 +27,6 @@ import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
-import com.wan.hollout.ui.helpers.DividerItemDecoration;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -92,18 +91,25 @@ public class ConversationsFragment extends Fragment {
         }
 
         @Override
-        public void onModelChanged(@NonNull ChatMessage model, @NonNull BaseModel.Action action) {
-            //Check for the model that just changed
-            if (!conversations.isEmpty()) {
-                for (ConversationItem conversationItem : conversations) {
-                    String conversationId = conversationItem.getObjectId();
-                    if (model.getConversationId().equals(conversationId)) {
-                        int indexOfConversation = conversations.indexOf(conversationItem);
-                        if (indexOfConversation != -1) {
-                            conversationsAdapter.notifyItemChanged(indexOfConversation);
+        public void onModelChanged(@NonNull final ChatMessage model, @NonNull BaseModel.Action action) {
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Check for the model that just changed
+                        if (!conversations.isEmpty()) {
+                            for (ConversationItem conversationItem : conversations) {
+                                String conversationId = conversationItem.getObjectId();
+                                if (model.getConversationId().equals(conversationId)) {
+                                    int indexOfConversation = conversations.indexOf(conversationItem);
+                                    if (indexOfConversation != -1) {
+                                        conversationsAdapter.notifyItemChanged(indexOfConversation);
+                                    }
+                                }
+                            }
                         }
                     }
-                }
+                });
             }
         }
     };
@@ -117,7 +123,7 @@ public class ConversationsFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View peopleView = inflater.inflate(R.layout.fragment_conversations, container, false);
         ButterKnife.bind(this, peopleView);
         return peopleView;

@@ -24,7 +24,7 @@ public class GoogleSignInHelper extends GoogleApiHelper {
         return new GoogleSignInHelper(activity, builder);
     }
 
-    public Task<Status> signOut() {
+    Task<Status> signOut() {
         final TaskCompletionSource<Status> statusTask = new TaskCompletionSource<>();
         getConnectedApiTask().addOnCompleteListener(new ExceptionForwarder<>(
                 statusTask,
@@ -38,7 +38,7 @@ public class GoogleSignInHelper extends GoogleApiHelper {
         return statusTask.getTask();
     }
 
-    public Task<Status> disableAutoSignIn() {
+    Task<Status> disableAutoSignIn() {
         final TaskCompletionSource<Status> statusTask = new TaskCompletionSource<>();
         getConnectedApiTask().addOnCompleteListener(new ExceptionForwarder<>(
                 statusTask,

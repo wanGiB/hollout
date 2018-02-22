@@ -147,7 +147,7 @@ public class PeopleToMeetAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                             }
                         } else {
                             if (!selectedPeopleToMeet.contains(personName)) {
-                                HolloutUtils.bangSound(context, true, R.raw.tipjar_send);
+                                HolloutUtils.bangSound(context, R.raw.tipjar_send);
                                 selections.put(personName.hashCode(), true);
                                 selectedPeopleToMeet.add(personName);
                                 parseUser.put(AppConstants.INTERESTS, selectedPeopleToMeet);

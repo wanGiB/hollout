@@ -24,7 +24,7 @@ import java.io.File;
  * @author Wan Clem
  */
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "UnusedReturnValue"})
 public class FirebaseUtils {
 
     private static String TAG = FirebaseUtils.class.getSimpleName();

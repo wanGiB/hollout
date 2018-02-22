@@ -30,9 +30,7 @@ import java.util.Comparator;
 
 
 /**
- * @author Peli
- * @author paulburke (ipaulpro)
- * @version 2013-12-11
+ * @author Wan Clem
  */
 public class FileUtils {
 
@@ -454,7 +452,7 @@ public class FileUtils {
                 }
             } catch (Exception e) {
                 if (DEBUG)
-                    HolloutLogger.e(TAG, "getThumbnail"+e.getMessage());
+                    HolloutLogger.e(TAG, "getThumbnail" + e.getMessage());
             } finally {
                 if (cursor != null)
                     cursor.close();
@@ -537,13 +535,13 @@ public class FileUtils {
         return type;
     }
 
-    public static String[] fileTypes = new String[] { "apk", "avi", "bmp", "chm", "dll", "doc", "docx", "dos", "gif",
-            "html", "jpeg", "jpg", "movie", "mp3","dat", "mp4", "mpe", "mpeg", "mpg", "pdf", "png", "ppt", "pptx", "rar",
-            "txt", "wav", "wma", "wmv", "xls", "xlsx", "xml", "zip" };
+    public static String[] fileTypes = new String[]{"apk", "avi", "bmp", "chm", "dll", "doc", "docx", "dos", "gif",
+            "html", "jpeg", "jpg", "movie", "mp3", "dat", "mp4", "mpe", "mpeg", "mpg", "pdf", "png", "ppt", "pptx", "rar",
+            "txt", "wav", "wma", "wmv", "xls", "xlsx", "xml", "zip"};
 
-    public static File[] loadFiles(File directory){
+    public static File[] loadFiles(File directory) {
         File[] listFiles = directory.listFiles();
-        if(listFiles == null)
+        if (listFiles == null)
             listFiles = new File[]{};
 
         ArrayList<File> tempFolder = new ArrayList<File>();
@@ -569,6 +567,7 @@ public class FileUtils {
 
     /**
      * Determine the type of file
+     *
      * @param f
      * @return
      */
@@ -583,10 +582,11 @@ public class FileUtils {
 
     /**
      * open file
+     *
      * @param f
      * @param context
      */
-    public static void openFile(File f,Activity context) {
+    public static void openFile(File f, Activity context) {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(android.content.Intent.ACTION_VIEW);
@@ -603,7 +603,7 @@ public class FileUtils {
         }
     }
 
-    public static void openFile(Uri uri,String type,Activity context) {
+    public static void openFile(Uri uri, String type, Activity context) {
         Intent intent = new Intent();
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.setAction(android.content.Intent.ACTION_VIEW);
@@ -629,7 +629,7 @@ public class FileUtils {
     }
 
 
-    public static synchronized void saveObjectToFile(Object object,File toSaveFile) throws Exception{
+    public static synchronized void saveObjectToFile(Object object, File toSaveFile) throws Exception {
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(toSaveFile));
         out.writeObject(object);
         out.flush();
@@ -637,7 +637,7 @@ public class FileUtils {
 
     }
 
-    public static synchronized Object readObjectFromFile(File toReadFile) throws Exception{
+    public static synchronized Object readObjectFromFile(File toReadFile) throws Exception {
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(toReadFile));
         return in.readObject();
     }

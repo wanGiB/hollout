@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/clobb"
                 android:textColor="@color/ease_white"
-                android:textSize="25sp"
+                android:textSize="50sp"
                 app:textStyle="bold" />
 
             <com.wan.hollout.ui.widgets.HolloutTextView
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/it"
                 android:textColor="@color/light_gray"
-                android:textSize="25sp"
+                android:textSize="50sp"
                 app:textStyle="light" />
 
         </LinearLayout>

@@ -68,7 +68,7 @@ public class DynamicLanguage {
   }
 
   private static Locale getSelectedLocale(Context context) {
-    String language[] = TextUtils.split(HolloutUtils.getLanguage(context), "_");
+    String language[] = TextUtils.split(HolloutUtils.getLanguage(), "_");
 
     if (language[0].equals(DEFAULT)) {
       return Locale.getDefault();

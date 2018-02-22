@@ -1,7 +1,6 @@
 package com.wan.hollout.utils;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -38,7 +37,6 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.KryoException;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -46,11 +44,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
-import com.wan.hollout.R;
 import com.wan.hollout.bean.AudioFile;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
@@ -67,12 +62,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.math.RoundingMode;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.text.DecimalFormat;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,25 +84,23 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
  * @author Wan Clem
  */
 
+@SuppressWarnings({"ResultOfMethodCallIgnored", "unused"})
 public class HolloutUtils {
 
     public static String TAG = "HolloutUtils";
 
-    public static float density = 1;
-    public static int leftBaseline;
-    public static boolean usingHardwareInput;
     private static Boolean isTablet = null;
-    public static Point displaySize = new Point();
+    private static Point displaySize = new Point();
+    private static DisplayMetrics displayMetrics = new DisplayMetrics();
 
-    public static DisplayMetrics displayMetrics = new DisplayMetrics();
+    private static final NavigableMap<Long, String> suffixes = new TreeMap<>();
 
     public static float getFileSizeInMB(long length) {
         return length / (1024 * 1024);
     }
 
     static {
-        leftBaseline = isTablet() ? 80 : 72;
-        checkDisplaySize(ApplicationLoader.getInstance(), null);
+        checkDisplaySize(ApplicationLoader.getInstance());
     }
 
     public static Kryo getKryoInstance() {
@@ -151,21 +142,7 @@ public class HolloutUtils {
         }
     }
 
-    public static boolean isTablet() {
-        if (isTablet == null) {
-            isTablet = ApplicationLoader.getInstance().getResources().getBoolean(R.bool.isTablet);
-        }
-        return isTablet;
-    }
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    public static boolean isLowMemory(Context context) {
-        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && activityManager.isLowRamDevice()) ||
-                activityManager.getMemoryClass() <= 64;
-    }
-
-    public static boolean isMainThread() {
+    private static boolean isMainThread() {
         return Looper.myLooper() == Looper.getMainLooper();
     }
 
@@ -183,18 +160,9 @@ public class HolloutUtils {
         return Math.min(Math.max(value, min), max);
     }
 
-    public static float clamp(float value, float min, float max) {
-        return Math.min(Math.max(value, min), max);
-    }
-
-
-    public static void bangSound(Context context, boolean reduceSound, int soundId) {
+    public static void bangSound(Context context, int soundId) {
         MediaPlayer mediaPlayer = MediaPlayer.create(context, soundId);
-        if (reduceSound) {
-            mediaPlayer.setVolume(0.2f, 0.2f);
-        } else {
-            mediaPlayer.setVolume(0.5f, 0.5f);
-        }
+        mediaPlayer.setVolume(0.2f, 0.2f);
         mediaPlayer.start();
     }
 
@@ -258,14 +226,11 @@ public class HolloutUtils {
         return decimalFormat.format(distanceBetweenTwoLocations);
     }
 
-    public static void checkDisplaySize(Context context, Configuration newConfiguration) {
+    private static void checkDisplaySize(Context context) {
         try {
-            density = context.getResources().getDisplayMetrics().density;
-            Configuration configuration = newConfiguration;
-            if (configuration == null) {
-                configuration = context.getResources().getConfiguration();
-            }
-            usingHardwareInput = configuration.keyboard != Configuration.KEYBOARD_NOKEYS && configuration.hardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
+            float density = context.getResources().getDisplayMetrics().density;
+            Configuration configuration;
+            configuration = context.getResources().getConfiguration();
             WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
             if (manager != null) {
                 Display display = manager.getDefaultDisplay();
@@ -290,15 +255,6 @@ public class HolloutUtils {
 
         }
     }
-
-    public static int dp(float value) {
-        if (value == 0) {
-            return 0;
-        }
-        return (int) Math.ceil(density * value);
-    }
-
-    private static final NavigableMap<Long, String> suffixes = new TreeMap<>();
 
     static {
         suffixes.put(1_000L, "k");
@@ -331,7 +287,10 @@ public class HolloutUtils {
         if (context != null) {
             ConnectivityManager
                     mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            NetworkInfo mNetworkInfo = null;
+            if (mConnectivityManager != null) {
+                mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+            }
             if (mNetworkInfo != null) {
                 return mNetworkInfo.isAvailable() && mNetworkInfo.isConnected();
             }
@@ -339,27 +298,7 @@ public class HolloutUtils {
         return false;
     }
 
-    public static String convertAdditionalPhotosToString(List<Object> additionalPhotosOfUser) {
-        Type listType = new TypeToken<List<String>>() {
-        }.getType();
-        return new Gson().toJson(additionalPhotosOfUser, listType);
-    }
-
-    public static Gson getGson() {
-        return new Gson();
-    }
-
-    public static List<String> extractAdditionalPhotosFromString(String string) {
-        if (StringUtils.isNotEmpty(string)) {
-            Type listType = new TypeToken<List<String>>() {
-            }.getType();
-            return new Gson().fromJson(string, listType);
-        } else {
-            return null;
-        }
-    }
-
-    public static ArrayList<String> getAllOfAUserPhotos(String profilePhoto, List<String> additionalPhotos) {
+    static ArrayList<String> getAllOfAUserPhotos(String profilePhoto, List<String> additionalPhotos) {
         ArrayList<String> resultantPhotos = new ArrayList<>();
         resultantPhotos.add(profilePhoto);
         if (additionalPhotos != null) {
@@ -427,36 +366,32 @@ public class HolloutUtils {
     }
 
     private static String[] suffix = new String[]{"", "k", "m", "b", "t"};
-    private static int MAX_LENGTH = 4;
 
     public static String format(double number) {
         String r = new DecimalFormat("##0E0").format(number);
         r = r.replaceAll("E[0-9]", suffix[Character.getNumericValue(r.charAt(r.length() - 1)) / 3]);
+        int MAX_LENGTH = 4;
         while (r.length() > MAX_LENGTH || r.matches("[0-9]+\\.[a-z]")) {
             r = r.substring(0, r.length() - 2) + r.substring(r.length() - 1);
         }
         return r;
     }
 
-    public static void updateCurrentParseInstallation(List<String> newChannelProps, List<String> removableChannelProps) {
-        ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
-        parseInstallation.put(AppConstants.REAL_OBJECT_ID, AuthUtil.getCurrentUser().getString(AppConstants.REAL_OBJECT_ID));
-        List<String> existingChannels = parseInstallation.getList("channels");
-        checkAndUpdateChannels(newChannelProps, removableChannelProps, parseInstallation, existingChannels);
-        parseInstallation.saveInBackground();
+    public static void updateCurrentParseInstallation(List<String> newChannelProps) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
+            parseInstallation.put(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            List<String> existingChannels = parseInstallation.getList("channels");
+            checkAndUpdateChannels(newChannelProps, parseInstallation, existingChannels);
+            parseInstallation.saveInBackground();
+        }
     }
 
-    private static void checkAndUpdateChannels(List<String> newChannelProps, List<String> removableChannelProps,
+    private static void checkAndUpdateChannels(List<String> newChannelProps,
                                                ParseInstallation parseInstallation,
                                                List<String> existingChannels) {
         if (existingChannels != null) {
-            if (removableChannelProps != null) {
-                for (String removableChannelItem : removableChannelProps) {
-                    if (existingChannels.contains(removableChannelItem)) {
-                        existingChannels.remove(removableChannelItem);
-                    }
-                }
-            }
             for (String newChannelItem : newChannelProps) {
                 if (!existingChannels.contains(newChannelItem)) {
                     existingChannels.add(newChannelItem);
@@ -474,7 +409,7 @@ public class HolloutUtils {
         }
     }
 
-    public static String getHashedString(String plainString) {
+    private static String getHashedString(String plainString) {
         if (isNotEmpty(plainString)) {
             return Base64.encodeToString(plainString.getBytes(), Base64.DEFAULT);
         } else {
@@ -530,8 +465,8 @@ public class HolloutUtils {
         return null;
     }
 
-    public static String getLanguage(Context context) {
-        return HolloutPreferences.getLanguage(LANGUAGE_PREF, "zz");
+    public static String getLanguage() {
+        return HolloutPreferences.getLanguage(LANGUAGE_PREF);
     }
 
     public static long getVideoDuration(String file) {
@@ -560,27 +495,6 @@ public class HolloutUtils {
             }
         }
         return sizeInMB;
-    }
-
-    public static long getVideoDuration(Uri fileUri) {
-        long durationOfFile = 0;
-        Cursor returnCursor = null;
-        try {
-            returnCursor = ApplicationLoader.getInstance().getContentResolver().query(fileUri, null, null, null, null);
-            if (returnCursor != null && returnCursor.moveToFirst()) {
-                int fileDuration = returnCursor.getColumnIndex(MediaStore.Video.Media.DURATION);
-                durationOfFile = returnCursor.getLong(fileDuration);
-            }
-        } finally {
-            if (returnCursor != null) {
-                try {
-                    returnCursor.close();
-                } catch (Exception e) {
-                    HolloutLogger.e(TAG, e.getMessage());
-                }
-            }
-        }
-        return durationOfFile;
     }
 
     public static boolean isFileCode(String fileMime) {
@@ -660,17 +574,12 @@ public class HolloutUtils {
         return mediaFile;
     }
 
-
-    public static boolean hasLollipop() {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
-    }
-
     public static boolean hasMarshmallow() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
 
-    public static File getFilePath(String fileName, Context context, String contentType) {
-        return getFilePath(fileName, context, contentType, false);
+    public static File getFilePath(String fileName, Context context) {
+        return getFilePath(fileName, context, "text/x-vcard", false);
     }
 
     private static final String IMAGE_DIR = "image";
@@ -940,7 +849,7 @@ public class HolloutUtils {
         return sortedVideoEntries;
     }
 
-    public static String getQualifier(String word) {
+    static String getQualifier(String word) {
         if (StringUtils.startsWithAny(word.toLowerCase(), "a,e,i,o,u")) {
             return "an";
         } else {
@@ -955,21 +864,6 @@ public class HolloutUtils {
         }
         return ageRanges;
     }
-
-//    public static String getThumbnailImagePath(String thumbRemoteUrl) {
-//        String thumbImageName = thumbRemoteUrl.substring(thumbRemoteUrl.lastIndexOf("/") + 1, thumbRemoteUrl.length());
-//        String path = PathUtil.getInstance().getImagePath() + "/" + "th" + thumbImageName;
-//        EMLog.d("msg", "thum image path:" + path);
-//        return path;
-//    }
-
-//    private static EMMessage.Type getMessageType(EMMessage message) {
-//        return message.getType();
-//    }
-
-//    private static EMMessage.Direct getMessageDirection(EMMessage message) {
-//        return message.direct();
-//    }
 
     public static boolean checkGooglePlayServices(Activity activity) {
         final int status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(activity);

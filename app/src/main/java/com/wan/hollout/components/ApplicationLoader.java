@@ -38,7 +38,6 @@ import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 
 import org.greenrobot.eventbus.EventBus;
-import org.intellij.lang.annotations.Flow;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -231,7 +230,7 @@ public class ApplicationLoader extends Application {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                HolloutPreferences.defaultToSystemEmojis(AppConstants.SYSTEM_EMOJI_PREF, false);
+                HolloutPreferences.defaultToSystemEmojis(AppConstants.SYSTEM_EMOJI_PREF);
             }
         }).start();
     }

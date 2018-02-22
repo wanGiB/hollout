@@ -35,7 +35,6 @@ import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.models.NearbyPerson;
 import com.wan.hollout.ui.activities.MeetPeopleActivity;
 import com.wan.hollout.ui.adapters.PeopleAdapter;
-import com.wan.hollout.ui.decorators.StartOffsetItemDecoration;
 import com.wan.hollout.ui.widgets.ChatRequestsHeaderView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;

@@ -27,16 +27,16 @@ public class HolloutPreferences {
     }
 
     @SuppressLint("ApplySharedPref")
-    public static void setCanAccessLocation(boolean value) {
-        getInstance().edit().putBoolean(AppConstants.CAN_ACCESS_LOCATION, value).commit();
+    public static void setCanAccessLocation() {
+        getInstance().edit().putBoolean(AppConstants.CAN_ACCESS_LOCATION, true).commit();
     }
 
-    public static String getAPreviousUploadFromPreference(String hashedPhotoPath) {
+    static String getAPreviousUploadFromPreference(String hashedPhotoPath) {
         SharedPreferences sharedPreferences = getInstance();
         return sharedPreferences.getString(hashedPhotoPath, hashedPhotoPath);
     }
 
-    public static void persistUploadedFile(String hashedPhotoPath, String returnedFileUrl) {
+    static void persistUploadedFile(String hashedPhotoPath, String returnedFileUrl) {
         SharedPreferences sharedPreferences = getInstance();
         sharedPreferences.edit().putString(hashedPhotoPath, returnedFileUrl).apply();
     }
@@ -62,45 +62,12 @@ public class HolloutPreferences {
         return getInstance().getInt(AppConstants.START_PAGE_INDEX, 0);
     }
 
-    public static void saveCurrentPlaybackTime(String postId, int duration) {
-        getInstance().edit().putInt(postId + "_", duration).commit();
-        HolloutLogger.d("SavedVideoPosition", duration + "");
-    }
-
-    public static int getLastPlaybackTime(String postId) {
-        return getInstance().getInt(postId + "_", 0);
-    }
-
     public static void setUserWelcomed(boolean value) {
         getInstance().edit().putBoolean(AppConstants.USER_WELCOMED, value).commit();
     }
 
     public static boolean isUserWelcomed() {
         return getInstance().getBoolean(AppConstants.USER_WELCOMED, false);
-    }
-
-    public static long getPostLikes(String globalPostId) {
-        return getInstance().getLong(globalPostId, 0);
-    }
-
-    public static void savePostLikes(String postId, int count) {
-        getInstance().edit().putLong(postId, count).commit();
-    }
-
-    public static boolean authenticated() {
-        return getInstance().getBoolean(AppConstants.AUTHENTICATED, false);
-    }
-
-    public static void setAuthenticated() {
-        getInstance().edit().putBoolean(AppConstants.AUTHENTICATED, true).commit();
-    }
-
-    public static String getAvailableUsername() {
-        return getInstance().getString(AppConstants.APP_USER_NAME, null);
-    }
-
-    public static String getAvailablePassword() {
-        return getInstance().getString(AppConstants.APP_USER_PASSWORD, null);
     }
 
     public static void persistCredentials(String username, String password) {
@@ -121,12 +88,12 @@ public class HolloutPreferences {
         return getInstance().getBoolean(SYSTEM_EMOJI_PREF, false);
     }
 
-    public static String getLanguage(String languagePref, String zz) {
-        return getInstance().getString(languagePref, zz);
+    static String getLanguage(String languagePref) {
+        return getInstance().getString(languagePref, "zz");
     }
 
-    public static void defaultToSystemEmojis(String systemEmojiPref, boolean b) {
-        getInstance().edit().putBoolean(systemEmojiPref, b).commit();
+    public static void defaultToSystemEmojis(String systemEmojiPref) {
+        getInstance().edit().putBoolean(systemEmojiPref, false).commit();
     }
 
     public static boolean isEnterSendsEnabled() {

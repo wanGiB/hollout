@@ -11,7 +11,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
 /**
- * Created by devashish on 27/9/14.
+ * @author Wan Clem
  */
 public class FilePathFinder {
 

@@ -26,10 +26,10 @@ public abstract class GoogleApiHelper implements
 
     private static final AtomicInteger SAFE_ID = new AtomicInteger(10);
 
-    protected GoogleApiClient mClient;
+    GoogleApiClient mClient;
     private TaskCompletionSource<Bundle> mGoogleApiConnectionTask = new TaskCompletionSource<>();
 
-    protected GoogleApiHelper(FragmentActivity activity, GoogleApiClient.Builder builder) {
+    GoogleApiHelper(FragmentActivity activity, GoogleApiClient.Builder builder) {
         builder.enableAutoManage(activity, getSafeAutoManageId(), this);
         builder.addConnectionCallbacks(this);
         mClient = builder.build();
@@ -39,11 +39,11 @@ public abstract class GoogleApiHelper implements
      * @return a safe id for {@link GoogleApiClient.Builder#enableAutoManage(FragmentActivity, int,
      * GoogleApiClient.OnConnectionFailedListener)}
      */
-    public static int getSafeAutoManageId() {
+    private static int getSafeAutoManageId() {
         return SAFE_ID.getAndIncrement();
     }
 
-    public Task<Bundle> getConnectedApiTask() {
+    Task<Bundle> getConnectedApiTask() {
         return mGoogleApiConnectionTask.getTask();
     }
 
@@ -68,7 +68,7 @@ public abstract class GoogleApiHelper implements
     protected static final class TaskResultCaptor<R extends Result> implements ResultCallback<R> {
         private TaskCompletionSource<R> mSource;
 
-        public TaskResultCaptor(TaskCompletionSource<R> source) {
+        TaskResultCaptor(TaskCompletionSource<R> source) {
             mSource = source;
         }
 
@@ -82,8 +82,8 @@ public abstract class GoogleApiHelper implements
         private TaskCompletionSource mSource;
         private OnSuccessListener<TResult> mListener;
 
-        public ExceptionForwarder(TaskCompletionSource source,
-                                  OnSuccessListener<TResult> listener) {
+        ExceptionForwarder(TaskCompletionSource source,
+                           OnSuccessListener<TResult> listener) {
             mSource = source;
             mListener = listener;
         }
@@ -93,7 +93,9 @@ public abstract class GoogleApiHelper implements
             if (task.isSuccessful()) {
                 mListener.onSuccess(task.getResult());
             } else {
-                mSource.setException(task.getException());
+                if (task.getException() != null) {
+                    mSource.setException(task.getException());
+                }
             }
         }
     }

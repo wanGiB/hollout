@@ -2,7 +2,6 @@ package com.wan.hollout.utils;
 
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Base64;
 
 import com.parse.GetCallback;
 import com.parse.ParseException;
@@ -205,10 +204,6 @@ public class DbUtils {
         } catch (SQLiteException ignore) {
             doneCallback.done(new ArrayList<ChatMessage>(), null);
         }
-    }
-
-    public static int getUnreadMessagesInConversation(String conversationId) {
-        return 0;
     }
 
     public static ChatMessage getLastMessageInConversation(String conversationId) {

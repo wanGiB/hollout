@@ -162,7 +162,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             tabLayout.setupWithViewPager(viewPager);
             setupTabs(adapter);
         }
-
         fetchUnreadMessagesCount();
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -593,7 +592,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 || requestCode == PermissionsUtils.REQUEST_STORAGE
                 && holloutPermissions.verifyPermissions(grantResults)) {
             if (requestCode == PermissionsUtils.REQUEST_LOCATION) {
-                HolloutPreferences.setCanAccessLocation(true);
+                HolloutPreferences.setCanAccessLocation();
             }
             tryAskForPermissions();
         } else {
