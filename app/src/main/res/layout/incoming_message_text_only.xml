@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="1dp"
-    android:animateLayoutChanges="true"
-    android:orientation="vertical">
+    android:animateLayoutChanges="true">
 
     <RelativeLayout
         android:id="@+id/message_container"
@@ -49,17 +48,16 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/message_container"
         android:layout_alignEnd="@+id/message_container"
         android:layout_alignRight="@+id/message_container"
         android:layout_below="@+id/message_container"
-        android:layout_gravity="bottom|end"
-        android:orientation="horizontal">
+        android:layout_gravity="bottom|end">
 
         <com.wan.hollout.ui.widgets.HolloutTextView
             android:id="@+id/textview_time"
             style="@style/chat_timings"
             android:layout_width="wrap_content"
+            android:layout_gravity="end"
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
             android:layout_marginRight="4dp"

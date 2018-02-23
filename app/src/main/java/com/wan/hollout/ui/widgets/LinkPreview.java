@@ -164,8 +164,9 @@ public class LinkPreview extends RelativeLayout {
                 } else if (url.contains("www.clove.co.uk")) {
                     imageElements = doc.select("li[data-thumbnail-path]");
                     site = "www.clove.co.uk";
-                } else
-                    imageElements = doc.select("meta[property=og:image]");
+                } else {
+                    imageElements = doc.select("img");
+                }
                 mImageLink = getImageLinkFromSource(imageElements, site);
                 siteElements = doc.select("meta[property=og:site_name]");
                 linkElements = doc.select("meta[property=og:url]");
@@ -207,6 +208,7 @@ public class LinkPreview extends RelativeLayout {
                     mImgViewImage.setImageResource(R.drawable.ease_default_image);
                 }
                 if (url.toLowerCase().contains("amazon"))
+
                     if (getSiteName() == null || getSiteName().equals(""))
                         mSiteName = "Amazon";
                 if (getSiteName() != null) {
@@ -263,7 +265,7 @@ public class LinkPreview extends RelativeLayout {
                     imageLink = "https://www.clove.co.uk" + elements.get(0).attr("data-thumbnail-path");
                     break;
                 default:
-                    imageLink = elements.get(0).attr("content");
+                    imageLink = elements.first().attr("src");
                     break;
             }
 

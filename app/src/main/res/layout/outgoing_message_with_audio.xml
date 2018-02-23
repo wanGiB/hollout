@@ -19,7 +19,8 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
-        android:background="@drawable/bubble_outgoing">
+        android:background="@drawable/outgoing_chat_bubble"
+        android:padding="4dp">
 
         <com.wan.hollout.ui.widgets.MessageReplyRecyclerItemView
             android:id="@+id/message_reply_recycler_item_view"

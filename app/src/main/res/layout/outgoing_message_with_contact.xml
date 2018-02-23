@@ -19,7 +19,8 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
-        android:background="@drawable/bubble_outgoing">
+        android:background="@drawable/outgoing_chat_bubble"
+        android:padding="4dp">
 
         <com.wan.hollout.ui.widgets.MessageReplyRecyclerItemView
             android:id="@+id/message_reply_recycler_item_view"
@@ -44,26 +45,24 @@
                     android:id="@+id/contact_icon"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:layout_gravity="center_vertical"
+                    android:scaleType="centerCrop"
                     android:src="@drawable/attach_contact"
                     tools:ignore="ContentDescription" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_gravity="center_vertical"
                     android:layout_marginLeft="10dp"
                     android:layout_marginStart="10dp"
-                    android:gravity="center_vertical"
                     android:orientation="vertical">
 
                     <com.wan.hollout.ui.widgets.HolloutTextView
                         android:id="@+id/contact_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:layout_gravity="center_vertical"
                         android:maxLines="1"
+                        android:text="Wan Clem"
                         android:textColor="@color/black"
                         android:textSize="16sp"
                         app:textStyle="bold" />
@@ -72,11 +71,10 @@
                         android:id="@+id/contact_phone_numbers"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
                         android:autoLink="web"
                         android:paddingEnd="6dp"
-                        android:gravity="center_vertical"
                         android:paddingRight="6dp"
+                        android:text="07017905852"
                         android:textColor="@color/text_black"
                         app:emojiconSize="25dp"
                         app:textStyle="medium"

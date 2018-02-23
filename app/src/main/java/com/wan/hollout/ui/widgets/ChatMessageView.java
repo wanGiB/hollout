@@ -296,22 +296,24 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void registerViewTreeObserver() {
-        int viewWidth = HolloutPreferences.getViewWidth(message.getMessageId());
-        if (viewWidth != 0) {
-            checkAndRedrawSomeViews(viewWidth);
-        } else {
-            ViewTreeObserver viewTreeObserver = getViewTreeObserver();
-            if (viewTreeObserver.isAlive()) {
-                viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                    @Override
-                    public boolean onPreDraw() {
-                        getViewTreeObserver().removeOnPreDrawListener(this);
-                        int messageBubbleWidth = messageBubbleLayout.getWidth();
-                        checkAndRedrawSomeViews(messageBubbleWidth);
-                        HolloutPreferences.saveViewWidth(message.getMessageId(), messageBubbleWidth);
-                        return true;
-                    }
-                });
+        if (message.getRepliedMessageId() != null) {
+            int viewWidth = HolloutPreferences.getViewWidth(message.getMessageId());
+            if (viewWidth != 0) {
+                checkAndRedrawSomeViews(viewWidth);
+            } else {
+                ViewTreeObserver viewTreeObserver = getViewTreeObserver();
+                if (viewTreeObserver.isAlive()) {
+                    viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                        @Override
+                        public boolean onPreDraw() {
+                            getViewTreeObserver().removeOnPreDrawListener(this);
+                            int messageBubbleWidth = messageBubbleLayout.getWidth();
+                            checkAndRedrawSomeViews(messageBubbleWidth);
+                            HolloutPreferences.saveViewWidth(message.getMessageId(), messageBubbleWidth);
+                            return true;
+                        }
+                    });
+                }
             }
         }
     }
@@ -739,6 +741,16 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                             activity.startActivity(mapIntent);
                         } else {
                             UiUtils.showSafeToast("Failed to find an application that can open this");
+                        }
+                    } else if (message.getMessageType() == MessageType.TXT) {
+                        ArrayList<String> includedLinks = UiUtils.pullLinks(message.getMessageBody());
+                        if (!includedLinks.isEmpty()) {
+                            String firstUrl = includedLinks.get(0);
+                            if (!firstUrl.startsWith("http://") && !firstUrl.startsWith("https://")) {
+                                firstUrl = "http://" + firstUrl;
+                            }
+                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(firstUrl));
+                            activity.startActivity(browserIntent);
                         }
                     }
                 }

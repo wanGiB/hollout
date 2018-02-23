@@ -907,7 +907,7 @@ public class UiUtils {
 
     //Pull all links from the body for easy retrieval
     @SuppressWarnings("unchecked")
-    public static ArrayList pullLinks(String text) {
+    public static ArrayList<String> pullLinks(String text) {
         ArrayList<String> links = new ArrayList<>();
         String regex = "\\(?\\b(http://|https://|www[.])[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
         Pattern p = Pattern.compile(regex);

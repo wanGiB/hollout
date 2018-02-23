@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.wan.hollout.ui.widgets.ChatMessageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -19,7 +18,8 @@
         android:layout_marginLeft="10dp"
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
-        android:background="@drawable/bubble_incoming">
+        android:background="@drawable/incoming_chat_bubble"
+        android:padding="4dp">
 
         <com.wan.hollout.ui.widgets.MessageReplyRecyclerItemView
             android:id="@+id/message_reply_recycler_item_view"
@@ -29,9 +29,9 @@
 
         <RelativeLayout
             android:id="@+id/content_view"
-            android:layout_below="@+id/message_reply_recycler_item_view"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/message_reply_recycler_item_view">
 
             <com.wan.hollout.ui.widgets.AudioView
                 android:id="@+id/audio_view"
@@ -55,10 +55,10 @@
         </RelativeLayout>
 
     </RelativeLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/message_container"
         android:layout_alignEnd="@+id/message_container"
         android:layout_alignRight="@+id/message_container"
         android:layout_below="@+id/message_container"

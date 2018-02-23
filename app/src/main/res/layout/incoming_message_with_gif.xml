@@ -53,7 +53,6 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/message_container"
         android:layout_alignEnd="@+id/message_container"
         android:layout_alignRight="@+id/message_container"
         android:layout_below="@+id/message_container"
