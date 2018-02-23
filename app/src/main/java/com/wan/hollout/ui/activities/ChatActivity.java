@@ -305,7 +305,7 @@ public class ChatActivity extends BaseActivity implements
 
         @Override
         public void onModelChanged(@NonNull final ChatMessage model, @NonNull final BaseModel.Action action) {
-            runOnUiThread(new Runnable() {
+            messagesRecyclerView.post(new Runnable() {
                 @Override
                 public void run() {
                     if (action == BaseModel.Action.INSERT || action == BaseModel.Action.SAVE) {
@@ -316,9 +316,9 @@ public class ChatActivity extends BaseActivity implements
                             } else {
                                 messagesRecyclerView.smoothScrollToPosition(0);
                             }
+                            clearAllUnreadMessagesFromRecipient();
                             prioritizeConversation();
                             refreshUnseenMessages();
-                            clearAllUnreadMessagesFromRecipient();
                             ChatClient.getInstance().markMessageAsRead(model);
                         }
                     } else if (action == BaseModel.Action.UPDATE) {
