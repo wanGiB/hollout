@@ -20,7 +20,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginStart="10dp"
         android:animateLayoutChanges="true"
-        android:background="@drawable/bubble_incoming"
+        android:background="@drawable/incoming_chat_bubble"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:orientation="vertical">
@@ -63,9 +63,8 @@
             android:id="@+id/textview_time"
             style="@style/chat_timings"
             android:layout_width="wrap_content"
+            android:layout_gravity="end"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="4dp"
-            android:layout_marginRight="4dp"
             app:textStyle="none" />
 
     </LinearLayout>

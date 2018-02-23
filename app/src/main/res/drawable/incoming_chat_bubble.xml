@@ -10,7 +10,7 @@
                 android:right="1.5dp"
                 android:top="1.5dp" />
 
-            <solid android:color="#dcdcdc" />
+            <solid android:color="#e6e6e6" />
 
             <corners
                 android:bottomRightRadius="5dp"
@@ -33,7 +33,7 @@
                 android:topLeftRadius="5dp"
                 android:topRightRadius="5dp" />
 
-            <solid android:color="#EDEDED" />
+            <solid android:color="#ffffff" />
 
         </shape>
 

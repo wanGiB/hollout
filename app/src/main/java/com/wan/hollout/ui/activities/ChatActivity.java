@@ -78,7 +78,6 @@ import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.rendering.StickyRecyclerHeadersDecoration;
 import com.wan.hollout.ui.adapters.MessagesAdapter;
 import com.wan.hollout.ui.adapters.PickedMediaFilesAdapter;
-import com.wan.hollout.ui.services.BatchMessageDeliveryStatusUpdater;
 import com.wan.hollout.ui.services.ContactService;
 import com.wan.hollout.ui.utils.FileUploader;
 import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
@@ -293,7 +292,6 @@ public class ChatActivity extends BaseActivity implements
 
     private static KeyframesDrawable imageDrawable;
     private static InputStream stream;
-    private List<ChatMessage> allUnreadMessages = new ArrayList<>();
     private String phoneNumberToCall;
 
     private ProgressDialog deleteConversationProgressDialog;
@@ -472,7 +470,7 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void fetchMessages() {
-        DbUtils.fetchMessagesInConversation(getRecipient(), new DoneCallback<List<ChatMessage>>() {
+        DbUtils.fetchMessagesInConversation(getCurrentActivityInstance(), getRecipient(), new DoneCallback<List<ChatMessage>>() {
             @Override
             public void done(final List<ChatMessage> result, final Exception e) {
                 runOnUiThread(new Runnable() {
@@ -488,7 +486,6 @@ public class ChatActivity extends BaseActivity implements
                                 sortMessages();
                                 notifyDataSetChanged();
                                 NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
-                                markMessagesAsRead();
                             }
                         }
                         tryOffloadLastMessage();
@@ -498,35 +495,6 @@ public class ChatActivity extends BaseActivity implements
             }
         });
         NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
-    }
-
-    private void markMessagesAsRead() {
-        final List<ChatMessage> unreadMessagesInThisConversation = new ArrayList<>();
-        HolloutUtils.deserializeMessages(AppConstants.ALL_UNREAD_MESSAGES, new DoneCallback<List<ChatMessage>>() {
-            @Override
-            public void done(List<ChatMessage> result, Exception e) {
-                if (e == null && result != null) {
-                    allUnreadMessages.clear();
-                    allUnreadMessages.addAll(result);
-                }
-                if (!messages.isEmpty() && !allUnreadMessages.isEmpty()) {
-                    for (ChatMessage message : messages) {
-                        if (allUnreadMessages.contains(message)) {
-                            if (!unreadMessagesInThisConversation.contains(message)) {
-                                unreadMessagesInThisConversation.add(message);
-                            }
-                            allUnreadMessages.remove(message);
-                        }
-                    }
-                }
-            }
-        });
-        HolloutUtils.serializeMessages(allUnreadMessages, AppConstants.ALL_UNREAD_MESSAGES);
-        if (!messages.isEmpty()) {
-            Intent batchMessageDeliveryUpdateIntent = new Intent(getCurrentActivityInstance(), BatchMessageDeliveryStatusUpdater.class);
-            batchMessageDeliveryUpdateIntent.putParcelableArrayListExtra(AppConstants.MESSAGES_FOR_BATCH_DELIVERY_UPDATE, messages);
-            startService(batchMessageDeliveryUpdateIntent);
-        }
     }
 
     private void sortMessages() {
@@ -589,7 +557,7 @@ public class ChatActivity extends BaseActivity implements
         if (messageSize > 1) {
             ChatMessage lastMessage = messages.get(messages.size() - 1);
             if (lastMessage != null) {
-                DbUtils.fetchMoreMessagesInConversation(getRecipient(), messages.size(), new DoneCallback<List<ChatMessage>>() {
+                DbUtils.fetchMoreMessagesInConversation(getCurrentActivityInstance(), getRecipient(), messages.size(), new DoneCallback<List<ChatMessage>>() {
                     @Override
                     public void done(final List<ChatMessage> moreMessages, final Exception e) {
                         runOnUiThread(new Runnable() {

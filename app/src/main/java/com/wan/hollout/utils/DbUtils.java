@@ -1,5 +1,7 @@
 package com.wan.hollout.utils;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 
@@ -22,6 +24,7 @@ import com.wan.hollout.models.HolloutEntity;
 import com.wan.hollout.models.HolloutEntity_Table;
 import com.wan.hollout.models.PathEntity;
 import com.wan.hollout.models.PathEntity_Table;
+import com.wan.hollout.ui.services.BatchMessageDeliveryStatusUpdater;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -175,7 +178,7 @@ public class DbUtils {
         return SQLite.select().from(ChatMessage.class).where(ChatMessage_Table.messageId.eq(messageId)).querySingle();
     }
 
-    public static void fetchMessagesInConversation(String conversationId, final DoneCallback<List<ChatMessage>> doneCallback) {
+    public static void fetchMessagesInConversation(final Activity activity, String conversationId, final DoneCallback<List<ChatMessage>> doneCallback) {
         SQLite.select()
                 .from(ChatMessage.class)
                 .where(ChatMessage_Table.conversationId.eq(conversationId))
@@ -184,11 +187,12 @@ public class DbUtils {
                     @Override
                     public void onListQueryResult(QueryTransaction transaction, @NonNull List<ChatMessage> tResult) {
                         doneCallback.done(tResult, null);
+                        batchReadMessages(new ArrayList<>(tResult), activity);
                     }
                 }).execute();
     }
 
-    public static void fetchMoreMessagesInConversation(String conversationId, int offset, final DoneCallback<List<ChatMessage>> doneCallback) {
+    public static void fetchMoreMessagesInConversation(final Activity activity, String conversationId, int offset, final DoneCallback<List<ChatMessage>> doneCallback) {
         try {
             SQLite.select()
                     .from(ChatMessage.class)
@@ -199,10 +203,30 @@ public class DbUtils {
                         @Override
                         public void onListQueryResult(QueryTransaction transaction, @NonNull List<ChatMessage> tResult) {
                             doneCallback.done(tResult, null);
+                            batchReadMessages(new ArrayList<>(tResult), activity);
                         }
                     }).execute();
         } catch (SQLiteException ignore) {
             doneCallback.done(new ArrayList<ChatMessage>(), null);
+        }
+    }
+
+    private static void batchReadMessages(@NonNull final ArrayList<ChatMessage> tResult, Activity activity) {
+        if (!tResult.isEmpty()) {
+            Intent batchMessageDeliveryUpdateIntent = new Intent(activity, BatchMessageDeliveryStatusUpdater.class);
+            batchMessageDeliveryUpdateIntent.putParcelableArrayListExtra(AppConstants.MESSAGES_FOR_BATCH_DELIVERY_UPDATE, tResult);
+            activity.startService(batchMessageDeliveryUpdateIntent);
+            final List<ChatMessage> readMessages = new ArrayList<>();
+            HolloutUtils.deserializeMessages(AppConstants.ALL_UNREAD_MESSAGES, new DoneCallback<List<ChatMessage>>() {
+                @Override
+                public void done(List<ChatMessage> result, Exception e) {
+                    if (e == null && result != null) {
+                        result.removeAll(tResult);
+                        readMessages.addAll(result);
+                    }
+                }
+            });
+            HolloutUtils.serializeMessages(readMessages, AppConstants.ALL_UNREAD_MESSAGES);
         }
     }
 

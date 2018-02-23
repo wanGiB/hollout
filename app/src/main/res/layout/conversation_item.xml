@@ -175,6 +175,8 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:scaleType="centerCrop"
                     android:src="@drawable/hdp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginRight="4dp"
                     android:visibility="gone"
                     tools:ignore="ContentDescription" />
 
