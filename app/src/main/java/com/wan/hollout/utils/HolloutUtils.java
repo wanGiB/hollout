@@ -33,12 +33,8 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.KryoException;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -61,12 +57,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.math.RoundingMode;
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -110,39 +101,6 @@ public class HolloutUtils {
         Kryo kryo = new Kryo();
         kryo.register(ChatMessage.class, new ChatMessageSerializer());
         return kryo;
-    }
-
-    public static synchronized void serializeMessages(List<ChatMessage> tObjects, String serializableName) {
-        Kryo kryo = getKryoInstance();
-        try {
-            FileOutputStream fileOutputStream = ApplicationLoader.getInstance().openFileOutput(serializableName, Context.MODE_PRIVATE);
-            Output messageOutPuts = new Output(fileOutputStream);
-            kryo.writeObject(messageOutPuts, tObjects);
-            messageOutPuts.close();
-        } catch (IOException | KryoException | BufferOverflowException e) {
-            e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
-        }
-
-    }
-
-    @SuppressWarnings("unchecked")
-    public static synchronized void deserializeMessages(String fileName, DoneCallback<List<ChatMessage>> doneCallback) {
-        Kryo kryo = getKryoInstance();
-        try {
-            Input input = new Input(ApplicationLoader.getInstance().openFileInput(fileName));
-            ArrayList<ChatMessage> previouslySerializedChats = kryo.readObject(input, ArrayList.class);
-            if (doneCallback != null) {
-                doneCallback.done(previouslySerializedChats, null);
-            }
-            input.close();
-        } catch (FileNotFoundException | KryoException | BufferUnderflowException e) {
-            if (doneCallback != null) {
-                doneCallback.done(null, null);
-            }
-            e.printStackTrace();
-            HolloutLogger.e(TAG, e.getMessage());
-        }
     }
 
     private static boolean isMainThread() {

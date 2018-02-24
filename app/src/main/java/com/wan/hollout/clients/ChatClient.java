@@ -13,7 +13,6 @@ import com.parse.ParseObject;
 import com.wan.hollout.enums.MessageDirection;
 import com.wan.hollout.enums.MessageStatus;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
-import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -26,7 +25,6 @@ import com.wan.hollout.utils.MessageNotifier;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,19 +94,12 @@ public class ChatClient {
                                         chatMessage.setConversationId(chatMessage.getFrom());
                                         chatMessage.setFromName(chatMessage.getFromName());
                                         DbUtils.createMessage(chatMessage);
+                                        markMessageAsDelivered(chatMessage, from, userId);
                                         HolloutPreferences.incrementUnreadMessagesFrom(chatMessage.getFrom());
                                         incrementTotalUnreadChats(chatMessage);
-                                        HolloutUtils.deserializeMessages(AppConstants.ALL_UNREAD_MESSAGES, new DoneCallback<List<ChatMessage>>() {
-                                            @Override
-                                            public void done(List<ChatMessage> result, Exception e) {
-                                                List<ChatMessage> unreadMessages = (result != null && !result.isEmpty()) ? result : new ArrayList<ChatMessage>();
-                                                unreadMessages.add(chatMessage);
-                                                HolloutUtils.serializeMessages(unreadMessages, AppConstants.ALL_UNREAD_MESSAGES);
-                                                HolloutPreferences.setTotalUnreadMessagesCount(unreadMessages.size());
-                                                MessageNotifier.getInstance().notifyOnUnreadMessages();
-                                                markMessageAsDelivered(chatMessage, from, userId);
-                                            }
-                                        });
+                                        List<ChatMessage> allUnreadMessages = DbUtils.fetchAllUnreadMessages();
+                                        HolloutPreferences.setTotalUnreadMessagesCount(allUnreadMessages.size());
+                                        MessageNotifier.getInstance().notifyOnUnreadMessages();
                                         EventBus.getDefault().post(new MessageReceivedEvent(chatMessage));
                                     }
                                 }
@@ -212,17 +203,6 @@ public class ChatClient {
                     deliveryStatusProps.put(AppConstants.DELIVERY_STATUS, AppConstants.READ);
                     FirebaseUtils.getMessageDeliveryStatus().child(message.getFrom()).child(message.getMessageId())
                             .setValue(deliveryStatusProps);
-                    HolloutUtils.deserializeMessages(AppConstants.ALL_UNREAD_MESSAGES, new DoneCallback<List<ChatMessage>>() {
-                        @Override
-                        public void done(List<ChatMessage> deSerializedMessages, Exception e) {
-                            if (e == null && deSerializedMessages != null && !deSerializedMessages.isEmpty()) {
-                                if (deSerializedMessages.contains(message)) {
-                                    deSerializedMessages.remove(message);
-                                    HolloutUtils.serializeMessages(deSerializedMessages, AppConstants.ALL_UNREAD_MESSAGES);
-                                }
-                            }
-                        }
-                    });
                 }
             }
         });

@@ -58,14 +58,13 @@ public class MessageNotifier {
     }
 
     public void notifyOnUnreadMessages() {
-        HolloutUtils.deserializeMessages(AppConstants.ALL_UNREAD_MESSAGES, new DoneCallback<List<ChatMessage>>() {
-            @Override
-            public void done(List<ChatMessage> result, Exception e) {
-                if (result != null && !result.isEmpty()) {
-                    onNewMsg(result);
-                }
-            }
-        });
+        List<ChatMessage> allUnreadMessages = DbUtils.fetchAllUnreadMessages();
+        if (!allUnreadMessages.isEmpty()) {
+            HolloutLogger.d("HolloutNotifTag", "Yope, Messages found with size of " + allUnreadMessages.size());
+            onNewMsg(allUnreadMessages);
+        } else {
+            HolloutLogger.d("HolloutNotifTag", "Sorry, no messages o");
+        }
     }
 
     private void onNewMsg(List<ChatMessage> chatMessages) {
@@ -75,6 +74,7 @@ public class MessageNotifier {
                 if (AppConstants.activeChatId != null && messageFrom.equals(AppConstants.activeChatId)) {
                     return;
                 }
+                HolloutLogger.d("HolloutNotifTag", "Active Chat is null ");
                 Intent userInfoIntent = new Intent(ApplicationLoader.getInstance(), FetchUserInfoService.class);
                 userInfoIntent.putExtra(AppConstants.EXTRA_USER_ID, chatMessages.get(0).getFrom());
                 userInfoIntent.putExtra(AppConstants.UNREAD_MESSAGE_ID, chatMessages.get(0).getMessageId());
@@ -86,6 +86,7 @@ public class MessageNotifier {
                     if (AppConstants.activeChatId != null && messageFrom.equals(AppConstants.activeChatId)) {
                         return;
                     }
+                    HolloutLogger.d("HolloutNotifTag", "Active Chat is null ");
                     Intent userInfoIntent = new Intent(ApplicationLoader.getInstance(), FetchUserInfoService.class);
                     userInfoIntent.putExtra(AppConstants.EXTRA_USER_ID, chatMessages.get(0).getFrom());
                     userInfoIntent.putParcelableArrayListExtra(AppConstants.UNREAD_MESSAGES_FROM_SAME_SENDER, new ArrayList<>(chatMessages));
@@ -127,7 +128,7 @@ public class MessageNotifier {
     private boolean fromSameSender(List<ChatMessage> messages) {
         List<String> senders = new ArrayList<>();
         for (ChatMessage emMessage : messages) {
-            if (emMessage!=null){
+            if (emMessage != null) {
                 String senderId = emMessage.getFrom();
                 if (!senders.contains(senderId.trim().toLowerCase())) {
                     senders.add(senderId.trim().toLowerCase());

@@ -178,6 +178,13 @@ public class DbUtils {
         return SQLite.select().from(ChatMessage.class).where(ChatMessage_Table.messageId.eq(messageId)).querySingle();
     }
 
+    public static List<ChatMessage> fetchAllUnreadMessages() {
+        return SQLite.select()
+                .from(ChatMessage.class)
+                .where(ChatMessage_Table.messageDirection.eq(MessageDirection.INCOMING))
+                .and(ChatMessage_Table.messageStatus.notEq(MessageStatus.READ)).queryList();
+    }
+
     public static void fetchMessagesInConversation(String conversationId, final DoneCallback<List<ChatMessage>> doneCallback) {
         SQLite.select()
                 .from(ChatMessage.class)

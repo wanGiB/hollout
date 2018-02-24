@@ -116,6 +116,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     MaterialSearchView materialSearchView;
 
     //=======Action Mode Shits=====//
+    @SuppressLint("StaticFieldLeak")
     public static View actionModeBar;
 
     @BindView(R.id.destroy_action_mode)

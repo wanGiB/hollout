@@ -43,7 +43,11 @@ public class FetchUserInfoService extends JobIntentService {
                     List<ChatMessage> unreadMessagesFromSameSender = intentExtras.getParcelableArrayList(AppConstants.UNREAD_MESSAGES_FROM_SAME_SENDER);
                     if (StringUtils.isNotEmpty(userIdToFetch)) {
                         fetchUserDetails(userIdToFetch, notificationType, chatMessage, unreadMessagesFromSameSender);
+                    } else {
+                        HolloutLogger.d("HolloutNotifTag", "Damn! the sender of the message was not found");
                     }
+                } else {
+                    HolloutLogger.d("HolloutNotifTag", "Damn! A message received is not yet in the database");
                 }
             }
         }
