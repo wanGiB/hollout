@@ -1,7 +1,5 @@
 package com.wan.hollout.utils;
 
-import android.app.Activity;
-import android.content.Intent;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 
@@ -15,16 +13,18 @@ import com.raizlabs.android.dbflow.structure.database.DatabaseWrapper;
 import com.raizlabs.android.dbflow.structure.database.transaction.ProcessModelTransaction;
 import com.raizlabs.android.dbflow.structure.database.transaction.QueryTransaction;
 import com.raizlabs.android.dbflow.structure.database.transaction.Transaction;
+import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.database.HolloutDb;
+import com.wan.hollout.enums.MessageDirection;
+import com.wan.hollout.enums.MessageStatus;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.CallLog;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ChatMessage_Table;
-import com.wan.hollout.models.HolloutEntity;
-import com.wan.hollout.models.HolloutEntity_Table;
+import com.wan.hollout.models.HolloutUserEntity;
+import com.wan.hollout.models.HolloutUserEntity_Table;
 import com.wan.hollout.models.PathEntity;
 import com.wan.hollout.models.PathEntity_Table;
-import com.wan.hollout.ui.services.BatchMessageDeliveryStatusUpdater;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -93,45 +93,45 @@ public class DbUtils {
     }
 
     private static void upsertEntity(String entityId, ParseObject parseObject) {
-        HolloutEntity holloutEntity = SQLite.select().from(HolloutEntity.class).where(HolloutEntity_Table.entityId.eq(entityId)).querySingle();
-        if (holloutEntity != null) {
+        HolloutUserEntity holloutUserEntity = SQLite.select().from(HolloutUserEntity.class).where(HolloutUserEntity_Table.entityId.eq(entityId)).querySingle();
+        if (holloutUserEntity != null) {
 
-            holloutEntity.entityName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+            holloutUserEntity.entityName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
 
-            holloutEntity.entityProfilePhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+            holloutUserEntity.entityProfilePhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
 
-            holloutEntity.entityCoverPhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+            holloutUserEntity.entityCoverPhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO);
 
-            holloutEntity.update();
+            holloutUserEntity.update();
 
         } else {
 
-            HolloutEntity newHolloutEntity = new HolloutEntity();
+            HolloutUserEntity newHolloutUserEntity = new HolloutUserEntity();
 
-            newHolloutEntity.entityId = parseObject.getString(parseObject.getString(AppConstants.REAL_OBJECT_ID));
+            newHolloutUserEntity.entityId = parseObject.getString(parseObject.getString(AppConstants.REAL_OBJECT_ID));
 
-            newHolloutEntity.entityName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+            newHolloutUserEntity.entityName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
 
-            newHolloutEntity.entityProfilePhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+            newHolloutUserEntity.entityProfilePhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
 
-            newHolloutEntity.entityCoverPhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+            newHolloutUserEntity.entityCoverPhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO);
 
-            newHolloutEntity.save();
+            newHolloutUserEntity.save();
 
         }
 
     }
 
     public static String getEntityName(String entityId) {
-        HolloutEntity holloutEntity = SQLite.select().from(HolloutEntity.class).where(HolloutEntity_Table.entityId.eq(entityId)).querySingle();
-        if (holloutEntity != null) {
-            return holloutEntity.getEntityName();
+        HolloutUserEntity holloutUserEntity = SQLite.select().from(HolloutUserEntity.class).where(HolloutUserEntity_Table.entityId.eq(entityId)).querySingle();
+        if (holloutUserEntity != null) {
+            return holloutUserEntity.getEntityName();
         }
         return null;
     }
@@ -178,7 +178,7 @@ public class DbUtils {
         return SQLite.select().from(ChatMessage.class).where(ChatMessage_Table.messageId.eq(messageId)).querySingle();
     }
 
-    public static void fetchMessagesInConversation(final Activity activity, String conversationId, final DoneCallback<List<ChatMessage>> doneCallback) {
+    public static void fetchMessagesInConversation(String conversationId, final DoneCallback<List<ChatMessage>> doneCallback) {
         SQLite.select()
                 .from(ChatMessage.class)
                 .where(ChatMessage_Table.conversationId.eq(conversationId))
@@ -187,12 +187,12 @@ public class DbUtils {
                     @Override
                     public void onListQueryResult(QueryTransaction transaction, @NonNull List<ChatMessage> tResult) {
                         doneCallback.done(tResult, null);
-                        batchReadMessages(new ArrayList<>(tResult), activity);
+                        extractUnreadMessages(tResult);
                     }
                 }).execute();
     }
 
-    public static void fetchMoreMessagesInConversation(final Activity activity, String conversationId, int offset, final DoneCallback<List<ChatMessage>> doneCallback) {
+    public static void fetchMoreMessagesInConversation(String conversationId, int offset, final DoneCallback<List<ChatMessage>> doneCallback) {
         try {
             SQLite.select()
                     .from(ChatMessage.class)
@@ -203,7 +203,7 @@ public class DbUtils {
                         @Override
                         public void onListQueryResult(QueryTransaction transaction, @NonNull List<ChatMessage> tResult) {
                             doneCallback.done(tResult, null);
-                            batchReadMessages(new ArrayList<>(tResult), activity);
+                            extractUnreadMessages(tResult);
                         }
                     }).execute();
         } catch (SQLiteException ignore) {
@@ -211,22 +211,44 @@ public class DbUtils {
         }
     }
 
-    private static void batchReadMessages(@NonNull final ArrayList<ChatMessage> tResult, Activity activity) {
+    private static void extractUnreadMessages(@NonNull List<ChatMessage> tResult) {
+        List<ChatMessage> unreadMessagesList = new ArrayList<>();
         if (!tResult.isEmpty()) {
-            Intent batchMessageDeliveryUpdateIntent = new Intent(activity, BatchMessageDeliveryStatusUpdater.class);
-            batchMessageDeliveryUpdateIntent.putParcelableArrayListExtra(AppConstants.MESSAGES_FOR_BATCH_DELIVERY_UPDATE, tResult);
-            activity.startService(batchMessageDeliveryUpdateIntent);
-            final List<ChatMessage> readMessages = new ArrayList<>();
-            HolloutUtils.deserializeMessages(AppConstants.ALL_UNREAD_MESSAGES, new DoneCallback<List<ChatMessage>>() {
-                @Override
-                public void done(List<ChatMessage> result, Exception e) {
-                    if (e == null && result != null) {
-                        result.removeAll(tResult);
-                        readMessages.addAll(result);
+            for (ChatMessage chatMessage : tResult) {
+                if (chatMessage.getMessageDirection() == MessageDirection.INCOMING && chatMessage.getMessageStatus() != MessageStatus.READ) {
+                    if (!unreadMessagesList.contains(chatMessage)) {
+                        unreadMessagesList.add(chatMessage);
                     }
                 }
-            });
-            HolloutUtils.serializeMessages(readMessages, AppConstants.ALL_UNREAD_MESSAGES);
+            }
+        }
+        if (!unreadMessagesList.isEmpty()) {
+            checkAndMarkMessagesAsRead(unreadMessagesList);
+        }
+    }
+
+    private static void checkAndMarkMessagesAsRead(List<ChatMessage> targetMessages) {
+        if (!targetMessages.isEmpty()) {
+            ProcessModelTransaction<ChatMessage> processModelTransaction =
+                    new ProcessModelTransaction.Builder<>(new ProcessModelTransaction.ProcessModel<ChatMessage>() {
+                        @Override
+                        public void processModel(final ChatMessage message, DatabaseWrapper wrapper) {
+                            if (message.getMessageDirection() == MessageDirection.INCOMING && message.getMessageStatus() != MessageStatus.READ) {
+                                message.setMessageStatus(MessageStatus.READ);
+                                FlowManager.getModelAdapter(ChatMessage.class).update(message);
+                            }
+                        }
+                    }).processListener(new ProcessModelTransaction.OnModelProcessListener<ChatMessage>() {
+                        @Override
+                        public void onModelProcessed(long current, long total, ChatMessage modifiedModel) {
+                            ChatClient.getInstance().markMessageAsRead(modifiedModel);
+                        }
+                    }).addAll(targetMessages).build();
+            Transaction transaction = FlowManager
+                    .getDatabase(HolloutDb.class)
+                    .beginTransactionAsync(processModelTransaction)
+                    .build();
+            transaction.execute();
         }
     }
 
@@ -234,7 +256,7 @@ public class DbUtils {
         return SQLite.select().from(ChatMessage.class).where(ChatMessage_Table.conversationId.eq(conversationId)).orderBy(ChatMessage_Table.timeStamp, false).querySingle();
     }
 
-    public static void batchDelete(String conversationId, final DoneCallback<Long[]> operationDoneCallback) {
+    public static void deleteConversation(String conversationId, final DoneCallback<Long[]> operationDoneCallback) {
         SQLite.select().from(ChatMessage.class)
                 .where(ChatMessage_Table.conversationId.eq(conversationId))
                 .async()
@@ -242,7 +264,7 @@ public class DbUtils {
                     @Override
                     public void onListQueryResult(QueryTransaction transaction, @NonNull List<ChatMessage> tResult) {
                         if (!tResult.isEmpty()) {
-                            performBatchDelete(tResult, operationDoneCallback);
+                            performConversationDeletion(tResult, operationDoneCallback);
                         } else {
                             operationDoneCallback.done(new Long[]{-1L, 0L}, null);
                         }
@@ -250,12 +272,12 @@ public class DbUtils {
                 }).execute();
     }
 
-    private static void performBatchDelete(List<ChatMessage> messagesInConversation, final DoneCallback<Long[]> progressCallback) {
+    private static void performConversationDeletion(List<ChatMessage> messagesInConversation, final DoneCallback<Long[]> progressCallback) {
         ProcessModelTransaction<ChatMessage> processModelTransaction =
                 new ProcessModelTransaction.Builder<>(new ProcessModelTransaction.ProcessModel<ChatMessage>() {
                     @Override
-                    public void processModel(ChatMessage word, DatabaseWrapper wrapper) {
-                        FlowManager.getModelAdapter(ChatMessage.class).delete(word);
+                    public void processModel(ChatMessage message, DatabaseWrapper wrapper) {
+                        FlowManager.getModelAdapter(ChatMessage.class).delete(message);
                     }
                 }).processListener(new ProcessModelTransaction.OnModelProcessListener<ChatMessage>() {
                     @Override

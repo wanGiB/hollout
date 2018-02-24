@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.parse.ParseObject;
@@ -44,6 +45,8 @@ public class ChatClient {
     private ExecutorService executor = null;
     private static ChatClient instance;
 
+    private ValueEventListener messageDeliveryStatusValueEventListener, inBoundMessagesValueEventListener;
+
     public static ChatClient getInstance() {
         if (instance == null) {
             instance = new ChatClient();
@@ -68,13 +71,19 @@ public class ChatClient {
     }
 
     private void listenForInBoundPrivateMessages(final String userId) {
-        FirebaseUtils
+        DatabaseReference inBoundMessagesDatabaseReference = FirebaseUtils
                 .getUsersReference()
                 .child(userId)
-                .child(AppConstants.MESSAGES)
-                .addValueEventListener(new ValueEventListener() {
+                .child(AppConstants.MESSAGES);
+        if (inBoundMessagesValueEventListener != null) {
+            inBoundMessagesDatabaseReference.removeEventListener(inBoundMessagesValueEventListener);
+        }
+        inBoundMessagesValueEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                execute(new Runnable() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
+                    public void run() {
                         if (dataSnapshot != null) {
                             if (dataSnapshot.exists()) {
                                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -106,13 +115,68 @@ public class ChatClient {
                             }
                         }
                     }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-
                 });
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        inBoundMessagesDatabaseReference.addValueEventListener(inBoundMessagesValueEventListener);
+    }
+
+    private void listenForMessageDeliveryStatus(final String signedInUserId) {
+        DatabaseReference messageDeliveryStatusDatabaseReference = FirebaseUtils.getMessageDeliveryStatus().child(signedInUserId);
+        if (messageDeliveryStatusValueEventListener != null) {
+            messageDeliveryStatusDatabaseReference.removeEventListener(messageDeliveryStatusValueEventListener);
+        }
+        messageDeliveryStatusValueEventListener = new ValueEventListener() {
+
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (dataSnapshot != null && dataSnapshot.exists()) {
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                GenericTypeIndicator<Map<String, Object>> genericTypeIndicator = new GenericTypeIndicator<Map<String, Object>>() {
+                                };
+                                Map<String, Object> deliveryStatusMap = snapshot.getValue(genericTypeIndicator);
+                                if (deliveryStatusMap != null) {
+                                    HolloutLogger.d("ReceivedMsgProps", "Props aren't null with value = " + deliveryStatusMap.toString());
+                                    String deliveryStatus = (String) deliveryStatusMap.get(AppConstants.DELIVERY_STATUS);
+                                    if (deliveryStatus != null) {
+                                        ChatMessage message = DbUtils.getMessage(snapshot.getKey());
+                                        if (message != null) {
+                                            if (deliveryStatus.equals(AppConstants.DELIVERED)) {
+                                                message.setMessageStatus(MessageStatus.DELIVERED);
+                                            } else if (deliveryStatus.equals(AppConstants.READ)) {
+                                                message.setMessageStatus(MessageStatus.READ);
+                                                FirebaseUtils.getMessageDeliveryStatus().child(signedInUserId).child(snapshot.getKey()).removeValue();
+                                            }
+                                            DbUtils.updateMessage(message);
+                                        } else {
+                                            FirebaseUtils.getMessageDeliveryStatus().child(signedInUserId).child(snapshot.getKey()).removeValue();
+                                        }
+                                    }
+                                } else {
+                                    HolloutLogger.d("ReceivedMsgProps", "Props are null");
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+
+        };
+        messageDeliveryStatusDatabaseReference.addValueEventListener(messageDeliveryStatusValueEventListener);
     }
 
     private void incrementTotalUnreadChats(ChatMessage chatMessage) {
@@ -123,65 +187,45 @@ public class ChatClient {
         HolloutPreferences.saveTotalUnreadChats(totalUnreadChats);
     }
 
-    private void markMessageAsDelivered(final ChatMessage chatMessage, String from, final String userId) {
-        HashMap<String, Object> deliveryStatusProps = new HashMap<>();
-        deliveryStatusProps.put(AppConstants.DELIVERY_STATUS, AppConstants.DELIVERED);
-        FirebaseUtils.getMessageDeliveryStatus().child(from).child(chatMessage.getMessageId()).setValue(deliveryStatusProps).addOnSuccessListener(new OnSuccessListener<Void>() {
+    private void markMessageAsDelivered(final ChatMessage chatMessage, final String from, final String userId) {
+        execute(new Runnable() {
             @Override
-            public void onSuccess(Void aVoid) {
-                FirebaseUtils.getUsersReference().child(userId).child(AppConstants.MESSAGES).child(chatMessage.getMessageId()).removeValue();
+            public void run() {
+                HashMap<String, Object> deliveryStatusProps = new HashMap<>();
+                deliveryStatusProps.put(AppConstants.DELIVERY_STATUS, AppConstants.DELIVERED);
+                FirebaseUtils.getMessageDeliveryStatus().child(from).child(chatMessage.getMessageId()).setValue(deliveryStatusProps).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        FirebaseUtils.getUsersReference().child(userId).child(AppConstants.MESSAGES).child(chatMessage.getMessageId()).removeValue();
+                    }
+                });
             }
         });
     }
 
     public void markMessageAsRead(final ChatMessage message) {
-        if (message.getMessageStatus() != MessageStatus.READ && message.getMessageDirection() == MessageDirection.INCOMING) {
-            final HashMap<String, Object> deliveryStatusProps = new HashMap<>();
-            deliveryStatusProps.put(AppConstants.DELIVERY_STATUS, AppConstants.READ);
-            FirebaseUtils.getMessageDeliveryStatus().child(message.getFrom()).child(message.getMessageId())
-                    .setValue(deliveryStatusProps);
-        }
-    }
-
-    private void listenForMessageDeliveryStatus(final String signedInUserId) {
-        FirebaseUtils.getMessageDeliveryStatus().child(signedInUserId).addValueEventListener(new ValueEventListener() {
-
+        execute(new Runnable() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null && dataSnapshot.exists()) {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        GenericTypeIndicator<Map<String, Object>> genericTypeIndicator = new GenericTypeIndicator<Map<String, Object>>() {
-                        };
-                        Map<String, Object> deliveryStatusMap = snapshot.getValue(genericTypeIndicator);
-                        if (deliveryStatusMap != null) {
-                            HolloutLogger.d("ReceivedMsgProps", "Props aren't null with value = " + deliveryStatusMap.toString());
-                            String deliveryStatus = (String) deliveryStatusMap.get(AppConstants.DELIVERY_STATUS);
-                            if (deliveryStatus != null) {
-                                ChatMessage message = DbUtils.getMessage(snapshot.getKey());
-                                if (message != null) {
-                                    if (deliveryStatus.equals(AppConstants.DELIVERED)) {
-                                        message.setMessageStatus(MessageStatus.DELIVERED);
-                                    } else if (deliveryStatus.equals(AppConstants.READ)) {
-                                        message.setMessageStatus(MessageStatus.READ);
-                                        FirebaseUtils.getMessageDeliveryStatus().child(signedInUserId).child(snapshot.getKey()).removeValue();
-                                    }
-                                    DbUtils.updateMessage(message);
+            public void run() {
+                if (message.getMessageDirection() == MessageDirection.INCOMING && message.getMessageStatus() == MessageStatus.READ) {
+                    final HashMap<String, Object> deliveryStatusProps = new HashMap<>();
+                    deliveryStatusProps.put(AppConstants.DELIVERY_STATUS, AppConstants.READ);
+                    FirebaseUtils.getMessageDeliveryStatus().child(message.getFrom()).child(message.getMessageId())
+                            .setValue(deliveryStatusProps);
+                    HolloutUtils.deserializeMessages(AppConstants.ALL_UNREAD_MESSAGES, new DoneCallback<List<ChatMessage>>() {
+                        @Override
+                        public void done(List<ChatMessage> deSerializedMessages, Exception e) {
+                            if (e == null && deSerializedMessages != null && !deSerializedMessages.isEmpty()) {
+                                if (deSerializedMessages.contains(message)) {
+                                    deSerializedMessages.remove(message);
+                                    HolloutUtils.serializeMessages(deSerializedMessages, AppConstants.ALL_UNREAD_MESSAGES);
                                 }
                             }
-                        } else {
-                            HolloutLogger.d("ReceivedMsgProps", "Props are null");
                         }
-                    }
+                    });
                 }
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-
         });
-
     }
 
     public void sendMessage(final ChatMessage chatMessage) {
@@ -194,16 +238,28 @@ public class ChatClient {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        //Message Sent
-                        chatMessage.setMessageStatus(MessageStatus.SENT);
-                        DbUtils.updateMessage(chatMessage);
+                        execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                //Message Sent
+                                chatMessage.setMessageStatus(MessageStatus.SENT);
+                                DbUtils.updateMessage(chatMessage);
+                            }
+                        });
+
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                //Error sending message
-                chatMessage.setMessageStatus(MessageStatus.FAILED);
-                DbUtils.updateMessage(chatMessage);
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Error sending message
+                        chatMessage.setMessageStatus(MessageStatus.FAILED);
+                        DbUtils.updateMessage(chatMessage);
+                    }
+                });
+
             }
         });
     }

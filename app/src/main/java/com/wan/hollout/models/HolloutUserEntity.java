@@ -10,7 +10,7 @@ import com.wan.hollout.database.HolloutDb;
  * @author Wan Clem
  */
 @Table(database = HolloutDb.class)
-public class HolloutEntity extends BaseModel {
+public class HolloutUserEntity extends BaseModel {
 
     @PrimaryKey
     @Column

@@ -319,7 +319,11 @@ public class ChatActivity extends BaseActivity implements
                             clearAllUnreadMessagesFromRecipient();
                             prioritizeConversation();
                             refreshUnseenMessages();
-                            ChatClient.getInstance().markMessageAsRead(model);
+                            if (model.getMessageDirection() == MessageDirection.INCOMING && model.getMessageStatus() != MessageStatus.READ) {
+                                model.setMessageStatus(MessageStatus.READ);
+                                DbUtils.updateMessage(model);
+                                ChatClient.getInstance().markMessageAsRead(model);
+                            }
                         }
                     } else if (action == BaseModel.Action.UPDATE) {
                         int indexOfMessage = messages.indexOf(model);
@@ -470,7 +474,7 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void fetchMessages() {
-        DbUtils.fetchMessagesInConversation(getCurrentActivityInstance(), getRecipient(), new DoneCallback<List<ChatMessage>>() {
+        DbUtils.fetchMessagesInConversation(getRecipient(), new DoneCallback<List<ChatMessage>>() {
             @Override
             public void done(final List<ChatMessage> result, final Exception e) {
                 runOnUiThread(new Runnable() {
@@ -524,7 +528,7 @@ public class ChatActivity extends BaseActivity implements
             @Override
             public void onScrolledUp() {
                 super.onScrolledUp();
-                if (!messages.isEmpty() && messages.size() >= 20) {
+                if (!messages.isEmpty()) {
                     onScrolledUp = true;
                 }
             }
@@ -557,7 +561,7 @@ public class ChatActivity extends BaseActivity implements
         if (messageSize > 1) {
             ChatMessage lastMessage = messages.get(messages.size() - 1);
             if (lastMessage != null) {
-                DbUtils.fetchMoreMessagesInConversation(getCurrentActivityInstance(), getRecipient(), messages.size(), new DoneCallback<List<ChatMessage>>() {
+                DbUtils.fetchMoreMessagesInConversation(getRecipient(), messages.size(), new DoneCallback<List<ChatMessage>>() {
                     @Override
                     public void done(final List<ChatMessage> moreMessages, final Exception e) {
                         runOnUiThread(new Runnable() {
@@ -1234,7 +1238,7 @@ public class ChatActivity extends BaseActivity implements
                         dialog.dismiss();
                         deleteConversationProgressDialog.show();
                         deleteConversationProgressDialog.setTitle("Deleting Conversation");
-                        DbUtils.batchDelete(getRecipient(), new DoneCallback<Long[]>() {
+                        DbUtils.deleteConversation(getRecipient(), new DoneCallback<Long[]>() {
                             @Override
                             public void done(Long[] progressValues, Exception e) {
                                 long current = progressValues[0];

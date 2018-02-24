@@ -5,6 +5,7 @@ import com.raizlabs.android.dbflow.annotation.Migration;
 import com.raizlabs.android.dbflow.sql.SQLiteType;
 import com.raizlabs.android.dbflow.sql.migration.AlterTableMigration;
 import com.wan.hollout.models.ChatMessage;
+import com.wan.hollout.models.HolloutUserEntity;
 
 /**
  * @author Wan Clem
@@ -29,6 +30,21 @@ public class HolloutDb {
             addColumn(SQLiteType.INTEGER, "fileUploadProgress");
             addColumn(SQLiteType.INTEGER, "fileMimeType");
             addColumn(SQLiteType.INTEGER, "readSoundBanged");
+        }
+
+    }
+
+    @Migration(version = HolloutDb.VERSION, database = HolloutDb.class)
+    public static class HolloutEntityMigration extends AlterTableMigration<HolloutUserEntity> {
+
+        public HolloutEntityMigration(Class<HolloutUserEntity> table) {
+            super(table);
+        }
+
+        @Override
+        public void onPreMigrate() {
+            super.onPreMigrate();
+            renameFrom("HolloutEntity");
         }
 
     }

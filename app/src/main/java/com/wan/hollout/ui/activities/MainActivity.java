@@ -252,7 +252,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                     deleteConversationProgressDialog.show();
                                     deleteConversationProgressDialog.setTitle("Deleting Conversation" + (AppConstants.selectedPeople.size() > 1 ? (AppConstants.selectedPeople.size()) : ""));
                                     String recipientId = conversationItem.getRecipient().getString(AppConstants.REAL_OBJECT_ID);
-                                    DbUtils.batchDelete(recipientId, new DoneCallback<Long[]>() {
+                                    DbUtils.deleteConversation(recipientId, new DoneCallback<Long[]>() {
                                         @Override
                                         public void done(Long[] progressValues, Exception e) {
                                             long current = progressValues[0];
@@ -365,7 +365,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     private void setupNavigationDrawer(Bundle savedInstanceState, ParseObject signedInUser) {
         String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-
         currentProfile = new ProfileDrawerItem()
                 .withName(StringUtils.isNotEmpty(userDisplayName) ? WordUtils.capitalize(userDisplayName) : "Hollout User")
                 .withIcon(R.drawable.empty_profile)
@@ -914,6 +913,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 EventBus.getDefault().postSticky(AppConstants.REFRESH_PEOPLE);
             }
         } else {
+            //Todo: Look in here later on
             getSupportFragmentManager().findFragmentById(R.id.fragment_container).onActivityResult(requestCode, resultCode, data);
         }
     }
