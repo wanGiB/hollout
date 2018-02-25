@@ -12,10 +12,19 @@ import android.util.Log;
 import android.util.Pair;
 import android.widget.Toast;
 
+import com.tonyodev.fetch2.Download;
+import com.tonyodev.fetch2.Error;
+import com.tonyodev.fetch2.Fetch;
+import com.tonyodev.fetch2.Func;
+import com.tonyodev.fetch2.NetworkType;
+import com.tonyodev.fetch2.Priority;
+import com.tonyodev.fetch2.Request;
 import com.wan.hollout.R;
+import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.utils.Optional;
 import com.wan.hollout.utils.UiUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
@@ -59,7 +68,7 @@ public class AudioSlidePlayer {
         this.progressEventHandler = new ProgressEventHandler(this);
     }
 
-    public void play(final double progress, Uri audioUri) throws IOException {
+    public void play(final String localFilePath, final String remoteFilePath, final double progress, Uri audioUri) throws IOException {
         if (this.mediaPlayer != null) return;
 
         this.mediaPlayer = new MediaPlayer();
@@ -92,6 +101,26 @@ public class AudioSlidePlayer {
                 }
                 notifyOnStop();
                 progressEventHandler.removeMessages(0);
+                if (remoteFilePath != null && localFilePath != null) {
+                    File localFile = new File(localFilePath);
+                    if (!localFile.exists()) {
+                        Request request = new Request(remoteFilePath, localFilePath);
+                        request.setPriority(Priority.HIGH);
+                        request.setNetworkType(NetworkType.ALL);
+                        Fetch fetch = ApplicationLoader.getInstance().getMainFetch();
+                        fetch.enqueue(request, new Func<Download>() {
+                            @Override
+                            public void call(Download download) {
+
+                            }
+                        }, new Func<Error>() {
+                            @Override
+                            public void call(Error error) {
+
+                            }
+                        });
+                    }
+                }
             }
         });
 

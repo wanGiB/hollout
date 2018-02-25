@@ -102,7 +102,7 @@ import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.HolloutVCFParser;
 import com.wan.hollout.utils.LocationUtils;
-import com.wan.hollout.utils.NotificationUtils;
+import com.wan.hollout.utils.GeneralNotifier;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.SafeLayoutManager;
@@ -489,7 +489,7 @@ public class ChatActivity extends BaseActivity implements
                                 }
                                 sortMessages();
                                 notifyDataSetChanged();
-                                NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
+                                GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
                             }
                         }
                         tryOffloadLastMessage();
@@ -498,7 +498,7 @@ public class ChatActivity extends BaseActivity implements
                 });
             }
         });
-        NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
+        GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
     }
 
     private void sortMessages() {

@@ -75,13 +75,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <!-- SDK service -->
-        <service
-            android:name=".ui.services.FetchUserInfoService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <!-- SDK receiver -->
-
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"

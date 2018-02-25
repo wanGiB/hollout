@@ -74,7 +74,7 @@ import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
-import com.wan.hollout.utils.NotificationUtils;
+import com.wan.hollout.utils.GeneralNotifier;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
@@ -177,8 +177,9 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         }
         checkAndRegEventBus();
         attachEventHandlers();
-        NotificationUtils.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
-        NotificationUtils.getNotificationManager().cancel(AppConstants.NEARBY_KIND_NOTIFICATION_ID);
+        GeneralNotifier.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
+        GeneralNotifier.getNotificationManager().cancel(AppConstants.NEARBY_KIND_NOTIFICATION_ID);
+        GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
         initEventHandlers();
         createDeleteConversationProgressDialog();
     }

@@ -9,7 +9,6 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.text.Spanned;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -20,6 +19,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.wan.hollout.R;
+
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -53,6 +53,9 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
     @Nullable
     private String audioSlide;
 
+    private String remoteFilePath;
+    private String localFilePath;
+
     private Context context;
 
     public AudioView(Context context) {
@@ -63,7 +66,7 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
         this(context, attrs, 0);
     }
 
-    private void initContext(Context context){
+    private void initContext(Context context) {
         this.context = context;
     }
 
@@ -111,7 +114,7 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
     public void cleanup() {
         if (this.audioSlidePlayer != null && pauseButton.getVisibility() == View.VISIBLE) {
             this.audioSlidePlayer.stop();
-            this.playButton.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.play_icon));
+            this.playButton.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.play_icon));
         }
     }
 
@@ -207,6 +210,11 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
         }
     }
 
+    public void checkAndDownload(String localUrl, String remoteUrl) {
+        this.localFilePath = localUrl;
+        this.remoteFilePath = remoteUrl;
+    }
+
     private class PlayClickedListener implements OnClickListener {
         @TargetApi(Build.VERSION_CODES.LOLLIPOP)
         @Override
@@ -216,7 +224,7 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
                 if (audioSlidePlayer != null) {
                     togglePlayToPause();
                     if (audioSlide != null) {
-                        audioSlidePlayer.play(getProgress(), Uri.parse(audioSlide));
+                        audioSlidePlayer.play(localFilePath,remoteFilePath,getProgress(), Uri.parse(audioSlide));
                     }
                 }
             } catch (IOException e) {
@@ -255,7 +263,7 @@ public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener 
             try {
                 if (audioSlidePlayer != null && pauseButton.getVisibility() == View.VISIBLE) {
                     if (audioSlide != null) {
-                        audioSlidePlayer.play(getProgress(), Uri.parse(audioSlide));
+                        audioSlidePlayer.play(localFilePath,remoteFilePath,getProgress(), Uri.parse(audioSlide));
                     }
                 }
             } catch (IOException e) {

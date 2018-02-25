@@ -361,6 +361,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         } else {
             audioView.setAudio(message.getRemoteUrl(), StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)) : fileCaption, voiceContentDuration);
         }
+        audioView.checkAndDownload(message.getLocalUrl(), message.getRemoteUrl());
     }
 
     @SuppressLint("SetTextI18n")

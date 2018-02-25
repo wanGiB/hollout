@@ -182,7 +182,7 @@ public class DbUtils {
         return SQLite.select()
                 .from(ChatMessage.class)
                 .where(ChatMessage_Table.messageDirection.eq(MessageDirection.INCOMING))
-                .and(ChatMessage_Table.messageStatus.notEq(MessageStatus.READ)).queryList();
+                .and(ChatMessage_Table.messageStatus.notEq(MessageStatus.READ)).orderBy(ChatMessage_Table.timeStamp, false).queryList();
     }
 
     public static void fetchMessagesInConversation(String conversationId, final DoneCallback<List<ChatMessage>> doneCallback) {

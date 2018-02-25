@@ -39,9 +39,9 @@ import static android.content.Context.NOTIFICATION_SERVICE;
  */
 
 @SuppressWarnings({"ConstantConditions", "deprecation"})
-public class NotificationUtils {
+public class GeneralNotifier {
 
-    public static final String TAG = NotificationUtils.class.getSimpleName();
+    public static final String TAG = GeneralNotifier.class.getSimpleName();
 
     @SuppressLint("StaticFieldLeak")
     private static Context context = ApplicationLoader.getInstance();
@@ -66,6 +66,7 @@ public class NotificationUtils {
                 String requesterPhoto = requester.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+                NotificationHelper notificationHelper = new NotificationHelper(ApplicationLoader.getInstance().getApplicationContext(), requester.getString(AppConstants.REAL_OBJECT_ID), senderName);
                 builder.setContentTitle(context.getString(R.string.app_name));
                 Spanned message = UiUtils.fromHtml("<b>" + senderName + "</b> wants to chat with you");
                 builder.setContentText(message);
@@ -88,7 +89,7 @@ public class NotificationUtils {
                 }
                 notification.defaults |= Notification.DEFAULT_SOUND;
                 if (pendingIntent != null) {
-                    getNotificationManager().notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
+                    notificationHelper.notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
                     AppConstants.UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = AppConstants.UNACKNOWLEDGED_CHAT_REQUESTS_COUNT + 1;
                 }
 
@@ -119,6 +120,7 @@ public class NotificationUtils {
                             userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, requester);
                             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                             NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+                            NotificationHelper notificationHelper = new NotificationHelper(ApplicationLoader.getInstance().getApplicationContext(), requester.getString(AppConstants.REAL_OBJECT_ID), senderName);
                             builder.setContentTitle(context.getString(R.string.app_name));
                             builder.setContentText(message);
                             builder.setTicker(message);
@@ -141,7 +143,7 @@ public class NotificationUtils {
                             }
                             notification.defaults |= Notification.DEFAULT_SOUND;
                             if (pendingIntent != null) {
-                                getNotificationManager().notify(AppConstants.NEARBY_KIND_NOTIFICATION_ID, notification);
+                                notificationHelper.notify(AppConstants.NEARBY_KIND_NOTIFICATION_ID, notification);
                                 AppConstants.NEARBY_KIND_NOTIFICATION_COUNT = AppConstants.NEARBY_KIND_NOTIFICATION_COUNT + 1;
                             }
                         }
