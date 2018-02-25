@@ -20,10 +20,9 @@ import com.google.android.gms.location.LocationServices;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.SaveCallback;
+import com.wan.hollout.api.JsonApiClient;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.utils.AppConstants;
@@ -32,7 +31,6 @@ import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
-import com.wan.hollout.utils.NotificationCenter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
@@ -242,23 +240,8 @@ public class AppInstanceDetectionService extends JobIntentService implements
                 @Override
                 public void done(Boolean result, Exception e) {
                     if (e == null) {
-                        ParseInstallation parseInstallation = ParseInstallation.getCurrentInstallation();
-                        if (parseInstallation != null) {
-                            try {
-                                ParseGeoPoint parseGeoPoint = AuthUtil.getCurrentUser().getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
-                                if (parseGeoPoint != null) {
-                                    parseInstallation.put(AppConstants.APP_USER_GEO_POINT, parseGeoPoint);
-                                }
-                                parseInstallation.saveInBackground(new SaveCallback() {
-                                    @Override
-                                    public void done(ParseException e) {
-                                        if (sendPushNotification) {
-                                            sendAmNearbyPushNotification();
-                                        }
-                                    }
-                                });
-                            } catch (NullPointerException ignored) {
-                            }
+                        if (sendPushNotification) {
+                            sendAmNearbyPushNotification();
                         }
                     }
                 }
@@ -292,22 +275,12 @@ public class AppInstanceDetectionService extends JobIntentService implements
                 @Override
                 public void done(List<ParseObject> parseUsers, ParseException e) {
                     if (e == null && parseUsers != null && !parseUsers.isEmpty()) {
-                        List<String> appUserIds = new ArrayList<>();
-                        for (ParseObject parseUser : parseUsers) {
-                            String appUserId = parseUser.getString(AppConstants.REAL_OBJECT_ID);
-                            appUserIds.add(appUserId);
-                        }
-                        if (!appUserIds.isEmpty()) {
-                            final ParseQuery<ParseInstallation> parseInstallationParseQuery = ParseInstallation.getQuery();
-                            parseInstallationParseQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, appUserIds);
-                            parseInstallationParseQuery.findInBackground(new FindCallback<ParseInstallation>() {
-                                @Override
-                                public void done(List<ParseInstallation> objects, ParseException e) {
-                                    if (e == null && objects != null) {
-                                        NotificationCenter.sendAmNearbyNotification(signedInUser.getString(AppConstants.REAL_OBJECT_ID), parseInstallationParseQuery);
-                                    }
-                                }
-                            });
+                        //Send notification to them one after the other
+                        for (ParseObject user : parseUsers) {
+                            String userFirebaseToken = user.getString(AppConstants.USER_FIREBASE_TOKEN);
+                            if (StringUtils.isNotEmpty(userFirebaseToken)) {
+                                JsonApiClient.sendAmNearbyNotification(userFirebaseToken);
+                            }
                         }
                     }
                 }

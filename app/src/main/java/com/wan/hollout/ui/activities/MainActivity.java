@@ -448,6 +448,30 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                         return false;
                     }
                 }).withSavedInstance(savedInstanceState).build();
+
+        String userFirebaseTokenFromPreference = HolloutPreferences.getUserFirebaseToken();
+        String userFirebaseTokenFromSignedInUser = signedInUser.getString(AppConstants.USER_FIREBASE_TOKEN);
+        if (userFirebaseTokenFromPreference != null) {
+            if (userFirebaseTokenFromSignedInUser == null) {
+                signedInUser.put(AppConstants.USER_FIREBASE_TOKEN, userFirebaseTokenFromPreference);
+                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                    @Override
+                    public void done(Boolean result, Exception e) {
+                        //User Prefs updated;
+                    }
+                });
+            } else {
+                if (!userFirebaseTokenFromPreference.equals(userFirebaseTokenFromSignedInUser)) {
+                    signedInUser.put(AppConstants.USER_FIREBASE_TOKEN, userFirebaseTokenFromPreference);
+                    AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                        @Override
+                        public void done(Boolean result, Exception e) {
+                            //User Prefs updated;
+                        }
+                    });
+                }
+            }
+        }
     }
 
     private void initSharing() {
@@ -948,6 +972,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     if (e == null) {
                         HolloutPreferences.setUserWelcomed(false);
                         HolloutPreferences.clearPersistedCredentials();
+                        HolloutPreferences.getInstance().getAll().clear();
                         ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
                         ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
                         HolloutUtils.getKryoInstance().reset();

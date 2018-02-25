@@ -169,4 +169,11 @@ public class HolloutPreferences {
         getInstance().edit().putInt(AppConstants.TOTAL_UNREAD_MESSAGES_COUNT, size).commit();
     }
 
+    public static void saveUserFirebaseToken(String token) {
+        getInstance().edit().putString(AppConstants.USER_FIREBASE_TOKEN, token).commit();
+    }
+
+    public static String getUserFirebaseToken() {
+        return getInstance().getString(AppConstants.USER_FIREBASE_TOKEN, null);
+    }
 }

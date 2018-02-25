@@ -190,6 +190,7 @@ public class AppConstants {
     public static final String DOCUMENTS = "Documents";
     static final String UNREAD_MESSAGES_COUNT_FROM = "UnreadMessagesCountFrom_";
     static final String TOTAL_UNREAD_MESSAGES_COUNT = "total_unread_messages_count";
+    public static final String USER_FIREBASE_TOKEN = "user_firebase_token";
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
