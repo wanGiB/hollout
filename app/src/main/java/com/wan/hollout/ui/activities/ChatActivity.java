@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,6 +12,7 @@ import android.graphics.Bitmap;
 import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -96,13 +98,13 @@ import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FilePathFinder;
 import com.wan.hollout.utils.FileUtils;
+import com.wan.hollout.utils.GeneralNotifier;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.HolloutVCFParser;
 import com.wan.hollout.utils.LocationUtils;
-import com.wan.hollout.utils.GeneralNotifier;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.SafeLayoutManager;
@@ -125,6 +127,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -293,8 +296,10 @@ public class ChatActivity extends BaseActivity implements
     private static KeyframesDrawable imageDrawable;
     private static InputStream stream;
     private String phoneNumberToCall;
-
     private ProgressDialog deleteConversationProgressDialog;
+
+    private MessageUpdateTask messageUpdateTask;
+    private BangMessageSoundTask bangMessageSoundTask;
 
     private DirectModelNotifier.ModelChangedListener<ChatMessage> onModelStateChangedListener = new DirectModelNotifier.ModelChangedListener<ChatMessage>() {
 
@@ -328,15 +333,8 @@ public class ChatActivity extends BaseActivity implements
                     } else if (action == BaseModel.Action.UPDATE) {
                         int indexOfMessage = messages.indexOf(model);
                         if (indexOfMessage != -1) {
-                            messages.set(indexOfMessage, model);
-                            messagesAdapter.notifyItemChanged(indexOfMessage);
-                            if (model.getMessageDirection() == MessageDirection.OUTGOING && model.getMessageStatus() == MessageStatus.READ) {
-                                if (!model.isReadSoundBanged()) {
-                                    UiUtils.bangSound(ChatActivity.this, R.raw.pop);
-                                    model.setReadSoundBanged(true);
-                                    DbUtils.updateMessage(model);
-                                }
-                            }
+                            replaceMessageAtIndexAsync(indexOfMessage, model);
+                            checkBangMessageReadSound(model);
                         }
                     } else if (action == BaseModel.Action.DELETE) {
                         int indexOfMessage = messages.indexOf(model);
@@ -353,6 +351,14 @@ public class ChatActivity extends BaseActivity implements
         }
 
     };
+
+    private void checkBangMessageReadSound(@NonNull ChatMessage model) {
+        if (model.getMessageDirection() == MessageDirection.OUTGOING && model.getMessageStatus() == MessageStatus.READ) {
+            if (!model.isReadSoundBanged()) {
+                bangSoundAtIndexAsync(model);
+            }
+        }
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -391,6 +397,16 @@ public class ChatActivity extends BaseActivity implements
         checkBlackListStatus();
         createDeleteConversationProgressDialog();
         setActiveChat();
+    }
+
+    private void replaceMessageAtIndexAsync(final int indexOfMessage, final ChatMessage newMessage) {
+        messageUpdateTask = new MessageUpdateTask(getCurrentActivityInstance(), messagesAdapter, messages, newMessage, indexOfMessage);
+        messageUpdateTask.executeOnExecutor(ChatClient.getInstance().getExecutor());
+    }
+
+    private void bangSoundAtIndexAsync(ChatMessage message) {
+        bangMessageSoundTask = new BangMessageSoundTask(getCurrentActivityInstance(), message);
+        bangMessageSoundTask.executeOnExecutor(ChatClient.getInstance().getExecutor());
     }
 
     private void checkBlackListStatus() {
@@ -810,6 +826,7 @@ public class ChatActivity extends BaseActivity implements
             return;
         }
         AppConstants.activeChatId = null;
+        messages.clear();
         super.onBackPressed();
     }
 
@@ -2317,6 +2334,69 @@ public class ChatActivity extends BaseActivity implements
         Intent callIntent = new Intent(Intent.ACTION_CALL);
         callIntent.setData(Uri.parse("tel:" + StringUtils.substringBefore(purifiedPhoneNumber, ",")));
         startActivity(callIntent);
+    }
+
+    static class MessageUpdateTask extends AsyncTask<Void, Void, Boolean> {
+
+        private MessagesAdapter messagesAdapter;
+        private ChatMessage chatMessage;
+        private int indexOfMessage;
+        private List<ChatMessage> messages;
+        private WeakReference<Activity> weakReference;
+
+        MessageUpdateTask(Activity activity, MessagesAdapter messagesAdapter, List<ChatMessage> messages,
+                          ChatMessage chatMessage, int indexOfMessage) {
+            this.weakReference = new WeakReference<>(activity);
+            this.messages = messages;
+            this.messagesAdapter = messagesAdapter;
+            this.chatMessage = chatMessage;
+            this.indexOfMessage = indexOfMessage;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... objects) {
+            messages.set(indexOfMessage, chatMessage);
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            super.onPostExecute(success);
+            if (weakReference != null) {
+                if (weakReference.get() != null) {
+                    weakReference.get().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            messagesAdapter.notifyItemChanged(indexOfMessage);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    static class BangMessageSoundTask extends AsyncTask<Void, Void, Boolean> {
+
+        private WeakReference<Activity> activityWeakReference;
+        private ChatMessage message;
+
+        BangMessageSoundTask(Activity activity, ChatMessage message) {
+            this.activityWeakReference = new WeakReference<>(activity);
+            this.message = message;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... objects) {
+            if (activityWeakReference != null) {
+                if (activityWeakReference.get() != null) {
+                    UiUtils.bangSound(activityWeakReference.get(), R.raw.pop);
+                }
+                message.setReadSoundBanged(true);
+                DbUtils.updateMessage(message);
+            }
+            return true;
+        }
+
     }
 
 }

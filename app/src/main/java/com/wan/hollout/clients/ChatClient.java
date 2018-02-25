@@ -56,6 +56,10 @@ public class ChatClient {
         this.executor = Executors.newCachedThreadPool();
     }
 
+    public ExecutorService getExecutor() {
+        return executor;
+    }
+
     public void startChatClient() {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {

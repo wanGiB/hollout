@@ -55,6 +55,7 @@ import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.EaseShowImageActivity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FileUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
@@ -159,6 +160,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @BindView(R.id.content_view)
     ViewGroup contentView;
 
+    private String searchString;
     private ChatMessage message;
 
     private Activity activity;
@@ -183,6 +185,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     public void bindData(Activity context, ChatMessage messageObject, String searchString) {
         this.activity = context;
         this.message = messageObject;
+        this.searchString = searchString;
         setupMessageBubble();
         setupMessageBody(searchString);
         setupMessageTimeAndDeliveryStatus();
@@ -947,6 +950,16 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     message.setFileUploadProgress(progress);
                 }
             });
+        }
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        ChatMessage newMessage = DbUtils.getMessage(message.getMessageId());
+        if (newMessage != null) {
+            this.message = newMessage;
+            bindData(activity, newMessage, searchString);
         }
     }
 
