@@ -3,7 +3,6 @@ package com.wan.hollout.clients;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.os.Looper;
-import android.speech.tts.Voice;
 
 import com.parse.ParseObject;
 import com.sinch.android.rtc.AudioController;
@@ -88,6 +87,7 @@ public class CallClient extends ContextWrapper {
                 .environmentHost(BuildConfig.DEBUG ? "sandbox.sinch.com" : "clientapi.sinch.com")
                 .userId(userId)
                 .build();
+        sinchClient.getCallClient().setRespectNativeCalls(false);
         sinchClient.getVideoController().setResizeBehaviour(VideoScalingType.ASPECT_FILL);
         sinchClient.setSupportMessaging(false);
         sinchClient.setSupportCalling(true);
@@ -192,14 +192,6 @@ public class CallClient extends ContextWrapper {
 
     public Call getCall(String callId) {
         return sinchClient.getCallClient().getCall(callId);
-    }
-
-    private void terminateClient() {
-        if (sinchClient != null) {
-            sinchClient.stopListeningOnActiveConnection();
-            sinchClient.terminate();
-            sinchClient = null;
-        }
     }
 
     public boolean isCallClientStarted() {
