@@ -35,8 +35,22 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.drive.Drive;
+import com.google.android.gms.drive.DriveContents;
+import com.google.android.gms.drive.DriveFile;
+import com.google.android.gms.drive.DriveFolder;
+import com.google.android.gms.drive.MetadataChangeSet;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -73,10 +87,11 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FontUtils;
+import com.wan.hollout.utils.GeneralNotifier;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
-import com.wan.hollout.utils.GeneralNotifier;
+import com.wan.hollout.utils.JsonUtils;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
@@ -87,7 +102,11 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -98,6 +117,11 @@ import static com.wan.hollout.utils.UiUtils.showView;
 
 @SuppressWarnings("RedundantCast")
 public class MainActivity extends BaseActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+
+    /**
+     * Request code for google sign-in
+     */
+    protected static final int REQUEST_CODE_SIGN_IN = 0;
 
     @BindView(R.id.footerAd)
     LinearLayout footerView;
@@ -148,6 +172,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     public static Vibrator vibrator;
 
     private ProgressDialog deleteConversationProgressDialog;
+    private ArrayList<ChatMessage> messagesToBackUp = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -929,7 +954,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 }
             });
             peopleFilterDialog.create().show();
-
         }
     }
 
@@ -940,9 +964,19 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             if (resultCode == RESULT_OK) {
                 EventBus.getDefault().postSticky(AppConstants.REFRESH_PEOPLE);
             }
-        } else {
-            //Todo: Look in here later on
-            getSupportFragmentManager().findFragmentById(R.id.fragment_container).onActivityResult(requestCode, resultCode, data);
+        } else if (requestCode == REQUEST_CODE_SIGN_IN) {
+            if (resultCode != RESULT_OK) {
+                UiUtils.showSafeToast("Sorry, failed to initialize Google Drive. Please try again later.");
+                return;
+            }
+            Task<GoogleSignInAccount> getAccountTask =
+                    GoogleSignIn.getSignedInAccountFromIntent(data);
+            if (getAccountTask.isSuccessful()) {
+                UiUtils.dismissProgressDialog();
+                finishLogOut(false, "Logging Out");
+            } else {
+                UiUtils.showSafeToast("Sorry, failed to initialize Google Drive. Please try again later.");
+            }
         }
     }
 
@@ -953,7 +987,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         builder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                finishLogOut();
+                finishLogOut(true, "Please wait...");
             }
         }).setNegativeButton("NO", new DialogInterface.OnClickListener() {
             @Override
@@ -964,43 +998,160 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         builder.create().show();
     }
 
-    private void finishLogOut() {
+    private void finishLogOut(final boolean canShowMissDialog, final String message) {
         FirebaseAuth.getInstance().signOut();
-        UiUtils.showProgressDialog(MainActivity.this, "Logging out...");
+        UiUtils.showProgressDialog(MainActivity.this, message);
         if (AuthUtil.getCurrentUser() != null) {
-            AuthUtil.dissolveAuthenticatedUser(new DoneCallback<Boolean>() {
+            DbUtils.fetchAllMessages(new DoneCallback<List<ChatMessage>>() {
                 @Override
-                public void done(Boolean result, Exception e) {
-                    if (e == null) {
-                        HolloutPreferences.setUserWelcomed(false);
-                        HolloutPreferences.clearPersistedCredentials();
-                        HolloutPreferences.getInstance().getAll().clear();
-                        ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
-                        ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
-                        HolloutUtils.getKryoInstance().reset();
-                        AuthUtil.signOut(MainActivity.this)
-                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            finishUp();
-                                        } else {
-                                            UiUtils.dismissProgressDialog();
-                                            UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                public void done(List<ChatMessage> result, Exception e) {
+                    if (result != null && !result.isEmpty() && e == null) {
+                        messagesToBackUp.addAll(result);
+                        if (canShowMissDialog) {
+                            UiUtils.dismissProgressDialog();
+                            AlertDialog.Builder builder = new AlertDialog.Builder(getCurrentActivityInstance());
+                            builder.setTitle("We are going to miss you!");
+                            builder.setMessage("Let's quickly backup your chats to your drive before you live.");
+                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    UiUtils.showProgressDialog(MainActivity.this, message);
+                                    tryBackUpChatsBeforeLoginOut(new DoneCallback<Boolean>() {
+                                        @Override
+                                        public void done(Boolean backUpSuccess, Exception e) {
+                                            if (e == null && backUpSuccess) {
+                                                dissolveLoggedInUser();
+                                            } else {
+                                                UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                                            }
                                         }
-
+                                    });
+                                }
+                            });
+                            builder.create().show();
+                        } else {
+                            tryBackUpChatsBeforeLoginOut(new DoneCallback<Boolean>() {
+                                @Override
+                                public void done(Boolean backUpSuccess, Exception e) {
+                                    if (e == null && backUpSuccess) {
+                                        dissolveLoggedInUser();
+                                    } else {
+                                        UiUtils.showSafeToast("Failed to sign you out.Please try again");
                                     }
-
-                                });
+                                }
+                            });
+                        }
                     } else {
-                        UiUtils.dismissProgressDialog();
-                        UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                        dissolveLoggedInUser();
                     }
                 }
             });
         } else {
             finish();
         }
+    }
+
+    private void dissolveLoggedInUser() {
+        AuthUtil.dissolveAuthenticatedUser(new DoneCallback<Boolean>() {
+            @Override
+            public void done(Boolean result, Exception e) {
+                if (e == null) {
+                    HolloutPreferences.setUserWelcomed(false);
+                    HolloutPreferences.clearPersistedCredentials();
+                    HolloutPreferences.getInstance().getAll().clear();
+                    ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
+                    ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
+                    HolloutUtils.getKryoInstance().reset();
+                    AuthUtil.signOut(MainActivity.this)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isSuccessful()) {
+                                        finishUp();
+                                    } else {
+                                        UiUtils.dismissProgressDialog();
+                                        UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                                    }
+                                }
+                            });
+                } else {
+                    UiUtils.dismissProgressDialog();
+                    UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                }
+            }
+        });
+    }
+
+    /**
+     * Starts the sign-in process and initializes the Drive client.
+     */
+    protected void tryBackUpChatsBeforeLoginOut(DoneCallback<Boolean> backUpCompletedOptionCallback) {
+        Set<Scope> requiredScopes = new HashSet<>(2);
+        requiredScopes.add(Drive.SCOPE_FILE);
+        requiredScopes.add(Drive.SCOPE_APPFOLDER);
+        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if (signInAccount != null && signInAccount.getGrantedScopes().containsAll(requiredScopes)) {
+            initializeDriveClient(signInAccount, backUpCompletedOptionCallback);
+        } else {
+            GoogleSignInOptions signInOptions =
+                    new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestScopes(Drive.SCOPE_FILE)
+                            .requestScopes(Drive.SCOPE_APPFOLDER)
+                            .build();
+            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, signInOptions);
+            startActivityForResult(googleSignInClient.getSignInIntent(), REQUEST_CODE_SIGN_IN);
+        }
+    }
+
+    /**
+     * Continues the sign-in process, initializing the Drive clients with the current
+     * user's account.
+     */
+    protected void initializeDriveClient(GoogleSignInAccount signInAccount, DoneCallback<Boolean> backUpOperationDoneCallback) {
+        mDriveClient = Drive.getDriveClient(getApplicationContext(), signInAccount);
+        mDriveResourceClient = Drive.getDriveResourceClient(getApplicationContext(), signInAccount);
+        onDriveClientReady(backUpOperationDoneCallback);
+    }
+
+    protected void onDriveClientReady(DoneCallback<Boolean> backUpOperationDoneCallback) {
+        createFile(backUpOperationDoneCallback);
+    }
+
+    private void createFile(final DoneCallback<Boolean> backUpOperationDoneCallback) {
+        // [START create_file]
+        final Task<DriveFolder> rootFolderTask = getDriveResourceClient().getRootFolder();
+        final Task<DriveContents> createContentsTask = getDriveResourceClient().createContents();
+        Tasks.whenAll(rootFolderTask, createContentsTask)
+                .continueWithTask(new Continuation<Void, Task<DriveFile>>() {
+                    @Override
+                    public Task<DriveFile> then(@NonNull Task<Void> task) throws Exception {
+                        DriveFolder parent = rootFolderTask.getResult();
+                        DriveContents contents = createContentsTask.getResult();
+                        OutputStream outputStream = contents.getOutputStream();
+                        Writer writer = new OutputStreamWriter(outputStream);
+                        String serializeChats = JsonUtils.toJson(messagesToBackUp);
+                        writer.write(serializeChats);
+                        MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
+                                .setTitle("HolloutChats")
+                                .setMimeType("text/plain")
+                                .setStarred(true)
+                                .build();
+                        return getDriveResourceClient().createFile(parent, changeSet, contents);
+                    }
+                })
+                .addOnSuccessListener(this,
+                        new OnSuccessListener<DriveFile>() {
+                            @Override
+                            public void onSuccess(DriveFile driveFile) {
+                                backUpOperationDoneCallback.done(true, null);
+                            }
+                        })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        backUpOperationDoneCallback.done(false, e);
+                    }
+                });
     }
 
     private void finishUp() {

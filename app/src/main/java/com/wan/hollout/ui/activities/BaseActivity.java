@@ -6,6 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.view.Menu;
 
+import com.google.android.gms.drive.DriveClient;
+import com.google.android.gms.drive.DriveId;
+import com.google.android.gms.drive.DriveResourceClient;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.wan.hollout.R;
 
 import org.greenrobot.eventbus.EventBus;
@@ -13,6 +17,21 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 public abstract class BaseActivity extends AppCompatActivity {
+
+    /**
+     * Handles high-level drive functions like sync
+     */
+    protected DriveClient mDriveClient;
+
+    /**
+     * Handle access to Drive resources/files.
+     */
+    protected DriveResourceClient mDriveResourceClient;
+
+    /**
+     * Tracks completion of the drive picker
+     */
+    protected TaskCompletionSource<DriveId> mOpenItemTaskSource;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,6 +49,14 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    protected DriveClient getDriveClient() {
+        return mDriveClient;
+    }
+
+    protected DriveResourceClient getDriveResourceClient() {
+        return mDriveResourceClient;
     }
 
     @Override

@@ -10,7 +10,9 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.raizlabs.android.dbflow.config.FlowManager;
 import com.wan.hollout.R;
+import com.wan.hollout.database.HolloutDb;
 import com.wan.hollout.ui.widgets.ShimmerFrameLayout;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -144,6 +146,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void launchWelcomeActivity() {
+        FlowManager.getDatabase(HolloutDb.class).reset();
         Intent welcomeIntent = new Intent(SplashActivity.this, WelcomeActivity.class);
         startActivity(welcomeIntent);
         finishAct();

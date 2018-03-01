@@ -95,6 +95,17 @@ public class DbUtils {
                 }).execute();
     }
 
+    public static void fetchAllMessages(final DoneCallback<List<ChatMessage>> messageFetchDoneCallBack) {
+        SQLite.select()
+                .from(ChatMessage.class).async().queryListResultCallback(new QueryTransaction.QueryResultListCallback<ChatMessage>() {
+            @Override
+            public void onListQueryResult(QueryTransaction transaction, @NonNull List<ChatMessage> tResult) {
+                messageFetchDoneCallBack.done(tResult, null);
+
+            }
+        }).execute();
+    }
+
     public static void fetchMoreMessagesInConversation(String conversationId, int offset, final DoneCallback<List<ChatMessage>> doneCallback) {
         try {
             SQLite.select()
@@ -174,7 +185,8 @@ public class DbUtils {
     }
 
     public static ChatMessage getLastMessageInConversation(String conversationId) {
-        return SQLite.select().from(ChatMessage.class).where(ChatMessage_Table.conversationId.eq(conversationId)).orderBy(ChatMessage_Table.timeStamp, false).querySingle();
+        return SQLite.select().from(ChatMessage.class).where(ChatMessage_Table.conversationId
+                .eq(conversationId)).orderBy(ChatMessage_Table.timeStamp, false).querySingle();
     }
 
     public static void deleteConversation(String conversationId, final DoneCallback<Long[]> operationDoneCallback) {
@@ -191,6 +203,29 @@ public class DbUtils {
                         }
                     }
                 }).execute();
+    }
+
+    public static void performBatchMessageInsertion(List<ChatMessage> chatMessages,
+                                                    final DoneCallback<Long[]> progressCallback) {
+        ProcessModelTransaction<ChatMessage> processModelTransaction =
+                new ProcessModelTransaction.Builder<>(new ProcessModelTransaction.ProcessModel<ChatMessage>() {
+                    @Override
+                    public void processModel(ChatMessage message, DatabaseWrapper wrapper) {
+                        FlowManager.getModelAdapter(ChatMessage.class).save(message);
+                    }
+                }).processListener(new ProcessModelTransaction.OnModelProcessListener<ChatMessage>() {
+                    @Override
+                    public void onModelProcessed(long current, long total, ChatMessage modifiedModel) {
+                        if (progressCallback != null) {
+                            progressCallback.done(new Long[]{current, total}, null);
+                        }
+                    }
+                }).addAll(chatMessages).build();
+        Transaction transaction = FlowManager
+                .getDatabase(HolloutDb.class)
+                .beginTransactionAsync(processModelTransaction)
+                .build();
+        transaction.execute();
     }
 
     private static void performConversationDeletion(List<ChatMessage> messagesInConversation, final DoneCallback<Long[]> progressCallback) {
@@ -236,7 +271,7 @@ public class DbUtils {
                 }).execute();
     }
 
-    public static void createNewMissedCallMessage(String callerName, String mCallerId,String message) {
+    public static void createNewMissedCallMessage(String callerName, String mCallerId, String message) {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setConversationId(mCallerId);

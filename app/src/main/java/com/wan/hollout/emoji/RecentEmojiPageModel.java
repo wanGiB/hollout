@@ -77,7 +77,6 @@ public class RecentEmojiPageModel implements EmojiPageModel {
             iterator.next();
             iterator.remove();
         }
-
         final LinkedHashSet<String> latestRecentlyUsed = new LinkedHashSet<>(recentlyUsed);
         new AsyncTask<Void, Void, Void>() {
 

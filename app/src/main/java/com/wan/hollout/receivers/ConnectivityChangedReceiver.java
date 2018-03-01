@@ -28,10 +28,8 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
                 context.startService(mAppInstanceDetectIntent);
                 ChatClient.getInstance().startChatClient();
                 CallClient.getInstance().startCallClient();
-            } else {
-
             }
-        } catch (IllegalArgumentException | NullPointerException ignored) {
+        } catch (IllegalArgumentException | IllegalStateException | NullPointerException ignored) {
 
         }
     }
