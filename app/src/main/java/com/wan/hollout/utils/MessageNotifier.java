@@ -404,7 +404,7 @@ public class MessageNotifier {
                     if (Build.VERSION.SDK_INT >= 26) {
                         builder.setContentText((unreadMissedCalls.size() == 1 ? "1 missed call " : unreadMissedCalls.size() + " missed calls"));
                     }
-                    builder.setSmallIcon(R.drawable.ic_call_missed_black_48dp);
+                    builder.setSmallIcon(R.drawable.ic_call_missed_red_18dp);
                     builder.setLights(Color.parseColor("blue"), 500, 1000);
                     builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                     builder.setAutoCancel(true);

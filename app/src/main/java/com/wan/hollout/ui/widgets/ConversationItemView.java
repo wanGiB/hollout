@@ -579,7 +579,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             AppConstants.reactionsOpenPositions.put(getMessageId(), true);
             UiUtils.showView(userStatusOrLastMessageView, true);
             userStatusOrLastMessageView.setText(message.getMessageBody());
-            reactionsIndicatorView.setImageResource(R.drawable.ic_call_missed_black_48dp);
+            reactionsIndicatorView.setImageResource(R.drawable.ic_call_missed_red_18dp);
         }
 
         String messageBody;

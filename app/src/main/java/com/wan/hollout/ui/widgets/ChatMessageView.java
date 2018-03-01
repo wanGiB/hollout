@@ -204,7 +204,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void setupMessageBubble() {
         if (message.getMessageDirection() == MessageDirection.OUTGOING) {
-            messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.outgoing_chat_bubble));
+            if (message.getMessageType() != MessageType.CALL) {
+                messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.outgoing_chat_bubble));
+            }
         } else {
             messageBubbleLayout.setBackground(ContextCompat.getDrawable(activity, R.drawable.incoming_chat_bubble));
         }

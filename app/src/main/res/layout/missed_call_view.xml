@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.wan.hollout.ui.widgets.ChatMessageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/conversation_message_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal|top"
@@ -13,7 +14,7 @@
     android:paddingTop="3dp">
 
     <RelativeLayout
-        android:id="@+id/missed_call_container"
+        android:id="@+id/message_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -23,14 +24,12 @@
         android:paddingRight="5dp"
         android:paddingStart="5dp">
 
-        <android.support.v7.widget.AppCompatImageView
+        <ImageView
             android:id="@+id/missed_call_icon"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_call_missed_black_48dp"
-            app:tint="@color/red800"
-            app:tintMode="src_over" />
+            android:src="@drawable/ic_call_missed_red_18dp" />
 
         <com.wan.hollout.ui.widgets.HolloutTextView
             android:id="@+id/missed_call_view"
@@ -55,10 +54,10 @@
         style="@style/chat_timings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/missed_call_container"
+        android:layout_below="@+id/message_container"
         android:layout_centerHorizontal="true"
         android:layout_marginEnd="4dp"
         android:layout_marginRight="4dp"
         app:textStyle="none" />
 
-</RelativeLayout>
+</com.wan.hollout.ui.widgets.ChatMessageView>
