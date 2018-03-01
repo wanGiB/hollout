@@ -28,6 +28,7 @@ import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.tonyodev.fetch2.Fetch;
 import com.wan.hollout.R;
+import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.database.HolloutDb;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
@@ -64,6 +65,7 @@ public class ApplicationLoader extends Application {
                     if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                         EventBus.getDefault().post(new ConnectivityChangedAction(true));
                         ChatClient.getInstance().startChatClient();
+                        CallClient.getInstance().startCallClient();
                     }
                 }
             }
@@ -125,8 +127,13 @@ public class ApplicationLoader extends Application {
     }
 
     private void startAppInstanceDetector() {
-        Intent serviceIntent = new Intent(this, AppInstanceDetectionService.class);
-        startService(serviceIntent);
+        try {
+            Intent serviceIntent = new Intent(this, AppInstanceDetectionService.class);
+            startService(serviceIntent);
+        } catch (IllegalStateException ignored) {
+
+        }
+
     }
 
     private void initParse() {
@@ -148,6 +155,7 @@ public class ApplicationLoader extends Application {
                 .clientBuilder(getOkHttpClientBuilder())
                 .build());
         ChatClient.getInstance().startChatClient();
+        CallClient.getInstance().startCallClient();
         try {
             parseLiveQueryClient = ParseLiveQueryClient.Factory.getClient(new URI(AppKeys.SERVER_ENDPOINT));
             parseLiveQueryClient.registerListener(new ParseLiveQueryClientCallbacks() {

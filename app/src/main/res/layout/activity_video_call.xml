@@ -10,13 +10,6 @@
     android:fitsSystemWindows="false"
     tools:context=".ui.activities.VideoCallActivity">
 
-    <!--Call background-->
-    <ImageView
-        android:id="@+id/img_call_background"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        tools:ignore="ContentDescription" />
 
     <ImageView
         android:layout_width="30dp"
@@ -29,22 +22,61 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!--Opposite surfaceView-->
-        <com.hyphenate.media.EMCallSurfaceView
-            android:id="@+id/surface_view_opposite"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="invisible" />
-
-        <com.hyphenate.media.EMCallSurfaceView
+        <RelativeLayout
             android:id="@+id/surface_view_local"
             android:layout_width="@dimen/call_small_width"
             android:layout_height="@dimen/call_small_height"
+            android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_marginTop="@dimen/call_small_width" />
 
+        <!--Opposite surfaceView-->
+        <RelativeLayout
+            android:id="@+id/surface_view_opposite"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:clickable="true"
+            android:focusable="true" />
+
     </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/user_details_component"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="100dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!--Avatar-->
+        <com.wan.hollout.ui.widgets.CircleImageView
+            android:id="@+id/img_call_avatar"
+            android:layout_width="@dimen/call_avatar_size"
+            android:layout_height="@dimen/call_avatar_size"
+            android:src="@drawable/empty_profile"
+            app:border_color="@color/whitesmoke"
+            app:border_width="2dp" />
+
+        <!--Name-->
+        <TextView
+            android:id="@+id/text_call_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="16dp"
+            android:text="@string/app_name"
+            android:textColor="@color/em_white_87"
+            android:textSize="@dimen/call_name_size"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
     <RelativeLayout
         android:id="@+id/layout_call_control"
@@ -109,19 +141,20 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/toggle_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/call_layout_margin"
                 android:orientation="horizontal">
 
                 <!--Camera-->
-                <ImageButton
-                    android:id="@+id/btn_camera_switch"
-                    android:layout_width="@dimen/call_switch_width"
-                    android:layout_height="@dimen/call_switch_height"
-                    android:background="@drawable/em_btn_rectangle_white"
-                    android:src="@drawable/em_checkbox_camera"
-                    tools:ignore="ContentDescription" />
+                <!--<ImageButton-->
+                    <!--android:id="@+id/btn_hide_or_show_camera"-->
+                    <!--android:layout_width="@dimen/call_switch_width"-->
+                    <!--android:layout_height="@dimen/call_switch_height"-->
+                    <!--android:background="@drawable/em_btn_rectangle_white"-->
+                    <!--android:src="@drawable/em_checkbox_camera"-->
+                    <!--tools:ignore="ContentDescription" />-->
 
                 <!--Speaker-->
                 <ImageButton

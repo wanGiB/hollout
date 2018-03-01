@@ -301,6 +301,12 @@ public class ChatActivity extends BaseActivity implements
     private MessageUpdateTask messageUpdateTask;
     private BangMessageSoundTask bangMessageSoundTask;
 
+    private int callType = -1;
+    private Intent callIntent;
+
+    private int VOICE_CALL = 0;
+    private int VIDEO_CALL = 1;
+
     private DirectModelNotifier.ModelChangedListener<ChatMessage> onModelStateChangedListener = new DirectModelNotifier.ModelChangedListener<ChatMessage>() {
 
         @Override
@@ -969,7 +975,7 @@ public class ChatActivity extends BaseActivity implements
                     checkAndAddNewMessage(audioMessage);
                     DbUtils.createMessage(audioMessage);
                     emptyComposeText();
-                    FileUploader.getInstance().uploadFile(holloutFile.getLocalFilePath(), AppConstants.AUDIOS_DIRECTORY, audioMessage.getMessageId());
+                    FileUploader.getInstance().uploadFile(holloutFile.getLocalFilePath(), AppConstants.AUDIOS_DIRECTORY, audioMessage.getMessageId(), recipientProperties);
                     break;
                 case AppConstants.FILE_TYPE_VIDEO:
                     sendVideoMessage(holloutFile.getLocalFilePath(), holloutFile.getLocalFilePath(),
@@ -1324,19 +1330,51 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void startOnlineVoiceCall(Intent intent) {
-//        intent.setClass(ChatActivity.this, VoiceCallActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
-//        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
-//        startActivity(intent);
+        this.callIntent = intent;
+        setCallInitiationType(VOICE_CALL, intent);
+        if (!audioPermissionsMet()) {
+            return;
+        }
+        intent.setClass(ChatActivity.this, VoiceCallActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(AppConstants.CALLER_ID, recipientId);
+        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
+        startActivity(intent);
     }
 
     private void startOnlineVideoCall(Intent intent) {
-//        intent.setClass(ChatActivity.this, VideoCallActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        intent.putExtra(AppConstants.EXTRA_USER_ID, recipientId);
-//        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
-//        startActivity(intent);
+        this.callIntent = intent;
+        setCallInitiationType(VIDEO_CALL, intent);
+        if (!audioPermissionsMet()) {
+            return;
+        }
+        setCallInitiationType(VIDEO_CALL, intent);
+        intent.setClass(ChatActivity.this, VideoCallActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(AppConstants.CALLER_ID, recipientId);
+        intent.putExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
+        startActivity(intent);
+    }
+
+    private boolean audioPermissionsMet() {
+        if (PermissionsUtils.checkSelfPermissionForAudioRecording(this)) {
+            holloutPermissions.requestAudio();
+            setLastPermissionInitiationAction(AppConstants.REQUEST_AUDIO_ACCESS_FOR_RECORDING);
+            return false;
+        }
+        return true;
+    }
+
+    private void setCallInitiationType(int type, Intent intent) {
+        this.callType = type;
+    }
+
+    private int getCallInitiationType() {
+        return callType;
+    }
+
+    private Intent getCallIntent() {
+        return callIntent;
     }
 
     private void attemptToUnBlockUser() {
@@ -2023,7 +2061,15 @@ public class ChatActivity extends BaseActivity implements
         } else if (requestCode == PLACE_LOCATION_PICKER_REQUEST_CODE && holloutPermissions.verifyPermissions(grantResults)) {
             pickLocation();
         } else if (requestCode == PermissionsUtils.REQUEST_AUDIO_RECORD && holloutPermissions.verifyPermissions(grantResults)) {
-            onRecorderStarted();
+            if (getCallInitiationType() == -1) {
+                onRecorderStarted();
+            } else if (getCallInitiationType() == VOICE_CALL) {
+                startOnlineVoiceCall(getCallIntent());
+                callType = -1;
+            } else {
+                startOnlineVideoCall(getCallIntent());
+                callType = -1;
+            }
         } else if (requestCode == PermissionsUtils.REQUEST_CALL_PHONE && holloutPermissions.verifyPermissions(grantResults)) {
             placeLocalCall(getPhoneNumberToCall());
         }
@@ -2096,7 +2142,7 @@ public class ChatActivity extends BaseActivity implements
         checkAndAddNewMessage(message);
         DbUtils.createMessage(message);
         emptyComposeText();
-        FileUploader.getInstance().uploadFile(filePath, AppConstants.VOICE_NOTES, message.getMessageId());
+        FileUploader.getInstance().uploadFile(filePath, AppConstants.VOICE_NOTES, message.getMessageId(), recipientProperties);
     }
 
     @SuppressLint("CommitPrefEdits")
@@ -2115,7 +2161,7 @@ public class ChatActivity extends BaseActivity implements
         checkAndAddNewMessage(chatMessage);
         DbUtils.createMessage(chatMessage);
         emptyComposeText();
-        FileUploader.getInstance().uploadFile(imagePath, AppConstants.PHOTO_DIRECTORY, chatMessage.getMessageId());
+        FileUploader.getInstance().uploadFile(imagePath, AppConstants.PHOTO_DIRECTORY, chatMessage.getMessageId(), recipientProperties);
     }
 
     @SuppressLint("CommitPrefEdits")
@@ -2142,7 +2188,7 @@ public class ChatActivity extends BaseActivity implements
             DbUtils.createMessage(chatMessage);
             emptyComposeText();
             FileUploader.getInstance().uploadVideoThumbnailAndProceed(thumbOutPutFile.getPath(), videoPath, AppConstants.THUMBS_DIRECTORY,
-                    AppConstants.VIDEOS_DIRECTORY, chatMessage.getMessageId());
+                    AppConstants.VIDEOS_DIRECTORY, chatMessage.getMessageId(), recipientProperties);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -2163,7 +2209,7 @@ public class ChatActivity extends BaseActivity implements
     }
 
     protected void sendDocumentMessage(ChatMessage documentMessage) {
-        FileUploader.getInstance().uploadFile(documentMessage.getLocalUrl(), AppConstants.DOCUMENTS, documentMessage.getMessageId());
+        FileUploader.getInstance().uploadFile(documentMessage.getLocalUrl(), AppConstants.DOCUMENTS, documentMessage.getMessageId(), recipientProperties);
     }
 
     private void checkAndSendChatRequest() {
@@ -2231,7 +2277,7 @@ public class ChatActivity extends BaseActivity implements
      * set message Extension attributes
      */
     protected void sendNewMessage(ChatMessage newMessage) {
-        ChatClient.getInstance().sendMessage(newMessage);
+        ChatClient.getInstance().sendMessage(newMessage, recipientProperties);
         emptyComposeText();
         HolloutPreferences.updateConversationTime(recipientId);
         snackOutMessageReplyView(messageReplyView);

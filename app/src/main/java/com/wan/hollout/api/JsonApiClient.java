@@ -62,12 +62,12 @@ public class JsonApiClient {
         return requestBuilder;
     }
 
-    public static void sendAmNearbyNotification(String recipientToken) {
+    public static void sendFirebasePushNotification(String recipientToken,String category) {
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse("https://fcm.googleapis.com/fcm/send").newBuilder();
         JSONObject message = new JSONObject();
         JSONObject data = new JSONObject();
         try {
-            data.put(AppConstants.NOTIFICATION_TYPE, AppConstants.NOTIFICATION_TYPE_AM_NEARBY);
+            data.put(AppConstants.NOTIFICATION_TYPE, category);
             data.put("title", "Hollout");
             if (AuthUtil.getCurrentUser() != null) {
                 data.put(AppConstants.REAL_OBJECT_ID, AuthUtil.getCurrentUser().getString(AppConstants.REAL_OBJECT_ID));
@@ -116,7 +116,7 @@ public class JsonApiClient {
     }
 
     private static void logResponse(String responseBodyString, int code) {
-        HolloutLogger.d("sendAmNearbyNotification", responseBodyString + ", Response Code =" + code);
+        HolloutLogger.d("sendFirebasePushNotification", responseBodyString + ", Response Code =" + code);
     }
 
 }

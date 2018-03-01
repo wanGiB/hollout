@@ -5,6 +5,8 @@ import android.os.Bundle;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.wan.hollout.clients.CallClient;
+import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.utils.AppConstants;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,8 +19,6 @@ import java.util.Map;
 
 @SuppressLint("LongLogTag")
 public class HolloutFirebaseMessagingService extends FirebaseMessagingService {
-
-    private static final String TAG = "HolloutFirebaseMessagingService";
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -35,6 +35,12 @@ public class HolloutFirebaseMessagingService extends FirebaseMessagingService {
                         FetchUserInfoService fetchUserInfoService = new FetchUserInfoService();
                         fetchUserInfoService.onHandleWork(userInfoExtras);
                     }
+                } else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE)) {
+                    if (!ChatClient.getInstance().isStarted()) {
+                        ChatClient.getInstance().startChatClient();
+                    }
+                } else if (notificationType.equals(AppConstants.NEW_INCOMING_CALL)) {
+                    CallClient.getInstance().startCallClient();
                 }
             }
         }

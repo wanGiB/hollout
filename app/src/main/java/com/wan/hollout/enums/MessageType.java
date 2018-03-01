@@ -5,5 +5,5 @@ package com.wan.hollout.enums;
  */
 
 public enum MessageType {
-    TXT, IMAGE, VIDEO, LOCATION, VOICE, DOCUMENT, AUDIO, CONTACT, REACTION, GIF
+    TXT, IMAGE, VIDEO, LOCATION, VOICE, DOCUMENT, AUDIO, CONTACT, REACTION, GIF, CALL
 }

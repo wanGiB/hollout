@@ -15,6 +15,8 @@
         android:id="@+id/img_call_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
         android:scaleType="centerCrop"
         tools:ignore="ContentDescription" />
 
@@ -100,6 +102,7 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/toggle_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/call_layout_margin"
@@ -133,7 +136,6 @@
                     android:id="@+id/fab_reject_call"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_margin="@dimen/call_btn_margin"
                     android:src="@drawable/em_ic_call_end_white_24dp"
                     app:backgroundTint="@color/em_red_87"
@@ -144,7 +146,6 @@
                     android:id="@+id/fab_end_call"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_margin="@dimen/call_btn_margin"
                     android:src="@drawable/em_ic_call_end_white_24dp"
                     android:visibility="gone"
@@ -156,7 +157,6 @@
                     android:id="@+id/fab_answer_call"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
                     android:layout_margin="@dimen/call_btn_margin"
                     android:src="@drawable/em_ic_call_white_24dp"
                     app:backgroundTint="@color/em_green_87"

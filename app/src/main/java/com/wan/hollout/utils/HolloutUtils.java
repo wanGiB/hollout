@@ -970,7 +970,7 @@ public class HolloutUtils {
             if (userBlackList != null && !userBlackList.isEmpty()) {
                 if (userBlackList.contains(userId)) {
                     userBlackList.remove(userId);
-                    signedInUserObject.put(AppConstants.USER_BLACK_LIST, signedInUserObject);
+                    signedInUserObject.put(AppConstants.USER_BLACK_LIST, userBlackList);
                     AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
                         @Override
                         public void done(Boolean result, Exception e) {

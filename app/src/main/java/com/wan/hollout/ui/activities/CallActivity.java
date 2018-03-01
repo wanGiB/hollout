@@ -12,23 +12,18 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.AppCompatDelegate;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 
 import com.wan.hollout.R;
-import com.wan.hollout.call.CallStatus;
-import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.utils.AppConstants;
-import com.wan.hollout.utils.DbUtils;
 
 import org.greenrobot.eventbus.EventBus;
 
 /**
  * @author Wan Clem
  */
-public abstract class CallActivity extends AppCompatActivity {
+public abstract class CallActivity extends BaseActivity {
 
     protected Activity mActivity;
 
@@ -37,12 +32,10 @@ public abstract class CallActivity extends AppCompatActivity {
 
     // Call id
     protected String mCallerId;
+    protected String callId;
 
     // Is incoming call
     protected boolean isInComingCall;
-
-    // Call end state, used to save the message after the end of the call tips
-    protected int mCallStatus;
 
     // Call type, used to distinguish between voice and video calls, 0 video, 1 voice
     protected int mCallType;
@@ -55,13 +48,11 @@ public abstract class CallActivity extends AppCompatActivity {
 
     // Vibration
     protected Vibrator mVibrator;
-
     protected MediaPlayer mediaPlayer;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         if (savedInstanceState != null) {
             finish();
             return;
@@ -71,7 +62,6 @@ public abstract class CallActivity extends AppCompatActivity {
                 | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-
         EventBus.getDefault().post(AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER);
     }
 
@@ -81,10 +71,8 @@ public abstract class CallActivity extends AppCompatActivity {
     protected void initView() {
         mActivity = this;
         // Get call id
-        mCallerId = getIntent().getStringExtra(AppConstants.EXTRA_USER_ID);
+        mCallerId = getIntent().getStringExtra(AppConstants.CALLER_ID);
         isInComingCall = getIntent().getBooleanExtra(AppConstants.EXTRA_IS_INCOMING_CALL, false);
-        // Set default call end status
-        mCallStatus = CallStatus.CALL_CANCEL;
         // Vibrator
         mVibrator = (Vibrator) mActivity.getSystemService(Context.VIBRATOR_SERVICE);
         // AudioManager
@@ -95,23 +83,18 @@ public abstract class CallActivity extends AppCompatActivity {
         } else {
             createSoundPoolWithConstructor();
         }
-        if (CallStatus.getInstance().getCallState() == CallStatus.CALL_STATUS_NORMAL) {
-            // load sound
-            if (isInComingCall) {
-                loadDefaultIncomingCallRingtone();
-                return;
-            }
-
-            loadId = mSoundPool.load(mActivity, R.raw.progress_tone, 1);
-
-            // Load SoundPool listener
-            mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
-                @Override
-                public void onLoadComplete(SoundPool soundPool, int i, int i1) {
-                    playCallSound();
-                }
-            });
+        if (isInComingCall) {
+            loadDefaultIncomingCallRingtone();
+            return;
         }
+        loadId = mSoundPool.load(mActivity, R.raw.progress_tone, 1);
+        // Load SoundPool listener
+        mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int i, int i1) {
+                playCallSound();
+            }
+        });
     }
 
     public void loadDefaultIncomingCallRingtone() {
@@ -129,52 +112,7 @@ public abstract class CallActivity extends AppCompatActivity {
      * Call end save message to local
      */
     protected void saveCallMessage() {
-        String content;
-        switch (mCallStatus) {
-            case CallStatus.CALL_ACCEPTED:
-                content = mChronometer.getText().toString();
-                break;
-            case CallStatus.CALL_CANCEL:
-                content = mActivity.getString(R.string.em_call_cancel);
-                break;
-            case CallStatus.CALL_CANCEL_INCOMING_CALL:
-                content = mActivity.getString(R.string.em_call_cancel_incoming_call);
-                break;
-            case CallStatus.CALL_BUSY:
-                content = mActivity.getString(R.string.em_call_busy);
-                break;
-            case CallStatus.CALL_OFFLINE:
-                content = mActivity.getString(R.string.em_call_not_online);
-                break;
-            case CallStatus.CALL_REJECT_INCOMING_CALL:
-                content = mActivity.getString(R.string.em_call_reject_incoming_call);
-                break;
-            case CallStatus.CALL_REJECT:
-                content = mActivity.getString(R.string.em_call_reject);
-                break;
-            case CallStatus.CALL_NO_RESPONSE:
-                content = mActivity.getString(R.string.em_call_no_response);
-                break;
-            case CallStatus.CALL_TRANSPORT:
-                content = mActivity.getString(R.string.em_call_connection_fail);
-                break;
-            case CallStatus.CALL_VERSION_DIFFERENT:
-                content = mActivity.getString(R.string.em_call_not_online);
-                break;
-            default:
-                content = mActivity.getString(R.string.em_call_cancel);
-                break;
-        }
 
-        final String finalContent = content;
-        DbUtils.getEntityName(AppConstants.ENTITY_TYPE_INDIVIDUAL, mCallerId, new DoneCallback<String>() {
-            @Override
-            public void done(String result, Exception e) {
-                if (e == null && result != null) {
-                    DbUtils.createCallLog(mCallerId, result, finalContent, isInComingCall, mCallType == 0);
-                }
-            }
-        });
     }
 
     /**
@@ -184,7 +122,9 @@ public abstract class CallActivity extends AppCompatActivity {
         if (mVibrator == null) {
             mVibrator = (Vibrator) mActivity.getSystemService(Context.VIBRATOR_SERVICE);
         }
-        mVibrator.vibrate(60);
+        if (mVibrator != null) {
+            mVibrator.vibrate(60);
+        }
     }
 
     /**
@@ -224,7 +164,7 @@ public abstract class CallActivity extends AppCompatActivity {
                 mediaPlayer.pause();
                 mediaPlayer.stop();
                 mediaPlayer.release();
-            }catch (IllegalStateException ignored){
+            } catch (IllegalStateException ignored) {
 
             }
         }

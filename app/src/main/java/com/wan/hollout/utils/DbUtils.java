@@ -1,5 +1,6 @@
 package com.wan.hollout.utils;
 
+import android.database.SQLException;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 
@@ -93,57 +94,57 @@ public class DbUtils {
     }
 
     private static void upsertEntity(String entityId, ParseObject parseObject) {
-        HolloutUserEntity holloutUserEntity = SQLite.select().from(HolloutUserEntity.class).where(HolloutUserEntity_Table.entityId.eq(entityId)).querySingle();
-        if (holloutUserEntity != null) {
-
-            holloutUserEntity.entityName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                    ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-
-            holloutUserEntity.entityProfilePhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                    ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
-
-            holloutUserEntity.entityCoverPhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                    ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO);
-
-            holloutUserEntity.update();
-
-        } else {
-
-            HolloutUserEntity newHolloutUserEntity = new HolloutUserEntity();
-
-            newHolloutUserEntity.entityId = parseObject.getString(parseObject.getString(AppConstants.REAL_OBJECT_ID));
-
-            newHolloutUserEntity.entityName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                    ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-
-            newHolloutUserEntity.entityProfilePhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                    ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL);
-
-            newHolloutUserEntity.entityCoverPhotoUrl = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                    ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO);
-
-            newHolloutUserEntity.save();
-
+        try {
+            HolloutUserEntity holloutUserEntity = SQLite.select().from(HolloutUserEntity.class).where(HolloutUserEntity_Table.entityId.eq(entityId)).querySingle();
+            if (holloutUserEntity != null) {
+                holloutUserEntity.setEntityName(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                        ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME));
+                holloutUserEntity.setEntityProfilePhotoUrl(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                        ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL));
+                holloutUserEntity.setEntityCoverPhotoUrl(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                        ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO));
+                holloutUserEntity.update();
+            } else {
+                createNewHolloutUserEntity(parseObject);
+            }
+        } catch (SQLException e) {
+            createNewHolloutUserEntity(parseObject);
         }
 
     }
 
+    private static void createNewHolloutUserEntity(ParseObject parseObject) {
+        HolloutUserEntity newHolloutUserEntity = new HolloutUserEntity();
+        newHolloutUserEntity.setEntityId(parseObject.getString(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
+        newHolloutUserEntity.setEntityName(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME));
+        newHolloutUserEntity.setEntityProfilePhotoUrl(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL));
+        newHolloutUserEntity.setEntityCoverPhotoUrl(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
+                ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO));
+        newHolloutUserEntity.save();
+    }
+
     public static String getEntityName(String entityId) {
-        HolloutUserEntity holloutUserEntity = SQLite.select().from(HolloutUserEntity.class).where(HolloutUserEntity_Table.entityId.eq(entityId)).querySingle();
-        if (holloutUserEntity != null) {
-            return holloutUserEntity.getEntityName();
+        try {
+            HolloutUserEntity holloutUserEntity = SQLite.select().from(HolloutUserEntity.class).where(HolloutUserEntity_Table.entityId.eq(entityId)).querySingle();
+            if (holloutUserEntity != null) {
+                return holloutUserEntity.getEntityName();
+            }
+        } catch (SQLException e) {
+            return null;
         }
         return null;
     }
 
     public static void createCallLog(String partyId, String partyName, String content, boolean incoming, boolean voiceCall) {
         CallLog callLog = new CallLog();
-        callLog.content = content;
-        callLog.partyId = partyId;
-        callLog.callId = System.currentTimeMillis() + RandomStringUtils.random(5, true, true);
-        callLog.partyName = partyName;
-        callLog.incoming = incoming;
-        callLog.voiceCall = voiceCall;
+        callLog.setContent(content);
+        callLog.setPartyId(partyId);
+        callLog.setCallId(System.currentTimeMillis() + RandomStringUtils.random(5, true, true));
+        callLog.setPartyName(partyName);
+        callLog.setIncoming(incoming);
+        callLog.setVoiceCall(voiceCall);
         callLog.save();
     }
 
@@ -155,9 +156,9 @@ public class DbUtils {
         PathEntity pathEntity = SQLite.select().from(PathEntity.class).where(PathEntity_Table.pathId.in(getPathId(personId, pathName))).querySingle();
         if (pathEntity == null) {
             PathEntity newPathEntity = new PathEntity();
-            newPathEntity.pathId = getPathId(personId, pathName);
-            newPathEntity.personId = personId;
-            newPathEntity.pathName = pathName;
+            newPathEntity.setPathId(getPathId(personId, pathName));
+            newPathEntity.setPersonId(personId);
+            newPathEntity.setPathName(pathName);
             newPathEntity.save();
         }
     }

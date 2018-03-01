@@ -1,39 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center_horizontal|top"
     android:layout_marginBottom="5dp"
-    android:background="@android:color/white"
     android:orientation="horizontal"
     android:paddingBottom="3dp"
     android:paddingLeft="6dp"
     android:paddingRight="6dp"
     android:paddingTop="3dp">
 
-    <View
-        android:layout_width="wrap_content"
-        android:layout_height="0.05dp"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:background="@color/lighter_blue" />
-
-    <TextView
+    <com.wan.hollout.ui.widgets.HolloutTextView
         android:id="@+id/scroll_date_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/conversation_item_header_background"
+        android:gravity="center_horizontal"
         android:padding="8dp"
-        android:textColor="#8a90c7"
+        android:textColor="@color/whitesmoke"
         android:textSize="14sp"
+        app:textStyle="bold"
         tools:ignore="MissingPrefix" />
 
-    <View
-        android:layout_width="wrap_content"
-        android:layout_height="0.05dp"
-        android:layout_gravity="center_vertical"
-        android:layout_weight="1"
-        android:background="@color/lighter_blue" />
-
-</LinearLayout>
+</RelativeLayout>

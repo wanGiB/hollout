@@ -10,6 +10,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.parse.ParseObject;
+import com.wan.hollout.api.JsonApiClient;
 import com.wan.hollout.enums.MessageDirection;
 import com.wan.hollout.enums.MessageStatus;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
@@ -23,6 +24,7 @@ import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.MessageNotifier;
 
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
@@ -42,6 +44,7 @@ public class ChatClient {
     protected static final String TAG = "ChatClient";
     private ExecutorService executor = null;
     private static ChatClient instance;
+    private boolean isStarted = false;
 
     private ValueEventListener messageDeliveryStatusValueEventListener, inBoundMessagesValueEventListener;
 
@@ -60,11 +63,16 @@ public class ChatClient {
         return executor;
     }
 
+    public boolean isStarted() {
+        return isStarted;
+    }
+
     public void startChatClient() {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
             listenForInBoundPrivateMessages(signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             listenForMessageDeliveryStatus(signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            isStarted = true;
         }
     }
 
@@ -212,7 +220,7 @@ public class ChatClient {
         });
     }
 
-    public void sendMessage(final ChatMessage chatMessage) {
+    public void sendMessage(final ChatMessage chatMessage, final ParseObject recipientProperties) {
         DbUtils.createMessage(chatMessage);
         FirebaseUtils.getUsersReference()
                 .child(chatMessage.getTo())
@@ -228,9 +236,15 @@ public class ChatClient {
                                 //Message Sent
                                 chatMessage.setMessageStatus(MessageStatus.SENT);
                                 DbUtils.updateMessage(chatMessage);
+                                String recipientOnlineStatus = recipientProperties.getString(AppConstants.APP_USER_ONLINE_STATUS);
+                                String recipientToken = recipientProperties.getString(AppConstants.USER_FIREBASE_TOKEN);
+                                if (recipientOnlineStatus != null && !recipientOnlineStatus.equals(AppConstants.ONLINE)) {
+                                    if (StringUtils.isNotEmpty(recipientToken)) {
+                                        JsonApiClient.sendFirebasePushNotification(recipientToken, AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE);
+                                    }
+                                }
                             }
                         });
-
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -246,6 +260,7 @@ public class ChatClient {
 
             }
         });
+
     }
 
     public ChatMessage getMessage(String messageId) {

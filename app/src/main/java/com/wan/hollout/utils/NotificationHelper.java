@@ -13,7 +13,7 @@ import android.os.Build;
  *
  * @author Wan Clem
  */
-class NotificationHelper extends ContextWrapper {
+public class NotificationHelper extends ContextWrapper {
 
     private NotificationManager manager;
 

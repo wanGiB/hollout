@@ -335,6 +335,11 @@
     <string name="failed_to_download_file">Failed to download file. Please try again</string>
     <string name="user_blocked">User Blocked!</string>
     <string name="unblock_user">Unblock User</string>
-    <string name="ringing">Ringing...</string>
+    <string name="ringing">Ringing…</string>
+    <string name="incoming_call">Incoming Call</string>
+    <string name="outgoing_call">Outgoing Call</string>
+    <string name="loading">Loading…</string>
+    <string name="incoming_video_call">Incoming Video Call</string>
+    <string name="outgoing_video_call">Outgoing Video Call</string>
 
 </resources>

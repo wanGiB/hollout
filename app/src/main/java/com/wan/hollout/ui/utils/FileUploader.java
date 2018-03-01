@@ -2,6 +2,7 @@ package com.wan.hollout.ui.utils;
 
 import android.annotation.SuppressLint;
 
+import com.parse.ParseObject;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.enums.MessageStatus;
 import com.wan.hollout.interfaces.DoneCallback;
@@ -24,7 +25,7 @@ public class FileUploader {
         return instance;
     }
 
-    public void uploadFile(String filePath, String directory, final String messageId) {
+    public void uploadFile(String filePath, String directory, final String messageId, final ParseObject recipientProperties) {
         FirebaseUtils.uploadFileAsync(filePath, directory, messageId, false, new DoneCallback<String>() {
             @Override
             public void done(String result, Exception e) {
@@ -33,7 +34,7 @@ public class FileUploader {
                     if (chatMessage != null) {
                         chatMessage.setRemoteUrl(result);
                         chatMessage.setFileUploadProgress(100);
-                        ChatClient.getInstance().sendMessage(chatMessage);
+                        ChatClient.getInstance().sendMessage(chatMessage, recipientProperties);
                     }
                 } else {
                     if (e != null) {
@@ -48,7 +49,8 @@ public class FileUploader {
         });
     }
 
-    public void uploadVideoThumbnailAndProceed(String thumbnailPath, final String filePath, String thumbnailDirectory, final String videoDirectory, final String messageId) {
+    public void uploadVideoThumbnailAndProceed(String thumbnailPath, final String filePath, String thumbnailDirectory, final String videoDirectory,
+                                               final String messageId, final ParseObject recipientProps) {
         FirebaseUtils.uploadFileAsync(thumbnailPath, thumbnailDirectory, messageId, true, new DoneCallback<String>() {
             @Override
             public void done(String result, Exception e) {
@@ -57,7 +59,7 @@ public class FileUploader {
                     if (chatMessage != null) {
                         chatMessage.setThumbnailUrl(result);
                         DbUtils.updateMessage(chatMessage);
-                        uploadFile(filePath, videoDirectory, messageId);
+                        uploadFile(filePath, videoDirectory, messageId, recipientProps);
                     }
                 } else {
                     if (e != null) {

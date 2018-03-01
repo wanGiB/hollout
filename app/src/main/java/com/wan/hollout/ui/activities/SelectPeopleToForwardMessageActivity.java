@@ -136,7 +136,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
             }
             message.setFrom(signedInUserId.toLowerCase());
             message.setMessageId(RandomStringUtils.random(6, true, true) + System.currentTimeMillis());
-            ChatClient.getInstance().sendMessage(message);
+            ChatClient.getInstance().sendMessage(message, recipientProps);
             HolloutPreferences.updateConversationTime(recipientProps.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
             prioritizeConversation(recipientProps);
         }

@@ -279,7 +279,7 @@ public class AppInstanceDetectionService extends JobIntentService implements
                         for (ParseObject user : parseUsers) {
                             String userFirebaseToken = user.getString(AppConstants.USER_FIREBASE_TOKEN);
                             if (StringUtils.isNotEmpty(userFirebaseToken)) {
-                                JsonApiClient.sendAmNearbyNotification(userFirebaseToken);
+                                JsonApiClient.sendFirebasePushNotification(userFirebaseToken, AppConstants.NOTIFICATION_TYPE_AM_NEARBY);
                             }
                         }
                     }

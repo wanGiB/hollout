@@ -40,6 +40,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -975,6 +976,15 @@ public class UiUtils {
         Drawable wrapped = DrawableCompat.wrap(drawable);
         DrawableCompat.setTint(wrapped, color);
         return wrapped;
+    }
+
+    public static Animation getBlinkingAnimation(Context context) {
+        Animation animation = AnimationUtils.loadAnimation(context, android.R.anim.fade_in);
+        animation.setRepeatMode(Animation.REVERSE);
+        animation.setRepeatCount(Animation.INFINITE);
+        animation.setInterpolator(new AccelerateDecelerateInterpolator());
+        animation.setDuration(1500);
+        return animation;
     }
 
 }

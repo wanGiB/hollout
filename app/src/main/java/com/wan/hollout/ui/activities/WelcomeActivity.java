@@ -44,6 +44,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.wan.hollout.R;
+import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.eventbuses.TypingFinishedBus;
 import com.wan.hollout.ui.widgets.HolloutTextView;
@@ -172,8 +173,8 @@ public class WelcomeActivity extends AppCompatActivity implements GoogleApiClien
     }
 
     private void startChatClient() {
-        // sync blacklist
         ChatClient.getInstance().startChatClient();
+        CallClient.getInstance().startCallClient();
     }
 
     private void finishUp() {

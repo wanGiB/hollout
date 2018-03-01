@@ -191,6 +191,12 @@ public class AppConstants {
     static final String UNREAD_MESSAGES_COUNT_FROM = "UnreadMessagesCountFrom_";
     static final String TOTAL_UNREAD_MESSAGES_COUNT = "total_unread_messages_count";
     public static final String USER_FIREBASE_TOKEN = "user_firebase_token";
+    public static final String NEW_INCOMING_CALL = "NewIncomingCall";
+    public static final String CALLER_ID = "CallerId";
+    public static final String IS_VIDEO = "IsVideo";
+    public static final String BROADCAST_ACTION_CALL = "BroadCastActionCall";
+    public static final String CALL_STATE = "CallState";
+    public static final String CALL_ID = "call_id";
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

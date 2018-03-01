@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -60,6 +61,7 @@ public class MessageNotifier {
         List<ChatMessage> allUnreadMessages = DbUtils.fetchAllUnreadMessages();
         if (!allUnreadMessages.isEmpty()) {
             HolloutLogger.d("HolloutNotifTag", "Yope, Messages found with size of " + allUnreadMessages.size());
+            Collections.reverse(allUnreadMessages);
             onNewMsg(allUnreadMessages);
         } else {
             HolloutLogger.d("HolloutNotifTag", "Sorry, no messages o");
