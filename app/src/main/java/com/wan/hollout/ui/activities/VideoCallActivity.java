@@ -32,6 +32,7 @@ import com.wan.hollout.enums.CallType;
 import com.wan.hollout.eventbuses.CallTerminationCause;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.NotificationHelper;
 import com.wan.hollout.utils.UiUtils;
 
@@ -92,6 +93,8 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
     private NotificationManager mNotificationManager;
     private int callNotificationId = 342;
 
+    private String callerName;
+
     /**
      * Call entrance
      */
@@ -124,7 +127,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
             @Override
             public void done(ParseObject object, ParseException e) {
                 if (e == null && object != null) {
-                    String callerName = object.getString(AppConstants.APP_USER_DISPLAY_NAME);
+                    callerName = object.getString(AppConstants.APP_USER_DISPLAY_NAME);
                     String userPhotoUrl = object.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                     mUsernameView.setText(WordUtils.capitalize(callerName));
                     if (StringUtils.isNotEmpty(userPhotoUrl)) {
@@ -458,6 +461,11 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                             || StringUtils.containsIgnoreCase(terminationMessage, "Canceled")) {
                         UiUtils.showSafeToast(terminationMessage);
                         endCall();
+                        if (StringUtils.containsIgnoreCase(terminationMessage, "Canceled")) {
+                            if (isInComingCall) {
+                                DbUtils.createNewMissedCallMessage(callerName, mCallerId);
+                            }
+                        }
                     } else if (StringUtils.containsIgnoreCase(terminationMessage, "Denied")) {
                         if (!isInComingCall) {
                             UiUtils.showSafeToast("User Busy!");

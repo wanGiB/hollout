@@ -160,6 +160,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     @BindView(R.id.content_view)
     ViewGroup contentView;
 
+    @Nullable
+    @BindView(R.id.missed_call_view)
+    TextView missedCallView;
+
     private String searchString;
     private ChatMessage message;
 
@@ -264,6 +268,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             setupLocationMessage(searchString);
         }
 
+        if (messageType == MessageType.CALL) {
+            setupMissedCallMessage(searchString);
+        }
+
         setMessageStatusCallback(message.getFileUploadProgress());
         handleRepliedMessageIfAvailable();
         registerViewTreeObserver();
@@ -276,6 +284,14 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (audioView != null) {
             audioView.setOnClickListener(this);
             audioView.setOnLongClickListener(this);
+        }
+    }
+
+    private void setupMissedCallMessage(String searchString) {
+        if (StringUtils.isNotEmpty(searchString)) {
+            missedCallView.setText(UiUtils.highlightTextIfNecessary(searchString, message.getMessageBody(), ContextCompat.getColor(activity, R.color.colorAccent)));
+        } else {
+            missedCallView.setText(message.getMessageBody());
         }
     }
 

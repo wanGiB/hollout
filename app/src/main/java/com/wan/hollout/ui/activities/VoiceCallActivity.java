@@ -32,6 +32,8 @@ import com.wan.hollout.enums.CallType;
 import com.wan.hollout.eventbuses.CallTerminationCause;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.CallStateTracker;
+import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.NotificationHelper;
 import com.wan.hollout.utils.UiUtils;
 
@@ -83,6 +85,8 @@ public class VoiceCallActivity extends CallActivity {
     private NotificationManager mNotificationManager;
     private int callNotificationId = 342;
 
+    private String callerName;
+
     /**
      * Call entrance
      */
@@ -95,21 +99,24 @@ public class VoiceCallActivity extends CallActivity {
         if (isInComingCall) {
             mCallStatusView.setText(getString(R.string.incoming_call));
             UiUtils.showView(toggleContainer, false);
+            CallStateTracker.getInstance().setOutgoing(false);
         } else {
             mCallStatusView.setText(getString(R.string.outgoing_call));
             UiUtils.showView(toggleContainer, true);
+            CallStateTracker.getInstance().setOutgoing(true);
         }
         fetchCallerUserDetails();
     }
 
     private void fetchCallerUserDetails() {
+        CallStateTracker.getInstance().setCallerId(mCallerId);
         ParseQuery<ParseObject> callerQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         callerQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, mCallerId);
         callerQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(ParseObject object, ParseException e) {
                 if (e == null && object != null) {
-                    String callerName = object.getString(AppConstants.APP_USER_DISPLAY_NAME);
+                    callerName = object.getString(AppConstants.APP_USER_DISPLAY_NAME);
                     String userPhotoUrl = object.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
                     String userCoverPhotoUrl = object.getString(AppConstants.APP_USER_COVER_PHOTO);
                     mUsernameView.setText(WordUtils.capitalize(callerName));
@@ -256,6 +263,9 @@ public class VoiceCallActivity extends CallActivity {
         stopCallSound();
         // Call rejectCall();
         CallClient.getInstance().rejectCall(callId);
+        if (isInComingCall) {
+            CallStateTracker.getInstance().setWasRejected(true);
+        }
         // Set call state
         // Save call message to
         saveCallMessage();
@@ -282,6 +292,8 @@ public class VoiceCallActivity extends CallActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 10);
             return;
         }
+        CallStateTracker.getInstance().setWasRejected(false);
+        CallStateTracker.getInstance().setWasAnswered(true);
         startChronometer();
         // Vibrate
         vibrate();
@@ -409,6 +421,11 @@ public class VoiceCallActivity extends CallActivity {
                             || StringUtils.containsIgnoreCase(terminationMessage, "Canceled")) {
                         UiUtils.showSafeToast(terminationMessage);
                         endCall();
+                        if (StringUtils.containsIgnoreCase(terminationMessage, "Canceled")) {
+                            if (isInComingCall) {
+                                DbUtils.createNewMissedCallMessage(callerName,mCallerId);
+                            }
+                        }
                     } else if (StringUtils.containsIgnoreCase(terminationMessage, "Denied")) {
                         if (!isInComingCall) {
                             UiUtils.showSafeToast("User Busy!");
@@ -427,6 +444,7 @@ public class VoiceCallActivity extends CallActivity {
                             // Set call state view show content
                             if (isInComingCall) {
                                 mCallStatusView.setText(getString(R.string.incoming_call));
+                                CallStateTracker.getInstance().setWasRinging(true);
                             } else {
                                 mCallStatusView.setText(getString(R.string.ringing));
                             }

@@ -58,6 +58,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int INCOMING_MESSAGE_WITH_LINK_PREVIEW = 13;
     private static final int INCOMING_MESSAGE_WITH_REACTION = 14;
     private static final int INCOMING_MESSAGE_WITH_GIF = 15;
+    private static final int MESSAGE_TYPE_CALL = 16;
 
     private String searchString;
 
@@ -120,6 +121,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case INCOMING_MESSAGE_WITH_GIF:
                 layoutRes = R.layout.incoming_message_with_gif;
                 break;
+            case MESSAGE_TYPE_CALL:
+                layoutRes = R.layout.missed_call_view;
+                break;
             default:
                 layoutRes = R.layout.outgoing_message_text_only;
                 break;
@@ -162,6 +166,9 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
         if (messageType == MessageType.GIF) {
             return messageDirection == MessageDirection.OUTGOING ? OUTGOING_MESSAGE_WITH_GIF : INCOMING_MESSAGE_WITH_GIF;
+        }
+        if (messageType == MessageType.CALL) {
+            return MESSAGE_TYPE_CALL;
         }
         return -1;
     }

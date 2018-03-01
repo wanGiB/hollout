@@ -39,6 +39,7 @@ import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 
 import org.greenrobot.eventbus.EventBus;
+import org.intellij.lang.annotations.Flow;
 
 import java.net.URI;
 import java.net.URISyntaxException;

@@ -574,6 +574,14 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             userStatusOrLastMessageView.setText(activity.getString(R.string.voice));
         }
 
+        if (messageType == MessageType.CALL) {
+            UiUtils.showView(reactionsIndicatorView, true);
+            AppConstants.reactionsOpenPositions.put(getMessageId(), true);
+            UiUtils.showView(userStatusOrLastMessageView, true);
+            userStatusOrLastMessageView.setText(message.getMessageBody());
+            reactionsIndicatorView.setImageResource(R.drawable.ic_call_missed_black_48dp);
+        }
+
         String messageBody;
         if (messageType == MessageType.CONTACT) {
             messageBody = "Contact";
@@ -665,7 +673,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     }
 
     private void setupMessageReadStatus(ChatMessage message) {
-        if (getMessageDirection() == MessageDirection.OUTGOING && deliveryStatusView != null) {
+        if (getMessageDirection() == MessageDirection.OUTGOING && message.getMessageType() != MessageType.CALL && deliveryStatusView != null) {
             UiUtils.showView(deliveryStatusView, true);
             if (message.isAcknowledged()) {
                 deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);

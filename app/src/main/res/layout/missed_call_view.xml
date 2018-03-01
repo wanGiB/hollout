@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal|top"
+    android:layout_marginBottom="5dp"
+    android:orientation="horizontal"
+    android:paddingBottom="3dp"
+    android:paddingLeft="6dp"
+    android:paddingRight="6dp"
+    android:paddingTop="3dp">
+
+    <RelativeLayout
+        android:id="@+id/missed_call_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/missed_call_view_background"
+        android:paddingEnd="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingStart="5dp">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/missed_call_icon"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_call_missed_black_48dp"
+            app:tint="@color/red800"
+            app:tintMode="src_over" />
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:id="@+id/missed_call_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_toEndOf="@id/missed_call_icon"
+            android:layout_toRightOf="@id/missed_call_icon"
+            android:drawablePadding="5dp"
+            android:gravity="center_horizontal"
+            android:padding="8dp"
+            android:text="Missed Call"
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            app:textStyle="bold"
+            tools:ignore="MissingPrefix" />
+
+    </RelativeLayout>
+
+    <com.wan.hollout.ui.widgets.HolloutTextView
+        android:id="@+id/textview_time"
+        style="@style/chat_timings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/missed_call_container"
+        android:layout_centerHorizontal="true"
+        android:layout_marginEnd="4dp"
+        android:layout_marginRight="4dp"
+        app:textStyle="none" />
+
+</RelativeLayout>

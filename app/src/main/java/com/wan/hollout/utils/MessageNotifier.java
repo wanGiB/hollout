@@ -50,7 +50,7 @@ import java.util.concurrent.FutureTask;
 public class MessageNotifier {
 
     private final static String[] msgStandIns = {"&#x1f4f7; Photo", "&#x1f3a4; Voice Note",
-            "&#x2316; Location", "&#x1f4f7; Video", "&#x1f3a4; Audio", "&#x260e; Contact", "sent a Document", "Sent a GIF", "Reaction"
+            "&#x2316; Location", "&#x1f4f7; Video", "&#x1f3a4; Audio", "&#x260e; Contact", "sent a Document", "Sent a GIF", "Reaction", "Missed Call"
     };
 
     public static MessageNotifier getInstance() {
@@ -356,6 +356,8 @@ public class MessageNotifier {
             return msgStandIns[4];
         } else if (messageType == MessageType.CONTACT) {
             return msgStandIns[5];
+        } else if (messageType == MessageType.CALL) {
+            return msgStandIns[9];
         } else {
             return msgStandIns[6];
         }
@@ -383,6 +385,65 @@ public class MessageNotifier {
             }
         }
         return conversationIds;
+    }
+
+    void blowMissedCallsNotifications() {
+        final List<ChatMessage> unreadMissedCalls = DbUtils.fetchAllUnseenMissedCalls();
+        if (!unreadMissedCalls.isEmpty()) {
+            ChatClient.getInstance().execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    Intent mainIntent = new Intent(ApplicationLoader.getInstance(), MainActivity.class);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(ApplicationLoader.getInstance(), 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.getInstance(), getDefaultChannelId());
+                    NotificationHelper notificationHelper = new NotificationHelper(ApplicationLoader.getInstance().getApplicationContext(), getDefaultChannelId(), ApplicationLoader.getInstance().getString(R.string.app_name));
+
+                    Spanned messageSpannable = UiUtils.fromHtml(HolloutPreferences.getTotalUnreadMessagesCount() + "  missed calls");
+                    builder.setTicker(messageSpannable);
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        builder.setContentText((unreadMissedCalls.size() == 1 ? "1 missed call " : unreadMissedCalls.size() + " missed calls"));
+                    }
+                    builder.setSmallIcon(R.drawable.ic_call_missed_black_48dp);
+                    builder.setLights(Color.parseColor("blue"), 500, 1000);
+                    builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+                    builder.setAutoCancel(true);
+                    NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+                    builder.setColor(Color.parseColor("#00628F"));
+                    Resources res = ApplicationLoader.getInstance().getResources();
+
+                    int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
+                    int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
+
+                    Bitmap notificationInitiatorBitmap =
+                            getCircleBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(ApplicationLoader.getInstance().getResources(),
+                                    R.mipmap.ic_launcher),
+                                    width, height, false));
+
+                    builder.setContentTitle(WordUtils.capitalize(ApplicationLoader.getInstance().getString(R.string.app_name) + " Missed Calls"))
+                            .setLargeIcon(notificationInitiatorBitmap)
+                            .setContentIntent(pendingIntent)
+                            .setNumber(unreadMissedCalls.size())
+                            .setStyle(inboxStyle)
+                            .setSubText((unreadMissedCalls.size() == 1 ? "1 missed call " : unreadMissedCalls.size() + " missed calls") + " from " + ((getConversationIds(unreadMissedCalls).size() == 1) ? "1 chat " : (getConversationIds(unreadMissedCalls).size() + " chats")));
+
+                    for (ChatMessage message : unreadMissedCalls) {
+                        if (HolloutUtils.isAContact(message.getFrom())) {
+                            inboxStyle.addLine(WordUtils.capitalize(message.getFromName()) + ":" + UiUtils.fromHtml(getMessage(message)));
+                        } else {
+                            inboxStyle.addLine(WordUtils.capitalize(message.getFromName()) + " wants to chat with you");
+                        }
+                    }
+                    Notification notification = builder.build();
+                    notification.defaults |= Notification.DEFAULT_LIGHTS;
+                    notification.defaults |= Notification.DEFAULT_VIBRATE;
+                    notification.defaults |= Notification.DEFAULT_SOUND;
+                    if (pendingIntent != null) {
+                        notificationHelper.notify(AppConstants.NEW_MESSAGE_NOTIFICATION_ID, notification);
+                    }
+                }
+            });
+        }
     }
 
 }

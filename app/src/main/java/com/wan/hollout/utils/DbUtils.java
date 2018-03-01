@@ -1,13 +1,9 @@
 package com.wan.hollout.utils;
 
-import android.database.SQLException;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 
-import com.parse.GetCallback;
-import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
 import com.raizlabs.android.dbflow.structure.database.DatabaseWrapper;
@@ -18,12 +14,10 @@ import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.database.HolloutDb;
 import com.wan.hollout.enums.MessageDirection;
 import com.wan.hollout.enums.MessageStatus;
+import com.wan.hollout.enums.MessageType;
 import com.wan.hollout.interfaces.DoneCallback;
-import com.wan.hollout.models.CallLog;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ChatMessage_Table;
-import com.wan.hollout.models.HolloutUserEntity;
-import com.wan.hollout.models.HolloutUserEntity_Table;
 import com.wan.hollout.models.PathEntity;
 import com.wan.hollout.models.PathEntity_Table;
 
@@ -39,114 +33,6 @@ import java.util.List;
 
 @SuppressWarnings("WeakerAccess")
 public class DbUtils {
-
-    public static void getEntityName(int entityType, final String entityId, final DoneCallback<String> entityNameCallback) {
-        String entityNameFromDb = getEntityName(entityId);
-        if (StringUtils.isNotEmpty(entityNameFromDb)) {
-            entityNameCallback.done(entityNameFromDb, null);
-        }
-        if (entityType == AppConstants.ENTITY_TYPE_INDIVIDUAL) {
-            ParseQuery<ParseObject> parseUserParseQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-            parseUserParseQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, entityId);
-            parseUserParseQuery.getFirstInBackground(new GetCallback<ParseObject>() {
-                @Override
-                public void done(ParseObject object, ParseException e) {
-                    if (e == null) {
-                        if (object != null) {
-                            String entityName = object.getString(AppConstants.APP_USER_DISPLAY_NAME);
-                            if (StringUtils.isNotEmpty(entityName)) {
-                                upsertEntity(entityId, object);
-                                entityNameCallback.done(entityName, null);
-                            } else {
-                                entityNameCallback.done(null, null);
-                            }
-                        } else {
-                            entityNameCallback.done(null, null);
-                        }
-                    } else {
-                        entityNameCallback.done(null, e);
-                    }
-                }
-            });
-        } else if (entityType == AppConstants.ENTITY_TYPE_GROUP || entityType == AppConstants.ENTITY_TYPE_CHAT_ROOM) {
-            ParseQuery<ParseObject> groupsAndRoomsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-            groupsAndRoomsQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, entityId);
-            groupsAndRoomsQuery.getFirstInBackground(new GetCallback<ParseObject>() {
-                @Override
-                public void done(ParseObject object, ParseException e) {
-                    if (e == null) {
-                        if (object != null) {
-                            String entityName = object.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME);
-                            if (StringUtils.isNotEmpty(entityName)) {
-                                entityNameCallback.done(entityName, null);
-                            } else {
-                                entityNameCallback.done(null, null);
-                            }
-                        } else {
-                            entityNameCallback.done(null, null);
-                        }
-                    } else {
-                        entityNameCallback.done(null, e);
-                    }
-                }
-            });
-        }
-    }
-
-    private static void upsertEntity(String entityId, ParseObject parseObject) {
-        try {
-            HolloutUserEntity holloutUserEntity = SQLite.select().from(HolloutUserEntity.class).where(HolloutUserEntity_Table.entityId.eq(entityId)).querySingle();
-            if (holloutUserEntity != null) {
-                holloutUserEntity.setEntityName(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                        ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME));
-                holloutUserEntity.setEntityProfilePhotoUrl(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                        ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL));
-                holloutUserEntity.setEntityCoverPhotoUrl(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                        ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO));
-                holloutUserEntity.update();
-            } else {
-                createNewHolloutUserEntity(parseObject);
-            }
-        } catch (SQLException e) {
-            createNewHolloutUserEntity(parseObject);
-        }
-
-    }
-
-    private static void createNewHolloutUserEntity(ParseObject parseObject) {
-        HolloutUserEntity newHolloutUserEntity = new HolloutUserEntity();
-        newHolloutUserEntity.setEntityId(parseObject.getString(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
-        newHolloutUserEntity.setEntityName(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_NAME));
-        newHolloutUserEntity.setEntityProfilePhotoUrl(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                ? parseObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_PHOTO_URL));
-        newHolloutUserEntity.setEntityCoverPhotoUrl(parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
-                ? parseObject.getString(AppConstants.APP_USER_COVER_PHOTO) : parseObject.getString(AppConstants.GROUP_OR_CHAT_ROOM_COVER_PHOTO));
-        newHolloutUserEntity.save();
-    }
-
-    public static String getEntityName(String entityId) {
-        try {
-            HolloutUserEntity holloutUserEntity = SQLite.select().from(HolloutUserEntity.class).where(HolloutUserEntity_Table.entityId.eq(entityId)).querySingle();
-            if (holloutUserEntity != null) {
-                return holloutUserEntity.getEntityName();
-            }
-        } catch (SQLException e) {
-            return null;
-        }
-        return null;
-    }
-
-    public static void createCallLog(String partyId, String partyName, String content, boolean incoming, boolean voiceCall) {
-        CallLog callLog = new CallLog();
-        callLog.setContent(content);
-        callLog.setPartyId(partyId);
-        callLog.setCallId(System.currentTimeMillis() + RandomStringUtils.random(5, true, true));
-        callLog.setPartyName(partyName);
-        callLog.setIncoming(incoming);
-        callLog.setVoiceCall(voiceCall);
-        callLog.save();
-    }
 
     public static PathEntity getPathEntity(String pathName, String personId) {
         return SQLite.select().from(PathEntity.class).where(PathEntity_Table.pathId.in(getPathId(personId, pathName))).querySingle();
@@ -184,6 +70,15 @@ public class DbUtils {
                 .from(ChatMessage.class)
                 .where(ChatMessage_Table.messageDirection.eq(MessageDirection.INCOMING))
                 .and(ChatMessage_Table.messageStatus.notEq(MessageStatus.READ)).orderBy(ChatMessage_Table.timeStamp, false).queryList();
+    }
+
+    public static List<ChatMessage> fetchAllUnseenMissedCalls() {
+        return SQLite.select()
+                .from(ChatMessage.class)
+                .where(ChatMessage_Table.messageDirection.eq(MessageDirection.OUTGOING))
+                .and(ChatMessage_Table.messageType.eq(MessageType.CALL))
+                .and(ChatMessage_Table.messageStatus.notEq(MessageStatus.READ))
+                .orderBy(ChatMessage_Table.timeStamp, false).queryList();
     }
 
     public static void fetchMessagesInConversation(String conversationId, final DoneCallback<List<ChatMessage>> doneCallback) {
@@ -228,6 +123,13 @@ public class DbUtils {
                         unreadMessagesList.add(chatMessage);
                     }
                 }
+                if (chatMessage.getMessageDirection() == MessageDirection.OUTGOING
+                        && chatMessage.getMessageType() == MessageType.CALL
+                        && chatMessage.getMessageStatus() != MessageStatus.READ) {
+                    if (!unreadMessagesList.contains(chatMessage)) {
+                        unreadMessagesList.add(chatMessage);
+                    }
+                }
             }
         }
         if (!unreadMessagesList.isEmpty()) {
@@ -245,10 +147,21 @@ public class DbUtils {
                                 message.setMessageStatus(MessageStatus.READ);
                                 FlowManager.getModelAdapter(ChatMessage.class).update(message);
                             }
+                            if (message.getMessageDirection() == MessageDirection.OUTGOING
+                                    && message.getMessageType() == MessageType.CALL
+                                    && message.getMessageStatus() != MessageStatus.READ) {
+                                message.setMessageStatus(MessageStatus.READ);
+                                FlowManager.getModelAdapter(ChatMessage.class).update(message);
+                            }
                         }
                     }).processListener(new ProcessModelTransaction.OnModelProcessListener<ChatMessage>() {
                         @Override
                         public void onModelProcessed(long current, long total, ChatMessage modifiedModel) {
+                            if (modifiedModel.getMessageDirection() == MessageDirection.OUTGOING
+                                    && modifiedModel.getMessageType() == MessageType.CALL
+                                    && modifiedModel.getMessageStatus() == MessageStatus.READ) {
+                                return;
+                            }
                             ChatClient.getInstance().markMessageAsRead(modifiedModel);
                         }
                     }).addAll(targetMessages).build();
@@ -321,6 +234,28 @@ public class DbUtils {
                         messageSearchDoneCallBack.done(queriedWords, null);
                     }
                 }).execute();
+    }
+
+    public static void createNewMissedCallMessage(String callerName, String mCallerId) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        ChatMessage chatMessage = new ChatMessage();
+        chatMessage.setConversationId(mCallerId);
+        chatMessage.setTo(mCallerId);
+        chatMessage.setFromName(callerName);
+        chatMessage.setMessageDirection(MessageDirection.OUTGOING);
+        chatMessage.setMessageStatus(MessageStatus.SENT);
+        chatMessage.setMessageId(System.currentTimeMillis() + RandomStringUtils.random(5, true, true));
+        chatMessage.setMessageType(MessageType.CALL);
+        chatMessage.setMessageBody("Missed Call");
+        chatMessage.setTimeStamp(System.currentTimeMillis());
+        if (signedInUser != null) {
+            String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
+            if (StringUtils.isNotEmpty(signedInUserId)) {
+                chatMessage.setFrom(signedInUserId);
+            }
+        }
+        FlowManager.getModelAdapter(ChatMessage.class).save(chatMessage);
+        MessageNotifier.getInstance().blowMissedCallsNotifications();
     }
 
 }
