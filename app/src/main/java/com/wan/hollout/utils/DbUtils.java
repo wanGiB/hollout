@@ -236,7 +236,7 @@ public class DbUtils {
                 }).execute();
     }
 
-    public static void createNewMissedCallMessage(String callerName, String mCallerId) {
+    public static void createNewMissedCallMessage(String callerName, String mCallerId,String message) {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setConversationId(mCallerId);
@@ -246,7 +246,7 @@ public class DbUtils {
         chatMessage.setMessageStatus(MessageStatus.SENT);
         chatMessage.setMessageId(System.currentTimeMillis() + RandomStringUtils.random(5, true, true));
         chatMessage.setMessageType(MessageType.CALL);
-        chatMessage.setMessageBody("Missed Call");
+        chatMessage.setMessageBody(message);
         chatMessage.setTimeStamp(System.currentTimeMillis());
         if (signedInUser != null) {
             String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);

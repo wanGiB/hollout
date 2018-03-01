@@ -423,7 +423,7 @@ public class VoiceCallActivity extends CallActivity {
                         endCall();
                         if (StringUtils.containsIgnoreCase(terminationMessage, "Canceled")) {
                             if (isInComingCall) {
-                                DbUtils.createNewMissedCallMessage(callerName,mCallerId);
+                                DbUtils.createNewMissedCallMessage(callerName, mCallerId, "Missed Voice Call");
                             }
                         }
                     } else if (StringUtils.containsIgnoreCase(terminationMessage, "Denied")) {

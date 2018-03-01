@@ -312,6 +312,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
         saveCallMessage();
         // Finish activity
         onFinish();
+        removeVideoViews();
     }
 
     /**
@@ -323,6 +324,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
         CallClient.getInstance().hangUp(callId);
         saveCallMessage();
         onFinish();
+        removeVideoViews();
     }
 
     /**
@@ -463,7 +465,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                         endCall();
                         if (StringUtils.containsIgnoreCase(terminationMessage, "Canceled")) {
                             if (isInComingCall) {
-                                DbUtils.createNewMissedCallMessage(callerName, mCallerId);
+                                DbUtils.createNewMissedCallMessage(callerName, mCallerId, "Missed Video Call");
                             }
                         }
                     } else if (StringUtils.containsIgnoreCase(terminationMessage, "Denied")) {
@@ -473,6 +475,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                         }
                         endCall();
                     }
+                    removeVideoViews();
                 } else if (o instanceof CallState) {
                     CallState callState = (CallState) o;
                     switch (callState) {
