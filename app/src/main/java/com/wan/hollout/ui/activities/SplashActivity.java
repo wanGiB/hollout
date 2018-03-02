@@ -146,7 +146,6 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void launchWelcomeActivity() {
-        FlowManager.getDatabase(HolloutDb.class).reset();
         Intent welcomeIntent = new Intent(SplashActivity.this, WelcomeActivity.class);
         startActivity(welcomeIntent);
         finishAct();

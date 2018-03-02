@@ -65,9 +65,7 @@ import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.parse.ParseObject;
-import com.raizlabs.android.dbflow.config.FlowManager;
 import com.wan.hollout.R;
-import com.wan.hollout.database.HolloutDb;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
@@ -88,6 +86,7 @@ import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.GeneralNotifier;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -172,7 +171,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     public static Vibrator vibrator;
 
     private ProgressDialog deleteConversationProgressDialog;
-    private ArrayList<ChatMessage> messagesToBackUp = new ArrayList<>();
+    private List<ChatMessage> messagesToBackUp = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -1118,7 +1117,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     }
 
     private void createFile(final DoneCallback<Boolean> backUpOperationDoneCallback) {
-        // [START create_file]
         final Task<DriveFolder> rootFolderTask = getDriveResourceClient().getRootFolder();
         final Task<DriveContents> createContentsTask = getDriveResourceClient().createContents();
         Tasks.whenAll(rootFolderTask, createContentsTask)
@@ -1129,11 +1127,12 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                         DriveContents contents = createContentsTask.getResult();
                         OutputStream outputStream = contents.getOutputStream();
                         Writer writer = new OutputStreamWriter(outputStream);
-                        String serializeChats = JsonUtils.toJson(messagesToBackUp);
+                        String serializeChats = JsonUtils.getGson().toJson(messagesToBackUp, JsonUtils.getListType());
+                        HolloutLogger.d("SerializedChat", serializeChats);
                         writer.write(serializeChats);
                         MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
                                 .setTitle("HolloutChats")
-                                .setMimeType("text/plain")
+                                .setMimeType("application/json")
                                 .setStarred(true)
                                 .build();
                         return getDriveResourceClient().createFile(parent, changeSet, contents);

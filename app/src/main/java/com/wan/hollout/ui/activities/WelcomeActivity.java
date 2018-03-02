@@ -24,8 +24,6 @@ import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
-import com.fasterxml.jackson.databind.type.CollectionType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -60,6 +58,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
+import com.sinch.gson.stream.JsonReader;
 import com.wan.hollout.R;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
@@ -85,6 +84,7 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -94,9 +94,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class WelcomeActivity extends BaseActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
-
+public class WelcomeActivity extends BaseActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
     /**
      * Request code for google sign-in
      */
@@ -147,6 +145,7 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
     };
 
     private String TAG = "WelcomeActivity";
+    private ProgressDialog batchCreateMessagesDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -259,8 +258,6 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
      * user's account.
      */
 
-    private ProgressDialog batchCreateMessagesDialog;
-
     private void initBatchMessageInsertionDialog() {
         batchCreateMessagesDialog = new ProgressDialog(this);
         batchCreateMessagesDialog.setIndeterminate(false);
@@ -296,38 +293,40 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
                                                 while ((line = reader.readLine()) != null) {
                                                     builder.append(line);
                                                 }
-                                                String fetchedContent = StringUtils.strip(builder.toString());
+                                                String fetchedContent = StringUtils.replace(StringUtils.strip(builder.toString()), "/", "\\/");
                                                 UiUtils.dismissProgressDialog();
                                                 if (StringUtils.isNotEmpty(fetchedContent)) {
+                                                    JsonReader jsonReader = new JsonReader(new StringReader(fetchedContent));
+                                                    jsonReader.setLenient(true);
                                                     HolloutLogger.d("FetchedMessagesString", fetchedContent);
                                                     batchCreateMessagesDialog.show();
                                                     batchCreateMessagesDialog.setTitle("Retrieving Messages");
-
-                                                    CollectionType collectionType = TypeFactory.defaultInstance()
-                                                            .constructCollectionType(ArrayList.class, ChatMessage.class);
-
-                                                    List<ChatMessage> unSerializedMessages = JsonUtils.getMapper().readValue(fetchedContent, collectionType);
-                                                    if (unSerializedMessages != null && !unSerializedMessages.isEmpty()) {
-                                                        DbUtils.performBatchMessageInsertion(unSerializedMessages, new DoneCallback<Long[]>() {
-                                                            @Override
-                                                            public void done(Long[] progressValues, Exception e) {
-                                                                long current = progressValues[0];
-                                                                long total = progressValues[1];
-                                                                if (current != -1 && total != 0) {
-                                                                    double percentage = (100.0 * (current + 1)) / total;
-                                                                    batchCreateMessagesDialog.setProgress((int) percentage);
-                                                                    if (percentage == 100) {
+                                                    try {
+                                                        List<ChatMessage> unSerializedMessages = JsonUtils.getGson().fromJson(jsonReader, JsonUtils.getListType());
+                                                        if (!unSerializedMessages.isEmpty()) {
+                                                            DbUtils.performBatchMessageInsertion(unSerializedMessages, new DoneCallback<Long[]>() {
+                                                                @Override
+                                                                public void done(Long[] progressValues, Exception e) {
+                                                                    long current = progressValues[0];
+                                                                    long total = progressValues[1];
+                                                                    if (current != -1 && total != 0) {
+                                                                        double percentage = (100.0 * (current + 1)) / total;
+                                                                        batchCreateMessagesDialog.setProgress((int) percentage);
+                                                                        if (percentage == 100) {
+                                                                            checkDismissBatchMessageDialog();
+                                                                            backUpOperationDoneCallback.done(true, null);
+                                                                        }
+                                                                    } else {
                                                                         checkDismissBatchMessageDialog();
                                                                         backUpOperationDoneCallback.done(true, null);
                                                                     }
-                                                                } else {
-                                                                    checkDismissBatchMessageDialog();
-                                                                    backUpOperationDoneCallback.done(true, null);
                                                                 }
-                                                            }
-                                                        });
-                                                    } else {
-                                                        backUpOperationDoneCallback.done(true, null);
+                                                            });
+                                                        } else {
+                                                            backUpOperationDoneCallback.done(true, null);
+                                                        }
+                                                    } catch (Exception e) {
+                                                        HolloutLogger.d("RudeBoy", e.getMessage());
                                                     }
                                                 } else {
                                                     backUpOperationDoneCallback.done(true, null);
