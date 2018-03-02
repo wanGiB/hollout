@@ -1,6 +1,5 @@
 package com.wan.hollout.ui.activities;
 
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -9,7 +8,6 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -25,27 +23,14 @@ import com.facebook.FacebookException;
 import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.drive.Drive;
-import com.google.android.gms.drive.DriveContents;
-import com.google.android.gms.drive.DriveFile;
-import com.google.android.gms.drive.DriveId;
-import com.google.android.gms.drive.MetadataBuffer;
-import com.google.android.gms.drive.query.Filters;
-import com.google.android.gms.drive.query.Query;
-import com.google.android.gms.drive.query.SearchableField;
-import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -53,6 +38,9 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -70,6 +58,7 @@ import com.wan.hollout.ui.widgets.ShimmerFrameLayout;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
+import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.JsonUtils;
@@ -82,11 +71,8 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -94,11 +80,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
-public class WelcomeActivity extends BaseActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
-    /**
-     * Request code for google sign-in
-     */
-    protected static final int REQUEST_CODE_SIGN_IN = 0;
+public class WelcomeActivity extends BaseActivity
+        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     @BindView(R.id.shimmer_view_container)
     ShimmerFrameLayout shimmerFrameLayout;
@@ -145,7 +128,6 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
     };
 
     private String TAG = "WelcomeActivity";
-    private ProgressDialog batchCreateMessagesDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -184,7 +166,7 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
                     setupCrashlyticsUser(firebaseUser);
                     startChatClient();
                     UiUtils.dismissProgressDialog();
-                    finishUp(true, true);
+                    finishUp(true);
                 } else {
                     if (e != null) {
                         if (e.getCode() == ParseException.USERNAME_MISSING || e.getCode() == ParseException.OBJECT_NOT_FOUND) {
@@ -205,174 +187,77 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
         CallClient.getInstance().startCallClient();
     }
 
-    private void finishUp(boolean canShowBackUpFromHistoryDialog, boolean comingFromLogIn) {
-        UiUtils.dismissProgressDialog();
+    private void finishUp(boolean comingFromLogIn) {
+        UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
         if (comingFromLogIn) {
-            if (canShowBackUpFromHistoryDialog) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Welcome back!");
-                builder.setMessage("Let's quickly setup your chat history from your drive.");
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        tryRetrieveChats(new DoneCallback<Boolean>() {
-                            @Override
-                            public void done(Boolean signInSuccess, Exception e) {
-                                if (e == null && signInSuccess) {
-                                    navigateToAppropriateScreen();
-                                } else {
-                                    UiUtils.dismissProgressDialog();
-                                    if (e != null) {
-                                        HolloutLogger.d("FetchedMessagesString", "Error fetching chats" + e.getMessage());
-                                    }
-                                    navigateToAppropriateScreen();
-                                }
-                            }
-                        });
-                    }
-                });
-                builder.create().show();
-            } else {
-                tryRetrieveChats(new DoneCallback<Boolean>() {
-                    @Override
-                    public void done(Boolean signInSuccess, Exception e) {
-                        if (e == null && signInSuccess) {
-                            navigateToAppropriateScreen();
-                        } else {
-                            UiUtils.dismissProgressDialog();
-                            if (e != null) {
-                                HolloutLogger.d("FetchedMessagesString", "Error fetching chats" + e.getMessage());
-                            }
-                            navigateToAppropriateScreen();
+            tryRetrieveChats(new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean signInSuccess, Exception e) {
+                    if (e == null && signInSuccess) {
+                        navigateToAppropriateScreen();
+                    } else {
+                        UiUtils.dismissProgressDialog();
+                        if (e != null) {
+                            HolloutLogger.d("FetchedMessagesString", "Error fetching chats" + e.getMessage());
                         }
+                        navigateToAppropriateScreen();
                     }
-                });
-            }
+                }
+            });
         } else {
             navigateToAppropriateScreen();
         }
     }
 
-    /**
-     * Continues the sign-in process, initializing the Drive clients with the current
-     * user's account.
-     */
-
-    private void initBatchMessageInsertionDialog() {
-        batchCreateMessagesDialog = new ProgressDialog(this);
-        batchCreateMessagesDialog.setIndeterminate(false);
-        batchCreateMessagesDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        batchCreateMessagesDialog.setMax(100);
-    }
-
-    protected void initializeDriveClient(GoogleSignInAccount signInAccount, final DoneCallback<Boolean> backUpOperationDoneCallback) {
-        UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
-        initBatchMessageInsertionDialog();
-        mDriveClient = Drive.getDriveClient(getApplicationContext(), signInAccount);
-        mDriveResourceClient = Drive.getDriveResourceClient(getApplicationContext(), signInAccount);
-        Query query = new Query.Builder()
-                .addFilter(Filters.eq(SearchableField.TITLE, "HolloutChats"))
-                .build();
-        getDriveResourceClient()
-                .query(query)
-                .addOnSuccessListener(this,
-                        new OnSuccessListener<MetadataBuffer>() {
-                            @Override
-                            public void onSuccess(MetadataBuffer metadataBuffer) {
-                                DriveId driveId = metadataBuffer.get(0).getDriveId();
-                                DriveFile driveFile = driveId.asDriveFile();
-                                Task<DriveContents> openFileTask = getDriveResourceClient().openFile(driveFile, DriveFile.MODE_READ_ONLY);
-                                openFileTask
-                                        .continueWithTask(new Continuation<DriveContents, Task<Void>>() {
-                                            @Override
-                                            public Task<Void> then(@NonNull Task<DriveContents> task) throws Exception {
-                                                DriveContents contents = task.getResult();
-                                                BufferedReader reader = new BufferedReader(new InputStreamReader(contents.getInputStream()));
-                                                StringBuilder builder = new StringBuilder();
-                                                String line;
-                                                while ((line = reader.readLine()) != null) {
-                                                    builder.append(line);
+    protected void tryRetrieveChats(final DoneCallback<Boolean> backUpCompletedOptionCallback) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            FirebaseUtils.getArchives().child(signedInUser.getString(AppConstants.REAL_OBJECT_ID)).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot != null && dataSnapshot.exists()) {
+                        String fetchedContent = dataSnapshot.getValue(String.class);
+                        if (StringUtils.isNotEmpty(fetchedContent)) {
+                            JsonReader jsonReader = new JsonReader(new StringReader(fetchedContent));
+                            jsonReader.setLenient(true);
+                            HolloutLogger.d("FetchedMessagesString", fetchedContent);
+                            try {
+                                List<ChatMessage> unSerializedMessages = JsonUtils.getGson().fromJson(jsonReader, JsonUtils.getListType());
+                                if (!unSerializedMessages.isEmpty()) {
+                                    DbUtils.performBatchMessageInsertion(unSerializedMessages, new DoneCallback<Long[]>() {
+                                        @Override
+                                        public void done(Long[] progressValues, Exception e) {
+                                            long current = progressValues[0];
+                                            long total = progressValues[1];
+                                            if (current != -1 && total != 0) {
+                                                double percentage = (100.0 * (current + 1)) / total;
+                                                if (percentage == 100) {
+                                                    backUpCompletedOptionCallback.done(true, null);
                                                 }
-                                                String fetchedContent = StringUtils.replace(StringUtils.strip(builder.toString()), "/", "\\/");
-                                                UiUtils.dismissProgressDialog();
-                                                if (StringUtils.isNotEmpty(fetchedContent)) {
-                                                    JsonReader jsonReader = new JsonReader(new StringReader(fetchedContent));
-                                                    jsonReader.setLenient(true);
-                                                    HolloutLogger.d("FetchedMessagesString", fetchedContent);
-                                                    batchCreateMessagesDialog.show();
-                                                    batchCreateMessagesDialog.setTitle("Retrieving Messages");
-                                                    try {
-                                                        List<ChatMessage> unSerializedMessages = JsonUtils.getGson().fromJson(jsonReader, JsonUtils.getListType());
-                                                        if (!unSerializedMessages.isEmpty()) {
-                                                            DbUtils.performBatchMessageInsertion(unSerializedMessages, new DoneCallback<Long[]>() {
-                                                                @Override
-                                                                public void done(Long[] progressValues, Exception e) {
-                                                                    long current = progressValues[0];
-                                                                    long total = progressValues[1];
-                                                                    if (current != -1 && total != 0) {
-                                                                        double percentage = (100.0 * (current + 1)) / total;
-                                                                        batchCreateMessagesDialog.setProgress((int) percentage);
-                                                                        if (percentage == 100) {
-                                                                            checkDismissBatchMessageDialog();
-                                                                            backUpOperationDoneCallback.done(true, null);
-                                                                        }
-                                                                    } else {
-                                                                        checkDismissBatchMessageDialog();
-                                                                        backUpOperationDoneCallback.done(true, null);
-                                                                    }
-                                                                }
-                                                            });
-                                                        } else {
-                                                            backUpOperationDoneCallback.done(true, null);
-                                                        }
-                                                    } catch (Exception e) {
-                                                        HolloutLogger.d("RudeBoy", e.getMessage());
-                                                    }
-                                                } else {
-                                                    backUpOperationDoneCallback.done(true, null);
-                                                }
-                                                return getDriveResourceClient().discardContents(contents);
+                                            } else {
+                                                backUpCompletedOptionCallback.done(true, null);
                                             }
-                                        })
-                                        .addOnFailureListener(new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                backUpOperationDoneCallback.done(null, e);
-                                            }
-                                        });
-
+                                        }
+                                    });
+                                } else {
+                                    backUpCompletedOptionCallback.done(true, null);
+                                }
+                            } catch (Exception e1) {
+                                HolloutLogger.d("RudeBoy", e1.getMessage());
                             }
-                        })
-                .addOnFailureListener(this, new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        UiUtils.dismissProgressDialog();
-                        backUpOperationDoneCallback.done(false, e);
+                        } else {
+                            backUpCompletedOptionCallback.done(true, null);
+                        }
+                    } else {
+                        backUpCompletedOptionCallback.done(true, null);
                     }
-                });
-    }
+                }
 
-    private void checkDismissBatchMessageDialog() {
-        if (batchCreateMessagesDialog != null && batchCreateMessagesDialog.isShowing()) {
-            batchCreateMessagesDialog.dismiss();
-        }
-    }
-
-    protected void tryRetrieveChats(DoneCallback<Boolean> backUpCompletedOptionCallback) {
-        Set<Scope> requiredScopes = new HashSet<>(2);
-        requiredScopes.add(Drive.SCOPE_FILE);
-        requiredScopes.add(Drive.SCOPE_APPFOLDER);
-        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if (signInAccount != null && signInAccount.getGrantedScopes().containsAll(requiredScopes)) {
-            initializeDriveClient(signInAccount, backUpCompletedOptionCallback);
-        } else {
-            GoogleSignInOptions signInOptions =
-                    new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestScopes(Drive.SCOPE_FILE)
-                            .requestScopes(Drive.SCOPE_APPFOLDER)
-                            .build();
-            GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(this, signInOptions);
-            startActivityForResult(googleSignInClient.getSignInIntent(), REQUEST_CODE_SIGN_IN);
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    backUpCompletedOptionCallback.done(true, null);
+                }
+            });
         }
     }
 
@@ -399,17 +284,20 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
     }
 
     private void launchGenderAndAgeActivity() {
+        UiUtils.dismissProgressDialog();
         Intent genderAndAgeIntent = new Intent(WelcomeActivity.this, GenderAndAgeConfigurationActivity.class);
         startActivityForResult(genderAndAgeIntent, RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER);
     }
 
     private void navigateToAboutActivity() {
+        UiUtils.dismissProgressDialog();
         Intent aboutUserIntent = new Intent(WelcomeActivity.this, AboutUserActivity.class);
         startActivity(aboutUserIntent);
         finish();
     }
 
     private void navigateToMainActivity() {
+        UiUtils.dismissProgressDialog();
         Intent mainIntent = new Intent(WelcomeActivity.this, MainActivity.class);
         startActivity(mainIntent);
         finish();
@@ -451,7 +339,7 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
                     HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
                     startChatClient();
                     UiUtils.dismissProgressDialog();
-                    finishUp(false, false);
+                    finishUp(false);
                 } else {
                     String errorMessage = e.getMessage();
                     if (StringUtils.isNotEmpty(errorMessage)) {
@@ -663,7 +551,6 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
         }
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -682,20 +569,7 @@ public class WelcomeActivity extends BaseActivity implements GoogleApiClient.Con
                 UiUtils.dismissProgressDialog();
             }
         } else if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
-            finishUp(false, false);
-        } else if (requestCode == REQUEST_CODE_SIGN_IN) {
-            if (resultCode != RESULT_OK) {
-                UiUtils.showSafeToast("Sorry, failed to retrieve chats from Drive. Please try again later.");
-                return;
-            }
-            Task<GoogleSignInAccount> getAccountTask =
-                    GoogleSignIn.getSignedInAccountFromIntent(data);
-            if (getAccountTask.isSuccessful()) {
-                UiUtils.dismissProgressDialog();
-                finishUp(false, true);
-            } else {
-                UiUtils.showSafeToast("Sorry, failed to initialize Google Drive. Please try again later.");
-            }
+            finishUp(false);
         } else {
             mCallbackManager.onActivityResult(requestCode, resultCode, data);
         }

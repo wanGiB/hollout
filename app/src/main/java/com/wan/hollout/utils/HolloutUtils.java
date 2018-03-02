@@ -8,7 +8,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -578,17 +577,25 @@ public class HolloutUtils {
         return filePath;
     }
 
-    private static String getMetaDataValue(Context context, String metaDataName) {
-        try {
-            ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-            if (ai.metaData != null) {
-                return ai.metaData.getString(metaDataName);
+    public static File getChatBackUpFilePath(String fileName, Context context) {
+        File filePath;
+        File dir;
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            String folder = "/" + MAIN_FOLDER_META_DATA + "/ChatsBackUp";
+            dir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + folder);
+            if (!dir.exists()) {
+                dir.mkdirs();
             }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-            return null;
+        } else {
+            ContextWrapper cw = new ContextWrapper(context);
+            dir = cw.getDir("/ChatsBackUp", Context.MODE_PRIVATE);
         }
-        return null;
+        filePath = new File(dir, fileName);
+        return filePath;
+    }
+
+    private static String getMetaDataValue(Context context, String metaDataName) {
+        return "Hollout";
     }
 
     public static String getGifUrl(JSONObject gifObject) {

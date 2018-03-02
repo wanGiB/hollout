@@ -215,7 +215,7 @@ public class DbUtils {
                     }
                 }).processListener(new ProcessModelTransaction.OnModelProcessListener<ChatMessage>() {
                     @Override
-                    public void onModelProcessed(long current, long total, ChatMessage modifiedModel) {
+                    public void onModelProcessed(final long current, final long total, ChatMessage modifiedModel) {
                         if (progressCallback != null) {
                             progressCallback.done(new Long[]{current, total}, null);
                         }

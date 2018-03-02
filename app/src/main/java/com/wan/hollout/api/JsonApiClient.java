@@ -2,10 +2,13 @@ package com.wan.hollout.api;
 
 import android.support.annotation.NonNull;
 
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,7 +65,7 @@ public class JsonApiClient {
         return requestBuilder;
     }
 
-    public static void sendFirebasePushNotification(String recipientToken,String category) {
+    public static void sendFirebasePushNotification(String recipientToken, String category) {
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse("https://fcm.googleapis.com/fcm/send").newBuilder();
         JSONObject message = new JSONObject();
         JSONObject data = new JSONObject();
@@ -98,6 +101,56 @@ public class JsonApiClient {
         });
     }
 
+    public static void fetchChats(String chatsDownloadUrl, final DoneCallback<String> fetchDoneCallBack) {
+        HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(chatsDownloadUrl).newBuilder();
+        Request request = getRequestBuilder(null).url(httpUrlBuilder.build()).get().build();
+        getOkHttpClient().newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                logResponse(e.getMessage(), e.hashCode());
+                callBackOnMainThread(fetchDoneCallBack, null, e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    byte[] responseBytes = response.body().bytes();
+                    String responseByteString = new String(responseBytes);
+                    logResponse(responseByteString, response.code());
+                    callBackOnMainThread(fetchDoneCallBack, responseByteString, null);
+                } else {
+                    callBackOnMainThread(fetchDoneCallBack, null, new Exception("None"));
+                }
+            }
+
+        });
+
+    }
+
+
+    private static void callBackOnMainThread(final DoneCallback doneCallback, final Object result, final Exception e) {
+        UiUtils.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                if (e != null) {
+                    if (e.getMessage() != null) {
+                        if (StringUtils.containsIgnoreCase(e.getMessage(), "host") || StringUtils.containsIgnoreCase(e.getMessage(), "ssl")) {
+                            doneCallback.done(result, new Exception("Network Error! Please review your data connection and try again"));
+                        } else {
+                            HolloutLogger.d("MajorException", e.getMessage());
+                            doneCallback.done(result, e);
+                        }
+                    } else {
+                        doneCallback.done(result, new Exception("Error in operation!"));
+                    }
+                } else {
+                    doneCallback.done(result, null);
+                }
+            }
+        });
+    }
+
     private static String getZZAKey() {
         return "AAAAvc3IQns:APA91bGJrm56rf3_LCdFnRgFrDdCB0FL41Ecl66HxueLOl5JxhQg3rLsdaeoqbgTApBIYxV9JJWl_9MYG9q3vCueJGcjxgtLbq_6pFMOWiObps6ULo7lp4RSECytMzEKU2LVBtYWq5dk";
     }
@@ -116,7 +169,7 @@ public class JsonApiClient {
     }
 
     private static void logResponse(String responseBodyString, int code) {
-        HolloutLogger.d("sendFirebasePushNotification", responseBodyString + ", Response Code =" + code);
+        HolloutLogger.d("FetchChats", responseBodyString + ", Response Code =" + code);
     }
 
 }
