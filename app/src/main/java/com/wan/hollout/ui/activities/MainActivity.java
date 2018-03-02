@@ -143,14 +143,10 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     //save our header or result
     private AccountHeader headerResult = null;
     private Drawer result = null;
-
     private IProfile currentProfile;
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
-
     public static Vibrator vibrator;
-
     private ProgressDialog deleteConversationProgressDialog;
-    private List<ChatMessage> messagesToBackUp = new ArrayList<>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -1015,33 +1011,42 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
      */
     @SuppressWarnings("ConstantConditions")
     protected void tryBackUpChatsBeforeLoginOut(final DoneCallback<Boolean> backUpCompletedOptionCallback) {
-        String serializeChats = JsonUtils.getGson().toJson(messagesToBackUp, JsonUtils.getListType());
-        ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (signedInUser != null) {
-            String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
-            if (StringUtils.isNotEmpty(signedInUserId)) {
-                FirebaseUtils
-                        .getArchives()
-                        .child(signedInUserId)
-                        .setValue(serializeChats)
-                        .addOnSuccessListener(getCurrentActivityInstance(), new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                backUpCompletedOptionCallback.done(true, null);
-                            }
-                        })
-                        .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                backUpCompletedOptionCallback.done(false, new Exception("Failed to complete sign out. Please try again."));
-                            }
-                        });
-            } else {
-                backUpCompletedOptionCallback.done(true, null);
+        DbUtils.fetchAllMessages(new DoneCallback<List<ChatMessage>>() {
+            @Override
+            public void done(List<ChatMessage> result, Exception e) {
+                if (result != null && !result.isEmpty() && e == null) {
+                    String serializeChats = JsonUtils.getGson().toJson(result, JsonUtils.getListType());
+                    ParseObject signedInUser = AuthUtil.getCurrentUser();
+                    if (signedInUser != null) {
+                        String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
+                        if (StringUtils.isNotEmpty(signedInUserId)) {
+                            FirebaseUtils
+                                    .getArchives()
+                                    .child(signedInUserId)
+                                    .setValue(serializeChats)
+                                    .addOnSuccessListener(getCurrentActivityInstance(), new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            backUpCompletedOptionCallback.done(true, null);
+                                        }
+                                    })
+                                    .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            backUpCompletedOptionCallback.done(false, new Exception("Failed to complete sign out. Please try again."));
+                                        }
+                                    });
+                        } else {
+                            backUpCompletedOptionCallback.done(true, null);
+                        }
+                    } else {
+                        backUpCompletedOptionCallback.done(true, null);
+                    }
+                } else {
+                    backUpCompletedOptionCallback.done(true, null);
+                }
             }
-        } else {
-            backUpCompletedOptionCallback.done(true, null);
-        }
+        });
     }
 
     private void finishUp() {

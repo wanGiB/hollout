@@ -101,7 +101,6 @@ public class DbUtils {
             @Override
             public void onListQueryResult(QueryTransaction transaction, @NonNull List<ChatMessage> tResult) {
                 messageFetchDoneCallBack.done(tResult, null);
-
             }
         }).execute();
     }
