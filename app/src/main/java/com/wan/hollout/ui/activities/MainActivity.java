@@ -44,7 +44,12 @@ import com.google.android.gms.drive.Drive;
 import com.google.android.gms.drive.DriveContents;
 import com.google.android.gms.drive.DriveFile;
 import com.google.android.gms.drive.DriveFolder;
+import com.google.android.gms.drive.DriveId;
+import com.google.android.gms.drive.MetadataBuffer;
 import com.google.android.gms.drive.MetadataChangeSet;
+import com.google.android.gms.drive.query.Filters;
+import com.google.android.gms.drive.query.Query;
+import com.google.android.gms.drive.query.SearchableField;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -1112,8 +1117,13 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         onDriveClientReady(backUpOperationDoneCallback);
     }
 
-    protected void onDriveClientReady(DoneCallback<Boolean> backUpOperationDoneCallback) {
-        createFile(backUpOperationDoneCallback);
+    protected void onDriveClientReady(final DoneCallback<Boolean> backUpOperationDoneCallback) {
+        tryDeleteExistingFileBeforeCreating(new DoneCallback<Boolean>() {
+            @Override
+            public void done(Boolean result, Exception e) {
+                createFile(backUpOperationDoneCallback);
+            }
+        });
     }
 
     private void createFile(final DoneCallback<Boolean> backUpOperationDoneCallback) {
@@ -1149,6 +1159,44 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         backUpOperationDoneCallback.done(false, e);
+                    }
+                });
+    }
+
+    private void tryDeleteExistingFileBeforeCreating(final DoneCallback<Boolean> deleteDoneCallback) {
+        Query query = new Query.Builder()
+                .addFilter(Filters.eq(SearchableField.TITLE, "HolloutChats"))
+                .build();
+        getDriveResourceClient()
+                .query(query)
+                .addOnSuccessListener(this,
+                        new OnSuccessListener<MetadataBuffer>() {
+                            @Override
+                            public void onSuccess(MetadataBuffer metadataBuffer) {
+                                DriveId driveId = metadataBuffer.get(0).getDriveId();
+                                if (driveId != null) {
+                                    getDriveResourceClient().delete(driveId.asDriveResource())
+                                            .addOnSuccessListener(getCurrentActivityInstance(), new OnSuccessListener<Void>() {
+                                                @Override
+                                                public void onSuccess(Void aVoid) {
+                                                    deleteDoneCallback.done(true, null);
+                                                }
+                                            })
+                                            .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    deleteDoneCallback.done(false, e);
+                                                }
+                                            });
+                                } else {
+                                    deleteDoneCallback.done(true, null);
+                                }
+                            }
+                        })
+                .addOnFailureListener(this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        deleteDoneCallback.done(false, e);
                     }
                 });
     }
