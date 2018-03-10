@@ -1015,7 +1015,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             @Override
             public void done(List<ChatMessage> result, Exception e) {
                 if (result != null && !result.isEmpty() && e == null) {
-                    String serializeChats = JsonUtils.getGson().toJson(result, JsonUtils.getListType());
+                    String serializeChats = JsonUtils.getGSon().toJson(result, JsonUtils.getListType());
                     ParseObject signedInUser = AuthUtil.getCurrentUser();
                     if (signedInUser != null) {
                         String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);

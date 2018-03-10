@@ -94,7 +94,7 @@ public class CallClient extends ContextWrapper {
         sinchClient.setSupportManagedPush(true);
         sinchClient.setSupportActiveConnectionInBackground(true);
         sinchClient.startListeningOnActiveConnection();
-        if (sinchClientListener != null) {
+        if (sinchClientListener != null && sinchClient != null) {
             sinchClient.removeSinchClientListener(sinchClientListener);
             sinchClientListener = null;
         }
@@ -135,7 +135,7 @@ public class CallClient extends ContextWrapper {
     }
 
     private void checkAndRegisterCallClient() {
-        if (callClientListener != null) {
+        if (callClientListener != null && sinchClient != null) {
             sinchClient.getCallClient().removeCallClientListener(callClientListener);
             callClientListener = null;
         }

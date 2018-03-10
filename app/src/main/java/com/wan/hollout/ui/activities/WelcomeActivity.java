@@ -222,7 +222,7 @@ public class WelcomeActivity extends BaseActivity
                             jsonReader.setLenient(true);
                             HolloutLogger.d("FetchedMessagesString", fetchedContent);
                             try {
-                                List<ChatMessage> unSerializedMessages = JsonUtils.getGson().fromJson(jsonReader, JsonUtils.getListType());
+                                List<ChatMessage> unSerializedMessages = JsonUtils.getGSon().fromJson(jsonReader, JsonUtils.getListType());
                                 if (!unSerializedMessages.isEmpty()) {
                                     DbUtils.performBatchMessageInsertion(unSerializedMessages, new DoneCallback<Long[]>() {
                                         @Override

@@ -26,7 +26,7 @@ public class JsonUtils {
         return objectMapper;
     }
 
-    public static Gson getGson() {
+    public static Gson getGSon() {
         return new Gson();
     }
 

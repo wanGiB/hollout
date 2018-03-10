@@ -160,7 +160,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
     }
 
     private void setupTermsAndConditionsView() {
-        acceptLicenseCheck.setText(UiUtils.fromHtml("By continuing, you agree to our <a href=https://firebasestorage.googleapis.com/v0/b/hollout-860db.appspot.com/o/privacy_policy.html?alt=media&token=1aa10939-7463-4ac0-ad84-7f04ac6804f5>Privacy Policy</a>"));
+        acceptLicenseCheck.setText(UiUtils.fromHtml("By continuing, you agree to our <a href=https://firebasestorage.googleapis.com/v0/b/hollout-860db.appspot.com/o/WebComponents%2Fprivacy_policy.html?alt=media&token=e4b6c9b9-524c-45a9-847b-6f3bb1157a6f>Privacy Policy</a>"));
         acceptLicenseCheck.setMovementMethod(LinkMovementMethod.getInstance());
         acceptLicenseCheck.setClickable(true);
     }
