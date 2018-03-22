@@ -13,4 +13,5 @@ public class AppKeys {
     public static String GIPHY_DEV_KEY = "88585b2bc3204e4caead0d75ad206972";
     public static final String GIPHY_PRODUCTION_KEY = "88585b2bc3204e4caead0d75ad206972";
 
+    public static final String DATUM_BOX_KEY = "f458f2fa5d996c7bf35787d3bc23f995";
 }

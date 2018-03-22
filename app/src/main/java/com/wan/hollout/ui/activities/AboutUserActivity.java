@@ -30,7 +30,9 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.SaveCallback;
 import com.wan.hollout.R;
+import com.wan.hollout.api.JsonApiClient;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.adapters.InterestsSuggestionAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
@@ -131,11 +133,7 @@ public class AboutUserActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchItem.setVisible(false);
-
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
-//        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
-
-//        createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
         supportInvalidateOptionsMenu();
         return super.onPrepareOptionsMenu(menu);
@@ -215,11 +213,9 @@ public class AboutUserActivity extends BaseActivity {
 
     private void initComponents() {
         reasonForInterestsView.setMovementMethod(ScrollingMovementMethod.getInstance());
-
         if (signedInUser != null) {
             interestsSuggestionRecyclerView.setNestedScrollingEnabled(true);
         }
-
         moreAboutUserField.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -353,6 +349,8 @@ public class AboutUserActivity extends BaseActivity {
                     }
                 }
             });
+            //Use Machine learning to classify user interest
+            JsonApiClient.classifyInterest(s);
         }
     }
 

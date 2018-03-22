@@ -321,6 +321,7 @@ public class PeopleFragment extends Fragment {
                     List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
                     String signedInUserCountry = signedInUser.getString(AppConstants.APP_USER_COUNTRY);
                     List<String> signedInUserInterests = signedInUser.getList(AppConstants.INTERESTS);
+                    List<String> signedInUserCategory = signedInUser.getList(AppConstants.CATEGORY);
 
                     String startAgeValue = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
                     String endAgeValue = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
@@ -333,13 +334,10 @@ public class PeopleFragment extends Fragment {
                         HolloutLogger.d("AgeRanges", TextUtils.join(",", ageRanges));
                         peopleQuery.whereContainedIn(AppConstants.APP_USER_AGE, ageRanges);
                     }
-
                     String genderFilter = signedInUser.getString(AppConstants.GENDER_FILTER);
-
                     if (genderFilter != null && !genderFilter.equals(AppConstants.Both)) {
                         peopleQuery.whereEqualTo(AppConstants.APP_USER_GENDER, genderFilter);
                     }
-
                     if (savedUserChats != null) {
                         if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
                             savedUserChats.add(signedInUserId.toLowerCase());
@@ -351,12 +349,14 @@ public class PeopleFragment extends Fragment {
                         }
                         peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
                     }
-
                     if (signedInUserCountry != null) {
                         peopleQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
                     }
                     if (signedInUserInterests != null) {
                         peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, signedInUserInterests);
+                    }
+                    if (signedInUserCategory != null) {
+                        peopleQuery.whereContainedIn(AppConstants.CATEGORY, signedInUserCategory);
                     }
                     ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                     if (signedInUserGeoPoint != null) {
