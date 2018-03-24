@@ -155,30 +155,29 @@
             android:padding="10dp">
 
             <Button
-                android:id="@+id/button_login_facebook"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:drawableLeft="@drawable/glyph_facebook"
-                android:drawableStart="@drawable/glyph_facebook"
-                android:gravity="center"
-                android:text="@string/btn_text_login_fb"
-                android:theme="@style/Widget.Button.Login.Facebook" />
-
-            <Button
                 android:id="@+id/button_login_google"
-                android:layout_width="300dp"
+                android:layout_width="330dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:drawableLeft="@drawable/glyph_google"
                 android:drawableStart="@drawable/glyph_google"
                 android:gravity="center"
+                android:padding="5dp"
                 android:text="@string/btn_text_login_google"
+                android:textSize="18sp"
+                android:textAllCaps="false"
+                android:textStyle="normal"
                 android:theme="@style/Widget.Button.Login.Google" />
+
+            <com.truecaller.android.sdk.TrueButton
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                app:truebutton_text="signIn" />
 
         </LinearLayout>
 
     </RelativeLayout>
 
 </com.wan.hollout.ui.widgets.ScrimInsetsFrameLayout>
-

@@ -15,10 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -151,12 +148,12 @@ public class JsonApiClient {
 
     public static void classifyInterest(String interest) {
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(AppConstants.DATUM_URL).newBuilder();
-        httpUrlBuilder.addQueryParameter("api_key",AppKeys.DATUM_BOX_KEY);
+        httpUrlBuilder.addQueryParameter("api_key", AppKeys.DATUM_BOX_KEY);
         httpUrlBuilder.addQueryParameter("text", interest.trim());
         String postUrl = httpUrlBuilder.build().toString();
 
-        HashMap<String,String>authParams=new HashMap<>();
-        authParams.put("api_key",AppKeys.DATUM_BOX_KEY);
+        HashMap<String, String> authParams = new HashMap<>();
+        authParams.put("api_key", AppKeys.DATUM_BOX_KEY);
 
         JSONObject classificationProps = new JSONObject();
 
@@ -168,7 +165,6 @@ public class JsonApiClient {
         }
 
         RequestBody postRequestBody = RequestBody.create(MediaType.parse("application/json"), classificationProps.toString());
-
         Request postRequest = getRequestBuilder(authParams).url(postUrl).post(postRequestBody).build();
 
         getOkHttpClient().newCall(postRequest).enqueue(new Callback() {
@@ -181,7 +177,7 @@ public class JsonApiClient {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 String responseString = getResponseString(response);
-                logResponse(responseString,response.code());
+                logResponse(responseString, response.code());
                 if (response.isSuccessful()) {
                     try {
                         if (StringUtils.isNotEmpty(responseString)) {
@@ -210,19 +206,8 @@ public class JsonApiClient {
     private static void updateSignedInUserProps(String result) {
         ParseObject signedInUserObject = AuthUtil.getCurrentUser();
         if (signedInUserObject != null) {
-            List<String> userCategory = signedInUserObject.getList(AppConstants.CATEGORY);
-            if (userCategory != null && !userCategory.isEmpty()) {
-                if (!userCategory.contains(result)) {
-                    userCategory.add(result);
-                    signedInUserObject.put(AppConstants.CATEGORY, userCategory);
-                    AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
-                }
-            } else {
-                userCategory = new ArrayList<>();
-                userCategory.add(result);
-                signedInUserObject.put(AppConstants.CATEGORY, userCategory);
-                AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
-            }
+            signedInUserObject.put(AppConstants.CLASSIFICATION, result);
+            AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
         }
     }
 

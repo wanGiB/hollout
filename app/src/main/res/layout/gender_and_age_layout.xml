@@ -143,34 +143,6 @@
 
     </ScrollView>
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/button_continue"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="8dp"
-        android:clickable="true"
-        android:foreground="?attr/selectableItemBackground"
-        app:cardBackgroundColor="#f0f0f0"
-        app:cardCornerRadius="18dp"
-        app:cardElevation="1dp"
-        app:cardPreventCornerOverlap="false"
-        app:cardUseCompatPadding="true">
-
-        <com.wan.hollout.ui.widgets.HolloutTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center_vertical"
-            android:padding="9dp"
-            android:text="@string/continue_"
-            android:textColor="@color/medium_grey"
-            android:textSize="18sp"
-            app:textStyle="medium" />
-
-    </android.support.v7.widget.CardView>
-
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"
         android:layout_width="match_parent"

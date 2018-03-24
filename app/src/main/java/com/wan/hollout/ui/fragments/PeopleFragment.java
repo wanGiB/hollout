@@ -319,52 +319,49 @@ public class PeopleFragment extends Fragment {
                     List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
                     String signedInUserCountry = signedInUser.getString(AppConstants.APP_USER_COUNTRY);
                     List<String> signedInUserInterests = signedInUser.getList(AppConstants.INTERESTS);
-                    List<String> signedInUserCategory = signedInUser.getList(AppConstants.CATEGORY);
+                    String classification = signedInUser.getString(AppConstants.CLASSIFICATION);
 
                     String startAgeValue = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
                     String endAgeValue = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
 
                     ArrayList<String> newUserChats = new ArrayList<>();
-                    ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-                    peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
+                    ParseQuery<ParseObject> firstQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+                    firstQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
                     if (startAgeValue != null && endAgeValue != null) {
                         List<String> ageRanges = HolloutUtils.computeAgeRanges(startAgeValue, endAgeValue);
                         HolloutLogger.d("AgeRanges", TextUtils.join(",", ageRanges));
-                        peopleQuery.whereContainedIn(AppConstants.APP_USER_AGE, ageRanges);
+                        firstQuery.whereContainedIn(AppConstants.APP_USER_AGE, ageRanges);
                     }
                     String genderFilter = signedInUser.getString(AppConstants.GENDER_FILTER);
-                    if (genderFilter != null && !genderFilter.equals(AppConstants.Both)) {
-                        peopleQuery.whereEqualTo(AppConstants.APP_USER_GENDER, genderFilter);
-                    }
-                    if (savedUserChats != null) {
-                        if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
-                            savedUserChats.add(signedInUserId.toLowerCase());
-                        }
-                        peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, savedUserChats);
-                    } else {
-                        if (!newUserChats.contains(signedInUserId)) {
-                            newUserChats.add(signedInUserId);
-                        }
-                        peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
-                    }
-                    if (signedInUserCountry != null) {
-                        peopleQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
-                    }
+                    checkGender(firstQuery, genderFilter);
+                    excludeUserChats(signedInUserId, savedUserChats, newUserChats, firstQuery);
+                    attachCountry(signedInUserCountry, firstQuery);
                     if (signedInUserInterests != null) {
-                        peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, signedInUserInterests);
+                        firstQuery.whereContainedIn(AppConstants.ABOUT_USER, signedInUserInterests);
                     }
-                    if (signedInUserCategory != null) {
-                        peopleQuery.whereContainedIn(AppConstants.CATEGORY, signedInUserCategory);
-                    }
+
                     ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
-                    if (signedInUserGeoPoint != null) {
-                        peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 1000.0);
+                    attachGeoPoint(firstQuery, signedInUserGeoPoint);
+
+                    List<ParseQuery<ParseObject>> queries = new ArrayList<>();
+                    queries.add(firstQuery);
+
+                    ParseQuery<ParseObject> secondQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+                    if (classification != null) {
+                        secondQuery.whereEqualTo(AppConstants.CLASSIFICATION, classification);
+                        excludeUserChats(signedInUserId, savedUserChats, newUserChats, secondQuery);
+                        checkGender(secondQuery, genderFilter);
+                        queries.add(secondQuery);
+                        attachCountry(signedInUserCountry, secondQuery);
+                        attachGeoPoint(secondQuery, signedInUserGeoPoint);
                     }
-                    peopleQuery.setLimit(100);
+
+                    ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
+                    mainQuery.setLimit(100);
                     if (skip != 0) {
-                        peopleQuery.setSkip(skip);
+                        mainQuery.setSkip(skip);
                     }
-                    peopleQuery.findInBackground(new FindCallback<ParseObject>() {
+                    mainQuery.findInBackground(new FindCallback<ParseObject>() {
 
                         @Override
                         public void done(final List<ParseObject> users, final ParseException e) {
@@ -406,6 +403,38 @@ public class PeopleFragment extends Fragment {
             } else {
                 displayFetchErrorMessage(true);
             }
+        }
+    }
+
+    private void attachCountry(String signedInUserCountry, ParseQuery<ParseObject> firstQuery) {
+        if (signedInUserCountry != null) {
+            firstQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
+        }
+    }
+
+    private void attachGeoPoint(ParseQuery<ParseObject> mainQuery, ParseGeoPoint signedInUserGeoPoint) {
+        if (signedInUserGeoPoint != null) {
+            mainQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 1000.0);
+        }
+    }
+
+    private void checkGender(ParseQuery<ParseObject> firstQuery, String genderFilter) {
+        if (genderFilter != null && !genderFilter.equals(AppConstants.Both)) {
+            firstQuery.whereEqualTo(AppConstants.APP_USER_GENDER, genderFilter);
+        }
+    }
+
+    private void excludeUserChats(String signedInUserId, List<String> savedUserChats, ArrayList<String> newUserChats, ParseQuery<ParseObject> firstQuery) {
+        if (savedUserChats != null) {
+            if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
+                savedUserChats.add(signedInUserId.toLowerCase());
+            }
+            firstQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, savedUserChats);
+        } else {
+            if (!newUserChats.contains(signedInUserId)) {
+                newUserChats.add(signedInUserId);
+            }
+            firstQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
         }
     }
 

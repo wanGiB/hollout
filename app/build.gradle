@@ -66,9 +66,6 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile('com.facebook.android:facebook-android-sdk:4.+') {
-        exclude group: 'com.android.support', module: 'multidex'
-    }
     annotationProcessor "com.github.Raizlabs.DBFlow:dbflow-processor:${dbflow_version}"
     compile "com.github.Raizlabs.DBFlow:dbflow-core:${dbflow_version}"
     compile "com.github.Raizlabs.DBFlow:dbflow:${dbflow_version}"
@@ -133,6 +130,7 @@ dependencies {
     compile 'com.soundcloud.android:android-crop:1.0.1@aar'
     implementation project(':sinch-android-rtc-3.12.3')
     implementation 'com.tonyodev.fetch2:fetch2:2.0.0-RC8'
+    implementation project(':truesdk')
 }
 
 apply plugin: 'com.google.gms.google-services'

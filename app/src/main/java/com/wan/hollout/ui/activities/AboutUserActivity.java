@@ -8,7 +8,6 @@ import android.os.Vibrator;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -30,7 +29,6 @@ import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.api.JsonApiClient;
 import com.wan.hollout.interfaces.DoneCallback;
@@ -74,9 +72,6 @@ public class AboutUserActivity extends BaseActivity {
 
     @BindView(R.id.reason_for_interests_view)
     HolloutTextView reasonForInterestsView;
-
-    @BindView(R.id.button_continue)
-    CardView buttonContinue;
 
     @BindView(R.id.rootLayout)
     View rootLayout;
@@ -134,6 +129,8 @@ public class AboutUserActivity extends BaseActivity {
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchItem.setVisible(false);
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
+        MenuItem continueButton = menu.findItem(R.id.button_continue);
+        continueButton.setVisible(StringUtils.isNotEmpty(moreAboutUserField.getText().toString().trim()));
         filterPeopleMenuItem.setVisible(false);
         supportInvalidateOptionsMenu();
         return super.onPrepareOptionsMenu(menu);
@@ -280,59 +277,54 @@ public class AboutUserActivity extends BaseActivity {
 
         });
 
-        buttonContinue.setOnClickListener(new View.OnClickListener() {
+    }
 
-            @Override
-            public void onClick(View v) {
-                if (canMoveFurther()) {
+    private void checkAndContinue() {
+        if (canMoveFurther()) {
 
-                    List<String> existingInterests = signedInUser.getList(AppConstants.INTERESTS);
-                    List<String> aboutUserList = new ArrayList<>();
-                    List<String> interests = existingInterests != null ? existingInterests : new ArrayList<String>();
-                    String enteredInterests = moreAboutUserField.getText().toString().trim();
+            List<String> existingInterests = signedInUser.getList(AppConstants.INTERESTS);
+            List<String> aboutUserList = new ArrayList<>();
+            List<String> interests = existingInterests != null ? existingInterests : new ArrayList<String>();
+            String enteredInterests = moreAboutUserField.getText().toString().trim();
 
-                    buildInterests(aboutUserList, enteredInterests);
+            buildInterests(aboutUserList, enteredInterests);
 
-                    //Save occupations and move further
-                    for (String occupation : aboutUserList) {
-                        if (!interests.contains(occupation)) {
-                            interests.add(occupation);
-                        }
-                    }
-
-                    signedInUser.put(AppConstants.INTERESTS, interests);
-                    signedInUser.put(AppConstants.ABOUT_USER, aboutUserList);
-                    UiUtils.showProgressDialog(AboutUserActivity.this, "Please wait...");
-                    AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                        @Override
-                        public void done(Boolean success, Exception e) {
-                            if (e == null) {
-                                checkAndPushInterests(Arrays.asList(moreAboutUserField.getText().toString().trim().split(",")));
-                                UiUtils.dismissProgressDialog();
-                                if (!HolloutPreferences.isUserWelcomed()) {
-                                    launchGenderAndBirthDayActivity();
-                                } else {
-                                    if (canLaunchMain) {
-                                        launchMainActivity();
-                                    } else {
-                                        Intent callerIntent = new Intent();
-                                        setResult(RESULT_OK, callerIntent);
-                                        finish();
-                                    }
-                                }
-                            } else {
-                                UiUtils.dismissProgressDialog();
-                                UiUtils.showSafeToast("Error completing operation. Please try again. ");
-                            }
-                        }
-                    });
-                } else {
-                    Snackbar.make(buttonContinue, cantMoveFurtherErrorMessage(), Snackbar.LENGTH_SHORT).show();
+            //Save occupations and move further
+            for (String occupation : aboutUserList) {
+                if (!interests.contains(occupation)) {
+                    interests.add(occupation);
                 }
             }
 
-        });
-
+            signedInUser.put(AppConstants.INTERESTS, interests);
+            signedInUser.put(AppConstants.ABOUT_USER, aboutUserList);
+            UiUtils.showProgressDialog(AboutUserActivity.this, "Please wait...");
+            AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean success, Exception e) {
+                    if (e == null) {
+                        checkAndPushInterests(Arrays.asList(moreAboutUserField.getText().toString().trim().split(",")));
+                        UiUtils.dismissProgressDialog();
+                        if (!HolloutPreferences.isUserWelcomed()) {
+                            launchGenderAndBirthDayActivity();
+                        } else {
+                            if (canLaunchMain) {
+                                launchMainActivity();
+                            } else {
+                                Intent callerIntent = new Intent();
+                                setResult(RESULT_OK, callerIntent);
+                                finish();
+                            }
+                        }
+                    } else {
+                        UiUtils.dismissProgressDialog();
+                        UiUtils.showSafeToast("Error completing operation. Please try again. ");
+                    }
+                }
+            });
+        } else {
+            Snackbar.make(rootLayout, cantMoveFurtherErrorMessage(), Snackbar.LENGTH_SHORT).show();
+        }
     }
 
     private void checkAndPushInterests(List<String> interests) {
@@ -451,12 +443,10 @@ public class AboutUserActivity extends BaseActivity {
 
     private void onKeyboardHidden() {
         HolloutLogger.d(TAG, "Keyboard Hidden");
-        UiUtils.showView(buttonContinue, true);
     }
 
     private void onKeyboardShown() {
         HolloutLogger.d(TAG, "Keyboard Shown");
-        UiUtils.showView(buttonContinue, false);
     }
 
     private void initVibrator() {
@@ -471,6 +461,10 @@ public class AboutUserActivity extends BaseActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
             finish();
+            return true;
+        } else if (item.getItemId() == R.id.button_continue) {
+            UiUtils.dismissKeyboard(moreAboutUserField);
+            checkAndContinue();
             return true;
         }
         return super.onOptionsItemSelected(item);

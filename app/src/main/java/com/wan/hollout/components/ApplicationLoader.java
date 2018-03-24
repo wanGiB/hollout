@@ -13,7 +13,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
-import com.facebook.appevents.AppEventsLogger;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
@@ -39,7 +38,6 @@ import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 
 import org.greenrobot.eventbus.EventBus;
-import org.intellij.lang.annotations.Flow;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -77,7 +75,6 @@ public class ApplicationLoader extends Application {
     public void onCreate() {
         super.onCreate();
         sInstance = this;
-        AppEventsLogger.activateApp(this);
         initParse();
         initDrawer();
         Fabric.with(this, new Crashlytics());

@@ -74,7 +74,7 @@
     <string name="screwed_data_error_message">Something screwy happened. Please review your data connection</string>
     <string name="we_would_never_post_on_your_time_line">We will never post to your timeline</string>
     <string name="btn_text_login_fb">Log In with Facebook</string>
-    <string name="btn_text_login_google">Log In with Google</string>
+    <string name="btn_text_login_google">Sign in with Google</string>
     <string name="may_we_know_you_please">May we know you please</string>
     <string name="login">LOGIN</string>
     <string name="find_amp_chat_nwith_your_friends"><![CDATA[Find & Chat  \n with Your friends]]></string>
@@ -343,4 +343,5 @@
     <string name="outgoing_video_call">Outgoing Video Call</string>
     <string name="missed_calls_default_channel_id">missed_calls_channel_id</string>
 
+    <string name="partnerKey">YUvAZ9e94506173754212b263dc8afd9e8fc5</string>
 </resources>

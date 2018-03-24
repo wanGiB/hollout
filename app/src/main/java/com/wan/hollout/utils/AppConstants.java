@@ -201,7 +201,7 @@ public class AppConstants {
     public static final String CHAT_FILES = "ChatFiles";
     public static final String CHATS_DOWNLOAD_URL = "chats_download_url";
     public static final String ARCHIVES = "Archives";
-    public static final String CATEGORY = "category";
+    public static final String CLASSIFICATION = "classification";
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;

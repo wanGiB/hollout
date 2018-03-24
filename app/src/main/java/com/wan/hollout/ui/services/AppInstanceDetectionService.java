@@ -287,4 +287,5 @@ public class AppInstanceDetectionService extends JobIntentService implements
             });
         }
     }
+
 }

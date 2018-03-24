@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.text.method.LinkMovementMethod;
 import android.view.Menu;
@@ -53,9 +52,6 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
 
     @BindView(R.id.rootLayout)
     View rootLayout;
-
-    @BindView(R.id.button_continue)
-    CardView buttonContinue;
 
     @BindView(R.id.accept_app_license)
     CheckBox acceptLicenseCheck;
@@ -114,49 +110,46 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
         });
 
         setupTermsAndConditionsView();
+    }
 
-        buttonContinue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (acceptLicenseCheck.getVisibility() == View.GONE) {
-                    acceptLicenseCheck.setVisibility(View.VISIBLE);
-                } else {
-                    if (!acceptLicenseCheck.isChecked()) {
-                        Snackbar.make(acceptLicenseCheck, "You must accept the terms and conditions", Snackbar.LENGTH_LONG).show();
-                        return;
-                    }
-                    if (selectedGenderType.equals(AppConstants.UNKNOWN)) {
-                        Snackbar.make(acceptLicenseCheck, "Your gender please", Snackbar.LENGTH_LONG).show();
-                        return;
-                    }
-                    String age = ageBox.getText().toString().trim();
-                    if (StringUtils.isNotEmpty(age)) {
-                        if (Integer.parseInt(age) < 16) {
-                            Snackbar.make(acceptLicenseCheck, "Sorry, hollout is for 16yrs and above", Snackbar.LENGTH_LONG).show();
-                            return;
-                        }
-                    } else {
-                        Snackbar.make(ageBox, "Your age please", Snackbar.LENGTH_LONG).show();
-                        return;
-                    }
-                    signedInUser.put(AppConstants.APP_USER_GENDER, selectedGenderType);
-                    signedInUser.put(AppConstants.APP_USER_AGE, ageBox.getText().toString().trim());
-                    UiUtils.showProgressDialog(GenderAndAgeConfigurationActivity.this, "Please wait...");
-                    AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                        @Override
-                        public void done(Boolean result, Exception e) {
-                            UiUtils.dismissProgressDialog();
-                            if (e == null) {
-                                navigateBackToCaller();
-                            } else {
-                                Snackbar.make(acceptLicenseCheck, "An error occurred while updating details. Please review your data and try again",
-                                        Snackbar.LENGTH_LONG).show();
-                            }
-                        }
-                    });
-                }
+    private void checkAndContinue() {
+        if (acceptLicenseCheck.getVisibility() == View.GONE) {
+            acceptLicenseCheck.setVisibility(View.VISIBLE);
+        } else {
+            if (!acceptLicenseCheck.isChecked()) {
+                Snackbar.make(acceptLicenseCheck, "You must accept our privacy policy", Snackbar.LENGTH_LONG).show();
+                return;
             }
-        });
+            if (selectedGenderType.equals(AppConstants.UNKNOWN)) {
+                Snackbar.make(acceptLicenseCheck, "Your gender please", Snackbar.LENGTH_LONG).show();
+                return;
+            }
+            String age = ageBox.getText().toString().trim();
+            if (StringUtils.isNotEmpty(age)) {
+                if (Integer.parseInt(age) < 16) {
+                    Snackbar.make(acceptLicenseCheck, "Sorry, hollout is for 16yrs and above", Snackbar.LENGTH_LONG).show();
+                    return;
+                }
+            } else {
+                Snackbar.make(ageBox, "Your age please", Snackbar.LENGTH_LONG).show();
+                return;
+            }
+            signedInUser.put(AppConstants.APP_USER_GENDER, selectedGenderType);
+            signedInUser.put(AppConstants.APP_USER_AGE, ageBox.getText().toString().trim());
+            UiUtils.showProgressDialog(GenderAndAgeConfigurationActivity.this, "Please wait...");
+            AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean result, Exception e) {
+                    UiUtils.dismissProgressDialog();
+                    if (e == null) {
+                        navigateBackToCaller();
+                    } else {
+                        Snackbar.make(acceptLicenseCheck, "An error occurred while updating details. Please review your data and try again",
+                                Snackbar.LENGTH_LONG).show();
+                    }
+                }
+            });
+        }
     }
 
     private void setupTermsAndConditionsView() {
@@ -208,10 +201,22 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
 //        createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
 
+        MenuItem continueButton = menu.findItem(R.id.button_continue);
+        continueButton.setVisible(true);
+
         supportInvalidateOptionsMenu();
 
         return super.onPrepareOptionsMenu(menu);
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.button_continue) {
+            UiUtils.dismissKeyboard(ageBox);
+            checkAndContinue();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -260,12 +265,10 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
 
     private void onKeyboardHidden() {
         HolloutLogger.d(TAG, "Keyboard Hidden");
-        UiUtils.showView(buttonContinue, true);
     }
 
     private void onKeyboardShown() {
         HolloutLogger.d(TAG, "Keyboard Shown");
-        UiUtils.showView(buttonContinue, false);
     }
 
 }

@@ -3,11 +3,11 @@ package com.wan.hollout.ui.activities;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -16,12 +16,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
 import com.crashlytics.android.Crashlytics;
-import com.facebook.AccessToken;
-import com.facebook.CallbackManager;
-import com.facebook.FacebookCallback;
-import com.facebook.FacebookException;
-import com.facebook.login.LoginManager;
-import com.facebook.login.LoginResult;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -30,13 +24,16 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -46,6 +43,11 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.sinch.gson.stream.JsonReader;
+import com.truecaller.android.sdk.ITrueCallback;
+import com.truecaller.android.sdk.TrueButton;
+import com.truecaller.android.sdk.TrueClient;
+import com.truecaller.android.sdk.TrueError;
+import com.truecaller.android.sdk.TrueProfile;
 import com.wan.hollout.R;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
@@ -71,16 +73,14 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
 public class WelcomeActivity extends BaseActivity
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, ITrueCallback {
 
     @BindView(R.id.shimmer_view_container)
     ShimmerFrameLayout shimmerFrameLayout;
@@ -91,14 +91,14 @@ public class WelcomeActivity extends BaseActivity
     @BindView(R.id.typing_text_view)
     HolloutTextView typingTextView;
 
-    @BindView(R.id.button_login_facebook)
-    Button continueWithFacebook;
-
     @BindView(R.id.button_login_google)
     Button continueWithGoogle;
 
     @BindView(R.id.app_intro_message)
     HolloutTextView appIntroMessageView;
+
+    @BindView(R.id.com_truecaller_android_sdk_truebutton)
+    TrueButton trueButton;
 
     /* Is there a ConnectionResult resolution in progress? */
     private boolean mIsResolving = false;
@@ -110,7 +110,6 @@ public class WelcomeActivity extends BaseActivity
     /* Client for accessing Google APIs */
     private GoogleApiClient mGoogleApiClient;
     //Facebook Callback Manager
-    private CallbackManager mCallbackManager;
 
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener addAuthStateListener;
@@ -127,6 +126,8 @@ public class WelcomeActivity extends BaseActivity
     };
 
     private String TAG = "WelcomeActivity";
+
+    private TrueClient mTrueClient;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -145,8 +146,15 @@ public class WelcomeActivity extends BaseActivity
                 }
             }
         };
+        boolean usable = trueButton.isUsable();
+        if (usable) {
+            mTrueClient = new TrueClient(this, this);
+            mTrueClient.setReqNonce("12345678Min");
+            trueButton.setTrueClient(mTrueClient);
+        } else {
+            trueButton.setVisibility(View.GONE);
+        }
         appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font> and <font color=#3EB890>Holla</font> people of shared interests and profession <font color=#70CADB>around</font> you."));
-        continueWithFacebook.setOnClickListener(this);
         continueWithGoogle.setOnClickListener(this);
         initDividerBlinkingAnimation();
         startTypingAnimation(fieldIndex);
@@ -371,85 +379,10 @@ public class WelcomeActivity extends BaseActivity
         Crashlytics.setUserIdentifier(firebaseUser.getUid());
     }
 
-    private void initFacebookLogin() {
-        HolloutLogger.d(TAG, "Facebook init");
-
-        mCallbackManager = CallbackManager.Factory.create();
-        ArrayList<String> permissions = new ArrayList<>();
-
-        permissions.add("email");
-        permissions.add("public_profile");
-
-        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
-
-            @Override
-            public void onSuccess(LoginResult loginResult) {
-
-                if (loginResult != null) {
-                    HolloutLogger.d(TAG, "Login Result is not null");
-                    final AccessToken accessToken = loginResult.getAccessToken();
-                    if (accessToken != null) {
-                        HolloutLogger.d(TAG, "Access token is not null");
-                        //check declined permissions
-                        Set<String> declinedPermissions = accessToken.getDeclinedPermissions();
-                        if (declinedPermissions.isEmpty()) {
-                            handleFacebookSignInResult(accessToken);
-                        } else {
-                            UiUtils.showSafeToast("Declined Permissions, For you to sign in with your " +
-                                    "Facebook account, we require your email and your basic public profile, " +
-                                    "kindly try again, and grant access");
-                        }
-
-                    }
-
-                } else {
-                    HolloutLogger.d(TAG, "Login result is null");
-                }
-
-            }
-
-            @Override
-            public void onCancel() {
-                HolloutLogger.d(TAG, "User has canceled Login Dialog");
-            }
-
-            @Override
-            public void onError(FacebookException e) {
-                e.printStackTrace();
-                HolloutLogger.d(TAG, "Facebook Authentication Error  = " + e.getMessage());
-                Snackbar.make(continueWithFacebook, e.getMessage(), Snackbar.LENGTH_SHORT)
-                        .setAction(R.string.text_retry, new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                initFacebookLogin();
-                            }
-                        }).show();
-            }
-
-        });
-
-        LoginManager.getInstance().logInWithReadPermissions(this, permissions);
-
-    }
-
     private void initGoogleLogin() {
         UiUtils.showProgressDialog(WelcomeActivity.this, "Please wait...");
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    private void handleFacebookSignInResult(AccessToken accessToken) {
-        UiUtils.showProgressDialog(WelcomeActivity.this, "Please wait...");
-        AuthCredential credential = FacebookAuthProvider.getCredential(accessToken.getToken());
-        firebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (!task.isSuccessful()) {
-                            UiUtils.showSafeToast("LogIn Aborted");
-                        }
-                    }
-                });
     }
 
     @Override
@@ -568,8 +501,11 @@ public class WelcomeActivity extends BaseActivity
         } else if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
             finishUp(false);
         } else {
-            mCallbackManager.onActivityResult(requestCode, resultCode, data);
+            if (mTrueClient != null) {
+                mTrueClient.onActivityResult(requestCode, resultCode, data);
+            }
         }
+
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
@@ -609,9 +545,6 @@ public class WelcomeActivity extends BaseActivity
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.button_login_facebook:
-                initFacebookLogin();
-                break;
             case R.id.button_login_google:
                 initGoogleLogin();
                 break;
@@ -675,6 +608,71 @@ public class WelcomeActivity extends BaseActivity
                 }
             }
         });
+    }
+
+    @Override
+    public void onSuccesProfileShared(@NonNull final TrueProfile trueProfile) {
+        UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
+        final String fullName = trueProfile.firstName + " " + trueProfile.lastName;
+        String phoneNumber = trueProfile.phoneNumber;
+        final String email = StringUtils.strip(StringUtils.deleteWhitespace(phoneNumber + "@hollout.com"), "+");
+        final String password = "hollout";
+        firebaseAuth.removeAuthStateListener(addAuthStateListener);
+        firebaseAuth.createUserWithEmailAndPassword(email, password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+            @Override
+            public void onSuccess(AuthResult authResult) {
+                UserProfileChangeRequest.Builder profileUpdates = new UserProfileChangeRequest.Builder();
+                profileUpdates.setDisplayName(fullName);
+                if (trueProfile.avatarUrl != null) {
+                    profileUpdates.setPhotoUri(Uri.parse(trueProfile.avatarUrl));
+                }
+                if (firebaseAuth.getCurrentUser() != null) {
+                    firebaseAuth.getCurrentUser().updateProfile(profileUpdates.build())
+                            .addOnSuccessListener(getCurrentActivityInstance(), new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    authenticateUser(firebaseAuth.getCurrentUser());
+                                }
+                            })
+                            .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    UiUtils.dismissProgressDialog();
+                                    UiUtils.showSafeToast(e.getMessage());
+                                }
+                            });
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof FirebaseAuthUserCollisionException) {
+                    //User already exists
+                    firebaseAuth.signInWithEmailAndPassword(email, password)
+                            .addOnSuccessListener(getCurrentActivityInstance(), new OnSuccessListener<AuthResult>() {
+                                @Override
+                                public void onSuccess(AuthResult authResult) {
+                                    authenticateUser(firebaseAuth.getCurrentUser());
+                                }
+                            })
+                            .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    UiUtils.dismissProgressDialog();
+                                    UiUtils.showSafeToast(e.getMessage());
+                                }
+                            });
+                } else {
+                    UiUtils.dismissProgressDialog();
+                    UiUtils.showSafeToast(e.getMessage());
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onFailureProfileShared(@NonNull TrueError trueError) {
+        UiUtils.showSafeToast("Error completing log in with true caller. Please try again.");
     }
 
 }

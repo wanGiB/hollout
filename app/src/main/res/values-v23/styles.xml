@@ -20,4 +20,12 @@
         <item name="android:background">@color/black</item>
     </style>
 
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@color/status_background_white</item>
+    </style>
+
 </resources>

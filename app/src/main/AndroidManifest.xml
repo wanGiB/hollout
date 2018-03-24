@@ -59,6 +59,8 @@
         android:theme="@style/AppTheme"
         tools:replace="android:icon,android:allowBackup, android:label">
 
+        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="@string/partnerKey"/>
+
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="ad592a04b832e238a390d851afaba5226e6f6632" />
@@ -75,10 +77,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity
-            android:name="com.facebook.FacebookActivity"
-            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name" />
 
         <!--Video call activity-->
         <activity
@@ -96,18 +94,6 @@
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustPan|stateHidden" />
 
-        <activity
-            android:name="com.facebook.CustomTabActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="@string/fb_login_protocol_scheme" />
-            </intent-filter>
-        </activity>
         <activity
             android:name=".ui.activities.SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"

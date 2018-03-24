@@ -19,6 +19,8 @@
     <color name="light_button">#33ffffff</color>
     <color name="light_button_highlight">#66ffffff</color>
 
+    <color name="status_background_white">#fffafafa</color>
+
     <color name="gray5">#ffeeeeee</color>
     <color name="gray10">#ffdddddd</color>
     <color name="gray12">#ffe0e0e0</color>

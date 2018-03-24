@@ -15,9 +15,15 @@
         android:id="@+id/filter_people"
         android:title="@string/filter_people" />
 
+    <item
+        android:id="@+id/button_continue"
+        android:title="@string/continue_"
+        android:visible="false"
+        app:showAsAction="always" />
+
     <!--<item-->
-        <!--android:id="@+id/create_new_group"-->
-        <!--android:title="@string/create_new_group"-->
-        <!--app:showAsAction="never" />-->
+    <!--android:id="@+id/create_new_group"-->
+    <!--android:title="@string/create_new_group"-->
+    <!--app:showAsAction="never" />-->
 
 </menu>
