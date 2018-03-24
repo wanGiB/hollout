@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -105,34 +106,6 @@ public class JsonApiClient {
         });
     }
 
-    public static void fetchChats(String chatsDownloadUrl, final DoneCallback<String> fetchDoneCallBack) {
-        HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(chatsDownloadUrl).newBuilder();
-        Request request = getRequestBuilder(null).url(httpUrlBuilder.build()).get().build();
-        getOkHttpClient().newCall(request).enqueue(new Callback() {
-
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                logResponse(e.getMessage(), e.hashCode());
-                callBackOnMainThread(fetchDoneCallBack, null, e);
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (response.isSuccessful()) {
-                    byte[] responseBytes = response.body().bytes();
-                    String responseByteString = new String(responseBytes);
-                    logResponse(responseByteString, response.code());
-                    callBackOnMainThread(fetchDoneCallBack, responseByteString, null);
-                } else {
-                    callBackOnMainThread(fetchDoneCallBack, null, new Exception("None"));
-                }
-            }
-
-        });
-
-    }
-
-
     private static void callBackOnMainThread(final DoneCallback doneCallback, final Object result, final Exception e) {
         UiUtils.runOnMain(new Runnable() {
             @Override
@@ -178,18 +151,28 @@ public class JsonApiClient {
 
     public static void classifyInterest(String interest) {
         HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(AppConstants.DATUM_URL).newBuilder();
+        httpUrlBuilder.addQueryParameter("api_key",AppKeys.DATUM_BOX_KEY);
+        httpUrlBuilder.addQueryParameter("text", interest.trim());
         String postUrl = httpUrlBuilder.build().toString();
 
+        HashMap<String,String>authParams=new HashMap<>();
+        authParams.put("api_key",AppKeys.DATUM_BOX_KEY);
+
         JSONObject classificationProps = new JSONObject();
+
         try {
             classificationProps.put("api_key", AppKeys.DATUM_BOX_KEY);
             classificationProps.put("text", interest.trim());
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
         RequestBody postRequestBody = RequestBody.create(MediaType.parse("application/json"), classificationProps.toString());
-        Request postRequest = getRequestBuilder(null).url(postUrl).post(postRequestBody).build();
+
+        Request postRequest = getRequestBuilder(authParams).url(postUrl).post(postRequestBody).build();
+
         getOkHttpClient().newCall(postRequest).enqueue(new Callback() {
+
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
 
@@ -198,6 +181,7 @@ public class JsonApiClient {
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 String responseString = getResponseString(response);
+                logResponse(responseString,response.code());
                 if (response.isSuccessful()) {
                     try {
                         if (StringUtils.isNotEmpty(responseString)) {

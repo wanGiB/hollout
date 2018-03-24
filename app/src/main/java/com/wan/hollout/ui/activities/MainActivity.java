@@ -157,13 +157,11 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         actionModeBar = findViewById(R.id.action_mode_bar);
         setSupportActionBar(toolbar);
         ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (viewPager != null) {
-            Adapter adapter = setupViewPagerAdapter(viewPager);
-            viewPager.setOffscreenPageLimit(3);
-            tabLayout.setSelectedTabIndicatorHeight(7);
-            tabLayout.setupWithViewPager(viewPager);
-            setupTabs(adapter);
-        }
+        Adapter adapter = setupViewPagerAdapter(viewPager);
+        viewPager.setOffscreenPageLimit(3);
+        tabLayout.setSelectedTabIndicatorHeight(7);
+        tabLayout.setupWithViewPager(viewPager);
+        setupTabs(adapter);
         fetchUnreadMessagesCount();
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);

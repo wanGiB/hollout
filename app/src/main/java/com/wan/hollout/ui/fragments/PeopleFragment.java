@@ -215,7 +215,6 @@ public class PeopleFragment extends Fragment {
                         UiUtils.showView(chatRequestsHeaderView, true);
                         chatRequestsHeaderView.setChatRequests(getActivity(), objects, totalCount);
                         UiUtils.toggleFlipperState(peopleContentFlipper, 2);
-
                         if (!people.isEmpty()) {
                             chatRequestsHeaderView.showNearbyHeader(true);
                         }
@@ -223,7 +222,6 @@ public class PeopleFragment extends Fragment {
                 }
             });
         }
-
         chatRequestsHeaderView.attachEventHandlers(getActivity());
     }
 

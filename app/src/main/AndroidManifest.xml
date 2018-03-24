@@ -187,12 +187,6 @@
             </intent-filter>
         </service>
 
-        <service
-            android:name=".ui.services.FileUploadService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-        <service android:name=".ui.services.CallService" />
-
-
         <receiver android:name=".receivers.ConnectivityChangedReceiver">
             <intent-filter>
                 <action

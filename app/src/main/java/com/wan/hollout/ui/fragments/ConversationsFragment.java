@@ -58,9 +58,6 @@ public class ConversationsFragment extends Fragment {
     @BindView(R.id.swipe_refresh_layout)
     SwipeRefreshLayout swipeRefreshLayout;
 
-    @BindView(R.id.no_feed_view)
-    View noFeedView;
-
     @BindView(R.id.content_flipper)
     ViewFlipper contentFlipper;
 

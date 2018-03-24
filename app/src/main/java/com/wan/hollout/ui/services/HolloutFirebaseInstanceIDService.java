@@ -51,12 +51,7 @@ public class HolloutFirebaseInstanceIDService extends FirebaseInstanceIdService 
             ParseObject signedInUserObject = AuthUtil.getCurrentUser();
             if (signedInUserObject != null) {
                 signedInUserObject.put(AppConstants.USER_FIREBASE_TOKEN,token);
-                AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
-                    @Override
-                    public void done(Boolean result, Exception e) {
-
-                    }
-                });
+                AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
             }
         }
     }
