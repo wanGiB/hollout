@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ViewFlipper;
 
+import com.google.android.gms.auth.api.Auth;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.parse.CountCallback;
@@ -51,6 +52,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -91,7 +93,6 @@ public class PeopleFragment extends Fragment {
     private ParseObject signedInUser;
 
     private View footerView;
-
     public String searchString;
 
     public PeopleFragment() {
@@ -459,6 +460,7 @@ public class PeopleFragment extends Fragment {
                 }
             }
         }
+        Collections.sort(people);
         peopleAdapter.notifyDataSetChanged();
     }
 
