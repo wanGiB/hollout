@@ -215,17 +215,15 @@ public class JsonApiClient {
                     if (aboutSignedInUser.contains(existingClassificationString)) {
                         aboutSignedInUser.remove(existingClassificationString);
                     }
-                    aboutSignedInUser.add(result);
-                    signedInUserObject.put(AppConstants.CLASSIFICATION, result);
-                    signedInUserObject.put(AppConstants.ABOUT_USER, aboutSignedInUser);
                 }
-            }else{
+                aboutSignedInUser.add(result);
+                signedInUserObject.put(AppConstants.CLASSIFICATION, result);
+                signedInUserObject.put(AppConstants.ABOUT_USER, aboutSignedInUser);
+            } else {
                 aboutSignedInUser = new ArrayList<>();
-                if (existingClassificationString != null) {
-                    aboutSignedInUser.add(result);
-                    signedInUserObject.put(AppConstants.CLASSIFICATION, result);
-                    signedInUserObject.put(AppConstants.ABOUT_USER, aboutSignedInUser);
-                }
+                aboutSignedInUser.add(result);
+                signedInUserObject.put(AppConstants.CLASSIFICATION, result);
+                signedInUserObject.put(AppConstants.ABOUT_USER, aboutSignedInUser);
             }
             AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
         }
