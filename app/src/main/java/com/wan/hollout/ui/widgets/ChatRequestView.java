@@ -92,7 +92,19 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                     }
                     if (!(activity instanceof UserProfileActivity)) {
                         List<String> aboutUser = requestOriginator.getList(AppConstants.ABOUT_USER);
+                        String userClassificationString = requestOriginator.getString(AppConstants.CLASSIFICATION);
+                        if (userClassificationString != null && aboutUser != null) {
+                            if (aboutUser.contains(userClassificationString)) {
+                                aboutUser.remove(userClassificationString);
+                            }
+                        }
                         List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
+                        String signedInUserClassificationString = signedInUser.getString(AppConstants.CLASSIFICATION);
+                        if (signedInUserClassificationString != null && aboutSignedInUser != null) {
+                            if (aboutSignedInUser.contains(signedInUserClassificationString)) {
+                                aboutSignedInUser.remove(signedInUserClassificationString);
+                            }
+                        }
                         if (aboutUser != null && aboutSignedInUser != null) {
                             try {
                                 List<String> common = new ArrayList<>(aboutUser);
@@ -103,6 +115,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
                             }
                         }
+
                         ParseGeoPoint userGeoPoint = requestOriginator.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                         ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                         if (signedInUserGeoPoint != null && userGeoPoint != null) {

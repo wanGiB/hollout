@@ -11,7 +11,6 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -210,8 +209,21 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
             } else {
                 UiUtils.setTextOnView(distanceToUserView, " ");
             }
+
             List<String> aboutUser = person.getList(AppConstants.ABOUT_USER);
+            String userClassificationString = person.getString(AppConstants.CLASSIFICATION);
+            if (userClassificationString != null && aboutUser != null) {
+                if (aboutUser.contains(userClassificationString)) {
+                    aboutUser.remove(userClassificationString);
+                }
+            }
             List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
+            String signedInUserClassificationString = signedInUser.getString(AppConstants.CLASSIFICATION);
+            if (signedInUserClassificationString != null && aboutSignedInUser != null) {
+                if (aboutSignedInUser.contains(signedInUserClassificationString)) {
+                    aboutSignedInUser.remove(signedInUserClassificationString);
+                }
+            }
             if (aboutUser != null && aboutSignedInUser != null) {
                 try {
                     List<String> common = new ArrayList<>(aboutUser);

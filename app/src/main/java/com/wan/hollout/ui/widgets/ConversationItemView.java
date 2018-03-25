@@ -56,8 +56,10 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -74,6 +76,9 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     @BindView(R.id.from)
     HolloutTextView usernameEntryView;
+
+    @BindView(R.id.txt_primary)
+    HolloutTextView aboutPerson;
 
     @BindView(R.id.txt_secondary)
     ChatMessageTextView userStatusOrLastMessageView;
@@ -207,6 +212,38 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     public void setupConversation(final ParseObject parseObject, String searchString) {
         if (parseObject != null) {
+
+            List<String> aboutUser = parseObject.getList(AppConstants.ABOUT_USER);
+            String userClassificationString = parseObject.getString(AppConstants.CLASSIFICATION);
+            if(userClassificationString!=null && aboutUser!=null){
+                if (aboutUser.contains(userClassificationString)){
+                    aboutUser.remove(userClassificationString);
+                }
+            }
+
+            List<String> aboutSignedInUser = signedInUserObject.getList(AppConstants.ABOUT_USER);
+            String signedInUserClassificationString = parseObject.getString(AppConstants.CLASSIFICATION);
+            if(signedInUserClassificationString!=null && aboutSignedInUser!=null){
+                if (aboutSignedInUser.contains(signedInUserClassificationString)){
+                    aboutSignedInUser.remove(signedInUserClassificationString);
+                }
+            }
+
+            if (aboutUser != null && aboutSignedInUser != null) {
+                try {
+                    List<String> common = new ArrayList<>(aboutUser);
+                    common.retainAll(aboutSignedInUser);
+                    String firstInterest = !common.isEmpty() ? common.get(0) : aboutUser.get(0);
+                    if (StringUtils.isNotEmpty(searchString)) {
+                        aboutPerson.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(firstInterest),
+                                ContextCompat.getColor(activity, R.color.hollout_color_three)));
+                    } else {
+                        aboutPerson.setText(WordUtils.capitalize(firstInterest));
+                    }
+                } catch (NullPointerException ignored) {
+
+                }
+            }
             this.parseObject = parseObject;
             String userName = parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)
                     ? parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME)

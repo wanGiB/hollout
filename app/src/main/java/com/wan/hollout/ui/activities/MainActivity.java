@@ -75,6 +75,7 @@ import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.GeneralNotifier;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -479,7 +480,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 .setFeature("sharing");
         // Customize the appearance of your share sheet
         ShareSheetStyle shareSheetStyle = new ShareSheetStyle(this, "Check this out!",
-                "The easiest way to connect with people of shared interests and profession around you")
+                "The easiest way to connect with nearbyPeople of shared interests and profession around you")
                 .setCopyUrlStyle(ContextCompat.getDrawable(this, R.drawable.ic_content_copy_black_48dp), "Copy link",
                         "Link added to clipboard!")
                 .setMoreOptionStyle(ContextCompat.getDrawable(this, R.drawable.ic_expand_more_black_48dp), "Show more")

@@ -29,11 +29,11 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 
 import com.esotericsoftware.kryo.NotNull;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
-import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
@@ -104,7 +104,7 @@ public class AttachmentTypeSelector extends PopupWindow {
     private RecyclerView gifRecyclerView;
 
     @NonNull
-    private ProgressWheel gifLoadingProgressWheel;
+    private ProgressBar gifLoadingProgressWheel;
 
     private
     @NonNull

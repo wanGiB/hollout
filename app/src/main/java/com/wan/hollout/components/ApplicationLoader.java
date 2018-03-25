@@ -13,6 +13,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.ads.MobileAds;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
@@ -26,6 +27,7 @@ import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.tonyodev.fetch2.Fetch;
+import com.wan.hollout.BuildConfig;
 import com.wan.hollout.R;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
@@ -77,10 +79,17 @@ public class ApplicationLoader extends Application {
         sInstance = this;
         initParse();
         initDrawer();
+        initAdmob();
         Fabric.with(this, new Crashlytics());
         setupDatabase();
         startAppInstanceDetector();
         defaultSystemEmojiPref();
+    }
+
+    private void initAdmob() {
+        MobileAds.initialize(this,
+                BuildConfig.DEBUG ? AppKeys.DEBUG_AD_APP_ID
+                        : AppKeys.PRODUCTION_AD_APP_ID);
     }
 
     public Fetch getMainFetch() {

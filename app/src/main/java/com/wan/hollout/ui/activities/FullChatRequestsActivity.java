@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -41,7 +42,7 @@ public class FullChatRequestsActivity extends BaseActivity {
     HolloutTextView nothingToLoadView;
 
     @BindView(R.id.progress_wheel)
-    ProgressWheel progressWheel;
+    ProgressBar progressWheel;
 
     @BindView(R.id.chat_requests_recycler_view)
     RecyclerView chatRequestsRecyclerView;

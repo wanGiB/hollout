@@ -60,13 +60,11 @@
         android:src="@drawable/ic_arrow_back_white_36dp"
         app:fabSize="normal" />
 
-    <com.pnikosis.materialishprogress.ProgressWheel
+    <ProgressBar
         android:id="@+id/progress_bar"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        app:barColor="@color/ease_gray"
-        app:progressIndeterminate="true"
-        app:rimColor="@color/white" />
+         />
 
 </FrameLayout>

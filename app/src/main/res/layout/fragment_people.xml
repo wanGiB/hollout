@@ -6,13 +6,10 @@
     android:layout_height="match_parent"
     tools:galleryActivity="com.app.hollout.ui.fragments.PeopleFragment">
 
-    <com.pnikosis.materialishprogress.ProgressWheel
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_gravity="center"
-        app:barColor="@color/ease_gray"
-        app:progressIndeterminate="true"
-        app:rimColor="@color/white" />
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
     <LinearLayout
         android:id="@+id/no_feed_view"
@@ -87,6 +84,16 @@
                 android:layout_height="match_parent"
                 android:animateLayoutChanges="true"
                 android:orientation="vertical">
+
+                <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/adView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    ads:adSize="BANNER"
+                    ads:adUnitId="@string/ad_unit_id">
+
+                </com.google.android.gms.ads.AdView>
 
                 <com.wan.hollout.ui.widgets.ChatRequestsHeaderView
                     android:id="@+id/chat_requests_view"

@@ -25,6 +25,7 @@ import com.wan.hollout.eventbuses.CallTerminationCause;
 import com.wan.hollout.ui.activities.VideoCallActivity;
 import com.wan.hollout.ui.activities.VoiceCallActivity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 
@@ -82,8 +83,8 @@ public class CallClient extends ContextWrapper {
 
     private void initSinchClient(String userId) {
         sinchClient = Sinch.getSinchClientBuilder().context(ApplicationLoader.getInstance())
-                .applicationKey("5049e700-0fc2-43a7-bc09-3c08638796c7")
-                .applicationSecret("Wu5+oLuPlk2EKPsoydC3cg==")
+                .applicationKey(AppKeys.SINCH_APPLICATION_KEY)
+                .applicationSecret(AppKeys.SINCH_APP_SECRET)
                 .environmentHost(BuildConfig.DEBUG ? "sandbox.sinch.com" : "clientapi.sinch.com")
                 .userId(userId)
                 .build();

@@ -139,8 +139,14 @@ public class AboutUserActivity extends BaseActivity {
     private void attemptToOffloadPersistedInfoAboutUser() {
         if (signedInUser != null) {
             List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
+            String signedInUserClassificationString = signedInUser.getString(AppConstants.CLASSIFICATION);
             if (aboutUser != null) {
                 if (!aboutUser.isEmpty()) {
+                    if (signedInUserClassificationString!=null){
+                        if (aboutUser.contains(signedInUserClassificationString)){
+                            aboutUser.remove(signedInUserClassificationString);
+                        }
+                    }
                     String aboutUserString = TextUtils.join(",", aboutUser);
                     moreAboutUserField.setText(aboutUserString);
                     moreAboutUserField.setSelection(moreAboutUserField.length());
@@ -281,21 +287,17 @@ public class AboutUserActivity extends BaseActivity {
 
     private void checkAndContinue() {
         if (canMoveFurther()) {
-
             List<String> existingInterests = signedInUser.getList(AppConstants.INTERESTS);
             List<String> aboutUserList = new ArrayList<>();
             List<String> interests = existingInterests != null ? existingInterests : new ArrayList<String>();
             String enteredInterests = moreAboutUserField.getText().toString().trim();
-
             buildInterests(aboutUserList, enteredInterests);
-
             //Save occupations and move further
             for (String occupation : aboutUserList) {
                 if (!interests.contains(occupation)) {
                     interests.add(occupation);
                 }
             }
-
             signedInUser.put(AppConstants.INTERESTS, interests);
             signedInUser.put(AppConstants.ABOUT_USER, aboutUserList);
             UiUtils.showProgressDialog(AboutUserActivity.this, "Please wait...");

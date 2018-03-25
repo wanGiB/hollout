@@ -9,13 +9,10 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <com.pnikosis.materialishprogress.ProgressWheel
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_gravity="center"
-        app:barColor="@color/white"
-        app:progressIndeterminate="true"
-        app:rimColor="@color/ease_gray" />
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
     <LinearLayout
         android:layout_width="match_parent"

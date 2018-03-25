@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Hollout</string>
+    <string name="ad_unit_id">ca-app-pub-9005346464433496/1508382128</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="animated_text_contents_divider">\t| </string>

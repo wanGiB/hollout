@@ -97,6 +97,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
  * @author Wan Clem
  */
 
+@SuppressWarnings("unused")
 public class UiUtils {
 
     public static Handler handler = new Handler(Looper.getMainLooper());
@@ -256,7 +257,9 @@ public class UiUtils {
 
     public static void dismissKeyboard(View trigger) {
         InputMethodManager imm = (InputMethodManager) ApplicationLoader.getInstance().getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(trigger.getWindowToken(), 0);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(trigger.getWindowToken(), 0);
+        }
     }
 
     public static void loadImage(final Activity context, final String photoPath, final ImageView imageView) {
@@ -985,6 +988,40 @@ public class UiUtils {
         animation.setInterpolator(new AccelerateDecelerateInterpolator());
         animation.setDuration(1500);
         return animation;
+    }
+
+    private Object workLifeBalance;
+
+    private void makeEveryMomentCount() {
+        if (workLifeBalance == null) {
+            pauseWork();
+            forgetAboutAnythingThatMightGoWrong();
+            try {
+                catchLoadsAndLoadsOfFun();
+            } catch (FunException e) {
+                handleExceptionAndContinueFun();
+            }
+        }
+    }
+
+    private void handleExceptionAndContinueFun() {
+
+    }
+
+    static class FunException extends Exception {
+
+    }
+
+    private void catchLoadsAndLoadsOfFun() throws FunException {
+
+    }
+
+    private void forgetAboutAnythingThatMightGoWrong() {
+
+    }
+
+    private void pauseWork() {
+
     }
 
 }

@@ -14,13 +14,14 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ViewFlipper;
 
-import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.parse.CountCallback;
@@ -30,6 +31,7 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.wan.hollout.BuildConfig;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
@@ -40,7 +42,6 @@ import com.wan.hollout.ui.widgets.ChatRequestsHeaderView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
-import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.SafeLayoutManager;
@@ -61,7 +62,7 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class PeopleFragment extends Fragment {
+public class PeopleFragment extends BaseFragment {
 
     @BindView(R.id.people_content_flipper)
     public ViewFlipper peopleContentFlipper;
@@ -87,9 +88,12 @@ public class PeopleFragment extends Fragment {
     @BindView(R.id.nested_scroll_view)
     NestedScrollView nestedScrollView;
 
+    @BindView(R.id.adView)
+    AdView adView;
+
     @SuppressLint("StaticFieldLeak")
     public PeopleAdapter peopleAdapter;
-    public List<NearbyPerson> people = new ArrayList<>();
+    public List<NearbyPerson> nearbyPeople = new ArrayList<>();
     private ParseObject signedInUser;
 
     private View footerView;
@@ -112,41 +116,10 @@ public class PeopleFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        checkAndRegEventBus();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         initSignedInUser();
-        checkAndRegEventBus();
         countChatRequests();
-    }
-
-    private void checkAndRegEventBus() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    private void checkAnUnRegEventBus() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        checkAnUnRegEventBus();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        checkAnUnRegEventBus();
     }
 
     @Override
@@ -162,6 +135,22 @@ public class PeopleFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         peopleRecyclerView.setNestedScrollingEnabled(false);
+        loadAds();
+    }
+
+    private void loadAds() {
+        AdRequest.Builder adRequest = new AdRequest.Builder();
+        if (BuildConfig.DEBUG) {
+            adRequest.addTestDevice("CD59DB3342128DA74D9E4243A550E924");
+        }
+        adView.loadAd(adRequest.build());
+        adView.setAdListener(new AdListener() {
+            @Override
+            public void onAdLoaded() {
+                super.onAdLoaded();
+                UiUtils.showView(adView, true);
+            }
+        });
     }
 
     @Override
@@ -216,7 +205,7 @@ public class PeopleFragment extends Fragment {
                         UiUtils.showView(chatRequestsHeaderView, true);
                         chatRequestsHeaderView.setChatRequests(getActivity(), objects, totalCount);
                         UiUtils.toggleFlipperState(peopleContentFlipper, 2);
-                        if (!people.isEmpty()) {
+                        if (!nearbyPeople.isEmpty()) {
                             chatRequestsHeaderView.showNearbyHeader(true);
                         }
                     }
@@ -251,7 +240,7 @@ public class PeopleFragment extends Fragment {
             footerView = layoutInflater.inflate(R.layout.loading_footer, null);
 
             UiUtils.setUpRefreshColorSchemes(getActivity(), swipeRefreshLayout);
-            peopleAdapter = new PeopleAdapter(getActivity(), people);
+            peopleAdapter = new PeopleAdapter(getActivity(), nearbyPeople);
 
             HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(peopleAdapter);
             swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -277,12 +266,12 @@ public class PeopleFragment extends Fragment {
                         if ((scrollY >= (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1).getMeasuredHeight() - v.getMeasuredHeight())) &&
                                 scrollY > oldScrollY) {
                             //code to fetch more data for endless scrolling
-                            if (!people.isEmpty() && people.size() >= 100) {
+                            if (!nearbyPeople.isEmpty() && nearbyPeople.size() >= 100) {
                                 UiUtils.showView(footerView, true);
                                 if (StringUtils.isNotEmpty(searchString)) {
-                                    searchPeople(people.size(), searchString);
+                                    searchPeople(nearbyPeople.size(), searchString);
                                 } else {
-                                    fetchPeopleOfCommonInterestsFromNetwork(people.size());
+                                    fetchPeopleOfCommonInterestsFromNetwork(nearbyPeople.size());
                                 }
                             }
                         }
@@ -317,52 +306,43 @@ public class PeopleFragment extends Fragment {
             if (HolloutUtils.isNetWorkConnected(getActivity())) {
                 if (signedInUser != null) {
                     String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
-                    List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+                    List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
                     String signedInUserCountry = signedInUser.getString(AppConstants.APP_USER_COUNTRY);
                     List<String> signedInUserInterests = signedInUser.getList(AppConstants.INTERESTS);
-                    String classification = signedInUser.getString(AppConstants.CLASSIFICATION);
-
-                    String startAgeValue = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
-                    String endAgeValue = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
+                    String signedInUserClassification = signedInUser.getString(AppConstants.CLASSIFICATION);
+                    String filterStartAgeValue = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
+                    String filterEndAgeValue = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
 
                     ArrayList<String> newUserChats = new ArrayList<>();
-                    ParseQuery<ParseObject> firstQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-                    firstQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
-                    if (startAgeValue != null && endAgeValue != null) {
-                        List<String> ageRanges = HolloutUtils.computeAgeRanges(startAgeValue, endAgeValue);
-                        HolloutLogger.d("AgeRanges", TextUtils.join(",", ageRanges));
-                        firstQuery.whereContainedIn(AppConstants.APP_USER_AGE, ageRanges);
+
+                    //Init Query here
+                    ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+                    peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
+
+                    if (filterStartAgeValue != null && filterEndAgeValue != null) {
+                        List<String> ageRanges = HolloutUtils.computeAgeRanges(filterStartAgeValue, filterEndAgeValue);
+                        peopleQuery.whereContainedIn(AppConstants.APP_USER_AGE, ageRanges);
                     }
+
                     String genderFilter = signedInUser.getString(AppConstants.GENDER_FILTER);
-                    checkGender(firstQuery, genderFilter);
-                    excludeUserChats(signedInUserId, savedUserChats, newUserChats, firstQuery);
-                    attachCountry(signedInUserCountry, firstQuery);
+                    checkGender(peopleQuery, genderFilter);
+                    excludeUserChats(signedInUserId, signedInUserChats, newUserChats, peopleQuery);
+                    attachCountry(signedInUserCountry, peopleQuery);
                     if (signedInUserInterests != null) {
-                        firstQuery.whereContainedIn(AppConstants.ABOUT_USER, signedInUserInterests);
+                        if (signedInUserClassification != null) {
+                            if (!signedInUserInterests.contains(signedInUserClassification)) {
+                                signedInUserInterests.add(signedInUserClassification);
+                            }
+                        }
+                        peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, signedInUserInterests);
                     }
-
                     ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
-                    attachGeoPoint(firstQuery, signedInUserGeoPoint);
-
-                    List<ParseQuery<ParseObject>> queries = new ArrayList<>();
-                    queries.add(firstQuery);
-
-                    ParseQuery<ParseObject> secondQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-                    if (classification != null) {
-                        secondQuery.whereEqualTo(AppConstants.CLASSIFICATION, classification);
-                        excludeUserChats(signedInUserId, savedUserChats, newUserChats, secondQuery);
-                        checkGender(secondQuery, genderFilter);
-                        queries.add(secondQuery);
-                        attachCountry(signedInUserCountry, secondQuery);
-                        attachGeoPoint(secondQuery, signedInUserGeoPoint);
-                    }
-
-                    ParseQuery<ParseObject> mainQuery = ParseQuery.or(queries);
-                    mainQuery.setLimit(100);
+                    attachGeoPoint(peopleQuery, signedInUserGeoPoint);
+                    peopleQuery.setLimit(100);
                     if (skip != 0) {
-                        mainQuery.setSkip(skip);
+                        peopleQuery.setSkip(skip);
                     }
-                    mainQuery.findInBackground(new FindCallback<ParseObject>() {
+                    peopleQuery.findInBackground(new FindCallback<ParseObject>() {
 
                         @Override
                         public void done(final List<ParseObject> users, final ParseException e) {
@@ -371,7 +351,7 @@ public class PeopleFragment extends Fragment {
                             }
                             if (e == null) {
                                 if (skip == 0) {
-                                    people.clear();
+                                    nearbyPeople.clear();
                                 }
                                 if (users != null) {
                                     loadAdapter(users);
@@ -383,21 +363,16 @@ public class PeopleFragment extends Fragment {
                                     displayFetchErrorMessage(false);
                                 }
                             }
-                            if (!people.isEmpty()) {
+                            if (!nearbyPeople.isEmpty()) {
                                 UiUtils.toggleFlipperState(peopleContentFlipper, 2);
                                 cacheListOfPeople();
+                                if (chatRequestsHeaderView.getVisibility() == View.VISIBLE) {
+                                    chatRequestsHeaderView.showNearbyHeader(true);
+                                }
                             } else {
                                 displayFetchErrorMessage(false);
                             }
                             UiUtils.showView(footerView, false);
-
-                            if (!people.isEmpty()) {
-                                UiUtils.toggleFlipperState(peopleContentFlipper, 2);
-                                if (chatRequestsHeaderView.getVisibility() == View.VISIBLE) {
-                                    chatRequestsHeaderView.showNearbyHeader(true);
-                                }
-                            }
-
                         }
                     });
                 }
@@ -407,35 +382,35 @@ public class PeopleFragment extends Fragment {
         }
     }
 
-    private void attachCountry(String signedInUserCountry, ParseQuery<ParseObject> firstQuery) {
+    private void attachCountry(String signedInUserCountry, ParseQuery<ParseObject> peopleQuery) {
         if (signedInUserCountry != null) {
-            firstQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
+            peopleQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
         }
     }
 
-    private void attachGeoPoint(ParseQuery<ParseObject> mainQuery, ParseGeoPoint signedInUserGeoPoint) {
+    private void attachGeoPoint(ParseQuery<ParseObject> peopleQuery, ParseGeoPoint signedInUserGeoPoint) {
         if (signedInUserGeoPoint != null) {
-            mainQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 1000.0);
+            peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 1000.0);
         }
     }
 
-    private void checkGender(ParseQuery<ParseObject> firstQuery, String genderFilter) {
+    private void checkGender(ParseQuery<ParseObject> peopleQuery, String genderFilter) {
         if (genderFilter != null && !genderFilter.equals(AppConstants.Both)) {
-            firstQuery.whereEqualTo(AppConstants.APP_USER_GENDER, genderFilter);
+            peopleQuery.whereEqualTo(AppConstants.APP_USER_GENDER, genderFilter);
         }
     }
 
-    private void excludeUserChats(String signedInUserId, List<String> savedUserChats, ArrayList<String> newUserChats, ParseQuery<ParseObject> firstQuery) {
+    private void excludeUserChats(String signedInUserId, List<String> savedUserChats, ArrayList<String> newUserChats, ParseQuery<ParseObject> peopleQuery) {
         if (savedUserChats != null) {
             if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
                 savedUserChats.add(signedInUserId.toLowerCase());
             }
-            firstQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, savedUserChats);
+            peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, savedUserChats);
         } else {
             if (!newUserChats.contains(signedInUserId)) {
                 newUserChats.add(signedInUserId);
             }
-            firstQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
+            peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
         }
     }
 
@@ -444,7 +419,7 @@ public class PeopleFragment extends Fragment {
             @Override
             public void done(ParseException e) {
                 List<ParseObject> peopleToPin = new ArrayList<>();
-                for (NearbyPerson nearbyPerson : people) {
+                for (NearbyPerson nearbyPerson : nearbyPeople) {
                     peopleToPin.add(nearbyPerson.getPerson());
                 }
                 ParseObject.pinAllInBackground(AppConstants.APP_USERS, peopleToPin);
@@ -455,28 +430,25 @@ public class PeopleFragment extends Fragment {
     private void loadAdapter(List<ParseObject> users) {
         if (!users.isEmpty()) {
             for (ParseObject parseUser : users) {
-                if (!people.contains(new NearbyPerson(parseUser))) {
-                    people.add(new NearbyPerson(parseUser));
+                NearbyPerson nearbyPerson = new NearbyPerson(parseUser);
+                if (!nearbyPeople.contains(nearbyPerson)) {
+                    nearbyPeople.add(nearbyPerson);
                 }
             }
         }
-        Collections.sort(people);
+        Collections.sort(nearbyPeople);
         peopleAdapter.notifyDataSetChanged();
     }
 
     private void displayFetchErrorMessage(boolean networkError) {
-        if (people.isEmpty() && getActivity() != null && signedInUser != null) {
+        if (nearbyPeople.isEmpty() && getActivity() != null && signedInUser != null) {
             UiUtils.toggleFlipperState(peopleContentFlipper, 1);
             if (networkError) {
-                if (getActivity() != null) {
-                    noHolloutTextView.setText(getString(R.string.screwed_data_error_message));
-                    meetPeopleTextView.setText(getString(R.string.review_network));
-                }
+                noHolloutTextView.setText(getString(R.string.screwed_data_error_message));
+                meetPeopleTextView.setText(getString(R.string.review_network));
             } else {
-                if (getActivity() != null) {
-                    noHolloutTextView.setText(getString(R.string.people_unavailable));
-                    meetPeopleTextView.setText(getString(R.string.meet_more_people));
-                }
+                noHolloutTextView.setText(getString(R.string.people_unavailable));
+                meetPeopleTextView.setText(getString(R.string.meet_more_people));
             }
         }
     }
@@ -510,11 +482,11 @@ public class PeopleFragment extends Fragment {
                 if (e == null) {
                     if (objects != null && !objects.isEmpty()) {
                         if (skip == 0) {
-                            people.clear();
+                            nearbyPeople.clear();
                         }
                         for (ParseObject parseUser : objects) {
-                            if (!people.contains(new NearbyPerson(parseUser))) {
-                                people.add(new NearbyPerson(parseUser));
+                            if (!nearbyPeople.contains(new NearbyPerson(parseUser))) {
+                                nearbyPeople.add(new NearbyPerson(parseUser));
                             }
                         }
                         peopleAdapter.notifyDataSetChanged();
@@ -525,6 +497,7 @@ public class PeopleFragment extends Fragment {
         });
     }
 
+    @Override
     @SuppressWarnings("unused")
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
     public void onEventAsync(final Object o) {
@@ -534,7 +507,7 @@ public class PeopleFragment extends Fragment {
                 if (o instanceof ConnectivityChangedAction) {
                     ConnectivityChangedAction connectivityChangedAction = (ConnectivityChangedAction) o;
                     if (connectivityChangedAction.isConnectivityChanged()) {
-                        if (people.isEmpty()) {
+                        if (nearbyPeople.isEmpty()) {
                             UiUtils.toggleFlipperState(peopleContentFlipper, 0);
                             fetchPeopleOfCommonInterestsFromNetwork(0);
                         }
@@ -568,9 +541,6 @@ public class PeopleFragment extends Fragment {
                 }
                 EventBus.getDefault().removeAllStickyEvents();
             }
-
         });
-
     }
-
 }

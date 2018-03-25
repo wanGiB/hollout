@@ -39,14 +39,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <com.pnikosis.materialishprogress.ProgressWheel
+        <ProgressBar
             android:id="@+id/progress_wheel"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_gravity="center"
-            app:barColor="@color/white"
-            app:progressIndeterminate="true"
-            app:rimColor="@color/ease_gray" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
 
         <com.wan.hollout.ui.widgets.HolloutTextView
             android:id="@+id/nothing_to_load"

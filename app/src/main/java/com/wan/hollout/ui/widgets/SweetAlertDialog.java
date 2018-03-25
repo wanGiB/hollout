@@ -13,7 +13,6 @@ import com.wan.hollout.R;
 
 import cn.pedant.SweetAlert.OptAnimationLoader;
 
-
 public class SweetAlertDialog extends Dialog {
     private View mDialogView;
     private AnimationSet mModalInAnim;

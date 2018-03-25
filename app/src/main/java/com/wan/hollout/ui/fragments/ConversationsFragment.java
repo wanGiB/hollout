@@ -50,7 +50,7 @@ import butterknife.ButterKnife;
  */
 
 @SuppressWarnings("unchecked")
-public class ConversationsFragment extends Fragment {
+public class ConversationsFragment extends BaseFragment {
 
     @BindView(R.id.conversations_recycler_view)
     RecyclerView conversationsRecyclerView;
@@ -161,7 +161,6 @@ public class ConversationsFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         UiUtils.setUpRefreshColorSchemes(getActivity(), swipeRefreshLayout);
-        checkAndRegEventBus();
         setupAdapter();
         attemptOffloadConversationsFromCache();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -297,7 +296,6 @@ public class ConversationsFragment extends Fragment {
     public void onResume() {
         super.onResume();
         initSignedInUser();
-        checkAndRegEventBus();
         refreshConversations();
         invalidateAdapter();
         AppConstants.recentConversations.clear();
@@ -340,28 +338,10 @@ public class ConversationsFragment extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        checkAnUnRegEventBus();
         DirectModelNotifier.get().unregisterForModelChanges(ChatMessage.class, onModelStateChangedListener);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        checkAnUnRegEventBus();
-    }
-
-    private void checkAndRegEventBus() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    private void checkAnUnRegEventBus() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-    }
-
     @SuppressWarnings("unused")
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
     public void onEventAsync(final Object o) {

@@ -244,7 +244,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 } else {
                     String formattedDistanceToUser = HolloutUtils.formatDistanceToUser(distanceToUser);
                     if (formattedDistanceToUser != null) {
-                        userLocationAndDistanceView.setText(formattedDistanceToUser + "KM from people Nearby");
+                        userLocationAndDistanceView.setText(formattedDistanceToUser + "KM from nearbyPeople Nearby");
                     }
                 }
             } else {
@@ -581,13 +581,25 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             } else {
                 UiUtils.showView(startChatView, true);
                 List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
+                String userClassificationString = parseUser.getString(AppConstants.CLASSIFICATION);
+                if (userClassificationString != null && aboutUser != null) {
+                    if (aboutUser.contains(userClassificationString)) {
+                        aboutUser.remove(userClassificationString);
+                    }
+                }
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
+                String signedInUserClassificationString = signedInUser.getString(AppConstants.CLASSIFICATION);
+                if (signedInUserClassificationString != null && aboutSignedInUser != null) {
+                    if (aboutSignedInUser.contains(signedInUserClassificationString)) {
+                        aboutSignedInUser.remove(signedInUserClassificationString);
+                    }
+                }
                 if (aboutUser != null && aboutSignedInUser != null) {
                     try {
                         List<String> common = new ArrayList<>(aboutUser);
                         common.retainAll(aboutSignedInUser);
                         String firstInterest = !common.isEmpty() ? common.get(0) : aboutUser.get(0);
-                        aboutUserTextView.setText(StringUtils.capitalize(firstInterest));
+                        aboutUserTextView.setText(WordUtils.capitalize(firstInterest));
                     } catch (NullPointerException ignored) {
 
                     }

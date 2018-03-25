@@ -15,7 +15,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -206,7 +208,25 @@ public class JsonApiClient {
     private static void updateSignedInUserProps(String result) {
         ParseObject signedInUserObject = AuthUtil.getCurrentUser();
         if (signedInUserObject != null) {
-            signedInUserObject.put(AppConstants.CLASSIFICATION, result);
+            List<String> aboutSignedInUser = signedInUserObject.getList(AppConstants.ABOUT_USER);
+            String existingClassificationString = signedInUserObject.getString(AppConstants.CLASSIFICATION);
+            if (aboutSignedInUser != null && !aboutSignedInUser.isEmpty()) {
+                if (existingClassificationString != null) {
+                    if (aboutSignedInUser.contains(existingClassificationString)) {
+                        aboutSignedInUser.remove(existingClassificationString);
+                    }
+                    aboutSignedInUser.add(result);
+                    signedInUserObject.put(AppConstants.CLASSIFICATION, result);
+                    signedInUserObject.put(AppConstants.ABOUT_USER, aboutSignedInUser);
+                }
+            }else{
+                aboutSignedInUser = new ArrayList<>();
+                if (existingClassificationString != null) {
+                    aboutSignedInUser.add(result);
+                    signedInUserObject.put(AppConstants.CLASSIFICATION, result);
+                    signedInUserObject.put(AppConstants.ABOUT_USER, aboutSignedInUser);
+                }
+            }
             AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
         }
     }

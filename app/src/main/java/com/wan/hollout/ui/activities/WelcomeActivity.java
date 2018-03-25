@@ -154,7 +154,7 @@ public class WelcomeActivity extends BaseActivity
         } else {
             trueButton.setVisibility(View.GONE);
         }
-        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font> and <font color=#3EB890>Holla</font> people of shared interests and profession <font color=#70CADB>around</font> you."));
+        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font> and <font color=#3EB890>Holla</font> People of shared interests and profession <font color=#70CADB>around</font> you."));
         continueWithGoogle.setOnClickListener(this);
         initDividerBlinkingAnimation();
         startTypingAnimation(fieldIndex);

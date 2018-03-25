@@ -9,12 +9,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
@@ -56,7 +56,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
     FloatingActionButton doneFab;
 
     @BindView(R.id.progress_bar)
-    ProgressWheel progressWheel;
+    ProgressBar progressWheel;
 
     @BindView(R.id.search_view)
     MaterialSearchView searchView;
