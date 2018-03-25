@@ -101,8 +101,8 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_meet_people);
         ButterKnife.bind(this);
+        checkAndRegEventBus();
         signedInUser = AuthUtil.getCurrentUser();
-        initEventHandlers();
         initFooters();
         setupPotentialPeopleToMeetAdapter();
         setupSelectedPeopleToMeetAdapter();
@@ -118,49 +118,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 }
             }
         });
-        searchTextView.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (StringUtils.isNotEmpty(searchTextView.getText().toString())) {
-                    filterPeople(StringUtils.strip(searchTextView.getText().toString().trim()), 0);
-                } else {
-                    fetchPeople(0);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-
-        });
-
-        checkAndRegEventBus();
-
-        searchTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int actionId, @NonNull KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event.getAction() == KeyEvent.ACTION_DOWN &&
-                        event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-                    try {
-                        if (!event.isShiftPressed()) {
-                            // the user is done typing.
-                            filterPeople(searchTextView.getText().toString().trim(), 0);
-                            return true; // consume.
-                        }
-                    } catch (NullPointerException e) {
-                        return false;
-                    }
-                }
-                return false; // pass on to other listeners.
-            }
-        });
+        initEventHandlers();
     }
 
     @Override
@@ -172,15 +130,23 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
     private void offloadUserInterestsIfAvailable() {
         if (signedInUser != null) {
             List<String> userInterests = signedInUser.getList(AppConstants.INTERESTS);
+            String userClassification = signedInUser.getString(AppConstants.CLASSIFICATION);
             if (userInterests != null) {
                 if (!userInterests.isEmpty()) {
-                    selectedHeaderTextView.setText(UiUtils.fromHtml("SELECTED (<font color=#E8A723>" + userInterests.size() + "</font>)"));
+                    selectedHeaderTextView.setText(UiUtils.fromHtml("SELECTED (<font color=#E8A723>" + (userClassification != null
+                            ? userInterests.size() - 1 : userInterests.size()) + "</font>)"));
                     for (String interest : userInterests) {
                         ParseObject interestsObject = new ParseObject(AppConstants.INTERESTS);
                         interestsObject.put(AppConstants.NAME, interest.toLowerCase());
                         interestsObject.put(AppConstants.SELECTED, true);
                         if (!selectedPeopleToMeet.contains(interestsObject)) {
-                            selectedPeopleToMeet.add(interestsObject);
+                            if (userClassification != null) {
+                                if (!interest.equals(userClassification)) {
+                                    selectedPeopleToMeet.add(interestsObject);
+                                }
+                            } else {
+                                selectedPeopleToMeet.add(interestsObject);
+                            }
                         }
                     }
                 }
@@ -252,7 +218,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
     private void filterPeople(final String filterString, final int skip) {
         potentialPeopleToMeetAdapter.setSearchedString(filterString);
         final ParseQuery<ParseObject> peopleSearch = ParseQuery.getQuery(AppConstants.INTERESTS);
-        peopleSearch.whereContains(AppConstants.NAME, StringUtils.stripEnd(StringUtils.strip(filterString.toLowerCase().trim()), "s"));
+        peopleSearch.whereContains(AppConstants.NAME, StringUtils.stripEnd(filterString.toLowerCase(), "s"));
         if (skip != 0) {
             peopleSearch.setSkip(skip);
         }
@@ -265,11 +231,6 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                     if (objects != null && !objects.isEmpty()) {
                         UiUtils.toggleFlipperState(contentFlipper, 2);
                         loadNewPeopleToMeetAdapter(objects, skip);
-                    } else {
-                        if (skip == 0) {
-                            potentialPeopleToMeet.clear();
-                            potentialPeopleToMeetAdapter.notifyDataSetChanged();
-                        }
                     }
                 }
                 checkListIsEmpty();
@@ -292,11 +253,7 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             potentialPeopleToMeetAdapter.notifyDataSetChanged();
         }
         if (!displayableList.isEmpty()) {
-            for (ParseObject parseObject : displayableList) {
-                if (!potentialPeopleToMeet.contains(parseObject)) {
-                    potentialPeopleToMeet.add(parseObject);
-                }
-            }
+            potentialPeopleToMeet.addAll(displayableList);
             potentialPeopleToMeetAdapter.notifyDataSetChanged();
         }
     }
@@ -316,6 +273,48 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
         closeActivity.setOnClickListener(this);
         doneWithSelection.setOnClickListener(this);
         clearSearchBox.setOnClickListener(this);
+        searchTextView.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                String searchString = searchTextView.getText().toString();
+                if (StringUtils.isNotEmpty(searchString)) {
+                    filterPeople(searchString, 0);
+                } else {
+                    fetchPeople(0);
+                }
+            }
+
+        });
+        searchTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int actionId, @NonNull KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE || event.getAction() == KeyEvent.ACTION_DOWN &&
+                        event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    try {
+                        if (!event.isShiftPressed()) {
+                            // the user is done typing.
+                            filterPeople(searchTextView.getText().toString().trim(), 0);
+                            return true; // consume.
+                        }
+                    } catch (NullPointerException e) {
+                        return false;
+                    }
+                }
+                return false; // pass on to other listeners.
+            }
+        });
+
     }
 
     @Override

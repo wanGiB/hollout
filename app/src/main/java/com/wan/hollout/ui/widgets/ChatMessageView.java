@@ -355,6 +355,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void setupLocationMessage(String searchString) {
+        UiUtils.showView(photoVideoProgressView, false);
+        AppConstants.wavePositions.put(getMessageHash(), false);
         String locationName = message.getLocationAddress();
         if (StringUtils.isNotEmpty(locationName)) {
             UiUtils.showView(messageBodyView, true);

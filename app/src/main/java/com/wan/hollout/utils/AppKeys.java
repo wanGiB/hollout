@@ -19,4 +19,5 @@ public class AppKeys {
 
     public static final String SINCH_APPLICATION_KEY = "6f8c1bdc-11b9-4196-9359-9b78d8ad7665";
     public static final String SINCH_APP_SECRET = "afAUXim2J0aYY99B9/wXag==";
+
 }
