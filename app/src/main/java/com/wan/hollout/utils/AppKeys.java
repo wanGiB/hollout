@@ -10,7 +10,7 @@ public class AppKeys {
     public static String SERVER_CLIENT_KEY = "TKeaJbJGGItP01Xxj7Rz15AQgQFQhAeg8GPOUHUJ";
 
     public static String GIPHY_DEV_KEY = "8AOBjaBZI7Y0louUxHUBR5lD5OzQwoWo";
-    public static final String GIPHY_PRODUCTION_KEY = "88585b2bc3204e4caead0d75ad206972";
+    public static final String GIPHY_PRODUCTION_KEY = "8AOBjaBZI7Y0louUxHUBR5lD5OzQwoWo";
 
     public static final String DATUM_BOX_KEY = "f05dc14ecd4eb81113101efbfaddbe66";
 
