@@ -37,6 +37,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -256,6 +257,7 @@ public class AppInstanceDetectionService extends JobIntentService implements
         ArrayList<String> newUserChats = new ArrayList<>();
         ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+        String signedInUserClassification = signedInUser.getString(AppConstants.CLASSIFICATION);
         if (signedInUserGeoPoint != null && aboutUser != null) {
             if (savedUserChats != null) {
                 if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
@@ -269,7 +271,7 @@ public class AppInstanceDetectionService extends JobIntentService implements
                 peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
             }
             peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
-            peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, aboutUser);
+            peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, HolloutUtils.getUserAboutCopy(signedInUserClassification, aboutUser));
             peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 10.0);
             peopleQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override

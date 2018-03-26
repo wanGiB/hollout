@@ -133,8 +133,12 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
             String userClassification = signedInUser.getString(AppConstants.CLASSIFICATION);
             if (userInterests != null) {
                 if (!userInterests.isEmpty()) {
-                    selectedHeaderTextView.setText(UiUtils.fromHtml("SELECTED (<font color=#E8A723>" + (userClassification != null
-                            ? userInterests.size() - 1 : userInterests.size()) + "</font>)"));
+                    int totalSelectedInterests = (userClassification != null
+                            ? userInterests.size() - 1 : userInterests.size());
+                    if (totalSelectedInterests == 0) {
+                        totalSelectedInterests = 1;
+                    }
+                    selectedHeaderTextView.setText(UiUtils.fromHtml("SELECTED (<font color=#E8A723>" + totalSelectedInterests + "</font>)"));
                     for (String interest : userInterests) {
                         ParseObject interestsObject = new ParseObject(AppConstants.INTERESTS);
                         interestsObject.put(AppConstants.NAME, interest.toLowerCase());

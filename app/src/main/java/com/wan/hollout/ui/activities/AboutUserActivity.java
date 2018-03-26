@@ -142,8 +142,8 @@ public class AboutUserActivity extends BaseActivity {
             String signedInUserClassificationString = signedInUser.getString(AppConstants.CLASSIFICATION);
             if (aboutUser != null) {
                 if (!aboutUser.isEmpty()) {
-                    if (signedInUserClassificationString!=null){
-                        if (aboutUser.contains(signedInUserClassificationString)){
+                    if (signedInUserClassificationString != null) {
+                        if (aboutUser.contains(signedInUserClassificationString)) {
                             aboutUser.remove(signedInUserClassificationString);
                         }
                     }

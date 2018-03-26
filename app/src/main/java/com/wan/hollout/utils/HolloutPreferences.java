@@ -176,4 +176,5 @@ public class HolloutPreferences {
     public static String getUserFirebaseToken() {
         return getInstance().getString(AppConstants.USER_FIREBASE_TOKEN, null);
     }
+
 }

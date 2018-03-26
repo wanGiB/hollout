@@ -1000,4 +1000,14 @@ public class HolloutUtils {
         }
         return false;
     }
+
+    public static List<String> getUserAboutCopy(String userClassification,List<String> aboutUser) {
+        List<String> aboutUserCopy = new ArrayList<>(aboutUser);
+        if (userClassification != null) {
+            if (aboutUserCopy.contains(userClassification)) {
+                aboutUserCopy.remove(userClassification);
+            }
+        }
+        return aboutUserCopy;
+    }
 }

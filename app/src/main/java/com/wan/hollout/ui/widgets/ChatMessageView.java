@@ -355,12 +355,12 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     private void setupLocationMessage(String searchString) {
-        UiUtils.showView(photoVideoProgressView, false);
-        AppConstants.wavePositions.put(getMessageHash(), false);
         String locationName = message.getLocationAddress();
         if (StringUtils.isNotEmpty(locationName)) {
             UiUtils.showView(messageBodyView, true);
-            messageBodyView.setText(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, locationName, ContextCompat.getColor(activity, R.color.colorAccent)) : locationName);
+            messageBodyView.setText(StringUtils.isNotEmpty(searchString)
+                    ? UiUtils.highlightTextIfNecessary(searchString, locationName,
+                    ContextCompat.getColor(activity, R.color.colorAccent)) : locationName);
             AppConstants.messageBodyPositions.put(getMessageHash(), true);
         } else {
             UiUtils.showView(messageBodyView, false);
@@ -373,6 +373,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
             UiUtils.loadImage(activity, locationStaticMap, attachedPhotoOrVideoThumbnailView);
         }
+        AppConstants.wavePositions.put(getMessageHash(), false);
+        UiUtils.showView(photoVideoProgressView, false);
     }
 
     private void setupVoiceMessage(String searchString) {
@@ -970,6 +972,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     message.setFileUploadProgress(progress);
                 }
             });
+        } else {
+            AppConstants.wavePositions.put(getMessageHash(), false);
+            UiUtils.showView(photoVideoProgressView, false);
         }
     }
 
