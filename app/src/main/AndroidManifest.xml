@@ -59,7 +59,7 @@
         android:theme="@style/AppTheme"
         tools:replace="android:icon,android:allowBackup, android:label">
 
-        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="@string/partnerKey"/>
+        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="@string/truecaller_partner_key"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"
