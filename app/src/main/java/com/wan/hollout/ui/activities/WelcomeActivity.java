@@ -126,7 +126,6 @@ public class WelcomeActivity extends BaseActivity
     };
 
     private String TAG = "WelcomeActivity";
-
     private TrueClient mTrueClient;
 
     @Override
