@@ -184,7 +184,7 @@
     <color name="colorTwitter">#00B4FE</color>
     <color name="linked_in">#007bb6</color>
 
-    <color name="from">#000000</color>
+    <color name="from">@color/medium_grey</color>
     <color name="subject">#111111</color>
     <color name="timestamp">#4285f4</color>
     <color name="message">#7a7a7a</color>

@@ -11,10 +11,10 @@ import java.util.Map;
  */
 public class FontUtils {
 
-    private static String FONT_REGULAR = "AvenirLTStd-Book.otf";
-    private static String FONT_BOLD = "AvenirLTStd-Heavy.otf";
-    private static String FONT_LIGHT = "AvenirLTStd-Light.otf";
-    private static String FONT_MEDIUM = "AvenirLTStd-Medium.otf";
+    private static String FONT_REGULAR = "Roboto-Regular.ttf";
+    private static String FONT_BOLD = "Roboto-Bold.ttf";
+    private static String FONT_LIGHT = "Roboto-Light.ttf";
+    private static String FONT_MEDIUM = "Roboto-Medium.ttf";
     private static String DYSPEPSIA = "colophon.ttf";
     private static String FONT_AWESOME = "fontawesome-webfont.ttf";
 

@@ -132,7 +132,7 @@
                     android:paddingRight="5dp"
                     android:textColor="@color/from"
                     android:textSize="@dimen/msg_text_primary"
-                    app:textStyle="bold" />
+                    app:textStyle="medium" />
 
                 <TextView
                     android:id="@+id/timestamp"
@@ -160,7 +160,7 @@
                 android:lines="1"
                 android:textColor="@color/list_item_secondary_text"
                 android:textSize="@dimen/msg_text_secondary"
-                app:textStyle="bold" />
+                app:textStyle="medium" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -182,11 +182,11 @@
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginRight="4dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:scaleType="centerCrop"
                     android:src="@drawable/hdp"
-                    android:layout_marginEnd="4dp"
-                    android:layout_marginRight="4dp"
                     android:visibility="gone"
                     tools:ignore="ContentDescription" />
 
@@ -203,7 +203,7 @@
                     android:paddingRight="16dp"
                     android:textColor="@color/message"
                     android:textSize="@dimen/msg_text_secondary"
-                    app:textStyle="medium" />
+                    app:textStyle="regular" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/unread_message_indicator"

@@ -76,7 +76,8 @@
                         android:clickable="true"
                         android:textColor="@color/white"
                         android:textSize="25sp"
-                        app:textStyle="medium" />
+                        app:textStyle="medium"
+                        android:focusable="true" />
 
                     <ImageView
                         android:id="@+id/done_with_display_name_edit"
@@ -104,7 +105,8 @@
                 android:clickable="true"
                 android:src="@drawable/authentication_background_image"
                 app:border_color="@color/white"
-                app:border_width="3dp" />
+                app:border_width="3dp"
+                android:focusable="true" />
 
             <com.wan.hollout.ui.widgets.CircleImageView
                 android:id="@+id/user_gender"
@@ -120,7 +122,8 @@
                 android:src="@drawable/authentication_background_image"
                 android:visibility="gone"
                 app:border_color="@color/white"
-                app:border_width="2dp" />
+                app:border_width="2dp"
+                android:focusable="true" />
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/start_chat_view"
@@ -161,7 +164,8 @@
                     android:paddingRight="20dp"
                     android:paddingStart="22dp"
                     android:textColor="@color/text_dark"
-                    android:textSize="25sp" />
+                    android:textSize="25sp"
+                    android:focusable="true" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/about_user_recycler_view"
@@ -196,7 +200,8 @@
                     android:text="@string/edit"
                     android:textSize="10sp"
                     android:visibility="gone"
-                    tools:ignore="SmallSp" />
+                    tools:ignore="SmallSp"
+                    android:focusable="true" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/user_location_and_distance"
@@ -237,7 +242,8 @@
                         android:text="@string/hey_there_holla_me_on_hollout"
                         android:textColor="@color/grey500"
                         android:textSize="18sp"
-                        app:textStyle="medium" />
+                        app:textStyle="medium"
+                        android:focusable="true" />
 
                 </FrameLayout>
 
@@ -293,7 +299,8 @@
                         android:clickable="true"
                         android:scaleType="centerCrop"
                         android:src="@drawable/authentication_background_image"
-                        tools:ignore="ContentDescription" />
+                        tools:ignore="ContentDescription"
+                        android:focusable="true" />
 
                     <View
                         android:id="@+id/featured_photos_dim_view"
@@ -316,7 +323,8 @@
                         android:padding="10dp"
                         android:textColor="@color/whitesmoke"
                         android:textSize="16sp"
-                        app:textStyle="light" />
+                        app:textStyle="light"
+                        android:focusable="true" />
 
                 </FrameLayout>
 
@@ -343,7 +351,8 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
             android:src="@drawable/ic_arrow_back_white_48dp"
-            tools:ignore="ContentDescription" />
+            tools:ignore="ContentDescription"
+            android:focusable="true" />
 
         <com.wan.hollout.ui.widgets.HolloutTextView
             android:id="@+id/online_status"
