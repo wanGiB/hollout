@@ -135,11 +135,19 @@ public class UiUtils {
     }
 
     public static synchronized ProgressDialog showProgressDialog(final Context context, final String message) {
-        ProgressDialog operationsProgressDialog = new ProgressDialog(context);
-        operationsProgressDialog.setCancelable(false);
-        operationsProgressDialog.setMessage(message);
-        operationsProgressDialog.show();
-        return operationsProgressDialog;
+        try {
+            ProgressDialog operationsProgressDialog = new ProgressDialog(context);
+            operationsProgressDialog.setCancelable(false);
+            operationsProgressDialog.setMessage(message);
+            operationsProgressDialog.show();
+            return operationsProgressDialog;
+        } catch (WindowManager.BadTokenException e) {
+            ProgressDialog operationsProgressDialog = new ProgressDialog(ApplicationLoader.getInstance());
+            operationsProgressDialog.setCancelable(false);
+            operationsProgressDialog.setMessage(message);
+            operationsProgressDialog.show();
+            return operationsProgressDialog;
+        }
     }
 
     public static synchronized void dismissProgressDialog(ProgressDialog operationsProgressDialog) {
@@ -147,8 +155,8 @@ public class UiUtils {
             if (operationsProgressDialog != null) {
                 if (operationsProgressDialog.isShowing()) {
                     operationsProgressDialog.dismiss();
+                    operationsProgressDialog.cancel();
                 }
-                operationsProgressDialog = null;
             }
         } catch (WindowManager.BadTokenException e) {
             HolloutLogger.d(TAG, "Your father lip. Dialog no gree close again o. See the error na = " + e.getMessage());
