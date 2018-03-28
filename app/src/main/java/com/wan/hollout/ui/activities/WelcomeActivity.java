@@ -617,61 +617,66 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     public void onSuccesProfileShared(@NonNull final TrueProfile trueProfile) {
-        UiUtils.dismissProgressDialog(progressDialog);
-        progressDialog = UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
-        final String fullName = trueProfile.firstName + " " + trueProfile.lastName;
-        String phoneNumber = trueProfile.phoneNumber;
-        final String email = StringUtils.strip(StringUtils.deleteWhitespace(phoneNumber + "@hollout.com"), "+");
-        final String password = "hollout";
-        firebaseAuth.removeAuthStateListener(addAuthStateListener);
-        firebaseAuth.createUserWithEmailAndPassword(email, password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+        runOnUiThread(new Runnable() {
             @Override
-            public void onSuccess(AuthResult authResult) {
-                UserProfileChangeRequest.Builder profileUpdates = new UserProfileChangeRequest.Builder();
-                profileUpdates.setDisplayName(fullName);
-                if (trueProfile.avatarUrl != null) {
-                    profileUpdates.setPhotoUri(Uri.parse(trueProfile.avatarUrl));
-                }
-                if (firebaseAuth.getCurrentUser() != null) {
-                    firebaseAuth.getCurrentUser().updateProfile(profileUpdates.build())
-                            .addOnSuccessListener(getCurrentActivityInstance(), new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    authenticateUser(firebaseAuth.getCurrentUser());
-                                }
-                            })
-                            .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    UiUtils.dismissProgressDialog(progressDialog);
-                                    UiUtils.showSafeToast(e.getMessage());
-                                }
-                            });
-                }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof FirebaseAuthUserCollisionException) {
-                    //User already exists
-                    firebaseAuth.signInWithEmailAndPassword(email, password)
-                            .addOnSuccessListener(getCurrentActivityInstance(), new OnSuccessListener<AuthResult>() {
-                                @Override
-                                public void onSuccess(AuthResult authResult) {
-                                    authenticateUser(firebaseAuth.getCurrentUser());
-                                }
-                            })
-                            .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    UiUtils.dismissProgressDialog(progressDialog);
-                                    UiUtils.showSafeToast(e.getMessage());
-                                }
-                            });
-                } else {
-                    UiUtils.dismissProgressDialog(progressDialog);
-                    UiUtils.showSafeToast(e.getMessage());
-                }
+            public void run() {
+                UiUtils.dismissProgressDialog(progressDialog);
+                progressDialog = UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
+                final String fullName = trueProfile.firstName + " " + trueProfile.lastName;
+                String phoneNumber = trueProfile.phoneNumber;
+                final String email = StringUtils.strip(StringUtils.deleteWhitespace(phoneNumber + "@hollout.com"), "+");
+                final String password = "hollout";
+                firebaseAuth.removeAuthStateListener(addAuthStateListener);
+                firebaseAuth.createUserWithEmailAndPassword(email, password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        UserProfileChangeRequest.Builder profileUpdates = new UserProfileChangeRequest.Builder();
+                        profileUpdates.setDisplayName(fullName);
+                        if (trueProfile.avatarUrl != null) {
+                            profileUpdates.setPhotoUri(Uri.parse(trueProfile.avatarUrl));
+                        }
+                        if (firebaseAuth.getCurrentUser() != null) {
+                            firebaseAuth.getCurrentUser().updateProfile(profileUpdates.build())
+                                    .addOnSuccessListener(getCurrentActivityInstance(), new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            authenticateUser(firebaseAuth.getCurrentUser());
+                                        }
+                                    })
+                                    .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            UiUtils.dismissProgressDialog(progressDialog);
+                                            UiUtils.showSafeToast(e.getMessage());
+                                        }
+                                    });
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (e instanceof FirebaseAuthUserCollisionException) {
+                            //User already exists
+                            firebaseAuth.signInWithEmailAndPassword(email, password)
+                                    .addOnSuccessListener(getCurrentActivityInstance(), new OnSuccessListener<AuthResult>() {
+                                        @Override
+                                        public void onSuccess(AuthResult authResult) {
+                                            authenticateUser(firebaseAuth.getCurrentUser());
+                                        }
+                                    })
+                                    .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            UiUtils.dismissProgressDialog(progressDialog);
+                                            UiUtils.showSafeToast(e.getMessage());
+                                        }
+                                    });
+                        } else {
+                            UiUtils.dismissProgressDialog(progressDialog);
+                            UiUtils.showSafeToast(e.getMessage());
+                        }
+                    }
+                });
             }
         });
     }

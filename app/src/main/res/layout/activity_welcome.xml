@@ -26,6 +26,7 @@
         android:clipToPadding="false">
 
         <LinearLayout
+            android:id="@+id/center_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -148,9 +149,8 @@
             android:id="@+id/bottom_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="62dp"
+            android:layout_below="@+id/center_container"
             android:orientation="vertical"
             android:padding="10dp">
 
