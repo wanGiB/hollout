@@ -55,9 +55,7 @@ public class AuthUtil {
     public static void createLocalUser(ParseObject remoteObject) {
         ParseObject newLocalObject = new ParseObject(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         for (String key : remoteObject.keySet()) {
-            if (key.equals(AppConstants.OBJECT_ID)) {
-                newLocalObject.put(AppConstants.MASKED_OBJECT_ID, remoteObject.get(AppConstants.OBJECT_ID));
-            } else {
+            if (!key.equals(AppConstants.OBJECT_ID)) {
                 newLocalObject.put(key, remoteObject.get(key));
             }
         }
@@ -69,21 +67,22 @@ public class AuthUtil {
         personQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, realObjectId);
         personQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
-            public void done(final ParseObject object, ParseException e) {
-                if (object != null) {
+            public void done(final ParseObject updatableObject, ParseException e) {
+                if (updatableObject != null) {
                     for (String key : updatableProps.keySet()) {
+                        HolloutLogger.d("UpdatableUserKey", key);
                         if (!key.equals(AppConstants.OBJECT_ID)) {
-                            object.put(key, updatableProps.get(key));
+                            updatableObject.put(key, updatableProps.get(key));
                         }
                     }
-                    object.saveInBackground(new SaveCallback() {
+                    updatableObject.saveInBackground(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
                             if (successCallback != null) {
                                 successCallback.done(true, null);
                             }
                             if (e != null) {
-                                object.saveEventually();
+                                updatableObject.saveEventually();
                             }
                         }
                     });
@@ -92,7 +91,7 @@ public class AuthUtil {
         });
     }
 
-    public static void dissolveAuthenticatedUser(final DoneCallback<Boolean> dissolutionCallback) {
+    public static void logOutAuthenticatedUser(final DoneCallback<Boolean> dissolutionCallback) {
         final ParseObject localObject = getCurrentUser();
         if (localObject != null) {
             localObject.put(AppConstants.APP_USER_ONLINE_STATUS, AppConstants.OFFLINE);
@@ -116,5 +115,4 @@ public class AuthUtil {
             });
         }
     }
-
 }

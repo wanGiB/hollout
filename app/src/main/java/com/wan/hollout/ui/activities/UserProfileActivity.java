@@ -2,6 +2,7 @@ package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -202,14 +203,23 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private void offloadUserAboutsIfAvailable(ParseObject parseUser) {
         List<ParseObject> aboutUserList = new ArrayList<>();
         List<String> userAboutList = parseUser.getList(AppConstants.ABOUT_USER);
+        String userClassification = parseUser.getString(AppConstants.CLASSIFICATION);
         if (userAboutList != null) {
             if (!userAboutList.isEmpty()) {
                 for (String interest : userAboutList) {
                     ParseObject interestsObject = new ParseObject(AppConstants.INTERESTS);
                     interestsObject.put(AppConstants.NAME, interest.toLowerCase());
                     interestsObject.put(AppConstants.SELECTED, true);
-                    if (!aboutUserList.contains(interestsObject)) {
-                        aboutUserList.add(interestsObject);
+                    if (userClassification != null) {
+                        if (!StringUtils.equalsIgnoreCase(interest, userClassification)) {
+                            if (!aboutUserList.contains(interestsObject)) {
+                                aboutUserList.add(interestsObject);
+                            }
+                        }
+                    } else {
+                        if (!aboutUserList.contains(interestsObject)) {
+                            aboutUserList.add(interestsObject);
+                        }
                     }
                 }
             }
@@ -298,12 +308,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         doneWithDisplayNameEdit.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                UiUtils.showProgressDialog(UserProfileActivity.this, "Updating display name...");
+                                final ProgressDialog progressDialog = UiUtils.showProgressDialog(UserProfileActivity.this, "Updating display name...");
                                 signedInUser.put(AppConstants.APP_USER_DISPLAY_NAME, userDisplayNameView.getText().toString().toLowerCase().trim());
                                 AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                                     @Override
                                     public void done(Boolean result, Exception e) {
-                                        UiUtils.dismissProgressDialog();
+                                        UiUtils.dismissProgressDialog(progressDialog);
                                         if (e == null) {
                                             dismissEditComponents();
                                             UiUtils.showSafeToast("Success!");
@@ -608,9 +618,10 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onClick(View view) {
                         if (chatRequestView.getVisibility() == View.VISIBLE) {
-                            UiUtils.showProgressDialog(UserProfileActivity.this, "Please wait...");
+                            ProgressDialog progressDialog = UiUtils.showProgressDialog(UserProfileActivity.this, "Please wait...");
                             //Automatically accept chat request
                             chatRequestView.acceptChatRequest();
+                            UiUtils.dismissProgressDialog(progressDialog);
                             return;
                         }
                         Intent chatIntent = new Intent(UserProfileActivity.this, ChatActivity.class);
@@ -680,7 +691,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         });
                         cropConsentDialog.create().show();
                     } else {
-                        UiUtils.showProgressDialog(UserProfileActivity.this, "Featuring Photo");
+                        final ProgressDialog progressDialog = UiUtils.showProgressDialog(UserProfileActivity.this, "Featuring Photo");
                         HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
                             @Override
                             public void done(final String result, final Exception e) {
@@ -703,7 +714,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                                 AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                                                     @Override
                                                     public void done(Boolean result, Exception e) {
-                                                        UiUtils.dismissProgressDialog();
+                                                        UiUtils.dismissProgressDialog(progressDialog);
                                                         if (e == null) {
                                                             UiUtils.showSafeToast("Photo featured successfully");
                                                             if (parseUser != null) {
@@ -721,7 +732,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                                 finish();
                                             }
                                         } else {
-                                            UiUtils.dismissProgressDialog();
+                                            UiUtils.dismissProgressDialog(progressDialog);
                                             UiUtils.showSafeToast("An error occurred while updating photo. Please try again.");
                                         }
                                     }
@@ -742,10 +753,11 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void prepareForUpload(String pickedPhotoFilePath, int currentAction) {
+        final ProgressDialog progressDialog;
         if (currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
-            UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Profile Photo");
+            progressDialog = UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Profile Photo");
         } else {
-            UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Cover Photo");
+            progressDialog = UiUtils.showProgressDialog(UserProfileActivity.this, "Updating Cover Photo");
         }
         HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
             @Override
@@ -761,7 +773,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                 AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                                     @Override
                                     public void done(Boolean result, Exception e) {
-                                        UiUtils.dismissProgressDialog();
+                                        UiUtils.dismissProgressDialog(progressDialog);
                                         if (e == null) {
                                             UiUtils.showSafeToast("Upload Success");
                                             if (parseUser != null) {
@@ -779,7 +791,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                 finish();
                             }
                         } else {
-                            UiUtils.dismissProgressDialog();
+                            UiUtils.dismissProgressDialog(progressDialog);
                             UiUtils.showSafeToast("An error occurred while updating photo. Please try again.");
                         }
                     }
@@ -904,7 +916,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     String s = (String) o;
                     if (s.equals(AppConstants.REMOVE_SOMETHING)) {
                         if (isAContact(parseUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase())) {
-                            UiUtils.dismissProgressDialog();
                             UiUtils.showView(chatRequestView, false);
                             startChatView.performClick();
                         }

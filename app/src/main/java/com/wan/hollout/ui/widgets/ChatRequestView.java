@@ -175,7 +175,10 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
         acceptRequestTextView.performClick();
     }
 
-    private void acceptChatRequest(final Activity activity, final ChatRequestsAdapter parent, final ParseObject feedObject, final String userDisplayName) {
+    private void acceptChatRequest(final Activity activity,
+                                   final ChatRequestsAdapter parent,
+                                   final ParseObject feedObject,
+                                   final String userDisplayName) {
         acceptRequestTextView.setOnClickListener(new OnClickListener() {
 
             @Override

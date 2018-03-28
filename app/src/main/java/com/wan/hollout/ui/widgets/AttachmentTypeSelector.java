@@ -41,6 +41,7 @@ import com.wan.hollout.listeners.OnSingleClickListener;
 import com.wan.hollout.ui.adapters.GifsAdapter;
 import com.wan.hollout.utils.ApiUtils;
 import com.wan.hollout.utils.HolloutUtils;
+import com.wan.hollout.utils.ItemOffSetDecoration;
 import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.ViewUtil;
 
@@ -389,28 +390,20 @@ public class AttachmentTypeSelector extends PopupWindow {
     }
 
     private void setupGifsAdapter() {
-
         gifsAdapter = new GifsAdapter(activity, gifs);
-
         HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(gifsAdapter);
-
         GridLayoutManager gridLayoutManager = new GridLayoutManager(activity, 3);
-
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-
             @Override
             public int getSpanSize(int position) {
                 return 1;
             }
-
         });
-
+        ItemOffSetDecoration itemOffSetDecoration = new ItemOffSetDecoration(activity, R.dimen.item_offset);
+        gifRecyclerView.addItemDecoration(itemOffSetDecoration);
         gifRecyclerView.setLayoutManager(gridLayoutManager);
-
         gifRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
-
         gifRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(gridLayoutManager) {
-
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
                 if (!gifs.isEmpty()) {
@@ -418,12 +411,9 @@ public class AttachmentTypeSelector extends PopupWindow {
                     loadGifs(activity, gifSearchBox.getText().toString().trim(), PAGE);
                 }
             }
-
         });
-
         RecyclerViewUtils.setFooterView(gifRecyclerView, footerView);
         UiUtils.showView(footerView, false);
-
     }
 
     public void loadGifs(final Activity activity, String searchKey, int page) {

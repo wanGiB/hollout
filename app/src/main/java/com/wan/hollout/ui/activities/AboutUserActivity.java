@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -300,13 +301,13 @@ public class AboutUserActivity extends BaseActivity {
             }
             signedInUser.put(AppConstants.INTERESTS, interests);
             signedInUser.put(AppConstants.ABOUT_USER, aboutUserList);
-            UiUtils.showProgressDialog(AboutUserActivity.this, "Please wait...");
+            final ProgressDialog progressDialog = UiUtils.showProgressDialog(AboutUserActivity.this, "Please wait...");
             AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                 @Override
                 public void done(Boolean success, Exception e) {
                     if (e == null) {
                         checkAndPushInterests(Arrays.asList(moreAboutUserField.getText().toString().trim().split(",")));
-                        UiUtils.dismissProgressDialog();
+                        UiUtils.dismissProgressDialog(progressDialog);
                         if (!HolloutPreferences.isUserWelcomed()) {
                             launchGenderAndBirthDayActivity();
                         } else {
@@ -319,7 +320,7 @@ public class AboutUserActivity extends BaseActivity {
                             }
                         }
                     } else {
-                        UiUtils.dismissProgressDialog();
+                        UiUtils.dismissProgressDialog(progressDialog);
                         UiUtils.showSafeToast("Error completing operation. Please try again. ");
                     }
                 }

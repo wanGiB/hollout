@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -108,12 +109,12 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
 
     private void sendMessage() {
         int peopleCount = AppConstants.selectedPeople.size();
-        UiUtils.showProgressDialog(this, "Forwarding Message to (" + (peopleCount == 1 ? "1 person)" : peopleCount + "persons)") + ")");
+        ProgressDialog progressDialog = UiUtils.showProgressDialog(this, "Forwarding Message to (" + (peopleCount == 1 ? "1 person)" : peopleCount + "persons)") + ")");
         ChatMessage message = AppConstants.selectedMessages.get(0);
         for (ConversationItem conversationItem : AppConstants.selectedPeople) {
             sendNewMessage(message, conversationItem.getRecipient());
         }
-        UiUtils.dismissProgressDialog();
+        UiUtils.dismissProgressDialog(progressDialog);
         UiUtils.showSafeToast("Success!");
         AppConstants.selectedPeople.clear();
         AppConstants.selectedPeoplePositions.clear();

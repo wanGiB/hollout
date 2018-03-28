@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.Nullable;
@@ -96,13 +97,13 @@ public class FeaturedPhotosRectangleAdapter extends RecyclerView.Adapter<Recycle
                                         List<String> featuredPhotos = signedInUserObject.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
                                         if (featuredPhotos != null && featuredPhotos.contains(photo)) {
                                             featuredPhotos.remove(photo);
-                                            UiUtils.showProgressDialog(activity,"Un-Featuring photo...");
+                                            final ProgressDialog progressDialog = UiUtils.showProgressDialog(activity, "Un-Featuring photo...");
                                             signedInUserObject.put(AppConstants.APP_USER_FEATURED_PHOTOS, featuredPhotos);
                                             AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
                                                 @Override
                                                 public void done(Boolean result, Exception e) {
                                                     if (e == null) {
-                                                        UiUtils.dismissProgressDialog();
+                                                        UiUtils.dismissProgressDialog(progressDialog);
                                                         UiUtils.showSafeToast("Deleted and un-featured successfully");
                                                         notifyDataSetChanged();
                                                     }

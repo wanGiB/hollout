@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.activities;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -136,11 +137,11 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
             }
             signedInUser.put(AppConstants.APP_USER_GENDER, selectedGenderType);
             signedInUser.put(AppConstants.APP_USER_AGE, ageBox.getText().toString().trim());
-            UiUtils.showProgressDialog(GenderAndAgeConfigurationActivity.this, "Please wait...");
+            final ProgressDialog progressDialog =UiUtils.showProgressDialog(GenderAndAgeConfigurationActivity.this, "Please wait...");
             AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                 @Override
                 public void done(Boolean result, Exception e) {
-                    UiUtils.dismissProgressDialog();
+                    UiUtils.dismissProgressDialog(progressDialog);
                     if (e == null) {
                         navigateBackToCaller();
                     } else {

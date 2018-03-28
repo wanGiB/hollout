@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -331,11 +332,11 @@ public class MeetPeopleActivity extends AppCompatActivity implements View.OnClic
                 searchTextView.setText("");
                 break;
             case R.id.done_with_selection:
-                UiUtils.showProgressDialog(MeetPeopleActivity.this, "Please wait...");
+                final ProgressDialog progressDialog = UiUtils.showProgressDialog(MeetPeopleActivity.this, "Please wait...");
                 AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                     @Override
                     public void done(Boolean result, Exception e) {
-                        UiUtils.dismissProgressDialog();
+                        UiUtils.dismissProgressDialog(progressDialog);
                         ParseObject signedInUser = AuthUtil.getCurrentUser();
                         if (signedInUser != null) {
                             List<String> userInterests = signedInUser.getList(AppConstants.INTERESTS);

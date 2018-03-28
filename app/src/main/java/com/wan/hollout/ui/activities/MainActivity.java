@@ -75,7 +75,6 @@ import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.GeneralNotifier;
-import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -209,11 +208,11 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                             if (selectedUserObject != null) {
                                 String userId = selectedUserObject.getString(AppConstants.REAL_OBJECT_ID);
                                 if (!HolloutUtils.isUserBlocked(userId)) {
-                                    UiUtils.showProgressDialog(MainActivity.this, "Blocking User. Please wait...");
+                                    final ProgressDialog progressDialog = UiUtils.showProgressDialog(MainActivity.this, "Blocking User. Please wait...");
                                     HolloutUtils.blockUser(userId, new DoneCallback<Boolean>() {
                                         @Override
                                         public void done(Boolean success, Exception e) {
-                                            UiUtils.dismissProgressDialog();
+                                            UiUtils.dismissProgressDialog(progressDialog);
                                             if (success) {
                                                 UiUtils.showSafeToast("User blocked successfully!");
                                                 ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
@@ -224,11 +223,11 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                         }
                                     });
                                 } else {
-                                    UiUtils.showProgressDialog(MainActivity.this, "Unblocking User. Please wait...");
+                                    final ProgressDialog progressDialog = UiUtils.showProgressDialog(MainActivity.this, "Unblocking User. Please wait...");
                                     HolloutUtils.unBlockUser(userId, new DoneCallback<Boolean>() {
                                         @Override
                                         public void done(Boolean success, Exception e) {
-                                            UiUtils.dismissProgressDialog();
+                                            UiUtils.dismissProgressDialog(progressDialog);
                                             if (success) {
                                                 UiUtils.showSafeToast("User Unblocked successfully!");
                                                 ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
@@ -959,23 +958,23 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     }
 
     private void finishLogOut() {
-        UiUtils.showProgressDialog(MainActivity.this, "Please wait...");
+        final ProgressDialog progressDialog = UiUtils.showProgressDialog(MainActivity.this, "Please wait...");
         tryBackUpChatsBeforeLoginOut(new DoneCallback<Boolean>() {
             @Override
             public void done(Boolean backUpSuccess, Exception e) {
                 if (e == null && backUpSuccess) {
                     FirebaseAuth.getInstance().signOut();
-                    dissolveLoggedInUser();
+                    dissolveLoggedInUser(progressDialog);
                 } else {
-                    UiUtils.dismissProgressDialog();
+                    UiUtils.dismissProgressDialog(progressDialog);
                     UiUtils.showSafeToast("Failed to sign you out.Please try again");
                 }
             }
         });
     }
 
-    private void dissolveLoggedInUser() {
-        AuthUtil.dissolveAuthenticatedUser(new DoneCallback<Boolean>() {
+    private void dissolveLoggedInUser(final ProgressDialog progressDialog) {
+        AuthUtil.logOutAuthenticatedUser(new DoneCallback<Boolean>() {
             @Override
             public void done(Boolean result, Exception e) {
                 if (e == null) {
@@ -990,15 +989,15 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
-                                        finishUp();
+                                        finishUp(progressDialog);
                                     } else {
-                                        UiUtils.dismissProgressDialog();
+                                        UiUtils.dismissProgressDialog(progressDialog);
                                         UiUtils.showSafeToast("Failed to sign you out.Please try again");
                                     }
                                 }
                             });
                 } else {
-                    UiUtils.dismissProgressDialog();
+                    UiUtils.dismissProgressDialog(progressDialog);
                     UiUtils.showSafeToast("Failed to sign you out.Please try again");
                 }
             }
@@ -1048,8 +1047,8 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         });
     }
 
-    private void finishUp() {
-        UiUtils.dismissProgressDialog();
+    private void finishUp(ProgressDialog progressDialog) {
+        UiUtils.dismissProgressDialog(progressDialog);
         UiUtils.showSafeToast("You've being logged out");
         Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
         startActivity(splashIntent);

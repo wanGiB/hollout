@@ -70,6 +70,7 @@ import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.adapters.FeaturedPhotosCircleAdapter;
+import com.wan.hollout.ui.utils.Preconditions;
 import com.wan.hollout.ui.widgets.CircularProgressButton;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
@@ -133,25 +134,21 @@ public class UiUtils {
         }
     }
 
-    private static ProgressDialog operationsProgressDialog;
-
-    public static synchronized void showProgressDialog(final Context context, final String message) {
-        try {
-            operationsProgressDialog = new ProgressDialog(context);
-            operationsProgressDialog.setCancelable(false);
-            operationsProgressDialog.setMessage(message);
-            operationsProgressDialog.show();
-        } catch (Exception ignored) {
-
-        }
+    public static synchronized ProgressDialog showProgressDialog(final Context context, final String message) {
+        ProgressDialog operationsProgressDialog = new ProgressDialog(context);
+        operationsProgressDialog.setCancelable(false);
+        operationsProgressDialog.setMessage(message);
+        operationsProgressDialog.show();
+        return operationsProgressDialog;
     }
 
-    public static synchronized void dismissProgressDialog() {
+    public static synchronized void dismissProgressDialog(ProgressDialog operationsProgressDialog) {
         try {
             if (operationsProgressDialog != null) {
                 if (operationsProgressDialog.isShowing()) {
                     operationsProgressDialog.dismiss();
                 }
+                operationsProgressDialog = null;
             }
         } catch (WindowManager.BadTokenException e) {
             HolloutLogger.d(TAG, "Your father lip. Dialog no gree close again o. See the error na = " + e.getMessage());

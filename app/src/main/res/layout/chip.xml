@@ -20,6 +20,6 @@
         android:paddingTop="8dp"
         android:textColor="@color/chip"
         android:textSize="20sp"
-        app:textStyle="medium" />
+        app:textStyle="regular" />
 
 </FrameLayout>

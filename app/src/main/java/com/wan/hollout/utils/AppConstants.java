@@ -166,7 +166,6 @@ public class AppConstants {
     public static final String UNREAD_MESSAGES_FROM_SAME_SENDER = "unread_messages_from_same_sender";
     public static final String OBJECT_TYPE_GROUP = "object_type_group";
 
-    static final String MASKED_OBJECT_ID = "masked_objectId";
     public static final String ATTEMPT_LOGOUT = "attempt_logout";
     static final String AUTHENTICATED_USER_DETAILS = "authenticated_user_details";
     static final String LAST_ATTEMPTED_MESSAGE_FOR = "last_attempted_msg_for_";

@@ -109,4 +109,6 @@
     <dimen name="mcab_default_content_inset">72dp</dimen>
     <dimen name="divider_decorator_offset">16dp</dimen>
 
+    <dimen name="item_offset">3dp</dimen>
+
 </resources>

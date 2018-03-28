@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.activities;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -128,6 +129,8 @@ public class WelcomeActivity extends BaseActivity
     private String TAG = "WelcomeActivity";
     private TrueClient mTrueClient;
 
+    private ProgressDialog progressDialog;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -171,7 +174,7 @@ public class WelcomeActivity extends BaseActivity
                     HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
                     setupCrashlyticsUser(firebaseUser);
                     startChatClient();
-                    UiUtils.dismissProgressDialog();
+                    UiUtils.dismissProgressDialog(progressDialog);
                     finishUp(true);
                 } else {
                     if (e != null) {
@@ -179,7 +182,7 @@ public class WelcomeActivity extends BaseActivity
                             createNewUserOnParse(firebaseUser);
                         } else {
                             UiUtils.showSafeToast("An error occurred while authenticating you. Please try again");
-                            UiUtils.dismissProgressDialog();
+                            UiUtils.dismissProgressDialog(progressDialog);
                             Crashlytics.logException(e);
                         }
                     }
@@ -194,7 +197,8 @@ public class WelcomeActivity extends BaseActivity
     }
 
     private void finishUp(boolean comingFromLogIn) {
-        UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
+        UiUtils.dismissProgressDialog(progressDialog);
+        progressDialog = UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
         if (comingFromLogIn) {
             tryRetrieveChats(new DoneCallback<Boolean>() {
                 @Override
@@ -202,7 +206,7 @@ public class WelcomeActivity extends BaseActivity
                     if (e == null && signInSuccess) {
                         navigateToAppropriateScreen();
                     } else {
-                        UiUtils.dismissProgressDialog();
+                        UiUtils.dismissProgressDialog(progressDialog);
                         if (e != null) {
                             HolloutLogger.d("FetchedMessagesString", "Error fetching chats" + e.getMessage());
                         }
@@ -290,27 +294,28 @@ public class WelcomeActivity extends BaseActivity
     }
 
     private void launchGenderAndAgeActivity() {
-        UiUtils.dismissProgressDialog();
+        UiUtils.dismissProgressDialog(progressDialog);
         Intent genderAndAgeIntent = new Intent(WelcomeActivity.this, GenderAndAgeConfigurationActivity.class);
         startActivityForResult(genderAndAgeIntent, RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER);
     }
 
     private void navigateToAboutActivity() {
-        UiUtils.dismissProgressDialog();
+        UiUtils.dismissProgressDialog(progressDialog);
         Intent aboutUserIntent = new Intent(WelcomeActivity.this, AboutUserActivity.class);
         startActivity(aboutUserIntent);
         finish();
     }
 
     private void navigateToMainActivity() {
-        UiUtils.dismissProgressDialog();
+        UiUtils.dismissProgressDialog(progressDialog);
         Intent mainIntent = new Intent(WelcomeActivity.this, MainActivity.class);
         startActivity(mainIntent);
         finish();
     }
 
     private void createNewUserOnParse(final FirebaseUser firebaseUser) {
-        UiUtils.showProgressDialog(this, "Authenticating account...");
+        UiUtils.dismissProgressDialog(progressDialog);
+        progressDialog = UiUtils.showProgressDialog(this, "Authenticating account...");
         setupCrashlyticsUser(firebaseUser);
         final ParseObject newHolloutUser = new ParseObject(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         if (firebaseUser.getDisplayName() != null) {
@@ -344,7 +349,7 @@ public class WelcomeActivity extends BaseActivity
                     AuthUtil.createLocalUser(newHolloutUser);
                     HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
                     startChatClient();
-                    UiUtils.dismissProgressDialog();
+                    UiUtils.dismissProgressDialog(progressDialog);
                     finishUp(false);
                 } else {
                     String errorMessage = e.getMessage();
@@ -379,7 +384,8 @@ public class WelcomeActivity extends BaseActivity
     }
 
     private void initGoogleLogin() {
-        UiUtils.showProgressDialog(WelcomeActivity.this, "Please wait...");
+        UiUtils.dismissProgressDialog(progressDialog);
+        progressDialog = UiUtils.showProgressDialog(WelcomeActivity.this, "Please wait...");
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
@@ -495,7 +501,7 @@ public class WelcomeActivity extends BaseActivity
             } else {
                 mShouldResolve = false;
                 UiUtils.showSafeToast("Failed to log in via google. Please try again ");
-                UiUtils.dismissProgressDialog();
+                UiUtils.dismissProgressDialog(progressDialog);
             }
         } else if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
             finishUp(false);
@@ -519,7 +525,7 @@ public class WelcomeActivity extends BaseActivity
                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                     if (!task.isSuccessful()) {
                                         UiUtils.showSafeToast("Log In Aborted ");
-                                        UiUtils.dismissProgressDialog();
+                                        UiUtils.dismissProgressDialog(progressDialog);
                                     }
                                 }
                             });
@@ -611,7 +617,8 @@ public class WelcomeActivity extends BaseActivity
 
     @Override
     public void onSuccesProfileShared(@NonNull final TrueProfile trueProfile) {
-        UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
+        UiUtils.dismissProgressDialog(progressDialog);
+        progressDialog = UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
         final String fullName = trueProfile.firstName + " " + trueProfile.lastName;
         String phoneNumber = trueProfile.phoneNumber;
         final String email = StringUtils.strip(StringUtils.deleteWhitespace(phoneNumber + "@hollout.com"), "+");
@@ -636,7 +643,7 @@ public class WelcomeActivity extends BaseActivity
                             .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    UiUtils.dismissProgressDialog();
+                                    UiUtils.dismissProgressDialog(progressDialog);
                                     UiUtils.showSafeToast(e.getMessage());
                                 }
                             });
@@ -657,12 +664,12 @@ public class WelcomeActivity extends BaseActivity
                             .addOnFailureListener(getCurrentActivityInstance(), new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
-                                    UiUtils.dismissProgressDialog();
+                                    UiUtils.dismissProgressDialog(progressDialog);
                                     UiUtils.showSafeToast(e.getMessage());
                                 }
                             });
                 } else {
-                    UiUtils.dismissProgressDialog();
+                    UiUtils.dismissProgressDialog(progressDialog);
                     UiUtils.showSafeToast(e.getMessage());
                 }
             }

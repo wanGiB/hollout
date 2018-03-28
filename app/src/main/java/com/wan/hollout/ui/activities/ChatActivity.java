@@ -1378,11 +1378,11 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void attemptToUnBlockUser() {
-        UiUtils.showProgressDialog(ChatActivity.this, "Trying to unblock user. Please wait...");
+        final ProgressDialog progressDialog = UiUtils.showProgressDialog(ChatActivity.this, "Trying to unblock user. Please wait...");
         HolloutUtils.unBlockUser(getRecipient(), new DoneCallback<Boolean>() {
             @Override
             public void done(Boolean success, Exception e) {
-                UiUtils.dismissProgressDialog();
+                UiUtils.dismissProgressDialog(progressDialog);
                 if (success) {
                     UiUtils.showSafeToast("User Unblocked successfully!");
                 } else {
@@ -1399,11 +1399,11 @@ public class ChatActivity extends BaseActivity implements
         blockConsentDialog.setPositiveButton("BLOCK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                UiUtils.showProgressDialog(ChatActivity.this, "Trying to block user. Please wait...");
+                final ProgressDialog progressDialog = UiUtils.showProgressDialog(ChatActivity.this, "Trying to block user. Please wait...");
                 HolloutUtils.blockUser(getRecipient(), new DoneCallback<Boolean>() {
                     @Override
                     public void done(Boolean success, Exception e) {
-                        UiUtils.dismissProgressDialog();
+                        UiUtils.dismissProgressDialog(progressDialog);
                         if (success) {
                             UiUtils.showSafeToast("User Blocked successfully!");
                             checkDidIBlackListUser();
