@@ -24,6 +24,10 @@ public class TimeChangeDetectionService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (timeChangedReceiver != null) {
+            unregisterReceiver(timeChangedReceiver);
+            timeChangedReceiver = null;
+        }
         timeChangedReceiver = new TimeChangedReceiver();
         IntentFilter timeFilters = new IntentFilter();
         timeFilters.addAction("android.intent.action.TIMEZONE_CHANGED");
@@ -32,12 +36,6 @@ public class TimeChangeDetectionService extends Service {
         timeFilters.addAction("android.intent.action.TIME_TICK");
         registerReceiver(timeChangedReceiver, timeFilters);
         return START_STICKY;
-    }
-
-    @Override
-    public void onDestroy() {
-        unregisterReceiver(timeChangedReceiver);
-        super.onDestroy();
     }
 
 }
