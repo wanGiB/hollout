@@ -815,13 +815,18 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void handleUserOnlineStatus(ParseObject parseUser) {
-        Long userLastSeenAt = parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
-        if (HolloutUtils.isNetWorkConnected(UserProfileActivity.this) && parseUser.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)) {
-            attachDrawableToTextView(ApplicationLoader.getInstance(), onlineStatusView, R.drawable.ic_online, UiUtils.DrawableDirection.LEFT);
-            onlineStatusView.setText(getString(R.string.online));
-        } else {
-            removeAllDrawablesFromTextView(onlineStatusView);
-            onlineStatusView.setText(UiUtils.getLastSeen(userLastSeenAt));
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        Long userLastSeenAt = parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) != 0
+                ? parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) :
+                parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
+        if (signedInUser != null) {
+            if (HolloutUtils.isNetWorkConnected(UserProfileActivity.this) && parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) == signedInUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP)) {
+                attachDrawableToTextView(ApplicationLoader.getInstance(), onlineStatusView, R.drawable.ic_online, UiUtils.DrawableDirection.LEFT);
+                onlineStatusView.setText(getString(R.string.online));
+            } else {
+                removeAllDrawablesFromTextView(onlineStatusView);
+                onlineStatusView.setText(UiUtils.getLastSeen(userLastSeenAt));
+            }
         }
     }
 

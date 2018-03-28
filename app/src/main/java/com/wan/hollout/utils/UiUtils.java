@@ -607,10 +607,11 @@ public class UiUtils {
     private static void refreshUserData(final ParseObject signedInUser, RecyclerView additionalPhotosRecyclerView, RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseObject parseUser, final Activity activity) {
         final String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         final String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-        Long userLastSeenAt = parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
+        Long userLastSeenAt = parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) != 0
+                ? parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) :
+                parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
         if (HolloutUtils.isNetWorkConnected(ApplicationLoader.getInstance())
-                && parseUser.getString(AppConstants.APP_USER_ONLINE_STATUS).
-                equals(AppConstants.ONLINE)) {
+                && parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) == signedInUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP)) {
             attachDrawableToTextView(ApplicationLoader.getInstance(), onlineStatusView, R.drawable.ic_online, DrawableDirection.LEFT);
             onlineStatusView.setText(activity.getString(R.string.online));
         } else {

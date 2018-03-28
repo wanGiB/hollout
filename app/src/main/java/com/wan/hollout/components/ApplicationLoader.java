@@ -14,6 +14,9 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
@@ -22,6 +25,7 @@ import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseLiveQueryClient;
 import com.parse.ParseLiveQueryClientCallbacks;
+import com.parse.ParseObject;
 import com.raizlabs.android.dbflow.config.DatabaseConfig;
 import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
@@ -36,6 +40,8 @@ import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
+import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 
@@ -84,6 +90,29 @@ public class ApplicationLoader extends Application {
         setupDatabase();
         startAppInstanceDetector();
         defaultSystemEmojiPref();
+        listenForServerTimeChanges();
+    }
+
+    private void listenForServerTimeChanges() {
+        FirebaseUtils.getServerUpTimeRef().addValueEventListener(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot != null && dataSnapshot.exists()) {
+                    Long currentTime = dataSnapshot.getValue(Long.class);
+                    ParseObject signedInUser = AuthUtil.getCurrentUser();
+                    if (signedInUser != null) {
+                        signedInUser.put(AppConstants.USER_CURRENT_TIME_STAMP, currentTime);
+                        AuthUtil.updateCurrentLocalUser(signedInUser, null);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     private void initAdmob() {

@@ -170,6 +170,7 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
 
     public void loadParseUser(final ParseObject person, String searchString) {
         if (person != null) {
+            signedInUser = AuthUtil.getCurrentUser();
             this.person = person;
             String userName = person.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String userProfilePhoto = person.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
@@ -249,7 +250,7 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
 
             String userOnlineStatus = person.getString(AppConstants.APP_USER_ONLINE_STATUS);
             if (userOnlineStatus != null && UiUtils.canShowPresence(person, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
-                if (person.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)
+                if (timeStampsAreTheSame(person)
                         && HolloutUtils.isNetWorkConnected(activity)) {
                     userOnlineStatusView.setImageResource(R.drawable.ic_online);
                 } else {
@@ -280,6 +281,11 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
 
         }
 
+    }
+
+    private boolean timeStampsAreTheSame(ParseObject person) {
+        return person.getLong(AppConstants.USER_CURRENT_TIME_STAMP)
+                == signedInUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP);
     }
 
     private void subscribeToUserChanges() {

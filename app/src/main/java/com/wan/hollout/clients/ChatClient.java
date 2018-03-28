@@ -236,9 +236,12 @@ public class ChatClient {
                                 //Message Sent
                                 chatMessage.setMessageStatus(MessageStatus.SENT);
                                 DbUtils.updateMessage(chatMessage);
-                                String recipientOnlineStatus = recipientProperties.getString(AppConstants.APP_USER_ONLINE_STATUS);
+                                long recipientTimeStamp = recipientProperties.getLong(AppConstants.USER_CURRENT_TIME_STAMP);
+                                ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+                                long signedInUserTimeStamp = signedInUserObject != null
+                                        ? signedInUserObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP) : 0;
                                 String recipientToken = recipientProperties.getString(AppConstants.USER_FIREBASE_TOKEN);
-                                if (recipientOnlineStatus != null && !recipientOnlineStatus.equals(AppConstants.ONLINE)) {
+                                if (recipientTimeStamp == signedInUserTimeStamp) {
                                     if (StringUtils.isNotEmpty(recipientToken)) {
                                         JsonApiClient.sendFirebasePushNotification(recipientToken, AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE);
                                     }

@@ -10,7 +10,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.wan.hollout.eventbuses.FileUploadProgressEvent;
@@ -99,6 +98,14 @@ public class FirebaseUtils {
 
     public static DatabaseReference getArchives() {
         return getRootRef().child(AppConstants.ARCHIVES);
+    }
+
+    public static void updateServerUptime(long currentTime) {
+        getRootRef().child(AppConstants.SERVER_UPTIME).setValue(currentTime);
+    }
+
+    public static DatabaseReference getServerUpTimeRef() {
+        return getRootRef().child(AppConstants.SERVER_UPTIME);
     }
 
 }

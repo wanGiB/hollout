@@ -233,6 +233,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     public void refreshToolbar(ParseObject recipientUser) {
         this.recipientObject = recipientUser;
+        signedInUserObject = AuthUtil.getCurrentUser();
         String recipientName = getRecipientName();
         String recipientPhotoUrl = getRecipientPhotoUrl();
         if (StringUtils.isNotEmpty(recipientName)) {
@@ -241,23 +242,25 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         }
         if (recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
             JSONObject chatStates = recipientUser.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
-            Long userLastSeen = recipientUser.getLong(AppConstants.APP_USER_LAST_SEEN);
+            Long userLastSeen = recipientUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) != 0
+                    ? recipientUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) :
+                    recipientUser.getLong(AppConstants.APP_USER_LAST_SEEN);
 
             if (chatStates != null) {
                 String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
-                String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
                 if (chatStateToSignedInUser != null) {
-                    if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
+                    if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && timeStampsAreTheSame(recipientUser)
+                            && userConnected()) {
                         UiUtils.showView(contactSubtitleLayout, true);
                         contactSubTitle.setText(mContext.getString(R.string.online));
                         UiUtils.showView(typingIndicator, false);
-                    } else if (chatStateToSignedInUser.contains(mContext.getString(R.string.typing)) && userOnlineStatus.equals(AppConstants.ONLINE)) {
+                    } else if (chatStateToSignedInUser.contains(mContext.getString(R.string.typing)) && timeStampsAreTheSame(recipientUser)) {
                         UiUtils.showView(contactSubtitleLayout, true);
                         UiUtils.showView(typingIndicator, true);
                         contactSubTitle.setText(StringUtils.strip(mContext.getString(R.string.typing_), "…"));
                         UiUtils.bangSound(getContext(), R.raw.typing);
                     } else {
-                        if (userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
+                        if (timeStampsAreTheSame(recipientUser) && userConnected()) {
                             UiUtils.showView(contactSubtitleLayout, true);
                             contactSubTitle.setText(mContext.getString(R.string.online));
                             UiUtils.showView(typingIndicator, false);
@@ -267,7 +270,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                         }
                     }
                 } else {
-                    if (userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
+                    if (timeStampsAreTheSame(recipientUser) && userConnected()) {
                         UiUtils.showView(contactSubtitleLayout, true);
                         contactSubTitle.setText(mContext.getString(R.string.online));
                         UiUtils.showView(typingIndicator, false);
@@ -278,7 +281,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                 }
             } else {
                 String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
-                if (userOnlineStatus != null && userOnlineStatus.equals(AppConstants.ONLINE) && userConnected()) {
+                if (userOnlineStatus != null && timeStampsAreTheSame(recipientUser) && userConnected()) {
                     UiUtils.showView(contactSubtitleLayout, true);
                     contactSubTitle.setText(mContext.getString(R.string.online));
                 } else {
@@ -289,6 +292,10 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         if (StringUtils.isNotEmpty(recipientPhotoUrl)) {
             UiUtils.loadImage(mContext, recipientPhotoUrl, contactPhotoView);
         }
+    }
+
+    private boolean timeStampsAreTheSame(ParseObject recipientUser) {
+        return recipientUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) == signedInUserObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP);
     }
 
     private void subscribeToObjectChanges() {

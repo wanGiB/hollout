@@ -233,6 +233,8 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
+        <service android:name=".ui.services.TimeChangeDetectionService" />
+
     </application>
 
 </manifest>

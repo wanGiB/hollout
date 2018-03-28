@@ -212,19 +212,19 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     public void setupConversation(final ParseObject parseObject, String searchString) {
         if (parseObject != null) {
-
+            this.signedInUserObject = AuthUtil.getCurrentUser();
             List<String> aboutUser = parseObject.getList(AppConstants.ABOUT_USER);
             String userClassificationString = parseObject.getString(AppConstants.CLASSIFICATION);
-            if(userClassificationString!=null && aboutUser!=null){
-                if (aboutUser.contains(userClassificationString)){
+            if (userClassificationString != null && aboutUser != null) {
+                if (aboutUser.contains(userClassificationString)) {
                     aboutUser.remove(userClassificationString);
                 }
             }
 
             List<String> aboutSignedInUser = signedInUserObject.getList(AppConstants.ABOUT_USER);
             String signedInUserClassificationString = parseObject.getString(AppConstants.CLASSIFICATION);
-            if(signedInUserClassificationString!=null && aboutSignedInUser!=null){
-                if (aboutSignedInUser.contains(signedInUserClassificationString)){
+            if (signedInUserClassificationString != null && aboutSignedInUser != null) {
+                if (aboutSignedInUser.contains(signedInUserClassificationString)) {
                     aboutSignedInUser.remove(signedInUserClassificationString);
                 }
             }
@@ -289,8 +289,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                     if (chatStates != null) {
                         String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
                         if (chatStateToSignedInUser.contains(activity.getString(R.string.typing))
-                                && parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS)
-                                .equals(AppConstants.ONLINE)) {
+                                && parseObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP)
+                                == signedInUserObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP)) {
                             userStatusOrLastMessageView.setTypeface(null, Typeface.BOLD);
                             userStatusOrLastMessageView.setText(activity.getString(R.string.typing));
                             userStatusOrLastMessageView.setTextColor(ContextCompat.getColor(getContext(), R.color.hollout_color_one));
@@ -372,7 +372,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         UiUtils.showView(userOnlineStatusView, true);
         String userOnlineStatus = parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS);
         if (userOnlineStatus != null && UiUtils.canShowPresence(parseObject, AppConstants.ENTITY_TYPE_CHATS, new HashMap<String, Object>())) {
-            if (parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS).equals(AppConstants.ONLINE)
+            if (parseObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP) == signedInUserObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP)
                     && HolloutUtils.isNetWorkConnected(activity)) {
                 userOnlineStatusView.setImageResource(R.drawable.ic_online);
                 AppConstants.onlinePositions.put(getMessageId(), true);

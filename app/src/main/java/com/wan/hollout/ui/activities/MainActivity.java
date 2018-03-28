@@ -40,6 +40,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.AccountHeader;
@@ -64,6 +65,7 @@ import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
+import com.wan.hollout.ui.services.TimeChangeDetectionService;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
@@ -659,6 +661,20 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         checkAndRegEventBus();
         fetchUnreadMessagesCount();
         displaySignedInUserInfo(AuthUtil.getCurrentUser());
+        checkStartTimeStampUpdateServer();
+    }
+
+    private void checkStartTimeStampUpdateServer() {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            String email = firebaseUser.getEmail();
+            if (email != null) {
+                if (email.equals("holloutdev@gmail.com") || email.equals("wannclem@gmail.com") || email.equals("wanaclem@gmail.com")) {
+                    Intent timeChangedServiceIntent = new Intent(this, TimeChangeDetectionService.class);
+                    startService(timeChangedServiceIntent);
+                }
+            }
+        }
     }
 
     @Override
