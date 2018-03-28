@@ -602,7 +602,6 @@ public class WelcomeActivity extends BaseActivity
                 if (o instanceof TypingFinishedBus) {
                     TypingFinishedBus typingFinishedBus = (TypingFinishedBus) o;
                     if (typingFinishedBus.isTypingFinished()) {
-
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
