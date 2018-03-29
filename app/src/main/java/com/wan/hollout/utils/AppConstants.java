@@ -203,6 +203,7 @@ public class AppConstants {
     public static final String CLASSIFICATION = "classification";
     public static final String SERVER_UPTIME = "ServerUpTime";
     public static final String USER_CURRENT_TIME_STAMP = "user_current_time_stamp";
+    public static final String ACTIVITY_COUNT = "activity_count";
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
@@ -216,7 +217,7 @@ public class AppConstants {
     public static final SimpleDateFormat DATE_FORMATTER_IN_GEN_FORMAT = new SimpleDateFormat("d/MM/yyyy", Locale.getDefault());
     public static final SimpleDateFormat DATE_FORMATTER_IN_12HRS = new SimpleDateFormat("h:mm a", Locale.getDefault());
     public static final SimpleDateFormat DATE_FORMATTER_IN_BIRTHDAY_FORMAT = new SimpleDateFormat("EEE, d MMM yyyy", Locale.getDefault());
-    static final SimpleDateFormat DATE_FORMATTER_IN_YEARS = new SimpleDateFormat("yyyy", Locale.getDefault());
+    public static final SimpleDateFormat DATE_FORMATTER_IN_YEARS = new SimpleDateFormat("yyyy", Locale.getDefault());
     public static final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM d, yyyy", Locale.getDefault());
 
     public static int ANIMATION_DURATION_MEDIUM = 400;
@@ -256,7 +257,6 @@ public class AppConstants {
     public static SparseBooleanArray messageBodyPositions = new SparseBooleanArray();
     public static SparseBooleanArray unreadMessagesPositions = new SparseBooleanArray();
     public static SparseBooleanArray lastMessageAvailablePositions = new SparseBooleanArray();
-    public static SparseBooleanArray parseUserAvailableOnlineStatusPositions = new SparseBooleanArray();
     public static SparseBooleanArray onlinePositions = new SparseBooleanArray();
     public static SparseBooleanArray fileSizeOrDurationPositions = new SparseBooleanArray();
     public static SparseBooleanArray playableVideoPositions = new SparseBooleanArray();

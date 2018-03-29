@@ -103,15 +103,8 @@ public class SplashActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER && resultCode == RESULT_OK) {
-            launchPeopleToMeetActivity();
-        } else if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE) {
             launchMainActivity();
         }
-    }
-
-    private void launchPeopleToMeetActivity() {
-        Intent peopleToMeetActivityIntent = new Intent(SplashActivity.this, MeetPeopleActivity.class);
-        startActivityForResult(peopleToMeetActivityIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
     }
 
     private void launchGenderAndAgeActivity() {

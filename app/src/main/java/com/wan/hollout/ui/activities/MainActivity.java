@@ -185,6 +185,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         createDeleteConversationProgressDialog();
     }
 
+
     private void createDeleteConversationProgressDialog() {
         deleteConversationProgressDialog = new ProgressDialog(this);
         deleteConversationProgressDialog.setIndeterminate(false);
@@ -431,7 +432,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         if (drawerItem != null) {
                             if (drawerItem.getIdentifier() == 1) {
-                                meetMorePeople();
+//                                meetMorePeople();
                             } else if (drawerItem.getIdentifier() == 2) {
                                 launchUserProfile();
                             } else if (drawerItem.getIdentifier() == 3) {
@@ -662,6 +663,13 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         fetchUnreadMessagesCount();
         displaySignedInUserInfo(AuthUtil.getCurrentUser());
         checkStartTimeStampUpdateServer();
+        HolloutPreferences.incrementActivityCount();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        HolloutPreferences.destroyActivityCount();
     }
 
     private void checkStartTimeStampUpdateServer() {
@@ -1069,11 +1077,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
         startActivity(splashIntent);
         finish();
-    }
-
-    private void meetMorePeople() {
-        Intent meetPeopleIntent = new Intent(MainActivity.this, MeetPeopleActivity.class);
-        startActivityForResult(meetPeopleIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
     }
 
     private void launchSettings(String settingsFragmentName) {

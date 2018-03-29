@@ -81,7 +81,7 @@
     <color name="dark_black">#ff000000</color>
     <color name="colorAccentDark">#ffcc5135</color>
     <color name="gray50">#ff808080</color>
-    <color name="white">#fffafafa</color>
+    <color name="white">#ffffff</color>
     <color name="list_item_info">#74000000</color>
     <color name="conversation_list_divider_light">#15000000</color>
     <color name="conversation_list_divider_dark">#22ffffff</color>
@@ -185,6 +185,7 @@
     <color name="linked_in">#007bb6</color>
 
     <color name="from">@color/medium_grey</color>
+    <color name="tab_indicator_color">#42a4d1</color>
     <color name="subject">#111111</color>
     <color name="timestamp">#4285f4</color>
     <color name="message">#7a7a7a</color>
@@ -271,6 +272,8 @@
     <color name="message_sent_color">@color/white</color>
     <color name="message_delivered_color">@color/gray5</color>
     <color name="message_read_color">@color/green_100</color>
+
+    <color name="light_status_dark_primary_color">#E5E5E5</color>
 
     <!--white color-->
     <color name="em_white_100">#ffffffff</color>

@@ -13,7 +13,10 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
+import com.raizlabs.android.dbflow.list.IFlowCursorIterator;
 import com.wan.hollout.interfaces.DoneCallback;
+
+import java.util.List;
 
 /**
  * @author Wan Clem
@@ -44,12 +47,29 @@ public class AuthUtil {
     }
 
     public static void updateCurrentLocalUser(final ParseObject updatableProps, @Nullable  final DoneCallback<Boolean> successCallback) {
+        runLegacyDataCleanUp(updatableProps);
         updatableProps.pinInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 updateRemoteUserVariant(updatableProps, updatableProps.getString(AppConstants.REAL_OBJECT_ID), successCallback);
             }
         });
+    }
+
+    private static void runLegacyDataCleanUp(ParseObject updatableProps) {
+        if (updatableProps.containsKey(AppConstants.INTERESTS)) {
+            updatableProps.remove(AppConstants.INTERESTS);
+        }
+        List<String> aboutUser = updatableProps.getList(AppConstants.ABOUT_USER);
+        String classification = updatableProps.getString(AppConstants.CLASSIFICATION);
+        if (aboutUser != null) {
+            if (classification != null) {
+                if (aboutUser.contains(classification)) {
+                    aboutUser.remove(classification);
+                }
+                updatableProps.remove(AppConstants.CLASSIFICATION);
+            }
+        }
     }
 
     public static void createLocalUser(ParseObject remoteObject) {

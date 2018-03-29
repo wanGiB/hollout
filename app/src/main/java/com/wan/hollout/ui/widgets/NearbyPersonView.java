@@ -3,8 +3,6 @@ package com.wan.hollout.ui.widgets;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -14,8 +12,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -23,7 +19,6 @@ import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.UserProfileActivity;
-import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
@@ -36,7 +31,6 @@ import org.apache.commons.lang3.text.WordUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -46,9 +40,6 @@ import butterknife.ButterKnife;
  */
 @SuppressWarnings("unused")
 public class NearbyPersonView extends RelativeLayout implements View.OnClickListener, View.OnLongClickListener {
-
-    @BindView(R.id.user_online_status)
-    ImageView userOnlineStatusView;
 
     @BindView(R.id.from)
     HolloutTextView usernameEntryView;
@@ -62,26 +53,14 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
     @BindView(R.id.distance_to_user)
     TextView distanceToUserView;
 
-    @BindView(R.id.icon_text)
-    TextView iconText;
-
-    @BindView(R.id.timestamp)
-    TextView userLocationView;
-
-    @BindView(R.id.icon_back)
-    RelativeLayout iconBack;
-
-    @BindView(R.id.icon_front)
-    RelativeLayout iconFront;
-
     @BindView(R.id.icon_profile)
-    ImageView userPhotoView;
-
-    @BindView(R.id.icon_container)
-    RelativeLayout iconContainer;
+    CircleImageView userPhotoView;
 
     @BindView(R.id.parent_layout)
     View parentView;
+
+    @BindView(R.id.online_status)
+    ImageView onlineStatusView;
 
     private ParseObject signedInUser;
     public Activity activity;
@@ -125,47 +104,8 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
 
     private void applyProfilePicture(String profileUrl) {
         if (!TextUtils.isEmpty(profileUrl)) {
-            Glide.with(activity).load(profileUrl)
-                    .thumbnail(0.5f)
-                    .crossFade()
-                    .transform(new CircleTransform(activity))
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(userPhotoView);
-            userPhotoView.setColorFilter(null);
-            iconText.setVisibility(View.GONE);
-        } else {
-            userPhotoView.setImageResource(R.drawable.bg_circle);
-            userPhotoView.setColorFilter(getRandomMaterialColor("400"));
-            iconText.setVisibility(View.VISIBLE);
+            UiUtils.loadImage(activity, profileUrl, userPhotoView);
         }
-    }
-
-    private void applyIconAnimation() {
-        iconBack.setVisibility(View.GONE);
-        resetIconYAxis(iconFront);
-        iconFront.setVisibility(View.VISIBLE);
-        iconFront.setAlpha(1);
-    }
-
-    private void resetIconYAxis(View view) {
-        if (view.getRotationY() != 0) {
-            view.setRotationY(0);
-        }
-    }
-
-    /**
-     * chooses a random color from array.xml
-     */
-    private int getRandomMaterialColor(String typeColor) {
-        int returnColor = Color.GRAY;
-        int arrayId = getResources().getIdentifier("mdcolor_" + typeColor, "array", activity.getPackageName());
-        if (arrayId != 0) {
-            TypedArray colors = getResources().obtainTypedArray(arrayId);
-            int index = (int) (Math.random() * colors.length());
-            returnColor = colors.getColor(index, Color.GRAY);
-            colors.recycle();
-        }
-        return returnColor;
     }
 
     public void loadParseUser(final ParseObject person, String searchString) {
@@ -183,25 +123,10 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
                     usernameEntryView.setText(WordUtils.capitalize(userName));
                 }
                 // displaying the first letter of From in icon text
-                iconText.setText(WordUtils.capitalize(userName.substring(0, 1)));
             }
             // display profile image
             applyProfilePicture(userProfilePhoto);
-            applyIconAnimation();
 
-            if (UiUtils.canShowLocation(person, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>()) && userName.length() <= 15) {
-                String userCurrentLocation = HolloutUtils.resolveToBestLocation(person);
-                if (userCurrentLocation != null) {
-                    userLocationView.setText(userCurrentLocation.toUpperCase(Locale.getDefault()));
-                } else {
-                    UiUtils.setTextOnView(userLocationView, " ");
-                    userLocationView.invalidate();
-                }
-                userLocationView.invalidate();
-            } else {
-                UiUtils.setTextOnView(userLocationView, " ");
-                userLocationView.invalidate();
-            }
             ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
             if (signedInUserGeoPoint != null && userGeoPoint != null) {
                 double distanceInKills = signedInUserGeoPoint.distanceInKilometersTo(userGeoPoint);
@@ -212,19 +137,7 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
             }
 
             List<String> aboutUser = person.getList(AppConstants.ABOUT_USER);
-            String userClassificationString = person.getString(AppConstants.CLASSIFICATION);
-            if (userClassificationString != null && aboutUser != null) {
-                if (aboutUser.contains(userClassificationString)) {
-                    aboutUser.remove(userClassificationString);
-                }
-            }
             List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
-            String signedInUserClassificationString = signedInUser.getString(AppConstants.CLASSIFICATION);
-            if (signedInUserClassificationString != null && aboutSignedInUser != null) {
-                if (aboutSignedInUser.contains(signedInUserClassificationString)) {
-                    aboutSignedInUser.remove(signedInUserClassificationString);
-                }
-            }
             if (aboutUser != null && aboutSignedInUser != null) {
                 try {
                     List<String> common = new ArrayList<>(aboutUser);
@@ -252,12 +165,12 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
             if (userOnlineStatus != null && UiUtils.canShowPresence(person, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
                 if (timeStampsAreTheSame(person)
                         && HolloutUtils.isNetWorkConnected(activity)) {
-                    userOnlineStatusView.setImageResource(R.drawable.ic_online);
+                    UiUtils.showView(onlineStatusView, true);
                 } else {
-                    userOnlineStatusView.setImageResource(R.drawable.ic_offline_grey);
+                    UiUtils.showView(onlineStatusView, false);
                 }
             } else {
-                userOnlineStatusView.setImageResource(R.drawable.ic_offline_grey);
+                UiUtils.showView(onlineStatusView, false);
             }
 
             userPhotoView.setOnClickListener(new OnClickListener() {
@@ -266,15 +179,6 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
                 public void onClick(View view) {
                     UiUtils.blinkView(view);
                     UiUtils.loadUserData(activity, person);
-                }
-
-            });
-
-            iconContainer.setOnClickListener(new OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    NearbyPersonView.this.performClick();
                 }
 
             });

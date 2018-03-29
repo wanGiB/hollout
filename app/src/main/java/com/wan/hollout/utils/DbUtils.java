@@ -211,6 +211,7 @@ public class DbUtils {
                     @Override
                     public void processModel(ChatMessage message, DatabaseWrapper wrapper) {
                         FlowManager.getModelAdapter(ChatMessage.class).save(message);
+                        HolloutPreferences.updateConversationTime(message.getConversationId(), message.getTimeStamp());
                     }
                 }).processListener(new ProcessModelTransaction.OnModelProcessListener<ChatMessage>() {
                     @Override

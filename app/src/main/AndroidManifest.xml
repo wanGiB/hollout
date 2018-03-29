@@ -132,13 +132,6 @@
             android:windowSoftInputMode="stateHidden" />
 
         <activity
-            android:name=".ui.activities.MeetPeopleActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
-            android:label="@string/chats"
-            android:theme="@style/AppTheme"
-            android:windowSoftInputMode="stateHidden" />
-
-        <activity
             android:name=".ui.activities.ChatActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/chat"

@@ -19,9 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ViewFlipper;
 
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.parse.CountCallback;
@@ -31,19 +28,16 @@ import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.wan.hollout.BuildConfig;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.models.NearbyPerson;
-import com.wan.hollout.ui.activities.MeetPeopleActivity;
 import com.wan.hollout.ui.adapters.PeopleAdapter;
 import com.wan.hollout.ui.widgets.ChatRequestsHeaderView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutUtils;
-import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.SafeLayoutManager;
 import com.wan.hollout.utils.UiUtils;
 
@@ -87,9 +81,6 @@ public class PeopleFragment extends BaseFragment {
 
     @BindView(R.id.nested_scroll_view)
     NestedScrollView nestedScrollView;
-
-    @BindView(R.id.adView)
-    AdView adView;
 
     @SuppressLint("StaticFieldLeak")
     public PeopleAdapter peopleAdapter;
@@ -135,22 +126,6 @@ public class PeopleFragment extends BaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         peopleRecyclerView.setNestedScrollingEnabled(false);
-        loadAds();
-    }
-
-    private void loadAds() {
-        AdRequest.Builder adRequest = new AdRequest.Builder();
-        if (BuildConfig.DEBUG) {
-            adRequest.addTestDevice("CD59DB3342128DA74D9E4243A550E924");
-        }
-        adView.loadAd(adRequest.build());
-        adView.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                super.onAdLoaded();
-                UiUtils.showView(adView, true);
-            }
-        });
     }
 
     @Override
@@ -288,11 +263,7 @@ public class PeopleFragment extends BaseFragment {
                     if (meetPeopleTextView.getText().toString().equals(getString(R.string.review_network))) {
                         Intent dataSourceIntent = new Intent(Settings.ACTION_WIFI_SETTINGS);
                         startActivity(dataSourceIntent);
-                    } else {
-                        Intent interestsIntent = new Intent(getActivity(), MeetPeopleActivity.class);
-                        startActivityForResult(interestsIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
                     }
-
                 }
 
             });
@@ -308,13 +279,9 @@ public class PeopleFragment extends BaseFragment {
                     String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
                     List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
                     String signedInUserCountry = signedInUser.getString(AppConstants.APP_USER_COUNTRY);
-                    List<String> signedInUserInterests = signedInUser.getList(AppConstants.INTERESTS);
-                    String signedInUserClassification = signedInUser.getString(AppConstants.CLASSIFICATION);
                     String filterStartAgeValue = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
                     String filterEndAgeValue = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
-
                     ArrayList<String> newUserChats = new ArrayList<>();
-
                     //Init Query here
                     ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
                     peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
@@ -328,14 +295,6 @@ public class PeopleFragment extends BaseFragment {
                     checkGender(peopleQuery, genderFilter);
                     excludeUserChats(signedInUserId, signedInUserChats, newUserChats, peopleQuery);
                     attachCountry(signedInUserCountry, peopleQuery);
-                    if (signedInUserInterests != null) {
-                        if (signedInUserClassification != null) {
-                            if (!signedInUserInterests.contains(signedInUserClassification)) {
-                                signedInUserInterests.add(signedInUserClassification);
-                            }
-                        }
-                        peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, signedInUserInterests);
-                    }
                     ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                     attachGeoPoint(peopleQuery, signedInUserGeoPoint);
                     peopleQuery.setLimit(100);

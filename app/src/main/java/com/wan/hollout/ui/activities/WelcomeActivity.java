@@ -6,14 +6,10 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
 import com.crashlytics.android.Crashlytics;
@@ -52,7 +48,6 @@ import com.truecaller.android.sdk.TrueProfile;
 import com.wan.hollout.R;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
-import com.wan.hollout.eventbuses.TypingFinishedBus;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.ui.widgets.HolloutTextView;
@@ -65,13 +60,10 @@ import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.JsonUtils;
 import com.wan.hollout.utils.RequestCodes;
-import com.wan.hollout.utils.TypingSimulationConstants;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.StringReader;
 import java.util.List;
@@ -81,16 +73,11 @@ import butterknife.ButterKnife;
 
 
 public class WelcomeActivity extends BaseActivity
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, ITrueCallback {
+        implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, View.OnClickListener, ITrueCallback {
 
     @BindView(R.id.shimmer_view_container)
     ShimmerFrameLayout shimmerFrameLayout;
-
-    @BindView(R.id.blinking_divider)
-    HolloutTextView blinkingDivider;
-
-    @BindView(R.id.typing_text_view)
-    HolloutTextView typingTextView;
 
     @BindView(R.id.button_login_google)
     Button continueWithGoogle;
@@ -115,17 +102,6 @@ public class WelcomeActivity extends BaseActivity
     private FirebaseAuth firebaseAuth;
     private FirebaseAuth.AuthStateListener addAuthStateListener;
 
-    private int fieldIndex = 0;
-
-    private String[] sentences = {
-            "Your sport team fans",
-            "People in your field of study",
-            "People who share in your passion",
-            "People who share in your interests",
-            "People of like minds",
-            "Any one like you!!!"
-    };
-
     private String TAG = "WelcomeActivity";
     private TrueClient mTrueClient;
 
@@ -136,7 +112,6 @@ public class WelcomeActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_welcome);
         ButterKnife.bind(this);
-        checkAndRegEventBus();
         initGoogleApiStuffs();
         firebaseAuth = FirebaseAuth.getInstance();
         addAuthStateListener = new FirebaseAuth.AuthStateListener() {
@@ -156,10 +131,8 @@ public class WelcomeActivity extends BaseActivity
         } else {
             trueButton.setVisibility(View.GONE);
         }
-        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font> and <font color=#3EB890>Holla</font> People of shared interests and profession <font color=#70CADB>around</font> you."));
+        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font>,  <font color=#3EB890>Discover</font> and meet new people around you."));
         continueWithGoogle.setOnClickListener(this);
-        initDividerBlinkingAnimation();
-        startTypingAnimation(fieldIndex);
     }
 
     private void authenticateUser(final FirebaseUser firebaseUser) {
@@ -391,32 +364,6 @@ public class WelcomeActivity extends BaseActivity
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
-        startTypingAnimation(0);
-    }
-
-
-    private void initDividerBlinkingAnimation() {
-        Animation blinkingAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
-        blinkingAnimation.setRepeatMode(Animation.REVERSE);
-        blinkingAnimation.setDuration(450);
-        blinkingAnimation.setRepeatCount(Animation.INFINITE);
-        blinkingAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-        blinkingDivider.startAnimation(blinkingAnimation);
-    }
-
-    private void startTypingAnimation(int index) {
-        if (index == sentences.length) {
-            index = 0;
-        }
-        fieldIndex = index;
-        String currentlyTypedWord = sentences[index];
-        TypingSimulationConstants.CURRENTLY_TYPED_WORD = currentlyTypedWord;
-        typingTextView.animateText(currentlyTypedWord);
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
         checkAndRegEventBus();
@@ -591,27 +538,6 @@ public class WelcomeActivity extends BaseActivity
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this);
         }
-    }
-
-    @SuppressWarnings("unused")
-    @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
-    public void onEventAsync(final Object o) {
-        UiUtils.runOnMain(new Runnable() {
-            @Override
-            public void run() {
-                if (o instanceof TypingFinishedBus) {
-                    TypingFinishedBus typingFinishedBus = (TypingFinishedBus) o;
-                    if (typingFinishedBus.isTypingFinished()) {
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                startTypingAnimation(fieldIndex + 1);
-                            }
-                        }, 3000);
-                    }
-                }
-            }
-        });
     }
 
     @Override

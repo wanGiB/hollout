@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -20,10 +19,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
@@ -40,7 +40,6 @@ import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.MainActivity;
-import com.wan.hollout.ui.helpers.CircleTransform;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
@@ -71,9 +70,6 @@ import butterknife.ButterKnife;
 @SuppressLint("SetTextI18n")
 public class ConversationItemView extends RelativeLayout implements View.OnClickListener, View.OnLongClickListener {
 
-    @BindView(R.id.user_online_status)
-    ImageView userOnlineStatusView;
-
     @BindView(R.id.from)
     HolloutTextView usernameEntryView;
 
@@ -86,23 +82,11 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     @BindView(R.id.unread_message_indicator)
     TextView unreadMessagesCountView;
 
-    @BindView(R.id.icon_text)
-    TextView iconText;
-
     @BindView(R.id.timestamp)
     TextView msgTimeStampView;
 
-    @BindView(R.id.icon_back)
-    RelativeLayout iconBack;
-
-    @BindView(R.id.icon_front)
-    RelativeLayout iconFront;
-
     @BindView(R.id.icon_profile)
-    ImageView userPhotoView;
-
-    @BindView(R.id.icon_container)
-    RelativeLayout iconContainer;
+    CircleImageView userPhotoView;
 
     @BindView(R.id.delivery_status_view)
     ImageView deliveryStatusView;
@@ -112,6 +96,9 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     @BindView(R.id.reactions_indicator)
     ImageView reactionsIndicatorView;
+
+    @BindView(R.id.online_status)
+    ImageView onlineStatusView;
 
     public ParseObject parseObject;
     public Activity activity;
@@ -153,7 +140,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         this.parseObject = parseObject;
         init();
         setupConversation(parseObject, searchString);
-        invalidateViewOnScroll();
     }
 
     private void invalidateItemView(Activity activity, int objectHashCode) {
@@ -163,47 +149,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private void applyProfilePicture(String profileUrl) {
         if (!TextUtils.isEmpty(profileUrl)) {
-            Glide.with(activity).load(profileUrl)
-                    .thumbnail(0.5f)
-                    .crossFade()
-                    .transform(new CircleTransform(activity))
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(userPhotoView);
-            userPhotoView.setColorFilter(null);
-            iconText.setVisibility(View.GONE);
-        } else {
-            userPhotoView.setImageResource(R.drawable.bg_circle);
-            userPhotoView.setColorFilter(getRandomMaterialColor("400"));
-            iconText.setVisibility(View.VISIBLE);
+            UiUtils.loadImage(activity, profileUrl, userPhotoView);
         }
-    }
-
-    private void applyIconAnimation() {
-        iconBack.setVisibility(View.GONE);
-        resetIconYAxis(iconFront);
-        iconFront.setVisibility(View.VISIBLE);
-        iconFront.setAlpha(1);
-    }
-
-    private void resetIconYAxis(View view) {
-        if (view.getRotationY() != 0) {
-            view.setRotationY(0);
-        }
-    }
-
-    /**
-     * chooses a random color from array.xml
-     */
-    private int getRandomMaterialColor(String typeColor) {
-        int returnColor = Color.GRAY;
-        int arrayId = getResources().getIdentifier("mdcolor_" + typeColor, "array", activity.getPackageName());
-        if (arrayId != 0) {
-            TypedArray colors = getResources().obtainTypedArray(arrayId);
-            int index = (int) (Math.random() * colors.length());
-            returnColor = colors.getColor(index, Color.GRAY);
-            colors.recycle();
-        }
-        return returnColor;
     }
 
     public int getMessageId() {
@@ -214,21 +161,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         if (parseObject != null) {
             this.signedInUserObject = AuthUtil.getCurrentUser();
             List<String> aboutUser = parseObject.getList(AppConstants.ABOUT_USER);
-            String userClassificationString = parseObject.getString(AppConstants.CLASSIFICATION);
-            if (userClassificationString != null && aboutUser != null) {
-                if (aboutUser.contains(userClassificationString)) {
-                    aboutUser.remove(userClassificationString);
-                }
-            }
-
             List<String> aboutSignedInUser = signedInUserObject.getList(AppConstants.ABOUT_USER);
-            String signedInUserClassificationString = parseObject.getString(AppConstants.CLASSIFICATION);
-            if (signedInUserClassificationString != null && aboutSignedInUser != null) {
-                if (aboutSignedInUser.contains(signedInUserClassificationString)) {
-                    aboutSignedInUser.remove(signedInUserClassificationString);
-                }
-            }
-
             if (aboutUser != null && aboutSignedInUser != null) {
                 try {
                     List<String> common = new ArrayList<>(aboutUser);
@@ -258,10 +191,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 } else {
                     usernameEntryView.setText(WordUtils.capitalize(userName));
                 }
-                iconText.setText(WordUtils.capitalize(userName.substring(0, 1)));
             }
             applyProfilePicture(userProfilePhoto);
-            applyIconAnimation();
             attachEventHandlers(parseObject);
             if (HolloutUtils.isUserBlocked(parseObject.getString(AppConstants.REAL_OBJECT_ID))) {
                 userStatusOrLastMessageView.setText(activity.getString(R.string.user_blocked));
@@ -303,16 +234,16 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                         setupDefaults();
                     }
                 } else {
-                    UiUtils.showView(userOnlineStatusView, false);
-                    AppConstants.parseUserAvailableOnlineStatusPositions.put(getMessageId(), false);
+                    UiUtils.showView(onlineStatusView, false);
                     setupDefaults();
                 }
-                listenToUserPresence(parseObject);
             } else {
                 setupDefaults();
             }
+            listenToUserPresence(parseObject);
         }
         invalidateItemView(activity, getCurrentConversationHashCode());
+        invalidateViewOnScroll();
     }
 
     private void attachEventHandlers(final ParseObject parseObject) {
@@ -323,13 +254,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                     UiUtils.loadUserData(activity, parseObject);
                 }
-            }
-        });
-
-        iconContainer.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ConversationItemView.this.performClick();
             }
         });
 
@@ -352,7 +276,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 switch (v.getId()) {
                     case R.id.icon_profile:
                     case R.id.message_container:
-                    case R.id.icon_container:
                     case R.id.from:
                     case R.id.txt_secondary:
                         ConversationItemView.this.performLongClick();
@@ -365,26 +288,24 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         userPhotoView.setOnLongClickListener(onLongClickListener);
         usernameEntryView.setOnLongClickListener(onLongClickListener);
         userStatusOrLastMessageView.setOnLongClickListener(onLongClickListener);
-        iconContainer.setOnLongClickListener(onLongClickListener);
     }
 
     private void listenToUserPresence(ParseObject parseObject) {
-        UiUtils.showView(userOnlineStatusView, true);
         String userOnlineStatus = parseObject.getString(AppConstants.APP_USER_ONLINE_STATUS);
         if (userOnlineStatus != null && UiUtils.canShowPresence(parseObject, AppConstants.ENTITY_TYPE_CHATS, new HashMap<String, Object>())) {
-            if (parseObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP) == signedInUserObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP)
+            if (parseObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP)
+                    == signedInUserObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP)
                     && HolloutUtils.isNetWorkConnected(activity)) {
-                userOnlineStatusView.setImageResource(R.drawable.ic_online);
+                UiUtils.showView(onlineStatusView, true);
                 AppConstants.onlinePositions.put(getMessageId(), true);
             } else {
-                userOnlineStatusView.setImageResource(R.drawable.ic_offline_grey);
+                UiUtils.showView(onlineStatusView, false);
                 AppConstants.onlinePositions.put(getMessageId(), false);
             }
         } else {
-            userOnlineStatusView.setImageResource(R.drawable.ic_offline_grey);
+            UiUtils.showView(onlineStatusView, false);
             AppConstants.onlinePositions.put(getMessageId(), false);
         }
-        AppConstants.parseUserAvailableOnlineStatusPositions.put(getMessageId(), true);
     }
 
     private void setupDefaults() {
@@ -399,7 +320,13 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
                 msgTimeStampView.setText(msgTime);
             } else {
-                msgTimeStampView.setText(UiUtils.getDaysAgo(AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(msgDate)) + " at " + AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate));
+                String daysAgo = UiUtils.getDaysAgo(AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(msgDate)) + " at " + AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
+                String yearsAgo = AppConstants.DATE_FORMATTER_IN_YEARS.format(msgDate);
+                String currentYear = AppConstants.DATE_FORMATTER_IN_YEARS.format(new Date());
+                if (yearsAgo.equals(currentYear)) {
+                    daysAgo = daysAgo.replace(yearsAgo, "");
+                }
+                msgTimeStampView.setText(daysAgo);
             }
             AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
             setupLastMessage(lastMessage);
@@ -429,8 +356,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     private void invalidateViewOnScroll() {
         UiUtils.showView(unreadMessagesCountView, AppConstants.unreadMessagesPositions.get(getMessageId()));
         UiUtils.showView(msgTimeStampView, AppConstants.lastMessageAvailablePositions.get(getMessageId()));
-        UiUtils.showView(userOnlineStatusView, AppConstants.parseUserAvailableOnlineStatusPositions.get(getMessageId()));
-        userOnlineStatusView.setImageResource(AppConstants.onlinePositions.get(getMessageId()) ? R.drawable.ic_online : R.drawable.ic_offline_grey);
+        UiUtils.showView(onlineStatusView, AppConstants.onlinePositions.get(getMessageId()));
         if (AppConstants.lastMessageAvailablePositions.get(getMessageId()) && lastMessage != null && lastMessage.getMessageDirection() == MessageDirection.OUTGOING) {
             setupMessageReadStatus(lastMessage);
         } else {
@@ -612,11 +538,10 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         }
 
         if (messageType == MessageType.CALL) {
-            UiUtils.showView(reactionsIndicatorView, true);
-            AppConstants.reactionsOpenPositions.put(getMessageId(), true);
+            UiUtils.showView(reactionsIndicatorView, false);
+            AppConstants.reactionsOpenPositions.put(getMessageId(), false);
             UiUtils.showView(userStatusOrLastMessageView, true);
             userStatusOrLastMessageView.setText(message.getMessageBody());
-            reactionsIndicatorView.setImageResource(R.drawable.ic_call_missed_red_18dp);
         }
 
         String messageBody;
@@ -710,18 +635,25 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     }
 
     private void setupMessageReadStatus(ChatMessage message) {
-        if (getMessageDirection() == MessageDirection.OUTGOING && message.getMessageType() != MessageType.CALL && deliveryStatusView != null) {
+        if (getMessageDirection() == MessageDirection.OUTGOING || message.getMessageType() == MessageType.CALL && deliveryStatusView != null) {
             UiUtils.showView(deliveryStatusView, true);
-            if (message.isAcknowledged()) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.isListened()) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.getMessageStatus() == MessageStatus.READ) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
-            } else if (message.getMessageStatus() == MessageStatus.DELIVERED) {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_client_received);
+            if (message.getMessageType() == MessageType.CALL) {
+                IconicsDrawable iconicsDrawable = new IconicsDrawable(activity)
+                        .icon(GoogleMaterial.Icon.gmd_call_missed)
+                        .color(Color.LTGRAY);
+                deliveryStatusView.setImageDrawable(iconicsDrawable);
             } else {
-                deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
+                if (message.isAcknowledged()) {
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+                } else if (message.isListened()) {
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+                } else if (message.getMessageStatus() == MessageStatus.READ) {
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_read);
+                } else if (message.getMessageStatus() == MessageStatus.DELIVERED) {
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_client_received);
+                } else {
+                    deliveryStatusView.setImageResource(R.drawable.msg_status_server_receive);
+                }
             }
         } else {
             UiUtils.showView(deliveryStatusView, false);

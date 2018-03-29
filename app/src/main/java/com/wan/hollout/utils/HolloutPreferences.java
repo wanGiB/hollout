@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.eventbuses.ActivityCountChangedEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -140,6 +143,10 @@ public class HolloutPreferences {
         getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH + "_" + recipient, System.currentTimeMillis()).commit();
     }
 
+    public static void updateConversationTime(String recipient,long time) {
+        getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH + "_" + recipient, time).commit();
+    }
+
     public static int getViewWidth(String messageId) {
         return getInstance().getInt(messageId, 0);
     }
@@ -175,6 +182,25 @@ public class HolloutPreferences {
 
     public static String getUserFirebaseToken() {
         return getInstance().getString(AppConstants.USER_FIREBASE_TOKEN, null);
+    }
+
+    public static void incrementActivityCount() {
+        int currentActivityCount = getInstance().getInt(AppConstants.ACTIVITY_COUNT, 0);
+        getInstance().edit().putInt(AppConstants.ACTIVITY_COUNT, currentActivityCount + 1).commit();
+        EventBus.getDefault().post(new ActivityCountChangedEvent());
+    }
+
+    public static void decrementActivityCount() {
+        int currentActivityCount = getInstance().getInt(AppConstants.ACTIVITY_COUNT, 0);
+        if (currentActivityCount != 0) {
+            getInstance().edit().putInt(AppConstants.ACTIVITY_COUNT, currentActivityCount - 1).commit();
+        }
+        EventBus.getDefault().post(new ActivityCountChangedEvent());
+    }
+
+    public static void destroyActivityCount() {
+        getInstance().edit().putInt(AppConstants.ACTIVITY_COUNT, 0).commit();
+        EventBus.getDefault().post(new ActivityCountChangedEvent());
     }
 
 }

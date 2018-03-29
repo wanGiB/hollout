@@ -134,20 +134,30 @@ public class UiUtils {
         }
     }
 
-    public static synchronized ProgressDialog showProgressDialog(final Context context, final String message) {
-        try {
-            ProgressDialog operationsProgressDialog = new ProgressDialog(context);
-            operationsProgressDialog.setCancelable(false);
-            operationsProgressDialog.setMessage(message);
-            operationsProgressDialog.show();
-            return operationsProgressDialog;
-        } catch (WindowManager.BadTokenException e) {
-            ProgressDialog operationsProgressDialog = new ProgressDialog(ApplicationLoader.getInstance());
-            operationsProgressDialog.setCancelable(false);
-            operationsProgressDialog.setMessage(message);
-            operationsProgressDialog.show();
-            return operationsProgressDialog;
+    public static synchronized ProgressDialog showProgressDialog(final Activity context, final String message) {
+        if (Build.VERSION.SDK_INT >= 17 && !context.isDestroyed()) {
+            try {
+                return constructProgressDialog(context, message);
+            } catch (WindowManager.BadTokenException ignore) {
+
+            }
+        } else {
+            try {
+                return constructProgressDialog(context, message);
+            } catch (WindowManager.BadTokenException ignore) {
+
+            }
         }
+        return null;
+    }
+
+    @NonNull
+    private static ProgressDialog constructProgressDialog(Activity context, String message) {
+        ProgressDialog operationsProgressDialog = new ProgressDialog(context);
+        operationsProgressDialog.setCancelable(false);
+        operationsProgressDialog.setMessage(message);
+        operationsProgressDialog.show();
+        return operationsProgressDialog;
     }
 
     public static synchronized void dismissProgressDialog(ProgressDialog operationsProgressDialog) {

@@ -13,10 +13,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.ads.MobileAds;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
 import com.mikepenz.materialdrawer.util.DrawerImageLoader;
@@ -31,21 +27,22 @@ import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.tonyodev.fetch2.Fetch;
-import com.wan.hollout.BuildConfig;
 import com.wan.hollout.R;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.database.HolloutDb;
+import com.wan.hollout.eventbuses.ActivityCountChangedEvent;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.AuthUtil;
-import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -85,43 +82,34 @@ public class ApplicationLoader extends Application {
         sInstance = this;
         initParse();
         initDrawer();
-        initAdmob();
         Fabric.with(this, new Crashlytics());
         setupDatabase();
         startAppInstanceDetector();
         defaultSystemEmojiPref();
-        listenForServerTimeChanges();
+        checkAndRegEventBus();
     }
 
-    private void listenForServerTimeChanges() {
-        FirebaseUtils.getServerUpTimeRef().addValueEventListener(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot != null && dataSnapshot.exists()) {
-                    Long currentTime = dataSnapshot.getValue(Long.class);
-                    ParseObject signedInUser = AuthUtil.getCurrentUser();
-                    if (signedInUser != null) {
-                        String appUserOnlineStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
-                        if (appUserOnlineStatus != null && appUserOnlineStatus.equals(AppConstants.ONLINE)) {
-                            signedInUser.put(AppConstants.USER_CURRENT_TIME_STAMP, currentTime);
-                            AuthUtil.updateCurrentLocalUser(signedInUser, null);
-                        }
-                    }
+    @SuppressWarnings("unused")
+    @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
+    public void onEventAsync(final Object o) {
+        if (o instanceof ActivityCountChangedEvent) {
+            int currentActivityCount = HolloutPreferences.getInstance().getInt(AppConstants.ACTIVITY_COUNT, 0);
+            if (currentActivityCount <= 0) {
+                ParseObject signedInUser = AuthUtil.getCurrentUser();
+                if (signedInUser != null) {
+                    signedInUser.put(AppConstants.APP_USER_ONLINE_STATUS, AppConstants.OFFLINE);
+                    signedInUser.put(AppConstants.APP_USER_LAST_SEEN, System.currentTimeMillis());
+                    signedInUser.put(AppConstants.USER_CURRENT_TIME_STAMP, System.currentTimeMillis());
+                    AuthUtil.updateCurrentLocalUser(signedInUser, null);
                 }
             }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        }
     }
 
-    private void initAdmob() {
-        MobileAds.initialize(this,
-                BuildConfig.DEBUG ? AppKeys.DEBUG_AD_APP_ID
-                        : AppKeys.PRODUCTION_AD_APP_ID);
+    private void checkAndRegEventBus() {
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
     }
 
     public Fetch getMainFetch() {

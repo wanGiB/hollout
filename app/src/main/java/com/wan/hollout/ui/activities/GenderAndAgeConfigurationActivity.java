@@ -137,7 +137,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
             }
             signedInUser.put(AppConstants.APP_USER_GENDER, selectedGenderType);
             signedInUser.put(AppConstants.APP_USER_AGE, ageBox.getText().toString().trim());
-            final ProgressDialog progressDialog =UiUtils.showProgressDialog(GenderAndAgeConfigurationActivity.this, "Please wait...");
+            final ProgressDialog progressDialog = UiUtils.showProgressDialog(GenderAndAgeConfigurationActivity.this, "Please wait...");
             AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
                 @Override
                 public void done(Boolean result, Exception e) {
@@ -216,6 +216,8 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
         if (item.getItemId() == R.id.button_continue) {
             UiUtils.dismissKeyboard(ageBox);
             checkAndContinue();
+        } else if (item.getItemId() == android.R.id.home) {
+            finish();
         }
         return super.onOptionsItemSelected(item);
     }

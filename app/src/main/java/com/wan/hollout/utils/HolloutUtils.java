@@ -26,7 +26,6 @@ import android.os.Environment;
 import android.os.Looper;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Base64;
@@ -58,8 +57,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.math.RoundingMode;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1001,13 +998,4 @@ public class HolloutUtils {
         return false;
     }
 
-    public static List<String> getUserAboutCopy(String userClassification,List<String> aboutUser) {
-        List<String> aboutUserCopy = new ArrayList<>(aboutUser);
-        if (userClassification != null) {
-            if (aboutUserCopy.contains(userClassification)) {
-                aboutUserCopy.remove(userClassification);
-            }
-        }
-        return aboutUserCopy;
-    }
 }

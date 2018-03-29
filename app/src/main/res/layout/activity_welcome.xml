@@ -85,63 +85,8 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:paddingStart="20dp"
-                android:text="@string/app_intro_message"
                 android:textColor="@color/gray5"
                 app:textStyle="medium" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="15dp"
-                android:layout_marginTop="25dp"
-                android:clipToPadding="false"
-                android:orientation="horizontal">
-
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    style="@style/TextAppearance.Welcome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center_vertical"
-                    android:lineSpacingExtra="1.1dp"
-                    android:lineSpacingMultiplier="1.2"
-                    android:paddingLeft="20dp"
-                    android:paddingStart="20dp"
-                    android:text="@string/find"
-                    android:textColor="@color/white"
-                    tools:ignore="RtlSymmetry" />
-
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:id="@+id/typing_text_view"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center_vertical"
-                    android:lineSpacingExtra="1.1dp"
-                    android:lineSpacingMultiplier="1.2"
-                    android:paddingLeft="20dp"
-                    android:paddingStart="20dp"
-                    android:textColor="@color/hollout_color_three"
-                    android:textSize="20sp"
-                    app:charIncrease="4"
-                    app:textStyle="bold"
-                    app:text_animationStyle="typed"
-                    app:typerSpeed="50"
-                    tools:ignore="RtlSymmetry" />
-
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:id="@+id/blinking_divider"
-                    style="@style/TextAppearance.Welcome"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:gravity="center_vertical"
-                    android:text="@string/animated_text_contents_divider"
-                    android:textColor="@color/whitesmoke"
-                    app:textStyle="medium" />
-
-            </LinearLayout>
 
         </LinearLayout>
 
@@ -149,8 +94,8 @@
             android:id="@+id/bottom_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_below="@+id/center_container"
+            android:layout_centerHorizontal="true"
             android:orientation="vertical"
             android:padding="10dp">
 
@@ -164,8 +109,8 @@
                 android:gravity="center"
                 android:padding="5dp"
                 android:text="@string/btn_text_login_google"
-                android:textSize="18sp"
                 android:textAllCaps="false"
+                android:textSize="18sp"
                 android:textStyle="normal"
                 android:theme="@style/Widget.Button.Login.Google" />
 

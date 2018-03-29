@@ -203,23 +203,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private void offloadUserAboutsIfAvailable(ParseObject parseUser) {
         List<ParseObject> aboutUserList = new ArrayList<>();
         List<String> userAboutList = parseUser.getList(AppConstants.ABOUT_USER);
-        String userClassification = parseUser.getString(AppConstants.CLASSIFICATION);
         if (userAboutList != null) {
             if (!userAboutList.isEmpty()) {
                 for (String interest : userAboutList) {
                     ParseObject interestsObject = new ParseObject(AppConstants.INTERESTS);
                     interestsObject.put(AppConstants.NAME, interest.toLowerCase());
                     interestsObject.put(AppConstants.SELECTED, true);
-                    if (userClassification != null) {
-                        if (!StringUtils.equalsIgnoreCase(interest, userClassification)) {
-                            if (!aboutUserList.contains(interestsObject)) {
-                                aboutUserList.add(interestsObject);
-                            }
-                        }
-                    } else {
-                        if (!aboutUserList.contains(interestsObject)) {
-                            aboutUserList.add(interestsObject);
-                        }
+                    if (!aboutUserList.contains(interestsObject)) {
+                        aboutUserList.add(interestsObject);
                     }
                 }
             }
@@ -591,19 +582,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             } else {
                 UiUtils.showView(startChatView, true);
                 List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
-                String userClassificationString = parseUser.getString(AppConstants.CLASSIFICATION);
-                if (userClassificationString != null && aboutUser != null) {
-                    if (aboutUser.contains(userClassificationString)) {
-                        aboutUser.remove(userClassificationString);
-                    }
-                }
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
-                String signedInUserClassificationString = signedInUser.getString(AppConstants.CLASSIFICATION);
-                if (signedInUserClassificationString != null && aboutSignedInUser != null) {
-                    if (aboutSignedInUser.contains(signedInUserClassificationString)) {
-                        aboutSignedInUser.remove(signedInUserClassificationString);
-                    }
-                }
                 if (aboutUser != null && aboutSignedInUser != null) {
                     try {
                         List<String> common = new ArrayList<>(aboutUser);
@@ -618,10 +597,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onClick(View view) {
                         if (chatRequestView.getVisibility() == View.VISIBLE) {
-                            ProgressDialog progressDialog = UiUtils.showProgressDialog(UserProfileActivity.this, "Please wait...");
                             //Automatically accept chat request
                             chatRequestView.acceptChatRequest();
-                            UiUtils.dismissProgressDialog(progressDialog);
                             return;
                         }
                         Intent chatIntent = new Intent(UserProfileActivity.this, ChatActivity.class);

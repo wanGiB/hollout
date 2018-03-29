@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="10dp"
     tools:ignore="RtlHardcoded">
 
     <RelativeLayout
@@ -13,97 +14,44 @@
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:paddingTop="@dimen/padding_list_row"
+        android:padding="5dp"
         tools:ignore="UselessParent">
 
-        <RelativeLayout
-            android:id="@+id/icon_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginEnd="10dp"
-            android:layout_marginRight="10dp"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true">
+        <FrameLayout
+            android:id="@+id/icon_profile_container"
+            android:layout_width="@dimen/icon_width_height"
+            android:layout_height="@dimen/icon_width_height"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp">
 
-            <ImageView
-                android:id="@+id/user_online_status"
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="2dp"
-                android:layout_marginRight="2dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_offline_grey"
-                android:visibility="visible"
-                tools:ignore="RtlHardcoded" />
+            <com.wan.hollout.ui.widgets.CircleImageView
+                android:id="@+id/icon_profile"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/empty_profile"
+                tools:ignore="ContentDescription" />
 
-            <RelativeLayout
-                android:id="@+id/icon_back"
+            <com.wan.hollout.ui.widgets.CircleImageView
+                android:id="@+id/online_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toEndOf="@id/user_online_status"
-                android:layout_toRightOf="@id/user_online_status"
-                android:fillAfter="false"
-                android:fillEnabled="false">
+                android:layout_marginLeft="3dp"
+                android:layout_marginStart="3dp"
+                android:src="@drawable/ic_online"
+                android:visibility="gone" />
 
-                <ImageView
-                    android:layout_width="@dimen/icon_width_height"
-                    android:layout_height="@dimen/icon_width_height"
-                    android:src="@drawable/bg_circle"
-                    tools:ignore="ContentDescription" />
-
-                <ImageView
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_centerInParent="true"
-                    android:src="@drawable/ic_done_white_24dp"
-                    tools:ignore="ContentDescription" />
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/icon_front"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
-                android:layout_toEndOf="@id/user_online_status"
-                android:layout_toRightOf="@id/user_online_status"
-                android:fillAfter="false"
-                android:fillEnabled="false">
-
-                <ImageView
-                    android:id="@+id/icon_profile"
-                    android:layout_width="@dimen/icon_width_height"
-                    android:layout_height="@dimen/icon_width_height"
-                    tools:ignore="ContentDescription" />
-
-                <TextView
-                    android:id="@+id/icon_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/icon_text" />
-
-            </RelativeLayout>
-
-        </RelativeLayout>
+        </FrameLayout>
 
         <LinearLayout
             android:id="@+id/message_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/icon_container"
-            android:layout_toRightOf="@id/icon_container"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_toEndOf="@id/icon_profile_container"
+            android:layout_toRightOf="@id/icon_profile_container"
+            android:gravity="center_vertical"
             android:orientation="vertical"
             android:paddingEnd="@dimen/padding_list_row"
             android:paddingRight="@dimen/padding_list_row"
@@ -130,8 +78,8 @@
                     android:textSize="@dimen/msg_text_primary"
                     app:textStyle="medium" />
 
-                <TextView
-                    android:id="@+id/timestamp"
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/distance_to_user"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
@@ -142,9 +90,8 @@
                     android:gravity="center_vertical"
                     android:maxLines="1"
                     android:maxWidth="100dp"
-                    android:textColor="@color/ease_gray"
                     android:textSize="@dimen/timestamp"
-                    android:textStyle="bold"
+                    app:textStyle="regular"
                     tools:ignore="RelativeOverlap,RtlHardcoded" />
 
             </RelativeLayout>
@@ -155,7 +102,6 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:lines="1"
-                android:textColor="@color/list_item_secondary_text"
                 android:textSize="@dimen/msg_text_secondary"
                 app:textStyle="medium" />
 
@@ -177,29 +123,9 @@
                     android:textSize="@dimen/msg_text_secondary"
                     app:textStyle="regular" />
 
-                <TextView
-                    android:id="@+id/distance_to_user"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingEnd="3dp"
-                    android:paddingRight="3dp"
-                    android:textColor="@color/ease_gray"
-                    android:textSize="@dimen/timestamp"
-                    android:textStyle="bold"
-                    tools:ignore="RelativeOverlap,RtlHardcoded,RtlSymmetry" />
-
             </LinearLayout>
 
         </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_below="@id/message_container"
-            android:layout_marginTop="8dp"
-            android:layout_toEndOf="@id/icon_container"
-            android:layout_toRightOf="@id/icon_container"
-            android:background="@color/lighter_blue" />
 
     </RelativeLayout>
 

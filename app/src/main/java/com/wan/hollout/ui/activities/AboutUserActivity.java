@@ -31,7 +31,6 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.wan.hollout.R;
-import com.wan.hollout.api.JsonApiClient;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.adapters.InterestsSuggestionAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
@@ -140,14 +139,8 @@ public class AboutUserActivity extends BaseActivity {
     private void attemptToOffloadPersistedInfoAboutUser() {
         if (signedInUser != null) {
             List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
-            String signedInUserClassificationString = signedInUser.getString(AppConstants.CLASSIFICATION);
             if (aboutUser != null) {
                 if (!aboutUser.isEmpty()) {
-                    if (signedInUserClassificationString != null) {
-                        if (aboutUser.contains(signedInUserClassificationString)) {
-                            aboutUser.remove(signedInUserClassificationString);
-                        }
-                    }
                     String aboutUserString = TextUtils.join(",", aboutUser);
                     moreAboutUserField.setText(aboutUserString);
                     moreAboutUserField.setSelection(moreAboutUserField.length());
@@ -288,18 +281,9 @@ public class AboutUserActivity extends BaseActivity {
 
     private void checkAndContinue() {
         if (canMoveFurther()) {
-            List<String> existingInterests = signedInUser.getList(AppConstants.INTERESTS);
             List<String> aboutUserList = new ArrayList<>();
-            List<String> interests = existingInterests != null ? existingInterests : new ArrayList<String>();
             String enteredInterests = moreAboutUserField.getText().toString().trim();
             buildInterests(aboutUserList, enteredInterests);
-            //Save occupations and move further
-            for (String occupation : aboutUserList) {
-                if (!interests.contains(occupation)) {
-                    interests.add(occupation);
-                }
-            }
-            signedInUser.put(AppConstants.INTERESTS, interests);
             signedInUser.put(AppConstants.ABOUT_USER, aboutUserList);
             final ProgressDialog progressDialog = UiUtils.showProgressDialog(AboutUserActivity.this, "Please wait...");
             AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
@@ -344,8 +328,6 @@ public class AboutUserActivity extends BaseActivity {
                     }
                 }
             });
-            //Use Machine learning to classify user interest
-            JsonApiClient.classifyInterest(s);
         }
     }
 
@@ -428,20 +410,11 @@ public class AboutUserActivity extends BaseActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
             if (resultCode == RESULT_OK) {
-                if (!HolloutPreferences.isUserWelcomed()) {
-                    launchPeopleToMeet();
-                } else {
-                    launchMainActivity();
-                }
+                launchMainActivity();
             }
         } else if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE) {
             launchMainActivity();
         }
-    }
-
-    private void launchPeopleToMeet() {
-        Intent meetPeopleIntent = new Intent(AboutUserActivity.this, MeetPeopleActivity.class);
-        startActivityForResult(meetPeopleIntent, RequestCodes.MEET_PEOPLE_REQUEST_CODE);
     }
 
     private void onKeyboardHidden() {

@@ -2,10 +2,8 @@ package com.wan.hollout.api;
 
 import android.support.annotation.NonNull;
 
-import com.parse.ParseObject;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.utils.AppConstants;
-import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.UiUtils;
@@ -15,9 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -146,87 +142,6 @@ public class JsonApiClient {
 
     private static void logResponse(String responseBodyString, int code) {
         HolloutLogger.d("FetchChats", responseBodyString + ", Response Code =" + code);
-    }
-
-    public static void classifyInterest(String interest) {
-        HttpUrl.Builder httpUrlBuilder = HttpUrl.parse(AppConstants.DATUM_URL).newBuilder();
-        httpUrlBuilder.addQueryParameter("api_key", AppKeys.DATUM_BOX_KEY);
-        httpUrlBuilder.addQueryParameter("text", interest.trim());
-        String postUrl = httpUrlBuilder.build().toString();
-
-        HashMap<String, String> authParams = new HashMap<>();
-        authParams.put("api_key", AppKeys.DATUM_BOX_KEY);
-
-        JSONObject classificationProps = new JSONObject();
-
-        try {
-            classificationProps.put("api_key", AppKeys.DATUM_BOX_KEY);
-            classificationProps.put("text", interest.trim());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        RequestBody postRequestBody = RequestBody.create(MediaType.parse("application/json"), classificationProps.toString());
-        Request postRequest = getRequestBuilder(authParams).url(postUrl).post(postRequestBody).build();
-
-        getOkHttpClient().newCall(postRequest).enqueue(new Callback() {
-
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-
-            }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                String responseString = getResponseString(response);
-                logResponse(responseString, response.code());
-                if (response.isSuccessful()) {
-                    try {
-                        if (StringUtils.isNotEmpty(responseString)) {
-                            JSONObject responseObject = new JSONObject(responseString);
-                            if (responseObject != null) {
-                                JSONObject output = responseObject.optJSONObject("output");
-                                if (output != null) {
-                                    int status = output.optInt("status");
-                                    if (status == 1) {
-                                        String result = output.optString("result");
-                                        if (result != null) {
-                                            updateSignedInUserProps(result);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }
-
-    private static void updateSignedInUserProps(String result) {
-        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
-        if (signedInUserObject != null) {
-            List<String> aboutSignedInUser = signedInUserObject.getList(AppConstants.ABOUT_USER);
-            String existingClassificationString = signedInUserObject.getString(AppConstants.CLASSIFICATION);
-            if (aboutSignedInUser != null && !aboutSignedInUser.isEmpty()) {
-                if (existingClassificationString != null) {
-                    if (aboutSignedInUser.contains(existingClassificationString)) {
-                        aboutSignedInUser.remove(existingClassificationString);
-                    }
-                }
-                aboutSignedInUser.add(result);
-                signedInUserObject.put(AppConstants.CLASSIFICATION, result);
-                signedInUserObject.put(AppConstants.ABOUT_USER, aboutSignedInUser);
-            } else {
-                aboutSignedInUser = new ArrayList<>();
-                aboutSignedInUser.add(result);
-                signedInUserObject.put(AppConstants.CLASSIFICATION, result);
-                signedInUserObject.put(AppConstants.ABOUT_USER, aboutSignedInUser);
-            }
-            AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
-        }
     }
 
 }

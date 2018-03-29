@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.widgets;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
@@ -51,7 +52,6 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     private ParseObject requestOriginator;
 
     private Activity activity;
-    private ParseObject feedObject;
 
     public ChatRequestView(Context context) {
         this(context, null);
@@ -70,7 +70,6 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
     public void bindData(final Activity activity, final ChatRequestsAdapter parent, final ParseObject feedObject) {
         this.activity = activity;
         this.signedInUser = AuthUtil.getCurrentUser();
-        this.feedObject = feedObject;
         if (feedObject != null) {
             String requestType = feedObject.getString(AppConstants.FEED_TYPE);
             if (requestType.equals(AppConstants.FEED_TYPE_CHAT_REQUEST)) {
@@ -92,19 +91,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                     }
                     if (!(activity instanceof UserProfileActivity)) {
                         List<String> aboutUser = requestOriginator.getList(AppConstants.ABOUT_USER);
-                        String userClassificationString = requestOriginator.getString(AppConstants.CLASSIFICATION);
-                        if (userClassificationString != null && aboutUser != null) {
-                            if (aboutUser.contains(userClassificationString)) {
-                                aboutUser.remove(userClassificationString);
-                            }
-                        }
                         List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
-                        String signedInUserClassificationString = signedInUser.getString(AppConstants.CLASSIFICATION);
-                        if (signedInUserClassificationString != null && aboutSignedInUser != null) {
-                            if (aboutSignedInUser.contains(signedInUserClassificationString)) {
-                                aboutSignedInUser.remove(signedInUserClassificationString);
-                            }
-                        }
                         if (aboutUser != null && aboutSignedInUser != null) {
                             try {
                                 List<String> common = new ArrayList<>(aboutUser);
@@ -115,7 +102,6 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
                             }
                         }
-
                         ParseGeoPoint userGeoPoint = requestOriginator.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                         ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                         if (signedInUserGeoPoint != null && userGeoPoint != null) {
@@ -148,7 +134,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
         declineRequestView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                declineRequestView.setText(activity.getString(R.string.working));
+                final ProgressDialog progressDialog = UiUtils.showProgressDialog(activity, "Declining request. Please wait...");
                 ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
                 requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, feedObject.getObjectId());
                 requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
@@ -162,6 +148,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                                     if (parent != null) {
                                         removeRequest(parent, object);
                                     }
+                                    UiUtils.dismissProgressDialog(progressDialog);
                                 }
                             });
                         }
@@ -183,7 +170,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
 
             @Override
             public void onClick(View v) {
-                acceptRequestTextView.setText(activity.getString(R.string.working));
+                final ProgressDialog progressDialog = UiUtils.showProgressDialog(activity, "Accepting request. Please wait...");
                 ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
                 requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, feedObject.getObjectId());
                 requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
@@ -212,6 +199,7 @@ public class ChatRequestView extends LinearLayout implements View.OnClickListene
                                                     if (parent != null) {
                                                         removeRequest(parent, feedObject);
                                                     }
+                                                    UiUtils.dismissProgressDialog(progressDialog);
                                                     EventBus.getDefault().post(AppConstants.REMOVE_SOMETHING);
                                                     EventBus.getDefault().postSticky(AppConstants.REFRESH_CONVERSATIONS);
                                                 } else {
