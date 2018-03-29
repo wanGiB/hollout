@@ -102,8 +102,11 @@ public class ApplicationLoader extends Application {
                     Long currentTime = dataSnapshot.getValue(Long.class);
                     ParseObject signedInUser = AuthUtil.getCurrentUser();
                     if (signedInUser != null) {
-                        signedInUser.put(AppConstants.USER_CURRENT_TIME_STAMP, currentTime);
-                        AuthUtil.updateCurrentLocalUser(signedInUser, null);
+                        String appUserOnlineStatus = signedInUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
+                        if (appUserOnlineStatus != null && appUserOnlineStatus.equals(AppConstants.ONLINE)) {
+                            signedInUser.put(AppConstants.USER_CURRENT_TIME_STAMP, currentTime);
+                            AuthUtil.updateCurrentLocalUser(signedInUser, null);
+                        }
                     }
                 }
             }
