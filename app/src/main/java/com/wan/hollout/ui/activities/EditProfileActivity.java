@@ -360,6 +360,7 @@ public class EditProfileActivity extends BaseActivity implements View.OnClickLis
         signedInUserObject.put(AppConstants.APP_USER_DISPLAY_NAME, displayNameBox.getText().toString().trim());
         signedInUserObject.put(AppConstants.APP_USER_AGE, age);
         signedInUserObject.put(AppConstants.APP_USER_GENDER, selectedGenderType);
+        UiUtils.dismissKeyboard(displayNameBox);
         updateProfile();
     }
 

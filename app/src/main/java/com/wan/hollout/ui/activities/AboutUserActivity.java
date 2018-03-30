@@ -411,9 +411,11 @@ public class AboutUserActivity extends BaseActivity {
         if (requestCode == RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER) {
             if (resultCode == RESULT_OK) {
                 launchMainActivity();
+                finish();
             }
         } else if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE) {
             launchMainActivity();
+            finish();
         }
     }
 

@@ -286,7 +286,7 @@ public class UiUtils {
                             Glide.with(context).load(photoPath).listener(new RequestListener<String, GlideDrawable>() {
                                 @Override
                                 public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                                    imageView.setImageResource(R.drawable.web_hi_res_512);
+                                    imageView.setImageResource(R.mipmap.ic_launcher);
                                     HolloutLogger.d(TAG, "An exception was raised while loading an image");
                                     return false;
                                 }

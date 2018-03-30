@@ -160,7 +160,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
     }
 
     private void navigateBackToCaller() {
-        Intent mCallerIntent = new Intent();
+        Intent mCallerIntent = getIntent();
         setResult(RESULT_OK, mCallerIntent);
         finish();
     }
