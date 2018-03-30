@@ -2,13 +2,11 @@ package com.wan.hollout.ui.widgets;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -45,7 +43,8 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
     private LinearLayout composeContainer;
 
     private Animation mFadeInFadeOutAnimation;
-    private FloatingActionButton sendButton;
+    private FloatingActionButton recordButton;
+    private AnimatingToggle controlsToggle;
 
     @Nullable
     private Listener listener;
@@ -64,9 +63,7 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
     }
 
     public boolean canRecord() {
-        Drawable canRecordDrawable = ContextCompat.getDrawable(getContext(), R.drawable.send_inactive_icon);
-        Drawable currentFabDrawable = sendButton.getDrawable();
-        return canRecordDrawable.getConstantState() == currentFabDrawable.getConstantState();
+        return controlsToggle.getCurrent().getId() == recordButton.getId();
     }
 
     @Override
@@ -80,7 +77,8 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
         composeOrRecordAnimationToggle = ViewUtil.findById(this, R.id.compose_or_record_toggle);
         recordingContainer = ViewUtil.findById(this, R.id.recording_container);
         composeContainer = ViewUtil.findById(this, R.id.compose_bubble);
-        sendButton = ViewUtil.findById(this, R.id.record_or_send_message_button);
+        controlsToggle = ViewUtil.findById(this, R.id.control_toggle);
+        recordButton = ViewUtil.findById(this, R.id.record_message_button);
 
         recordingStartedAnimationTimer = ViewUtil.findById(this, R.id.recording_started_animating_image);
 
@@ -173,6 +171,10 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
     @Override
     public void onEmojiSelected(String emoji) {
         composeText.insertEmoji(emoji);
+    }
+
+    public void displayControl(View control) {
+        controlsToggle.display(control);
     }
 
     public interface Listener {

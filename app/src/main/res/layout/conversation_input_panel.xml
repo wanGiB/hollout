@@ -192,21 +192,52 @@
 
             </com.wan.hollout.ui.widgets.AnimatingToggle>
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/record_or_send_message_button"
+            <com.wan.hollout.ui.widgets.AnimatingToggle
+                android:id="@+id/control_toggle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginEnd="2dp"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
-                android:layout_marginStart="2dp"
-                android:contentDescription="@string/conversation_activity__quick_attachment_drawer_record_and_send_audio_description"
-                android:src="@drawable/send_inactive_icon"
-                app:backgroundTint="@color/grey_200"
-                app:elevation="2dp"
-                app:fabSize="mini"
-                app:useCompatPadding="false" />
+                android:layout_height="wrap_content">
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/record_message_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="2dp"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginRight="2dp"
+                    android:layout_marginStart="2dp"
+                    android:contentDescription="@string/conversation_activity__quick_attachment_drawer_record_and_send_audio_description"
+                    android:src="@drawable/send_inactive_icon"
+                    app:backgroundTint="@color/grey_200"
+                    app:elevation="2dp"
+                    app:fabSize="mini"
+                    app:useCompatPadding="false" />
+
+                <FrameLayout
+                    android:id="@+id/send_button_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@color/colorAccent">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_ami_send_24dp"
+                            tools:ignore="ContentDescription" />
+
+                    </FrameLayout>
+
+                </FrameLayout>
+
+            </com.wan.hollout.ui.widgets.AnimatingToggle>
 
         </com.wan.hollout.ui.widgets.InputPanel>
 

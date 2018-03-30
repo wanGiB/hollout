@@ -23,6 +23,7 @@ import com.wan.hollout.R;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+@SuppressWarnings("RedundantCast")
 public class AudioView extends FrameLayout implements AudioSlidePlayer.Listener {
 
     private static final String TAG = AudioView.class.getSimpleName();

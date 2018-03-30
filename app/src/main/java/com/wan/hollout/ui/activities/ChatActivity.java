@@ -82,6 +82,7 @@ import com.wan.hollout.ui.adapters.MessagesAdapter;
 import com.wan.hollout.ui.adapters.PickedMediaFilesAdapter;
 import com.wan.hollout.ui.services.ContactService;
 import com.wan.hollout.ui.utils.FileUploader;
+import com.wan.hollout.ui.widgets.AnimatingToggle;
 import com.wan.hollout.ui.widgets.AttachmentTypeSelector;
 import com.wan.hollout.ui.widgets.ChatToolbar;
 import com.wan.hollout.ui.widgets.CircleImageView;
@@ -171,8 +172,14 @@ public class ChatActivity extends BaseActivity implements
     @BindView(R.id.embedded_text_editor)
     ComposeText composeText;
 
-    @BindView(R.id.record_or_send_message_button)
-    FloatingActionButton sendOrRecordAudioButton;
+    @BindView(R.id.record_message_button)
+    FloatingActionButton recordAudioButton;
+
+    @BindView(R.id.control_toggle)
+    AnimatingToggle controlToggle;
+
+    @BindView(R.id.send_button_container)
+    View sendMessageContainer;
 
     @BindView(R.id.attach_button)
     ImageButton attachButton;
@@ -654,11 +661,13 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void releaseMediaRecorder() {
-        mediaRecorder.stop();
-        mediaRecorder.reset();
-        mediaRecorder.release();
-        mediaRecorder = null;
-        recordingInProgress = false;
+        if (mediaRecorder != null) {
+            mediaRecorder.stop();
+            mediaRecorder.reset();
+            mediaRecorder.release();
+            mediaRecorder = null;
+            recordingInProgress = false;
+        }
     }
 
     public void startRecorder() {
@@ -804,8 +813,11 @@ public class ChatActivity extends BaseActivity implements
 
         composeText.setOnEditorActionListener(sendButtonOnClickListener);
         attachButton.setOnClickListener(new AttachButtonListener());
-        sendOrRecordAudioButton.setOnClickListener(sendButtonOnClickListener);
-        sendOrRecordAudioButton.setEnabled(true);
+
+        recordAudioButton.setOnClickListener(sendButtonOnClickListener);
+        recordAudioButton.setEnabled(true);
+
+        sendMessageContainer.setOnClickListener(sendButtonOnClickListener);
 
         composeText.setOnKeyListener(composeKeyPressedListener);
         composeText.addTextChangedListener(composeKeyPressedListener);
@@ -848,8 +860,8 @@ public class ChatActivity extends BaseActivity implements
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if (event.getAction() == KeyEvent.ACTION_DOWN) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    sendOrRecordAudioButton.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
-                    sendOrRecordAudioButton.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
+                    sendMessageContainer.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
+                    sendMessageContainer.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
                     return true;
                 }
             }
@@ -899,13 +911,11 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void displayInactiveSendButton() {
-        sendOrRecordAudioButton.setImageResource(R.drawable.send_inactive_icon);
-        tintSendOrRecordAudioButton(R.color.grey_200);
+        inputPanel.displayControl(recordAudioButton);
     }
 
     private void displayActiveSendButton() {
-        sendOrRecordAudioButton.setImageResource(R.drawable.ic_ami_send_24dp);
-        tintSendOrRecordAudioButton(R.color.colorPrimary);
+        inputPanel.displayControl(sendMessageContainer);
     }
 
     private void updateToggleButtonState() {
@@ -918,10 +928,6 @@ public class ChatActivity extends BaseActivity implements
         }
     }
 
-    private void tintSendOrRecordAudioButton(int color) {
-        sendOrRecordAudioButton.setBackgroundTintList(new ColorStateList(new int[][]{new int[]{0}}, new int[]{ContextCompat.getColor(this, color)}));
-    }
-
     public void vibrateVibrator() {
         vibrator.vibrate(100);
     }
@@ -930,8 +936,8 @@ public class ChatActivity extends BaseActivity implements
 
         @Override
         public void onClick(View v) {
+            vibrateVibrator();
             if (inputPanel.canRecord()) {
-                vibrator.vibrate(100);
                 inputPanel.startRecorder();
             } else {
                 UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
@@ -955,7 +961,7 @@ public class ChatActivity extends BaseActivity implements
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_SEND) {
-                sendOrRecordAudioButton.performClick();
+                sendMessageContainer.performClick();
                 return true;
             }
             return false;
@@ -1525,11 +1531,11 @@ public class ChatActivity extends BaseActivity implements
         if (wasIBlackListed) {
             composeText.setEnabled(false);
             attachButton.setEnabled(false);
-            sendOrRecordAudioButton.setEnabled(false);
+            recordAudioButton.setEnabled(false);
         } else {
             composeText.setEnabled(true);
             attachButton.setEnabled(true);
-            sendOrRecordAudioButton.setEnabled(true);
+            recordAudioButton.setEnabled(true);
         }
     }
 
