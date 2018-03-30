@@ -241,7 +241,7 @@ public class ChatClient {
                                 long signedInUserTimeStamp = signedInUserObject != null
                                         ? signedInUserObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP) : 0;
                                 String recipientToken = recipientProperties.getString(AppConstants.USER_FIREBASE_TOKEN);
-                                if (recipientTimeStamp == signedInUserTimeStamp) {
+                                if (recipientTimeStamp != signedInUserTimeStamp) {
                                     if (StringUtils.isNotEmpty(recipientToken)) {
                                         JsonApiClient.sendFirebasePushNotification(recipientToken, AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE);
                                     }
