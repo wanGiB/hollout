@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@color/lighter_blue"
     android:orientation="vertical">
 
     <com.wan.hollout.ui.widgets.ChatToolbar
@@ -29,6 +28,13 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/hollout_doodle"
+                tools:ignore="ContentDescription" />
 
             <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/messages_empty_view"

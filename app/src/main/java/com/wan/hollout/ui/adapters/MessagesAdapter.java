@@ -2,6 +2,7 @@ package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
 import android.graphics.drawable.TransitionDrawable;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -174,7 +175,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         MessageItemsHolder messageItemsHolder = (MessageItemsHolder) holder;
         ChatMessage messageObject = messages.get(position);
         if (messageObject != null) {

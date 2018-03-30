@@ -50,16 +50,14 @@
                     android:orientation="horizontal"
                     android:paddingBottom="20dp">
 
-                    <com.wan.hollout.ui.widgets.HolloutEditText
+                    <com.wan.hollout.ui.widgets.HolloutTextView
                         android:id="@+id/user_display_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:background="@android:color/transparent"
-                        android:cursorVisible="false"
                         android:ellipsize="end"
                         android:focusable="false"
                         android:focusableInTouchMode="false"
-                        android:inputType="text|textNoSuggestions"
                         android:maxLines="2"
                         android:paddingLeft="20dp"
                         android:paddingStart="20dp"
@@ -74,21 +72,10 @@
                         android:layout_height="wrap_content"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
+                        android:focusable="true"
                         android:textColor="@color/white"
                         android:textSize="25sp"
-                        app:textStyle="medium"
-                        android:focusable="true" />
-
-                    <ImageView
-                        android:id="@+id/done_with_display_name_edit"
-                        android:layout_width="25dp"
-                        android:layout_height="25dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginLeft="16dp"
-                        android:layout_marginStart="16dp"
-                        android:src="@drawable/ic_done_white_24dp"
-                        android:visibility="gone"
-                        tools:ignore="ContentDescription" />
+                        app:textStyle="medium" />
 
                 </LinearLayout>
 
@@ -103,10 +90,10 @@
                 android:layout_marginTop="280dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:focusable="true"
                 android:src="@drawable/authentication_background_image"
                 app:border_color="@color/white"
-                app:border_width="3dp"
-                android:focusable="true" />
+                app:border_width="3dp" />
 
             <com.wan.hollout.ui.widgets.CircleImageView
                 android:id="@+id/user_gender"
@@ -119,11 +106,11 @@
                 android:layout_marginTop="282dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:focusable="true"
                 android:src="@drawable/authentication_background_image"
                 android:visibility="gone"
                 app:border_color="@color/white"
-                app:border_width="2dp"
-                android:focusable="true" />
+                app:border_width="2dp" />
 
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/start_chat_view"
@@ -158,14 +145,14 @@
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:ellipsize="end"
+                    android:focusable="true"
                     android:maxLines="2"
                     android:paddingEnd="20dp"
                     android:paddingLeft="22dp"
                     android:paddingRight="20dp"
                     android:paddingStart="22dp"
                     android:textColor="@color/text_dark"
-                    android:textSize="25sp"
-                    android:focusable="true" />
+                    android:textSize="25sp" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/about_user_recycler_view"
@@ -190,6 +177,7 @@
                     android:layout_marginRight="10dp"
                     android:background="@drawable/get_started_button_background"
                     android:clickable="true"
+                    android:focusable="true"
                     android:foreground="?attr/selectableItemBackground"
                     android:paddingBottom="5dp"
                     android:paddingEnd="14dp"
@@ -200,8 +188,7 @@
                     android:text="@string/edit"
                     android:textSize="10sp"
                     android:visibility="gone"
-                    tools:ignore="SmallSp"
-                    android:focusable="true" />
+                    tools:ignore="SmallSp" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/user_location_and_distance"
@@ -229,21 +216,21 @@
                         android:id="@+id/user_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:drawableEnd="@drawable/ic_close_quote"
                         android:drawableLeft="@drawable/ic_open_quote"
                         android:drawablePadding="5dp"
                         android:drawableRight="@drawable/ic_close_quote"
                         android:drawableStart="@drawable/ic_open_quote"
-                        android:background="?attr/selectableItemBackground"
+                        android:focusable="true"
                         android:gravity="center_horizontal"
-                        android:layout_gravity="center_horizontal"
                         android:padding="16dp"
                         android:text="@string/hey_there_holla_me_on_hollout"
                         android:textColor="@color/grey500"
                         android:textSize="18sp"
-                        app:textStyle="medium"
-                        android:focusable="true" />
+                        app:textStyle="medium" />
 
                 </FrameLayout>
 
@@ -297,10 +284,10 @@
                         android:layout_height="match_parent"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
+                        android:focusable="true"
                         android:scaleType="centerCrop"
                         android:src="@drawable/authentication_background_image"
-                        tools:ignore="ContentDescription"
-                        android:focusable="true" />
+                        tools:ignore="ContentDescription" />
 
                     <View
                         android:id="@+id/featured_photos_dim_view"
@@ -318,13 +305,13 @@
                         android:layout_marginRight="16dp"
                         android:layout_marginStart="16dp"
                         android:clickable="true"
+                        android:focusable="true"
                         android:foreground="?attr/selectableItemBackground"
                         android:gravity="center"
                         android:padding="10dp"
                         android:textColor="@color/whitesmoke"
                         android:textSize="16sp"
-                        app:textStyle="light"
-                        android:focusable="true" />
+                        app:textStyle="light" />
 
                 </FrameLayout>
 
@@ -350,9 +337,9 @@
             android:layout_marginStart="16dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:clickable="true"
+            android:focusable="true"
             android:src="@drawable/ic_arrow_back_white_48dp"
-            tools:ignore="ContentDescription"
-            android:focusable="true" />
+            tools:ignore="ContentDescription" />
 
         <com.wan.hollout.ui.widgets.HolloutTextView
             android:id="@+id/online_status"

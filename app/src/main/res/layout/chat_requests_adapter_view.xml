@@ -72,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:textColor="@color/accent"
+                android:textColor="@color/colorAccent"
                 android:textSize="14sp"
                 app:textStyle="medium" />
 

@@ -6,7 +6,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -14,17 +17,22 @@ import android.provider.Settings;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,16 +51,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
-import com.mikepenz.materialdrawer.AccountHeader;
-import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
-import com.mikepenz.materialdrawer.model.ProfileSettingDrawerItem;
-import com.mikepenz.materialdrawer.model.SectionDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
-import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.mikepenz.iconics.typeface.IIcon;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
@@ -66,6 +65,7 @@ import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.services.TimeChangeDetectionService;
+import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
@@ -137,15 +137,14 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     @BindView(R.id.block_user)
     ImageView blockUser;
 
+    @BindView(R.id.nav_view)
+    NavigationView navigationView;
+
+    @BindView(R.id.drawer_layout)
+    DrawerLayout drawerLayout;
+
     private HolloutPermissions holloutPermissions;
 
-    private static final int PROFILE_SETTING = 100000;
-    private static final int ACTIVE_PROFILE = 100;
-
-    //save our header or result
-    private AccountHeader headerResult = null;
-    private Drawer result = null;
-    private IProfile currentProfile;
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
     public static Vibrator vibrator;
     private ProgressDialog deleteConversationProgressDialog;
@@ -168,8 +167,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         initAndroidPermissions();
-        setupNavigationDrawer(savedInstanceState, signedInUser);
-        displaySignedInUserInfo(signedInUser);
+        setupNavigationDrawer(signedInUser);
         if (!HolloutPreferences.isUserWelcomed()) {
             if (signedInUser != null) {
                 UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)));
@@ -367,89 +365,71 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     }
 
-    private void setupNavigationDrawer(Bundle savedInstanceState, ParseObject signedInUser) {
-        String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-        currentProfile = new ProfileDrawerItem()
-                .withName(StringUtils.isNotEmpty(userDisplayName) ? WordUtils.capitalize(userDisplayName) : "Hollout User")
-                .withIcon(R.drawable.empty_profile)
-                .withIdentifier(ACTIVE_PROFILE);
+    private Drawable getDrawableFromIcon(IIcon icon) {
+        return new IconicsDrawable(this)
+                .sizeDp(18)
+                .icon(icon);
+    }
 
-        headerResult = new AccountHeaderBuilder()
-                .withActivity(this)
-                .withTranslucentStatusBar(true)
-                .withDividerBelowHeader(false)
-                .withHeaderBackground(R.color.colorPrimary)
-                .withPaddingBelowHeader(false)
-                .withSelectionSecondLineShown(false)
-                .addProfiles(currentProfile, new ProfileSettingDrawerItem().withName("Switch Accounts")
-                        .withDescription("Log Out")
-                        .withIcon(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_settings)
-                                .actionBar().paddingDp(5).colorRes(R.color.material_drawer_primary_text))
-                        .withIdentifier(PROFILE_SETTING))
-                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
-                    @Override
-                    public boolean onProfileChanged(View view, IProfile profile, boolean current) {
-                        if (profile instanceof IDrawerItem && profile.getIdentifier() == PROFILE_SETTING) {
-                            attemptLogOut();
-                        }
-                        return true;
-                    }
-                }).withOnAccountHeaderProfileImageListener(new AccountHeader.OnAccountHeaderProfileImageListener() {
-                    @Override
-                    public boolean onProfileImageClick(View view, IProfile profile, boolean current) {
-                        if (current) {
-                            launchUserProfile();
-                        }
-                        return false;
-                    }
+    private void setupNavigationDrawer(ParseObject signedInUser) {
 
-                    @Override
-                    public boolean onProfileImageLongClick(View view, IProfile profile, boolean current) {
-                        return false;
-                    }
-                })
-                .withSavedInstance(savedInstanceState).build();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
 
-        result = new DrawerBuilder()
-                .withActivity(this)
-                .withToolbar(toolbar)
-                .withTranslucentStatusBar(true)
-                .withAccountHeader(headerResult)
-                .withHeaderPadding(false)
-                .addDrawerItems(
-                        new SectionDrawerItem().withName("People").withDivider(false),
-                        new PrimaryDrawerItem().withName(R.string.meet_people).withIcon(GoogleMaterial.Icon.gmd_nature_people).withIdentifier(1),
-                        new SectionDrawerItem().withName("Account"),
-                        new PrimaryDrawerItem().withName(R.string.your_profile).withIcon(GoogleMaterial.Icon.gmd_account_circle).withIdentifier(2),
-                        new PrimaryDrawerItem().withName(R.string.invite_friends).withIcon(GoogleMaterial.Icon.gmd_insert_link).withIdentifier(7),
-                        new SectionDrawerItem().withName("Help & Settings"),
-                        new PrimaryDrawerItem().withName(R.string.notification_settings).withIcon(GoogleMaterial.Icon.gmd_notifications).withIdentifier(3),
-                        new PrimaryDrawerItem().withName(R.string.chats_and_calls_settings).withIcon(GoogleMaterial.Icon.gmd_chat).withIdentifier(4),
-                        new PrimaryDrawerItem().withName(R.string.privacy_settings).withIcon(GoogleMaterial.Icon.gmd_security).withIdentifier(5),
-                        new PrimaryDrawerItem().withName(R.string.support_and_about_settings).withIcon(GoogleMaterial.Icon.gmd_help).withIdentifier(6)
-                ).withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        if (drawerItem != null) {
-                            if (drawerItem.getIdentifier() == 1) {
-//                                meetMorePeople();
-                            } else if (drawerItem.getIdentifier() == 2) {
-                                launchUserProfile();
-                            } else if (drawerItem.getIdentifier() == 3) {
-                                launchSettings(AppConstants.NOTIFICATION_SETTINGS_FRAGMENT);
-                            } else if (drawerItem.getIdentifier() == 4) {
-                                launchSettings(AppConstants.CHATS_SETTINGS_FRAGMENT);
-                            } else if (drawerItem.getIdentifier() == 5) {
-                                launchSettings(AppConstants.PRIVACY_AND_SECURITY_FRAGMENT);
-                            } else if (drawerItem.getIdentifier() == 6) {
-                                launchSettings(AppConstants.SUPPORT_SETTINGS_FRAGMENT);
-                            } else if (drawerItem.getIdentifier() == 7) {
-                                initSharing();
-                            }
-                        }
-                        return false;
-                    }
-                }).withSavedInstance(savedInstanceState).build();
+        Menu navMenu = navigationView.getMenu();
+
+        navMenu.add(0, 0, 0, "Profile").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_account_circle));
+        navMenu.add(0, 1, 1, "Invite Friends").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_insert_link));
+
+        navMenu.addSubMenu("Help & Settings");
+        navMenu.add(1, 3, 3, "Notification Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_notifications));
+        navMenu.add(1, 4, 4, "Chats & Calls Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_chat));
+        navMenu.add(1, 5, 5, "Privacy Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_security));
+        navMenu.add(1, 6, 6, "Support Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_help));
+        navMenu.add(1, 7, 7, "Log Out").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_chevron_left));
+
+        displaySignedInUserProps(signedInUser);
+
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case 0:
+                        launchUserProfile();
+                        break;
+                    case 1:
+                        initSharing();
+                        break;
+                    case 3:
+                        launchSettings(AppConstants.NOTIFICATION_SETTINGS_FRAGMENT);
+                        break;
+                    case 4:
+                        launchSettings(AppConstants.CHATS_SETTINGS_FRAGMENT);
+                        break;
+                    case 5:
+                        launchSettings(AppConstants.PRIVACY_AND_SECURITY_FRAGMENT);
+                        break;
+                    case 6:
+                        launchSettings(AppConstants.SUPPORT_SETTINGS_FRAGMENT);
+                        break;
+                    case 7:
+                        attemptLogOut();
+                        break;
+                }
+                drawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            }
+        });
+
+        View editProfileView = findViewById(R.id.edit_profile);
+        editProfileView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getCurrentActivityInstance(), EditProfileActivity.class));
+            }
+        });
 
         String userFirebaseTokenFromPreference = HolloutPreferences.getUserFirebaseToken();
         String userFirebaseTokenFromSignedInUser = signedInUser.getString(AppConstants.USER_FIREBASE_TOKEN);
@@ -474,6 +454,49 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 }
             }
         }
+    }
+
+    private void displaySignedInUserProps(ParseObject signedInUser) {
+        String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+        String userPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+        String userCoverPhotoUrl = signedInUser.getString(AppConstants.APP_USER_COVER_PHOTO);
+
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        View headerView = navigationView.getHeaderView(0);
+
+        TextView signedInUserNameView = headerView.findViewById(R.id.signed_in_user_name_view);
+        CircleImageView signedInUserProfilePhotoView = headerView.findViewById(R.id.signed_in_user_profile_image_view);
+        ImageView signedInUserCoverPhotoView = headerView.findViewById(R.id.signed_in_user_cover_image_view);
+        TextView signedInUserEmailView = headerView.findViewById(R.id.signed_in_user_email_view);
+
+        //Load Data
+        signedInUserNameView.setText(WordUtils.capitalize(userDisplayName));
+        if (StringUtils.isNotEmpty(userPhotoUrl)) {
+            UiUtils.loadImage(this, userPhotoUrl, signedInUserProfilePhotoView);
+        }
+        if (StringUtils.isNotEmpty(userCoverPhotoUrl)) {
+            UiUtils.loadImage(this, userCoverPhotoUrl, signedInUserCoverPhotoView);
+            signedInUserCoverPhotoView.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.MULTIPLY));
+        }
+        if (firebaseUser != null) {
+            String userEmail = firebaseUser.getEmail();
+            if (userEmail != null) {
+                userEmail = StringUtils.remove(userEmail, "@hollout.com");
+                signedInUserEmailView.setText(userEmail);
+            }
+        }
+
+        View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                launchUserProfile();
+            }
+        };
+
+        headerView.setOnClickListener(onClickListener);
+        signedInUserCoverPhotoView.setOnClickListener(onClickListener);
+        signedInUserProfilePhotoView.setOnClickListener(onClickListener);
     }
 
     private void initSharing() {
@@ -525,25 +548,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
         });
 
-    }
-
-    private void displaySignedInUserInfo(ParseObject signedInUser) {
-        if (currentProfile != null && signedInUser != null) {
-            String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-            String userPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-            String userEmail = signedInUser.getString(AppConstants.USER_EMAIL);
-            if (StringUtils.isNotEmpty(userDisplayName)) {
-                currentProfile.withName(WordUtils.capitalize(userDisplayName));
-            }
-            if (StringUtils.isNotEmpty(userPhotoUrl)) {
-                currentProfile.withIcon(userPhotoUrl);
-            }
-            if (StringUtils.isNotEmpty(userEmail)) {
-                currentProfile.withEmail(userEmail);
-            }
-            headerResult.updateProfile(currentProfile);
-            headerResult.setActiveProfile(currentProfile);
-        }
     }
 
     private void fetchUnreadMessagesCount() {
@@ -661,7 +665,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         super.onStart();
         checkAndRegEventBus();
         fetchUnreadMessagesCount();
-        displaySignedInUserInfo(AuthUtil.getCurrentUser());
+        displaySignedInUserProps(AuthUtil.getCurrentUser());
         checkStartTimeStampUpdateServer();
         HolloutPreferences.incrementActivityCount();
     }
@@ -805,17 +809,17 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     @Override
     public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(Gravity.START)) {
+            drawerLayout.closeDrawer(Gravity.START);
+            return;
+        }
+
         if (actionModeBar.getVisibility() == View.VISIBLE) {
             destroyActionMode();
             return;
         }
         if (viewPager.getCurrentItem() != 0) {
             viewPager.setCurrentItem(0);
-            return;
-        }
-
-        if (result != null && result.isDrawerOpen()) {
-            result.closeDrawer();
             return;
         }
 

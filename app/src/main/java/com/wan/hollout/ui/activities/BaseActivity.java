@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +11,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
+import com.mikepenz.iconics.context.IconicsContextWrapper;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.utils.AppConstants;
@@ -113,6 +115,11 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this);
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(IconicsContextWrapper.wrap(newBase));
     }
 
     @SuppressWarnings("unused")

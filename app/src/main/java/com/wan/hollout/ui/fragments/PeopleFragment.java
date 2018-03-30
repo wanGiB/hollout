@@ -404,10 +404,11 @@ public class PeopleFragment extends BaseFragment {
             UiUtils.toggleFlipperState(peopleContentFlipper, 1);
             if (networkError) {
                 noHolloutTextView.setText(getString(R.string.screwed_data_error_message));
+                UiUtils.showView(meetPeopleTextView, true);
                 meetPeopleTextView.setText(getString(R.string.review_network));
             } else {
                 noHolloutTextView.setText(getString(R.string.people_unavailable));
-                meetPeopleTextView.setText(getString(R.string.meet_more_people));
+                UiUtils.showView(meetPeopleTextView, false);
             }
         }
     }

@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
-        android:background="@color/white"
+        android:background="@drawable/hollout_doodle"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:overScrollMode="always">
@@ -23,10 +23,12 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:animateLayoutChanges="true"
+            android:background="@drawable/popup_fixed"
             android:clipChildren="false"
             android:clipToPadding="false"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="20dp">
 
             <com.wan.hollout.ui.widgets.CircleImageView
                 android:id="@+id/pick_photo_view"
@@ -90,15 +92,6 @@
 
             </RadioGroup>
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="start"
-                android:paddingTop="20dp"
-                android:text="@string/age"
-                android:textColor="@android:color/black"
-                android:textSize="18sp"
-                app:textStyle="medium" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -107,10 +100,22 @@
                 android:gravity="start"
                 android:orientation="horizontal">
 
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
+                    android:text="@string/age_"
+                    android:textColor="@android:color/black"
+                    android:textSize="18sp"
+                    app:textStyle="medium" />
+
                 <EditText
                     android:id="@+id/age_box"
-                    android:layout_width="50dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="16dp"
+                    android:layout_marginStart="16dp"
                     android:background="@drawable/blue_grey_thin_edit_text_bg"
                     android:hint="@string/_16"
                     android:inputType="phone"
@@ -119,6 +124,7 @@
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:text="@string/yrs"
                     android:textSize="15sp"
                     app:textStyle="medium" />
@@ -130,6 +136,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
+                android:layout_marginBottom="20dp"
                 android:layout_marginTop="20dp"
                 android:paddingLeft="20dp"
                 android:paddingStart="20dp"

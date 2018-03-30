@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -16,11 +15,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -36,14 +33,13 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.soundcloud.android.crop.Crop;
 import com.wan.hollout.R;
-import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.adapters.FeaturedPhotosRectangleAdapter;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
 import com.wan.hollout.ui.widgets.ChatRequestView;
 import com.wan.hollout.ui.widgets.CircleImageView;
-import com.wan.hollout.ui.widgets.HolloutEditText;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -95,7 +91,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     KenBurnsView signedInUserCoverPhotoView;
 
     @BindView(R.id.user_display_name)
-    HolloutEditText userDisplayNameView;
+    HolloutTextView userDisplayNameView;
 
     @BindView(R.id.user_profile_photo_view)
     CircleImageView userProfilePhotoView;
@@ -123,9 +119,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @BindView(R.id.age_view)
     HolloutTextView ageView;
-
-    @BindView(R.id.done_with_display_name_edit)
-    ImageView doneWithDisplayNameEdit;
 
     @BindView(R.id.user_gender)
     CircleImageView userGenderView;
@@ -284,63 +277,13 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             UiUtils.attachDrawableToTextView(UserProfileActivity.this, userLocationAndDistanceView, R.drawable.ic_location_on, UiUtils.DrawableDirection.LEFT);
 
             userDisplayNameView.setText(WordUtils.capitalize(username));
-            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
-                userDisplayNameView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        userDisplayNameView.setFocusable(true);
-                        userDisplayNameView.setFocusableInTouchMode(true);
-                        userDisplayNameView.setCursorVisible(true);
-                        userDisplayNameView.setSelection(userDisplayNameView.getText().toString().trim().length());
-                        userDisplayNameView.requestFocus();
-                        UiUtils.showKeyboard(userDisplayNameView);
-                        userDisplayNameView.setBackground(ContextCompat.getDrawable(UserProfileActivity.this, R.drawable.blue_grey_thin_edit_text_bg));
-                        UiUtils.showView(doneWithDisplayNameEdit, true);
-                        doneWithDisplayNameEdit.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                final ProgressDialog progressDialog = UiUtils.showProgressDialog(UserProfileActivity.this, "Updating display name...");
-                                signedInUser.put(AppConstants.APP_USER_DISPLAY_NAME, userDisplayNameView.getText().toString().toLowerCase().trim());
-                                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                                    @Override
-                                    public void done(Boolean result, Exception e) {
-                                        UiUtils.dismissProgressDialog(progressDialog);
-                                        if (e == null) {
-                                            dismissEditComponents();
-                                            UiUtils.showSafeToast("Success!");
-                                        } else {
-                                            UiUtils.showSafeToast("Error updating display name. Please review your data connection");
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+            if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
                 if (!userAge.equals(AppConstants.UNKNOWN)) {
                     ageView.setText(WordUtils.capitalize(", " + userAge));
-                    ageView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            configureAgeAndGender();
-                        }
-                    });
                 }
-                userDisplayNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                    @Override
-                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                        if (actionId == EditorInfo.IME_ACTION_DONE) {
-                            doneWithDisplayNameEdit.performClick();
-                        }
-                        return true;
-                    }
-                });
-            } else {
-                if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
-                    if (!userAge.equals(AppConstants.UNKNOWN)) {
-                        ageView.setText(WordUtils.capitalize(", " + userAge));
-                    }
-                }
+            }
+            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                ageView.setText(WordUtils.capitalize(", " + userAge));
             }
 
             String userGender = parseUser.getString(AppConstants.APP_USER_GENDER);
@@ -357,15 +300,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 userGenderView.setImageBitmap(textBitmap);
             } else {
                 UiUtils.showView(userGenderView, false);
-            }
-
-            if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
-                userGenderView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        configureAgeAndGender();
-                    }
-                });
             }
 
             String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
@@ -479,19 +413,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             }
             openPhotoViewActivity(signedInUserProfilePhotoUrl, allPhotos, parseUser);
         }
-    }
-
-    private void dismissEditComponents() {
-        UiUtils.showView(doneWithDisplayNameEdit, false);
-        userDisplayNameView.setCursorVisible(false);
-        userDisplayNameView.setBackground(new ColorDrawable(ContextCompat.getColor(UserProfileActivity.this, android.R.color.transparent)));
-        UiUtils.dismissKeyboard(userDisplayNameView);
-    }
-
-    private void configureAgeAndGender() {
-        Intent genderAndAgeIntent = new Intent(UserProfileActivity.this, GenderAndAgeConfigurationActivity.class);
-        genderAndAgeIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, false);
-        startActivityForResult(genderAndAgeIntent, RequestCodes.CONFIGURE_BIRTHDAY_AND_GENDER);
     }
 
     @SuppressLint("SetTextI18n")
@@ -837,8 +758,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     public void onBackPressed() {
         if (aboutUserRecyclerView.getVisibility() == View.VISIBLE) {
             aboutUserTextView.performClick();
-        } else if (doneWithDisplayNameEdit.getVisibility() == View.VISIBLE) {
-            dismissEditComponents();
         } else {
             super.onBackPressed();
         }

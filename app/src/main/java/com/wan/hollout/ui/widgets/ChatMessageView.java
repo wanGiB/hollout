@@ -200,6 +200,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         messageBubbleLayout.setOnLongClickListener(this);
         HolloutLogger.d("MessageInAdapterProps", messageObject.toString());
         checkAndRegEventBus();
+        UiUtils.showView(timeTextView, false);
+        UiUtils.showView(deliveryStatusView, false);
     }
 
     private void setupMessageBubble() {
@@ -734,6 +736,12 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                     updateActionMode();
                 } else {
                     UiUtils.blinkView(v);
+                    if (timeTextView != null) {
+                        UiUtils.showView(timeTextView, timeTextView.getVisibility() == GONE);
+                    }
+                    if (deliveryStatusView != null) {
+                        UiUtils.showView(deliveryStatusView, deliveryStatusView.getVisibility() == GONE);
+                    }
                     if (message.getMessageType() == MessageType.CONTACT) {
                         String contactPhoneNumber = message.getContactNumber();
                         String contactName = message.getContactName();

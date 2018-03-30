@@ -366,6 +366,10 @@ public class ChatActivity extends BaseActivity implements
         }
     }
 
+    public ArrayList<ChatMessage> getMessages() {
+        return messages;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

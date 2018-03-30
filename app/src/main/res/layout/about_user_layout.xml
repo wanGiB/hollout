@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
-        android:background="@color/white"
+        android:background="@drawable/hollout_doodle"
         android:overScrollMode="always">
 
         <LinearLayout
@@ -20,8 +20,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:animateLayoutChanges="true"
+            android:background="@drawable/popup_fixed"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="20dp">
 
             <com.wan.hollout.ui.widgets.CircleImageView
                 android:id="@+id/pick_photo_view"

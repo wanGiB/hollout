@@ -4,19 +4,11 @@ import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
-import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
-import com.mikepenz.iconics.IconicsDrawable;
-import com.mikepenz.materialdrawer.util.AbstractDrawerImageLoader;
-import com.mikepenz.materialdrawer.util.DrawerImageLoader;
-import com.mikepenz.materialdrawer.util.DrawerUIUtils;
 import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseLiveQueryClient;
@@ -27,7 +19,6 @@ import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.tonyodev.fetch2.Fetch;
-import com.wan.hollout.R;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.database.HolloutDb;
@@ -81,7 +72,6 @@ public class ApplicationLoader extends Application {
         super.onCreate();
         sInstance = this;
         initParse();
-        initDrawer();
         Fabric.with(this, new Crashlytics());
         setupDatabase();
         startAppInstanceDetector();
@@ -124,33 +114,6 @@ public class ApplicationLoader extends Application {
                 .addDatabaseConfig(new DatabaseConfig.Builder(HolloutDb.class)
                         .modelNotifier(DirectModelNotifier.get())
                         .build()).build());
-    }
-
-    private void initDrawer() {
-        DrawerImageLoader.init(new AbstractDrawerImageLoader() {
-
-            @Override
-            public void set(ImageView imageView, Uri uri, Drawable placeholder, String tag) {
-                Glide.with(imageView.getContext()).load(uri).placeholder(placeholder).into(imageView);
-            }
-
-            @Override
-            public void cancel(ImageView imageView) {
-                Glide.clear(imageView);
-            }
-
-            @Override
-            public Drawable placeholder(Context ctx, String tag) {
-                if (DrawerImageLoader.Tags.PROFILE.name().equals(tag)) {
-                    return DrawerUIUtils.getPlaceHolder(ctx);
-                } else if (DrawerImageLoader.Tags.ACCOUNT_HEADER.name().equals(tag)) {
-                    return new IconicsDrawable(ctx).iconText(" ").backgroundColorRes(com.mikepenz.materialdrawer.R.color.primary).sizeDp(56);
-                } else if ("customUrlItem".equals(tag)) {
-                    return new IconicsDrawable(ctx).iconText(" ").backgroundColorRes(R.color.md_red_500).sizeDp(56);
-                }
-                return super.placeholder(ctx, tag);
-            }
-        });
     }
 
     private void startAppInstanceDetector() {

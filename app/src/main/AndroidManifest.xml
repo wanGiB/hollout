@@ -12,7 +12,6 @@
     <uses-feature
         android:name="android.hardware.microphone"
         android:required="false" />
-
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
@@ -43,7 +42,6 @@
     <permission
         android:name="com.wan.hollout.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-
     <permission
         android:name="com.wan.hollout.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
@@ -58,22 +56,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:icon,android:allowBackup, android:label">
-
-        <meta-data android:name="com.truecaller.android.sdk.PartnerKey" android:value="@string/truecaller_partner_key"/>
-
+        <meta-data
+            android:name="com.truecaller.android.sdk.PartnerKey"
+            android:value="@string/truecaller_partner_key" />
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="ad592a04b832e238a390d851afaba5226e6f6632" />
-
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <!--Video call activity-->
+        <!-- Video call activity -->
         <activity
             android:name=".ui.activities.VideoCallActivity"
             android:launchMode="singleTask"
@@ -81,14 +77,13 @@
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustPan|stateHidden" />
 
-        <!--Voice call activity-->
+        <!-- Voice call activity -->
         <activity
             android:name=".ui.activities.VoiceCallActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="adjustPan|stateHidden" />
-
         <activity
             android:name=".ui.activities.SplashActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -100,51 +95,43 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.activities.WelcomeActivity"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme" />
-
         <activity
             android:name=".ui.activities.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/app_name"
             android:theme="@style/AppTheme" />
-
         <activity
             android:name=".ui.activities.GalleryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/gallery"
             android:theme="@style/AppTheme" />
-
         <activity
             android:name=".ui.activities.ComposeStatusActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/app_name"
             android:theme="@style/AppTheme" />
-
         <activity
             android:name=".ui.activities.AboutUserActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/about_you"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden" />
-
         <activity
             android:name=".ui.activities.ChatActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/chat"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden" />
-
         <activity
             android:name=".ui.activities.GenderAndAgeConfigurationActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/you_are"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden" />
-
         <activity
             android:name=".ui.activities.UserProfileActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
@@ -156,13 +143,11 @@
             android:name=".ui.services.AppInstanceDetectionService"
             android:enabled="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
-
         <service android:name=".ui.services.HolloutFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
         <service android:name=".ui.services.HolloutFirebaseInstanceIDService">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
@@ -181,28 +166,22 @@
             android:name=".ui.activities.SlidePagerActivity"
             android:configChanges="orientation|screenLayout|screenSize"
             android:theme="@style/FullscreenTheme" />
-
         <activity
             android:name=".ui.activities.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/profile"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden" />
-
         <activity
             android:name=".ui.activities.FullChatRequestsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:theme="@style/AppTheme" />
-
         <activity
             android:name=".ui.activities.SelectPeopleToForwardMessageActivity"
             android:configChanges="orientation"
             android:theme="@style/AppTheme" />
-
         <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
-
         <activity android:name=".ui.activities.EaseShowImageActivity" />
-
         <activity
             android:name=".ui.activities.PrivacyPolicyPreview"
             android:configChanges="orientation|keyboardHidden|screenLayout|screenSize"
@@ -210,11 +189,18 @@
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <action android:name="android.intent.action.VIEW" />
+
                 <data android:host="hollout-860db" />
                 <data android:scheme="http|https" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.activities.EditProfileActivity"
+            android:configChanges="orientation|screenSize|keyboard|screenLayout"
+            android:windowSoftInputMode="stateHidden" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
