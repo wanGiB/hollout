@@ -325,7 +325,11 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             parseObject.put(AppConstants.LAST_CONVERSATION_TIME_WITH, lastMessageTime);
             Date msgDate = new Date(lastMessageTime);
             boolean isYesterday = dayIsYesterday(new DateTime(msgDate.getTime()));
-            if (msgDate.equals(new Date())) {
+
+            String todaysString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(new Date());
+            String messageDateString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(new Date(lastMessageTime));
+
+            if (todaysString.equals(messageDateString)) {
                 //Msg received date = today
                 String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
                 msgTimeStampView.setText(msgTime);
@@ -337,7 +341,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                     String yearsAgo = AppConstants.DATE_FORMATTER_IN_YEARS.format(msgDate);
                     String currentYear = AppConstants.DATE_FORMATTER_IN_YEARS.format(new Date());
                     if (yearsAgo.equals(currentYear)) {
-                        daysAgo = daysAgo.replace("/"+yearsAgo, "");
+                        daysAgo = daysAgo.replace("/" + yearsAgo, "");
                     }
                     msgTimeStampView.setText(daysAgo);
                 }

@@ -108,6 +108,7 @@ public class ChatClient {
                                         DbUtils.createMessage(chatMessage);
                                         markMessageAsDelivered(chatMessage, from, userId);
                                         HolloutPreferences.incrementUnreadMessagesFrom(chatMessage.getFrom());
+                                        HolloutPreferences.updateConversationTime(chatMessage.getFrom());
                                         incrementTotalUnreadChats(chatMessage);
                                         List<ChatMessage> allUnreadMessages = DbUtils.fetchAllUnreadMessages();
                                         HolloutPreferences.setTotalUnreadMessagesCount(allUnreadMessages.size());
