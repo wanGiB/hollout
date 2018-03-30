@@ -505,7 +505,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 .setFeature("sharing");
         // Customize the appearance of your share sheet
         ShareSheetStyle shareSheetStyle = new ShareSheetStyle(this, "Check this out!",
-                "The easiest way to connect with nearbyPeople of shared interests and profession around you")
+                "Hi,I just connected with a new and awesome friend near me using Hollout. You should try it out too.")
                 .setCopyUrlStyle(ContextCompat.getDrawable(this, R.drawable.ic_content_copy_black_48dp), "Copy link",
                         "Link added to clipboard!")
                 .setMoreOptionStyle(ContextCompat.getDrawable(this, R.drawable.ic_expand_more_black_48dp), "Show more")
@@ -522,7 +522,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 .addPreferredSharingOption(SharingHelper.SHARE_WITH.MESSAGE)
                 .addPreferredSharingOption(SharingHelper.SHARE_WITH.TWITTER);
         ShareSheet shareSheet = new ShareSheet();
-        shareSheet.setImageUrl("https://image.ibb.co/nuKUzk/app_logo.png");
+        shareSheet.setImageUrl("https://firebasestorage.googleapis.com/v0/b/hollout-860db.appspot.com/o/Photos%2Fweb_hi_res_512.png?alt=media&token=ef62f277-a85b-4067-9981-f01034b43e9b");
         shareSheet.setCanonicalUrl_("https://play.google.com/store/apps/details?id=com.wan.hollout");
         shareSheet.showShareSheet(this, linkProperties, shareSheetStyle, new ShareSheet.BranchLinkShareListener() {
 

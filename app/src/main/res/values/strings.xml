@@ -350,4 +350,5 @@
     <string name="tap_to_change_cover_photo">Tap to change cover photo</string>
     <string name="tap_to_change_profile_photo">Tap to change profile photo</string>
     <string name="age_">Age:</string>
+    <string name="invite_friends_via">Invite Friends Via</string>
 </resources>

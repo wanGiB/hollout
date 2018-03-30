@@ -11,19 +11,19 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.support.design.widget.BottomSheetDialog;
-import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.AppCompatTextView;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
-import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
+import com.wan.hollout.R;
 import com.wan.hollout.utils.UiUtils;
 
 import java.util.ArrayList;
@@ -183,28 +183,20 @@ class ShareLinkManager {
 
         HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(adapter);
 
-        final RecyclerView shareOptionsRecyclerView = new RecyclerView(context_);
-        shareOptionsRecyclerView.setHorizontalFadingEdgeEnabled(false);
-        shareOptionsRecyclerView.setBackgroundColor(Color.WHITE);
+        View shareSheetView = LayoutInflater.from(context_).inflate(R.layout.share_sheet, null);
+        RecyclerView inviteFriendsRecyclerView = shareSheetView.findViewById(R.id.invite_friends_recycler_view);
+        inviteFriendsRecyclerView.setHorizontalFadingEdgeEnabled(false);
+        inviteFriendsRecyclerView.setBackgroundColor(Color.WHITE);
 
-        LinearLayoutManager verticalLayoutManager = new LinearLayoutManager(context_, LinearLayoutManager.VERTICAL, false);
-        shareOptionsRecyclerView.setLayoutManager(verticalLayoutManager);
-        shareOptionsRecyclerView.addItemDecoration(new DividerItemDecoration(context_, DividerItemDecoration.VERTICAL));
-        shareOptionsRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
-        if (builder_.getSharingTitleView() != null) {
-            RecyclerViewUtils.setHeaderView(shareOptionsRecyclerView, builder_.getSharingTitleView());
-        } else if (!TextUtils.isEmpty(builder_.getSharingTitle())) {
-            TextView textView = new TextView(context_);
-            textView.setText(builder_.getSharingTitle());
-            textView.setBackgroundColor(Color.WHITE);
-            textView.setTextColor(BG_COLOR_DISABLED);
-            textView.setTextAppearance(context_, android.R.style.TextAppearance_Medium);
-            textView.setTextColor(context_.getResources().getColor(android.R.color.darker_gray));
-            textView.setPadding(30, 30, 30, 30);
-            RecyclerViewUtils.setHeaderView(shareOptionsRecyclerView, textView);
-        }
+        TextView sharingTitleView = shareSheetView.findViewById(R.id.sharing_title);
+
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(context_, 3);
+        inviteFriendsRecyclerView.setLayoutManager(gridLayoutManager);
+        inviteFriendsRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
+        sharingTitleView.setText(builder_.getSharingTitle());
+
         shareDlg_ = new BottomSheetDialog(context_);
-        shareDlg_.setContentView(shareOptionsRecyclerView);
+        shareDlg_.setContentView(shareSheetView);
         shareDlg_.show();
         if (callback_ != null) {
             callback_.onShareLinkDialogLaunched();
@@ -310,7 +302,7 @@ class ShareLinkManager {
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            ShareItemView itemView = new ShareItemView(context);
+            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.share_sheet_item_layout, parent, false);
             return new ChooserItemHolder(itemView);
         }
 
@@ -322,16 +314,18 @@ class ShareLinkManager {
 
         class ChooserItemHolder extends RecyclerView.ViewHolder {
 
-            ShareItemView shareItemView;
+            private ImageView appIconView;
+            private AppCompatTextView appNameTextView;
 
             ChooserItemHolder(View itemView) {
                 super(itemView);
-                shareItemView = (ShareItemView) itemView;
-                shareItemView.setPadding(30, 30, 30, 30);
+                appIconView = itemView.findViewById(R.id.app_icon);
+                appNameTextView = itemView.findViewById(R.id.app_name);
             }
 
             void bindData(Context context, final ResolveInfo resolveInfo) {
-                shareItemView.setLabel(resolveInfo.loadLabel(context.getPackageManager()).toString(), resolveInfo.loadIcon(context.getPackageManager()), true);
+                appNameTextView.setText(resolveInfo.loadLabel(context.getPackageManager()).toString());
+                appIconView.setImageDrawable(resolveInfo.loadIcon(context.getPackageManager()));
                 itemView.setTag(resolveInfo);
                 itemView.setClickable(true);
                 itemView.setBackgroundColor(Color.WHITE);
@@ -352,41 +346,7 @@ class ShareLinkManager {
                 });
             }
         }
-    }
 
-    /**
-     * Class for sharing item view to be displayed in the list with Application icon and Name.
-     */
-    private class ShareItemView extends android.support.v7.widget.AppCompatTextView {
-        Context context_;
-
-        public ShareItemView(Context context) {
-            super(context);
-            context_ = context;
-            this.setPadding(leftMargin, padding, padding, padding);
-            this.setGravity(Gravity.START | Gravity.CENTER_VERTICAL);
-            this.setMinWidth(context_.getResources().getDisplayMetrics().widthPixels);
-        }
-
-        public void setLabel(String appName, Drawable appIcon, boolean isEnabled) {
-            this.setText("\t" + appName);
-            this.setTag(appName);
-            if (appIcon == null) {
-                this.setTextAppearance(context_, android.R.style.TextAppearance_Large);
-                this.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-            } else {
-                this.setTextAppearance(context_, android.R.style.TextAppearance_Medium);
-                this.setCompoundDrawablesWithIntrinsicBounds(appIcon, null, null, null);
-                viewItemMinHeight_ = Math.max(viewItemMinHeight_, (appIcon.getIntrinsicHeight() + padding));
-            }
-            this.setMinHeight(viewItemMinHeight_);
-            this.setTextColor(context_.getResources().getColor(android.R.color.black));
-            if (isEnabled) {
-                this.setBackgroundColor(BG_COLOR_ENABLED);
-            } else {
-                this.setBackgroundColor(BG_COLOR_DISABLED);
-            }
-        }
     }
 
     /**

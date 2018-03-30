@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <com.wan.hollout.ui.widgets.HolloutTextView
+        android:id="@+id/sharing_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        android:text="@string/invite_friends_via"
+        android:textSize="15sp"
+        app:textStyle="medium"
+        tools:ignore="MissingPrefix" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/invite_friends_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

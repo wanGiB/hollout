@@ -51,6 +51,9 @@ import com.wan.hollout.utils.UiUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.greenrobot.eventbus.EventBus;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeUtils;
+import org.joda.time.Instant;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -308,6 +311,12 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         }
     }
 
+    public static boolean dayIsYesterday(DateTime day) {
+        DateTime yesterday = new DateTime().withTimeAtStartOfDay().minusDays(1);
+        DateTime inputDay = day.withTimeAtStartOfDay();
+        return inputDay.isEqual(yesterday);
+    }
+
     private void setupDefaults() {
         if (lastMessage != null) {
             HolloutLogger.d("LastMessageTracker", "Last Message in conversation is not null");
@@ -315,18 +324,23 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             long lastMessageTime = lastMessage.getTimeStamp();
             parseObject.put(AppConstants.LAST_CONVERSATION_TIME_WITH, lastMessageTime);
             Date msgDate = new Date(lastMessageTime);
+            boolean isYesterday = dayIsYesterday(new DateTime(msgDate.getTime()));
             if (msgDate.equals(new Date())) {
                 //Msg received date = today
                 String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
                 msgTimeStampView.setText(msgTime);
             } else {
-                String daysAgo = UiUtils.getDaysAgo(AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(msgDate)) + " at " + AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
-                String yearsAgo = AppConstants.DATE_FORMATTER_IN_YEARS.format(msgDate);
-                String currentYear = AppConstants.DATE_FORMATTER_IN_YEARS.format(new Date());
-                if (yearsAgo.equals(currentYear)) {
-                    daysAgo = daysAgo.replace(yearsAgo, "");
+                if (isYesterday) {
+                    msgTimeStampView.setText("YESTERDAY");
+                } else {
+                    String daysAgo = AppConstants.DATE_FORMATTER_IN_GEN_FORMAT.format(msgDate);
+                    String yearsAgo = AppConstants.DATE_FORMATTER_IN_YEARS.format(msgDate);
+                    String currentYear = AppConstants.DATE_FORMATTER_IN_YEARS.format(new Date());
+                    if (yearsAgo.equals(currentYear)) {
+                        daysAgo = daysAgo.replace("/"+yearsAgo, "");
+                    }
+                    msgTimeStampView.setText(daysAgo);
                 }
-                msgTimeStampView.setText(daysAgo);
             }
             AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
             setupLastMessage(lastMessage);

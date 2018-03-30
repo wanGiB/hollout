@@ -92,6 +92,7 @@
                     android:maxWidth="100dp"
                     android:textSize="@dimen/timestamp"
                     app:textStyle="regular"
+                    android:textAllCaps="true"
                     tools:ignore="RelativeOverlap,RtlHardcoded" />
 
             </LinearLayout>
