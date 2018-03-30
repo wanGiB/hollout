@@ -994,6 +994,7 @@ public class ChatActivity extends BaseActivity implements
     private class AttachButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
+            UiUtils.dismissKeyboard(composeText);
             if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfForStoragePermission(ChatActivity.this)) {
                 holloutPermissions.requestStoragePermissions();
                 setLastPermissionInitiationAction(AppConstants.REQUEST_STORAGE_ACCESS_FOR_GALLERY);
