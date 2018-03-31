@@ -2,21 +2,22 @@ package com.wan.hollout.ui.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.pnikosis.materialishprogress.ProgressWheel;
 import com.wan.hollout.R;
+import com.wan.hollout.eventbuses.ChatRequestNegotiationResult;
 import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
-import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
 import com.wan.hollout.ui.adapters.ChatRequestsAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
@@ -47,6 +48,9 @@ public class FullChatRequestsActivity extends BaseActivity {
     @BindView(R.id.chat_requests_recycler_view)
     RecyclerView chatRequestsRecyclerView;
 
+    @BindView(R.id.instruction_header)
+    TextView instructionHeader;
+
     private ParseObject signedInUser;
     private List<ParseObject> chatRequests = new ArrayList<>();
     private ChatRequestsAdapter chatRequestsAdapter;
@@ -73,6 +77,7 @@ public class FullChatRequestsActivity extends BaseActivity {
             getSupportActionBar().setTitle("Chat Requests");
         }
         signedInUser = AuthUtil.getCurrentUser();
+        instructionHeader.setText(UiUtils.fromHtml("Swipe <- left to <font color=#D8461C>Decline</font><br/> Right -> to <font color=#4caf50>Accept</font>"));
         initFeedAdapter();
         fetchChatRequests(0);
         checkAndRegEventBus();
@@ -82,11 +87,7 @@ public class FullChatRequestsActivity extends BaseActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem searchItem = menu.findItem(R.id.action_search);
         searchItem.setVisible(false);
-
         MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
-//        MenuItem createNewGroupItem = menu.findItem(R.id.create_new_group);
-
-//        createNewGroupItem.setVisible(false);
         filterPeopleMenuItem.setVisible(false);
         supportInvalidateOptionsMenu();
         return super.onPrepareOptionsMenu(menu);
@@ -121,6 +122,7 @@ public class FullChatRequestsActivity extends BaseActivity {
         chatRequestsAdapter = new ChatRequestsAdapter(this, chatRequests);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         chatRequestsRecyclerView.setLayoutManager(linearLayoutManager);
+        chatRequestsRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         chatRequestsRecyclerView.setAdapter(chatRequestsAdapter);
         chatRequestsRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
@@ -185,7 +187,6 @@ public class FullChatRequestsActivity extends BaseActivity {
         if (!chatRequests.isEmpty()) {
             hideEmptyViewsAndShowRecyclerView();
         }
-
     }
 
     private void hideEmptyViewsAndShowRecyclerView() {
@@ -200,12 +201,18 @@ public class FullChatRequestsActivity extends BaseActivity {
         UiUtils.runOnMain(new Runnable() {
             @Override
             public void run() {
-                if (o instanceof RemovableChatRequestEvent) {
-                    RemovableChatRequestEvent removableChatRequestEvent = (RemovableChatRequestEvent) o;
-                    ParseObject removableChatRequest = removableChatRequestEvent.getRemovableChatRequest();
-                    if (removableChatRequest != null) {
-                        if (chatRequests.contains(removableChatRequest)) {
-                            chatRequests.remove(removableChatRequest);
+                if (o instanceof ChatRequestNegotiationResult) {
+                    ChatRequestNegotiationResult chatRequestNegotiationResult = (ChatRequestNegotiationResult) o;
+                    ParseObject chatRequest = chatRequestNegotiationResult.getChatRequest();
+                    if (chatRequest != null) {
+                        if (chatRequestNegotiationResult.canRemove()) {
+                            if (chatRequests.contains(chatRequest)) {
+                                chatRequests.remove(chatRequestNegotiationResult.getPosition());
+                                chatRequestsAdapter.notifyDataSetChanged();
+                            }
+                        } else {
+                            chatRequests.add(chatRequestNegotiationResult.getPosition(), chatRequest);
+                            chatRequestsAdapter.notifyItemInserted(chatRequestNegotiationResult.getPosition());
                             chatRequestsAdapter.notifyDataSetChanged();
                         }
                     }

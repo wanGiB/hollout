@@ -9,6 +9,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -84,6 +85,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1005,38 +1007,56 @@ public class UiUtils {
         return animation;
     }
 
-    private Object workLifeBalance;
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
 
-    private void makeEveryMomentCount() {
-        if (workLifeBalance == null) {
-            pauseWork();
-            forgetAboutAnythingThatMightGoWrong();
-            try {
-                catchLoadsAndLoadsOfFun();
-            } catch (FunException e) {
-                handleExceptionAndContinueFun();
-            }
+    public static int pxToDp(int px) {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int getScreenWidth() {
+        return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    public static int getScreenHeight() {
+        return Resources.getSystem().getDisplayMetrics().heightPixels;
+    }
+
+    private static int[] randomColors = new int[]{R.color.hollout_color,
+            R.color.hollout_color_one,
+            R.color.hollout_color_two,
+            R.color.hollout_color_three,
+            R.color.hollout_color_four, R.color.hollout_color_five};
+
+    public static void generateRandomBackgroundColor(View view, int position) {
+        Context context = ApplicationLoader.getInstance();
+        if (position == 0) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorTwitter));
+        } else if (position == 1) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.signal_primary));
+        } else if (position == 2) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorFacebook));
+        } else if (position == 3) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.gplus_color_1));
+        } else if (position == 4) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.gplus_color_3));
+        } else if (position == 5) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.black));
+        } else if (position == 6) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorFacebook));
+        } else if (position == 7) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.gplus_color_2));
+        } else if (position == 8) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.gplus_color_3));
+        } else if (position == 9) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.colorPrimaryDark));
+        } else if (position == 10) {
+            view.setBackgroundColor(ContextCompat.getColor(context, R.color.teal_100));
+        } else {
+            Random random = new Random();
+            view.setBackgroundColor(ContextCompat.getColor(context, randomColors[random.nextInt(randomColors.length - 1)]));
         }
-    }
-
-    private void handleExceptionAndContinueFun() {
-
-    }
-
-    static class FunException extends Exception {
-
-    }
-
-    private void catchLoadsAndLoadsOfFun() throws FunException {
-
-    }
-
-    private void forgetAboutAnythingThatMightGoWrong() {
-
-    }
-
-    private void pauseWork() {
-
     }
 
 }

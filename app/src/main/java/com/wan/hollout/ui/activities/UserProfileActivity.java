@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -34,11 +35,9 @@ import com.parse.ParseQuery;
 import com.soundcloud.android.crop.Crop;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.eventbuses.RemovableChatRequestEvent;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.adapters.FeaturedPhotosRectangleAdapter;
 import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
-import com.wan.hollout.ui.widgets.ChatRequestView;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
@@ -53,9 +52,6 @@ import net.alhazmy13.mediapicker.Image.ImagePicker;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -135,9 +131,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.scroller)
     ScrollView scrollView;
 
-    @BindView(R.id.chat_request_view)
-    ChatRequestView chatRequestView;
-
     private ParseObject parseUser;
 
     @Override
@@ -149,7 +142,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         aboutUserTextView.setTypeface(FontUtils.selectTypeface(this, 4));
         offloadIntent();
         initClickListeners();
-        checkAndRegEventBus();
     }
 
     private void initClickListeners() {
@@ -171,15 +163,26 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
             chatRequestsQuery.include(AppConstants.FEED_CREATOR);
-            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, parseUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
             chatRequestsQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                 @Override
-                public void done(ParseObject object, ParseException e) {
+                public void done(final ParseObject object, ParseException e) {
                     if (e == null && object != null) {
-                        //This user sent a chat request to signed in user
-                        UiUtils.showView(chatRequestView, true);
-                        chatRequestView.bindData(UserProfileActivity.this, null, object);
+                        Snackbar.make(featuredPhotosRecyclerView, "This chat Sent you a chat request",
+                                Snackbar.LENGTH_INDEFINITE).setAction("ACCEPT", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                HolloutUtils.acceptOrDeclineChat(object, true, parseUser.getString(AppConstants.REAL_OBJECT_ID),
+                                        parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
+                            }
+                        }).setAction("DECLINE", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                HolloutUtils.acceptOrDeclineChat(object, false, parseUser.getString(AppConstants.REAL_OBJECT_ID),
+                                        parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
+                            }
+                        }).show();
                     }
                 }
             });
@@ -517,11 +520,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 startChatView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (chatRequestView.getVisibility() == View.VISIBLE) {
-                            //Automatically accept chat request
-                            chatRequestView.acceptChatRequest();
-                            return;
-                        }
                         Intent chatIntent = new Intent(UserProfileActivity.this, ChatActivity.class);
                         parseUser.put(AppConstants.CHAT_TYPE, AppConstants.CHAT_TYPE_SINGLE);
                         chatIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
@@ -764,30 +762,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        checkAndRegEventBus();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        checkAnUnRegEventBus();
-    }
-
-    private void checkAndRegEventBus() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    private void checkAnUnRegEventBus() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
@@ -799,41 +773,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     public int getCurrentUploadAction() {
         return currentUploadAction;
-    }
-
-    @SuppressWarnings("unused")
-    @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
-    public void onEventAsync(final Object o) {
-        UiUtils.runOnMain(new Runnable() {
-            @Override
-            public void run() {
-                if (o instanceof RemovableChatRequestEvent) {
-                    RemovableChatRequestEvent removableChatRequestEvent = (RemovableChatRequestEvent) o;
-                    ParseObject removableChatRequest = removableChatRequestEvent.getRemovableChatRequest();
-                    if (removableChatRequest != null) {
-                        UiUtils.showView(chatRequestView, false);
-                    }
-                } else if (o instanceof String) {
-                    String s = (String) o;
-                    if (s.equals(AppConstants.REMOVE_SOMETHING)) {
-                        if (isAContact(parseUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase())) {
-                            UiUtils.showView(chatRequestView, false);
-                            startChatView.performClick();
-                        }
-                    }
-                }
-                EventBus.getDefault().removeAllStickyEvents();
-            }
-        });
-    }
-
-    private boolean isAContact(String recipientId) {
-        ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (signedInUser != null) {
-            List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-            return (signedInUserChats != null && signedInUserChats.contains(recipientId.toLowerCase()));
-        }
-        return false;
     }
 
 }

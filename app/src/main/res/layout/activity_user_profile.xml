@@ -234,19 +234,11 @@
 
                 </FrameLayout>
 
-                <com.wan.hollout.ui.widgets.ChatRequestView
-                    android:id="@+id/chat_request_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/user_status_frame"
-                    android:layout_gravity="top"
-                    android:visibility="gone" />
-
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/featured_photos_header"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/chat_request_view"
+                    android:layout_below="@+id/user_status_frame"
                     android:paddingBottom="8dp"
                     android:paddingEnd="16dp"
                     android:paddingLeft="16dp"

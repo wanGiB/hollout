@@ -1,7 +1,7 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
-import android.support.annotation.Nullable;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +22,7 @@ import butterknife.ButterKnife;
 
 public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public List<ParseObject> chatRequests;
+    private List<ParseObject> chatRequests;
     private Activity activity;
     private LayoutInflater layoutInflater;
 
@@ -36,18 +36,19 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return chatRequests;
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View convertView = layoutInflater.inflate(R.layout.chat_request_recycler_view_item, parent, false);
         return new ChatRequestsHolder(convertView);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ChatRequestsHolder chatRequestsHolder = (ChatRequestsHolder) holder;
         ParseObject chatRequest = chatRequests.get(position);
         if (chatRequest != null) {
-            chatRequestsHolder.bindData(activity, this, chatRequest);
+            chatRequestsHolder.bindData(activity, chatRequest, position);
         }
     }
 
@@ -59,7 +60,6 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @SuppressWarnings("WeakerAccess")
     static class ChatRequestsHolder extends RecyclerView.ViewHolder {
 
-        @Nullable
         @BindView(R.id.chat_request_view)
         ChatRequestView chatRequestView;
 
@@ -68,10 +68,8 @@ public class ChatRequestsAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             ButterKnife.bind(this, itemView);
         }
 
-        public void bindData(Activity activity, ChatRequestsAdapter chatRequestsAdapter, ParseObject chatRequest) {
-            if (chatRequestView != null) {
-                chatRequestView.bindData(activity, chatRequestsAdapter, chatRequest);
-            }
+        public void bindData(Activity activity, ParseObject parseObject, int position) {
+            chatRequestView.bindData(activity, parseObject, position);
         }
 
     }

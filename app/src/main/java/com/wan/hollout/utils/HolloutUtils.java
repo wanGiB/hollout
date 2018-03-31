@@ -41,17 +41,25 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.parse.DeleteCallback;
+import com.parse.GetCallback;
+import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.wan.hollout.bean.AudioFile;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.eventbuses.ChatRequestNegotiationResult;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
+import com.wan.hollout.ui.widgets.ChatRequestView;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -996,6 +1004,46 @@ public class HolloutUtils {
             return signedInUser != null && userBlackList != null && userBlackList.contains(signedInUser.getString(AppConstants.REAL_OBJECT_ID));
         }
         return false;
+    }
+
+    public static void acceptOrDeclineChat(final ParseObject requestObject, final boolean accept, final String requestOriginatorId,
+                                           final String requesterName) {
+        ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+        requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, requestObject.getObjectId());
+        requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(final ParseObject object, ParseException e) {
+                if (e == null && object != null) {
+                    object.deleteInBackground(new DeleteCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if (e == null) {
+                                if (accept) {
+                                    ParseObject signedInUser = AuthUtil.getCurrentUser();
+                                    if (signedInUser != null) {
+                                        List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+                                        if (signedInUserChats != null && !signedInUserChats.contains(requestOriginatorId.toLowerCase())) {
+                                            signedInUserChats.add(requestOriginatorId.toLowerCase());
+                                        }
+                                        if (signedInUserChats == null) {
+                                            signedInUserChats = new ArrayList<>();
+                                            signedInUserChats.add(requestOriginatorId.toLowerCase());
+                                        }
+                                        signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
+                                        HolloutPreferences.updateConversationTime(requestOriginatorId);
+                                        AuthUtil.updateCurrentLocalUser(signedInUser, null);
+                                    }
+                                }
+                                UiUtils.showSafeToast("Chat request from " + WordUtils.capitalize(requesterName) + " " + (accept ? "accepted" : "declined") + " successfully");
+                            } else {
+                                UiUtils.showSafeToast("Failed to " + (accept ? "accept" : "decline") + " chat request from " + WordUtils.capitalize(requesterName));
+                                EventBus.getDefault().post(new ChatRequestNegotiationResult(requestObject, false, 0));
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
 
 }
