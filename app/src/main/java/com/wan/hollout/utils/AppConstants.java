@@ -204,6 +204,7 @@ public class AppConstants {
     public static final String SERVER_UPTIME = "ServerUpTime";
     public static final String USER_CURRENT_TIME_STAMP = "user_current_time_stamp";
     public static final String ACTIVITY_COUNT = "activity_count";
+    public static final String FROM_MAIN = "from_main";
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;

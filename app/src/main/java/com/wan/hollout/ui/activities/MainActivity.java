@@ -77,6 +77,7 @@ import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.GeneralNotifier;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -460,7 +461,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         String userPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         String userCoverPhotoUrl = signedInUser.getString(AppConstants.APP_USER_COVER_PHOTO);
-
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         View headerView = navigationView.getHeaderView(0);
@@ -1079,6 +1079,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         UiUtils.dismissProgressDialog(progressDialog);
         UiUtils.showSafeToast("You've being logged out");
         Intent splashIntent = new Intent(MainActivity.this, SplashActivity.class);
+        splashIntent.putExtra(AppConstants.FROM_MAIN, true);
         startActivity(splashIntent);
         finish();
     }

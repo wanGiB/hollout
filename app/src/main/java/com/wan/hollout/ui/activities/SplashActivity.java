@@ -7,7 +7,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.parse.ParseObject;
+import com.raizlabs.android.dbflow.config.DatabaseConfig;
+import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
+import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.wan.hollout.R;
 import com.wan.hollout.database.HolloutDb;
 import com.wan.hollout.ui.widgets.ShimmerFrameLayout;
@@ -31,10 +34,16 @@ public class SplashActivity extends AppCompatActivity {
     @BindView(R.id.shimmer_view_container)
     ShimmerFrameLayout shimmerFrameLayout;
 
+    private boolean fromMain = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
+        Bundle intentExtras = getIntent().getExtras();
+        if (intentExtras != null) {
+            fromMain = intentExtras.getBoolean(AppConstants.FROM_MAIN, false);
+        }
         ButterKnife.bind(this);
     }
 
@@ -58,9 +67,19 @@ public class SplashActivity extends AppCompatActivity {
                 launchAboutActivity();
             }
         } else {
-            FlowManager.getDatabase(HolloutDb.class).reset();
+            if (fromMain) {
+                FlowManager.close();
+                reInitializeDatabase();
+            }
             launchWelcomeActivity();
         }
+    }
+
+    private void reInitializeDatabase() {
+        FlowManager.init(new FlowConfig.Builder(this)
+                .addDatabaseConfig(new DatabaseConfig.Builder(HolloutDb.class)
+                        .modelNotifier(DirectModelNotifier.get())
+                        .build()).build());
     }
 
     @Override

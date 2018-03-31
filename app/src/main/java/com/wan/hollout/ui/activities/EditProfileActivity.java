@@ -265,7 +265,7 @@ public class EditProfileActivity extends BaseActivity implements View.OnClickLis
                         cropConsentDialog.setPositiveButton("CROP", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Crop.of(Uri.fromFile(new File(pickedPhotoFilePath)), Uri.fromFile(new File(getCacheDir(), "CropIt")))
+                                Crop.of(Uri.fromFile(new File(pickedPhotoFilePath)), Uri.fromFile(new File(getCacheDir(), "cropped")))
                                         .asSquare().start(EditProfileActivity.this);
                             }
                         }).setNegativeButton("DON'T CROP", new DialogInterface.OnClickListener() {
@@ -280,7 +280,7 @@ public class EditProfileActivity extends BaseActivity implements View.OnClickLis
             }
         } else if (requestCode == Crop.REQUEST_CROP) {
             if (resultCode == Activity.RESULT_OK) {
-                Uri result = Uri.fromFile(new File(getCacheDir(), "CropIt"));
+                Uri result = Crop.getOutput(data);
                 if (result != null) {
                     prepareForUpload(result.getPath(), getCurrentUploadAction());
                 }

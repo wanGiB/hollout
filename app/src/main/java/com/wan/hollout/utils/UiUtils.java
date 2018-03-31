@@ -289,7 +289,7 @@ public class UiUtils {
                                 @Override
                                 public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                                     imageView.setImageResource(R.mipmap.ic_launcher);
-                                    HolloutLogger.d(TAG, "An exception was raised while loading an image");
+                                    HolloutLogger.d(TAG, "An exception was raised while loading an image "+e.getMessage());
                                     return false;
                                 }
 

@@ -302,6 +302,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
                 UiUtils.loadImage(UserProfileActivity.this, userProfilePhotoUrl, userProfilePhotoView);
+            } else {
+                userProfilePhotoView.setImageResource(R.drawable.empty_profile);
             }
 
             String userCoverPhoto = parseUser.getString(AppConstants.APP_USER_COVER_PHOTO);
@@ -570,7 +572,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         cropConsentDialog.setPositiveButton("CROP", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Crop.of(Uri.fromFile(new File(pickedPhotoFilePath)), Uri.fromFile(new File(getCacheDir(), "CropIt")))
+                                Crop.of(Uri.fromFile(new File(pickedPhotoFilePath)), Uri.fromFile(new File(getCacheDir(), "cropped")))
                                         .asSquare().start(UserProfileActivity.this);
                             }
                         }).setNegativeButton("DON'T CROP", new DialogInterface.OnClickListener() {
@@ -634,7 +636,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             }
         } else if (requestCode == Crop.REQUEST_CROP) {
             if (resultCode == Activity.RESULT_OK) {
-                Uri result = Uri.fromFile(new File(getCacheDir(), "CropIt"));
+                Uri result = Crop.getOutput(data);
                 if (result != null) {
                     prepareForUpload(result.getPath(), getCurrentUploadAction());
                 }

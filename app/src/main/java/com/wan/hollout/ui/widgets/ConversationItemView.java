@@ -152,6 +152,8 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     private void applyProfilePicture(String profileUrl) {
         if (!TextUtils.isEmpty(profileUrl)) {
             UiUtils.loadImage(activity, profileUrl, userPhotoView);
+        } else {
+            userPhotoView.setImageResource(R.drawable.empty_profile);
         }
     }
 
