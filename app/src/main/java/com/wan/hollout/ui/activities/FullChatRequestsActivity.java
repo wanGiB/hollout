@@ -162,7 +162,7 @@ public class FullChatRequestsActivity extends BaseActivity {
                 chatRequestsQuery.setSkip(skip);
             }
             chatRequestsQuery.include(AppConstants.FEED_CREATOR);
-            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
             chatRequestsQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
@@ -208,6 +208,7 @@ public class FullChatRequestsActivity extends BaseActivity {
                         if (chatRequestNegotiationResult.canRemove()) {
                             if (chatRequests.contains(chatRequest)) {
                                 chatRequests.remove(chatRequestNegotiationResult.getPosition());
+                                chatRequestsAdapter.notifyItemRemoved(chatRequestNegotiationResult.getPosition());
                                 chatRequestsAdapter.notifyDataSetChanged();
                             }
                         } else {
