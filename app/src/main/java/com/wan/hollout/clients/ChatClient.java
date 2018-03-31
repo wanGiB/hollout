@@ -107,9 +107,11 @@ public class ChatClient {
                                         chatMessage.setFromName(chatMessage.getFromName());
                                         DbUtils.createMessage(chatMessage);
                                         markMessageAsDelivered(chatMessage, from, userId);
-                                        HolloutPreferences.incrementUnreadMessagesFrom(chatMessage.getFrom());
                                         HolloutPreferences.updateConversationTime(chatMessage.getFrom());
-                                        incrementTotalUnreadChats(chatMessage);
+                                        if (HolloutUtils.isAContact(from)) {
+                                            HolloutPreferences.incrementUnreadMessagesFrom(chatMessage.getFrom());
+                                            incrementTotalUnreadChats(chatMessage);
+                                        }
                                         List<ChatMessage> allUnreadMessages = DbUtils.fetchAllUnreadMessages();
                                         HolloutPreferences.setTotalUnreadMessagesCount(allUnreadMessages.size());
                                         MessageNotifier.getInstance().notifyOnUnreadMessages();

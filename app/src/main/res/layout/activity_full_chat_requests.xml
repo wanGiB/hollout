@@ -48,7 +48,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#c4fafafa"
+                android:background="#c4ffffff"
                 android:orientation="vertical">
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
@@ -58,7 +58,7 @@
                     android:layout_gravity="top"
                     android:gravity="center"
                     android:padding="10dp"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     app:textStyle="medium" />
 
                 <View

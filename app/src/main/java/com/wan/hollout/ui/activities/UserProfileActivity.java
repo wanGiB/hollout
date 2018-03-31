@@ -169,17 +169,11 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 @Override
                 public void done(final ParseObject object, ParseException e) {
                     if (e == null && object != null) {
-                        Snackbar.make(featuredPhotosRecyclerView, "This chat Sent you a chat request",
+                        Snackbar.make(featuredPhotosRecyclerView, "This user sent you a chat request",
                                 Snackbar.LENGTH_INDEFINITE).setAction("ACCEPT", new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 HolloutUtils.acceptOrDeclineChat(object, true, parseUser.getString(AppConstants.REAL_OBJECT_ID),
-                                        parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
-                            }
-                        }).setAction("DECLINE", new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                HolloutUtils.acceptOrDeclineChat(object, false, parseUser.getString(AppConstants.REAL_OBJECT_ID),
                                         parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
                             }
                         }).show();

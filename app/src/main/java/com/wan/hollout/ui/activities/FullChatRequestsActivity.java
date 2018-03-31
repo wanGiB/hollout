@@ -77,7 +77,7 @@ public class FullChatRequestsActivity extends BaseActivity {
             getSupportActionBar().setTitle("Chat Requests");
         }
         signedInUser = AuthUtil.getCurrentUser();
-        instructionHeader.setText(UiUtils.fromHtml("Swipe <- left to <font color=#D8461C>Decline</font><br/> Right -> to <font color=#4caf50>Accept</font>"));
+        instructionHeader.setText(UiUtils.fromHtml("Swipe left and right to accept/decline"));
         initFeedAdapter();
         fetchChatRequests(0);
         checkAndRegEventBus();
