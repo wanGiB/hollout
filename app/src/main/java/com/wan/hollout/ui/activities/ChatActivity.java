@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;

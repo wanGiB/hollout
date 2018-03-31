@@ -13,7 +13,6 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
-import com.raizlabs.android.dbflow.list.IFlowCursorIterator;
 import com.wan.hollout.interfaces.DoneCallback;
 
 import java.util.List;
@@ -46,16 +45,6 @@ public class AuthUtil {
         return null;
     }
 
-    public static void updateCurrentLocalUser(final ParseObject updatableProps, @Nullable  final DoneCallback<Boolean> successCallback) {
-        runLegacyDataCleanUp(updatableProps);
-        updatableProps.pinInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                updateRemoteUserVariant(updatableProps, updatableProps.getString(AppConstants.REAL_OBJECT_ID), successCallback);
-            }
-        });
-    }
-
     private static void runLegacyDataCleanUp(ParseObject updatableProps) {
         if (updatableProps.containsKey(AppConstants.INTERESTS)) {
             updatableProps.remove(AppConstants.INTERESTS);
@@ -73,13 +62,20 @@ public class AuthUtil {
     }
 
     public static void createLocalUser(ParseObject remoteObject) {
-        ParseObject newLocalObject = new ParseObject(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        for (String key : remoteObject.keySet()) {
-            if (!key.equals(AppConstants.OBJECT_ID)) {
-                newLocalObject.put(key, remoteObject.get(key));
-            }
+        if (remoteObject.containsKey(AppConstants.OBJECT_ID)) {
+            remoteObject.remove(AppConstants.OBJECT_ID);
         }
-        newLocalObject.pinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS);
+        remoteObject.pinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS);
+    }
+
+    public static void updateCurrentLocalUser(final ParseObject updatableProps, @Nullable  final DoneCallback<Boolean> successCallback) {
+        runLegacyDataCleanUp(updatableProps);
+        updatableProps.pinInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                updateRemoteUserVariant(updatableProps, updatableProps.getString(AppConstants.REAL_OBJECT_ID), successCallback);
+            }
+        });
     }
 
     private static void updateRemoteUserVariant(final ParseObject updatableProps, String realObjectId, @Nullable final DoneCallback<Boolean> successCallback) {
