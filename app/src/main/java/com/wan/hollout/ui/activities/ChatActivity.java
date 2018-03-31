@@ -287,8 +287,6 @@ public class ChatActivity extends BaseActivity implements
     protected boolean isFirstLoad = true;
     protected boolean haveMoreData = true;
 
-    private boolean userFriendable = false;
-
     private Comparator<ChatMessage> messageComparator = new Comparator<ChatMessage>() {
         @Override
         public int compare(ChatMessage o1, ChatMessage o2) {
@@ -389,8 +387,6 @@ public class ChatActivity extends BaseActivity implements
         ButterKnife.bind(this);
         setSupportActionBar(chatToolbar.getToolbar());
         Bundle intentExtras = getIntent().getExtras();
-        userFriendable = intentExtras.getBoolean(AppConstants.USER_FRIENDABLE);
-        setUserFriendable(userFriendable);
         initBasicComponents();
         signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser == null) {
@@ -457,14 +453,6 @@ public class ChatActivity extends BaseActivity implements
 
     public String getPhoneNumberToCall() {
         return phoneNumberToCall;
-    }
-
-    private void setUserFriendable(boolean userFriendable) {
-        this.userFriendable = userFriendable;
-    }
-
-    private boolean isUserFriendable() {
-        return this.userFriendable;
     }
 
     private void clearAllUnreadMessagesFromRecipient() {
@@ -2206,24 +2194,6 @@ public class ChatActivity extends BaseActivity implements
         FileUploader.getInstance().uploadFile(documentMessage.getLocalUrl(), AppConstants.DOCUMENTS, documentMessage.getMessageId(), recipientProperties);
     }
 
-    private void checkAndSendChatRequest() {
-        if (signedInUser != null) {
-            String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
-            ParseQuery<ParseObject> pendingChatQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-            pendingChatQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUserId.toLowerCase());
-            pendingChatQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-            pendingChatQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, getRecipient());
-            pendingChatQuery.getFirstInBackground(new GetCallback<ParseObject>() {
-                @Override
-                public void done(ParseObject object, ParseException e) {
-                    if (object == null || e != null && e.getCode() == ParseException.OBJECT_NOT_FOUND) {
-                        sendNewChatRequest();
-                    }
-                }
-            });
-        }
-    }
-
     private void updateSignedInUserChats() {
         List<String> chatIds = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (chatIds != null) {
@@ -2276,11 +2246,10 @@ public class ChatActivity extends BaseActivity implements
         HolloutPreferences.updateConversationTime(recipientId);
         snackOutMessageReplyView(messageReplyView);
         prioritizeConversation();
-        if (isUserFriendable()) {
-            autoAcceptInvitation();
+        if (isAContact()) {
             return;
         }
-        sendAChatRequest();
+        checkAcceptPendingInvitation();
     }
 
     private void checkAndAddNewMessage(ChatMessage newMessage) {
@@ -2295,19 +2264,11 @@ public class ChatActivity extends BaseActivity implements
         messagesRecyclerView.smoothScrollToPosition(0);
     }
 
-    private void sendAChatRequest() {
-        if (!isAContact()) {
-            if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
-                checkAndSendChatRequest();
-            }
-        }
-    }
-
-    public void autoAcceptInvitation() {
+    public void checkAcceptPendingInvitation() {
         ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
         chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
         chatRequestsQuery.include(AppConstants.FEED_CREATOR);
-        chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+        chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
         chatRequestsQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, getRecipient());
         chatRequestsQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
@@ -2327,7 +2288,6 @@ public class ChatActivity extends BaseActivity implements
                         @Override
                         public void done(Boolean result, Exception e) {
                             if (e == null) {
-                                setUserFriendable(false);
                                 if (returnedFeedObject != null) {
                                     returnedFeedObject.deleteInBackground(new DeleteCallback() {
                                         @Override
@@ -2346,10 +2306,11 @@ public class ChatActivity extends BaseActivity implements
                     if (e != null) {
                         if (e.getCode() == ParseException.OBJECT_NOT_FOUND) {
                             //No request
-                            sendAChatRequest();
+                            if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
+                                sendNewChatRequest();
+                            }
                         }
                     }
-                    setUserFriendable(false);
                 }
             }
         });
