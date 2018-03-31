@@ -12,8 +12,7 @@
     <com.wan.hollout.ui.widgets.FixedFrameLayout
         android:id="@+id/fixed_frame_layout"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:animateLayoutChanges="true">
+        android:layout_height="?attr/actionBarSize">
 
         <FrameLayout
             android:layout_width="match_parent"

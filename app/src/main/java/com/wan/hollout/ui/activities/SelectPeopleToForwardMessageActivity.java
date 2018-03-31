@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -63,6 +64,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
     MaterialSearchView searchView;
 
     private List<ConversationItem> people = new ArrayList<>();
+
     private SelectPeopleAdapter selectPeopleAdapter;
 
     private ParseObject signedInUser;
@@ -95,7 +97,8 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                searchChats(!people.isEmpty() ? people.size() : 0, newText);
+                people.clear();
+                searchChats(people.size(), newText);
                 return true;
             }
         });
@@ -115,11 +118,11 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
             sendNewMessage(message, conversationItem.getRecipient());
         }
         UiUtils.dismissProgressDialog(progressDialog);
-        UiUtils.showSafeToast("Success!");
+        UiUtils.showSafeToast("Message Forwarded!");
         AppConstants.selectedPeople.clear();
         AppConstants.selectedPeoplePositions.clear();
         //Clear selected message queue
-        Intent resultIntent = new Intent();
+        Intent resultIntent = getIntent();
         resultIntent.putExtra(AppConstants.FORWARDED_MESSAGE_RESULT, AppConstants.RESULT_OK);
         setResult(RESULT_OK, resultIntent);
         finish();
@@ -135,7 +138,10 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
             if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
                 message.setFromPhotoUrl(signedInUserPhotoUrl);
             }
+            message.setTo(recipientProps.getString(AppConstants.REAL_OBJECT_ID));
+            message.setConversationId(recipientProps.getString(AppConstants.REAL_OBJECT_ID));
             message.setFrom(signedInUserId.toLowerCase());
+            message.setTimeStamp(System.currentTimeMillis());
             message.setMessageId(RandomStringUtils.random(6, true, true) + System.currentTimeMillis());
             ChatClient.getInstance().sendMessage(message, recipientProps);
             HolloutPreferences.updateConversationTime(recipientProps.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
@@ -220,6 +226,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
         selectPeopleAdapter = new SelectPeopleAdapter(this, people);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         peopleRecyclerView.setLayoutManager(linearLayoutManager);
+        peopleRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
         peopleRecyclerView.setAdapter(selectPeopleAdapter);
         peopleRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
@@ -260,6 +267,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
                                     people.clear();
                                 }
                                 sortConversations();
+                                selectPeopleAdapter.setSearchString(null);
                                 loadAdapter(objects);
                             }
                         }
@@ -270,6 +278,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
     }
 
     private void searchChats(final int skip, final String searchString) {
+        selectPeopleAdapter.setSearchString(searchString);
         ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
@@ -299,7 +308,6 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
                                     people.clear();
                                 }
                                 sortConversations();
-                                selectPeopleAdapter.setSearchString(searchString);
                                 loadAdapter(objects);
                             }
                         }
@@ -347,11 +355,13 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
                         if (!AppConstants.selectedPeople.isEmpty()) {
                             doneFab.show();
                             if (getSupportActionBar() != null) {
-                                getSupportActionBar().setTitle(getSupportActionBar().getTitle() + " (" + AppConstants.selectedPeople.size() + ")");
+                                getSupportActionBar().setTitle("Forward Message to: (" + AppConstants.selectedPeople.size() + ")");
                             }
                         } else {
                             doneFab.hide();
-                            getSupportActionBar().setTitle("Forward Message to:");
+                            if (getSupportActionBar()!=null){
+                                getSupportActionBar().setTitle("Forward Message to:");
+                            }
                         }
                     }
                 }

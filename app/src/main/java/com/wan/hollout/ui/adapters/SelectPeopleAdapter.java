@@ -42,7 +42,7 @@ public class SelectPeopleAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         this.layoutInflater = LayoutInflater.from(context);
     }
 
-    private String getSearchString() {
+    public String getSearchString() {
         return searchString;
     }
 
