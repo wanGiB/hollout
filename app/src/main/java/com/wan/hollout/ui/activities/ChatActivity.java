@@ -935,8 +935,8 @@ public class ChatActivity extends BaseActivity implements
 
         @Override
         public void onClick(View v) {
-            vibrateVibrator();
             if (inputPanel.canRecord()) {
+                vibrateVibrator();
                 inputPanel.startRecorder();
             } else {
                 UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
