@@ -473,7 +473,6 @@ public class UiUtils {
             String signedInUserAgeVisibility = signedInUser.getString(AppConstants.AGE_VISIBILITY_PREF);
             String ageVisibilityOfOtherUser = parseUser != null ? parseUser.getString(AppConstants.AGE_VISIBILITY_PREF) :
                     (String) optionalProps.get(AppConstants.AGE_VISIBILITY_PREF);
-
             //The user status is Anyone..Lets check to see if the current user is hiding his/her status..So we know how to deal with him
             if (type == AppConstants.ENTITY_TYPE_CLOSEBY) {
                 return (ageVisibilityOfOtherUser.equals(mContext.getString(R.string.anyone))

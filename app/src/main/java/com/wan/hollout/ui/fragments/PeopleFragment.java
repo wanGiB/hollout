@@ -12,6 +12,7 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -230,6 +231,7 @@ public class PeopleFragment extends BaseFragment {
             SafeLayoutManager linearLayoutManager = new SafeLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
             peopleRecyclerView.setLayoutManager(linearLayoutManager);
             peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            peopleRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),DividerItemDecoration.VERTICAL));
             peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
             RecyclerViewUtils.setFooterView(peopleRecyclerView, footerView);
             UiUtils.showView(footerView, false);

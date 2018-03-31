@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="10dp"
     tools:ignore="RtlHardcoded">
 
     <RelativeLayout
@@ -14,7 +13,12 @@
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
-        android:padding="5dp"
+        android:paddingBottom="10dp"
+        android:paddingEnd="5dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingStart="5dp"
+        android:paddingTop="10dp"
         tools:ignore="UselessParent">
 
         <FrameLayout
@@ -75,7 +79,7 @@
                     android:maxLines="2"
                     android:paddingEnd="5dp"
                     android:paddingRight="5dp"
-                    android:textColor="@color/from"
+                    android:textColor="@color/colorPrimaryDark"
                     android:textSize="@dimen/msg_text_primary"
                     app:textStyle="medium" />
 
@@ -90,9 +94,9 @@
                     android:gravity="center_vertical"
                     android:maxLines="1"
                     android:maxWidth="100dp"
+                    android:textAllCaps="true"
                     android:textSize="@dimen/timestamp"
                     app:textStyle="regular"
-                    android:textAllCaps="true"
                     tools:ignore="RelativeOverlap,RtlHardcoded" />
 
             </LinearLayout>
@@ -103,6 +107,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:lines="1"
+                android:textColor="@color/colorPrimary"
                 android:textSize="@dimen/msg_text_secondary"
                 app:textStyle="medium" />
 
@@ -113,8 +118,8 @@
 
                 <ImageView
                     android:id="@+id/delivery_status_view"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginEnd="5dp"
                     android:layout_marginRight="5dp"

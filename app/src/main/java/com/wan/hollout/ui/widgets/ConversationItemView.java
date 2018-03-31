@@ -619,6 +619,11 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         }
     }
 
+    @Override
+    protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
     private void setupMessageBodyOnlyMessage(ChatMessage message) {
         String messageBody = message.getMessageBody();
         if (messageBody.equals("You have an incoming call")) {
