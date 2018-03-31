@@ -110,5 +110,6 @@
     <dimen name="divider_decorator_offset">16dp</dimen>
 
     <dimen name="item_offset">3dp</dimen>
+    <dimen name="item_offset_eight">5dp</dimen>
 
 </resources>

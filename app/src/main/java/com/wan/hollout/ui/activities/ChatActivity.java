@@ -38,6 +38,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -784,6 +785,13 @@ public class ChatActivity extends BaseActivity implements
             attachmentTypeSelector = new AttachmentTypeSelector(this, getSupportLoaderManager(), new AttachmentTypeListener());
         }
         attachmentTypeSelector.show(attachButton);
+        UiUtils.showView(inputPanel, false);
+        attachmentTypeSelector.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                UiUtils.showView(inputPanel, true);
+            }
+        });
     }
 
     private void initializeViews() {

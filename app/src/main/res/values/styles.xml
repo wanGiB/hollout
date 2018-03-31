@@ -24,7 +24,7 @@
         <item name="conversation_emoji_toggle">@drawable/input_emoji</item>
         <item name="conversation_keyboard_toggle">@drawable/ic_keyboard_grey600_24dp</item>
 
-        <item name="emoji_tab_strip_background">@color/gray12</item>
+        <item name="emoji_tab_strip_background">@color/em_white_87</item>
         <item name="emoji_tab_indicator">#66555555</item>
         <item name="emoji_tab_underline">#44555555</item>
         <item name="emoji_tab_seperator">@color/gray20</item>
@@ -76,7 +76,7 @@
     </style>
 
     <style name="ComposeEditText" parent="@style/Widget.AppCompat.EditText">
-        <item name="android:background">@null</item>
+        <item name="android:background">@android:color/white</item>
         <item name="android:maxLines">5</item>
         <item name="android:capitalize">sentences</item>
         <item name="android:autoText">true</item>

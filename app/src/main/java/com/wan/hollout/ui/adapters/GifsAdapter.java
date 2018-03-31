@@ -2,6 +2,7 @@ package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,14 +39,15 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.layoutInflater = LayoutInflater.from(activity);
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View convertView = layoutInflater.inflate(R.layout.recycler_view_item_gif, parent, false);
         return new GifItemHolder(convertView);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         GifItemHolder gifItemHolder = (GifItemHolder) holder;
         String gifObjectUrl = gifs.get(position);
         if (gifObjectUrl != null) {

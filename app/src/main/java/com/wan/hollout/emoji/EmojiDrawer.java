@@ -29,6 +29,7 @@ import com.wan.hollout.ui.adapters.ReactionsAdapter;
 import com.wan.hollout.ui.widgets.InputAwareLayout;
 import com.wan.hollout.ui.widgets.PagerSlidingTabStrip;
 import com.wan.hollout.ui.widgets.RepeatableImageKey;
+import com.wan.hollout.utils.ItemOffSetDecoration;
 import com.wan.hollout.utils.ResUtil;
 import com.wan.hollout.utils.UiUtils;
 
@@ -144,13 +145,15 @@ public class EmojiDrawer extends LinearLayout implements InputAwareLayout.InputV
     }
 
     private void initReactionsAdapter() {
-        ReactionsAdapter reactionsAdapter = new ReactionsAdapter(getContext(), new ReactionsAdapter.ReactionSelectedListener() {
-            @Override
-            public void onReactionSelected(String reaction) {
-                EventBus.getDefault().post(new ReactionMessageEvent(reaction));
-            }
-        });
+        ReactionsAdapter reactionsAdapter = new ReactionsAdapter(getContext(),
+                new ReactionsAdapter.ReactionSelectedListener() {
+                    @Override
+                    public void onReactionSelected(String reaction) {
+                        EventBus.getDefault().post(new ReactionMessageEvent(reaction));
+                    }
+                });
         GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 3);
+        reactionsRecyclerView.addItemDecoration(new ItemOffSetDecoration(getContext(), R.dimen.item_offset_eight));
         reactionsRecyclerView.setLayoutManager(gridLayoutManager);
         reactionsRecyclerView.setAdapter(reactionsAdapter);
     }

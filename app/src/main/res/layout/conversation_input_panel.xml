@@ -64,6 +64,7 @@
             android:clipChildren="false"
             android:clipToPadding="false"
             android:focusable="true"
+            android:background="@android:color/white"
             android:orientation="horizontal"
             android:padding="10dp">
 
@@ -74,6 +75,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:clipChildren="false"
+                android:background="@android:color/white"
                 android:clipToPadding="false">
 
                 <LinearLayout
@@ -82,6 +84,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:clipChildren="false"
+                    android:background="@android:color/white"
                     android:clipToPadding="false">
 
                     <com.wan.hollout.emoji.EmojiToggle
@@ -128,6 +131,8 @@
                         android:paddingBottom="4dp"
                         android:paddingEnd="20dp"
                         android:paddingLeft="12dp"
+                        android:layout_marginRight="10dp"
+                        android:layout_marginEnd="10dp"
                         android:paddingRight="20dp"
                         android:paddingStart="12dp"
                         android:rotation="-45"
