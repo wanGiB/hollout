@@ -138,7 +138,6 @@ public class ConversationsFragment extends BaseFragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         conversationsRecyclerView.setLayoutManager(linearLayoutManager);
         conversationsRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        conversationsRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),DividerItemDecoration.VERTICAL));
         conversationsRecyclerView.setAdapter(conversationsAdapter);
         nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
@@ -319,6 +318,7 @@ public class ConversationsFragment extends BaseFragment {
                     }
                 }
             }
+            Collections.sort(conversations);
             invalidateEmptyView();
         }
     }

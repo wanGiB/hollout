@@ -231,7 +231,6 @@ public class PeopleFragment extends BaseFragment {
             SafeLayoutManager linearLayoutManager = new SafeLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
             peopleRecyclerView.setLayoutManager(linearLayoutManager);
             peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
-            peopleRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),DividerItemDecoration.VERTICAL));
             peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
             RecyclerViewUtils.setFooterView(peopleRecyclerView, footerView);
             UiUtils.showView(footerView, false);

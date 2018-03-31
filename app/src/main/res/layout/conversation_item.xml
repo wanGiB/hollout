@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
     tools:ignore="RtlHardcoded">
 
     <RelativeLayout
@@ -13,7 +14,7 @@
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
-        android:paddingBottom="10dp"
+        android:foreground="?attr/selectableItemBackground"
         android:paddingEnd="5dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
@@ -170,6 +171,12 @@
                     tools:ignore="SmallSp" />
 
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/lighter_blue" />
 
         </LinearLayout>
 

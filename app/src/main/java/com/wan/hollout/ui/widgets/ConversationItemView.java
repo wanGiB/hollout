@@ -52,8 +52,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.greenrobot.eventbus.EventBus;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
-import org.joda.time.Instant;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -260,37 +258,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             }
         });
 
-        usernameEntryView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ConversationItemView.this.performClick();
-            }
-        });
-        userStatusOrLastMessageView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ConversationItemView.this.performClick();
-            }
-        });
-
-        OnLongClickListener onLongClickListener = new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                switch (v.getId()) {
-                    case R.id.icon_profile:
-                    case R.id.message_container:
-                    case R.id.from:
-                    case R.id.txt_secondary:
-                        ConversationItemView.this.performLongClick();
-                        break;
-                }
-                return true;
-            }
-        };
-
-        userPhotoView.setOnLongClickListener(onLongClickListener);
-        usernameEntryView.setOnLongClickListener(onLongClickListener);
-        userStatusOrLastMessageView.setOnLongClickListener(onLongClickListener);
     }
 
     private void listenToUserPresence(ParseObject parseObject) {

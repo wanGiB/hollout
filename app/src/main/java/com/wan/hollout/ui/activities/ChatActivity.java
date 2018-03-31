@@ -117,7 +117,6 @@ import net.alhazmy13.mediapicker.Video.VideoPicker;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -489,18 +488,6 @@ public class ChatActivity extends BaseActivity implements
         }
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        checkAndRegEventBus();
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        checkAndRegEventBus();
-    }
-
     private void initConversation() {
         fetchMessages();
     }
@@ -848,6 +835,7 @@ public class ChatActivity extends BaseActivity implements
         }
         AppConstants.activeChatId = null;
         messages.clear();
+        recipientProperties = null;
         super.onBackPressed();
     }
 
@@ -1504,22 +1492,9 @@ public class ChatActivity extends BaseActivity implements
         inputPanel.onKeyboardShown();
     }
 
-    private void checkAndRegEventBus() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    private void checkAnUnRegEventBus() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
-        checkAndRegEventBus();
         DirectModelNotifier.get().registerForModelChanges(ChatMessage.class, onModelStateChangedListener);
         setActiveChat();
         checkBlackListStatus();
@@ -1543,7 +1518,6 @@ public class ChatActivity extends BaseActivity implements
         super.onPause();
         if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
         inputPanel.onPause();
-        checkAnUnRegEventBus();
     }
 
     public void sendChatStateMsg(final String chatState) {
@@ -1882,6 +1856,7 @@ public class ChatActivity extends BaseActivity implements
         }
     }
 
+    @Override
     @SuppressWarnings("unused")
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
     public void onEventAsync(final Object o) {
@@ -2088,19 +2063,12 @@ public class ChatActivity extends BaseActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        checkAnUnRegEventBus();
         sendChatStateMsg(getString(R.string.idle));
         HolloutPreferences.clearPreviousAttemptedMessage(recipientId);
         if (StringUtils.isNotEmpty(composeText.getText().toString().trim())) {
             HolloutPreferences.saveLastAttemptedMsg(recipientId, composeText.getText().toString().trim());
         }
         DirectModelNotifier.get().unregisterForModelChanges(ChatMessage.class, onModelStateChangedListener);
-    }
-
-    @Override
-    protected void onDestroy() {
-        checkAnUnRegEventBus();
-        super.onDestroy();
     }
 
     @NonNull

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
     tools:ignore="RtlHardcoded">
 
     <RelativeLayout
@@ -13,7 +14,6 @@
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
-        android:paddingBottom="10dp"
         android:paddingEnd="5dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
@@ -61,23 +61,24 @@
             android:paddingRight="@dimen/padding_list_row"
             tools:ignore="RtlSymmetry">
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:weightSum="1">
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     android:id="@+id/from"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
+                    android:layout_weight="1"
                     android:ellipsize="end"
                     android:gravity="center_vertical"
-                    android:maxLines="1"
-                    android:paddingEnd="16dp"
-                    android:paddingRight="16dp"
+                    android:maxLines="2"
+                    android:paddingEnd="5dp"
+                    android:paddingRight="5dp"
                     android:textColor="@color/colorPrimaryDark"
                     android:textSize="@dimen/msg_text_primary"
                     app:textStyle="medium" />
@@ -86,28 +87,26 @@
                     android:id="@+id/distance_to_user"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
                     android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"
                     android:ellipsize="end"
                     android:gravity="center_vertical"
                     android:maxLines="1"
-                    android:maxWidth="100dp"
                     android:textAllCaps="true"
                     android:textSize="@dimen/timestamp"
                     app:textStyle="regular"
                     tools:ignore="RelativeOverlap,RtlHardcoded" />
 
-            </RelativeLayout>
+            </LinearLayout>
 
             <com.wan.hollout.ui.widgets.HolloutTextView
                 android:id="@+id/txt_primary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:textColor="@color/colorPrimary"
                 android:lines="1"
+                android:textColor="@color/colorPrimary"
                 android:textSize="@dimen/msg_text_secondary"
                 app:textStyle="medium" />
 
@@ -130,6 +129,12 @@
                     app:textStyle="regular" />
 
             </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/lighter_blue" />
 
         </LinearLayout>
 

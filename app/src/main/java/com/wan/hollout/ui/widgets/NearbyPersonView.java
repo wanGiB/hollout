@@ -172,7 +172,6 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
             } else {
                 UiUtils.showView(onlineStatusView, false);
             }
-
             userPhotoView.setOnClickListener(new OnClickListener() {
 
                 @Override
