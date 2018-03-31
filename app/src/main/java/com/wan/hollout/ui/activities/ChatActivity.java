@@ -326,8 +326,8 @@ public class ChatActivity extends BaseActivity implements
                 @Override
                 public void run() {
                     if (action == BaseModel.Action.INSERT || action == BaseModel.Action.SAVE) {
-                        checkAndAddNewMessage(model);
-                        if (model.getFrom().equals(getRecipient())) {
+                        if (model.getConversationId().toLowerCase().equals(getRecipient())) {
+                            checkAndAddNewMessage(model);
                             if (onScrolledUp) {
                                 tempReceivedMessages.add(model);
                             } else {
@@ -343,21 +343,25 @@ public class ChatActivity extends BaseActivity implements
                             }
                         }
                     } else if (action == BaseModel.Action.UPDATE) {
-                        int indexOfMessage = messages.indexOf(model);
-                        if (indexOfMessage != -1) {
-                            replaceMessageAtIndexAsync(indexOfMessage, model);
-                            checkBangMessageReadSound(model);
+                        if (model.getConversationId().toLowerCase().equals(getRecipient())) {
+                            int indexOfMessage = messages.indexOf(model);
+                            if (indexOfMessage != -1) {
+                                replaceMessageAtIndexAsync(indexOfMessage, model);
+                                checkBangMessageReadSound(model);
+                            }
+                            clearAllUnreadMessagesFromRecipient();
                         }
                     } else if (action == BaseModel.Action.DELETE) {
-                        int indexOfMessage = messages.indexOf(model);
-                        if (indexOfMessage != -1) {
-                            messages.remove(indexOfMessage);
-                            notifyDataSetChanged();
+                        if (model.getConversationId().toLowerCase().equals(getRecipient())) {
+                            int indexOfMessage = messages.indexOf(model);
+                            if (indexOfMessage != -1) {
+                                messages.remove(indexOfMessage);
+                                notifyDataSetChanged();
+                            }
+                            invalidateEmptyView();
                         }
-                        invalidateEmptyView();
                     }
                 }
-
             });
 
         }
@@ -612,26 +616,28 @@ public class ChatActivity extends BaseActivity implements
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem placeCallMenuItem = menu.findItem(R.id.place_call);
-        MenuItem viewProfileMenuItem = menu.findItem(R.id.view_profile_info);
-        MenuItem blockUserMenuItem = menu.findItem(R.id.block_user);
-        if (chatType == AppConstants.CHAT_TYPE_GROUP || chatType == AppConstants.CHAT_TYPE_ROOM) {
-            placeCallMenuItem.setVisible(AppConstants.selectedMessages.isEmpty());
-            viewProfileMenuItem.setVisible(false);
-            blockUserMenuItem.setVisible(false);
-        }
-        if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
-            List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-            if (signedInUserChats != null && signedInUserChats.contains(recipientId)) {
-                placeCallMenuItem.setVisible(true);
-            } else {
-                placeCallMenuItem.setVisible(false);
+        if (getRecipient() != null) {
+            MenuItem placeCallMenuItem = menu.findItem(R.id.place_call);
+            MenuItem viewProfileMenuItem = menu.findItem(R.id.view_profile_info);
+            MenuItem blockUserMenuItem = menu.findItem(R.id.block_user);
+            if (chatType == AppConstants.CHAT_TYPE_GROUP || chatType == AppConstants.CHAT_TYPE_ROOM) {
+                placeCallMenuItem.setVisible(AppConstants.selectedMessages.isEmpty());
+                viewProfileMenuItem.setVisible(false);
+                blockUserMenuItem.setVisible(false);
             }
-            if (HolloutUtils.isUserBlocked(getRecipient())) {
-                blockUserMenuItem.setTitle(getString(R.string.unblock_user));
+            if (chatType == AppConstants.CHAT_TYPE_SINGLE) {
+                List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+                if (signedInUserChats != null && signedInUserChats.contains(recipientId)) {
+                    placeCallMenuItem.setVisible(true);
+                } else {
+                    placeCallMenuItem.setVisible(false);
+                }
+                if (HolloutUtils.isUserBlocked(getRecipient())) {
+                    blockUserMenuItem.setTitle(getString(R.string.unblock_user));
+                }
             }
+            supportInvalidateOptionsMenu();
         }
-        supportInvalidateOptionsMenu();
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -844,6 +850,8 @@ public class ChatActivity extends BaseActivity implements
         AppConstants.activeChatId = null;
         messages.clear();
         recipientProperties = null;
+        recipientId = null;
+        DirectModelNotifier.get().unregisterForModelChanges(ChatMessage.class, onModelStateChangedListener);
         super.onBackPressed();
     }
 
@@ -2081,7 +2089,7 @@ public class ChatActivity extends BaseActivity implements
 
     @NonNull
     public String getRecipient() {
-        return recipientId.toLowerCase();
+        return recipientId != null ? recipientId.toLowerCase() : null;
     }
 
     private void attachRequiredPropsToMessage(ChatMessage chatMessage, MessageType messageType) {
@@ -2278,7 +2286,7 @@ public class ChatActivity extends BaseActivity implements
     private void checkAndAddNewMessage(ChatMessage newMessage) {
         if (!messages.contains(newMessage)) {
             messages.add(0, newMessage);
-            if (newMessage.getFrom().equals(getRecipient())) {
+            if (newMessage.getConversationId().toLowerCase().equals(getRecipient())) {
                 UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
             }
         }
@@ -2325,6 +2333,7 @@ public class ChatActivity extends BaseActivity implements
                                         @Override
                                         public void done(ParseException e) {
                                             if (e != null) {
+                                                AppConstants.CHAT_INVITATION_ACCEPTED = true;
                                                 returnedFeedObject.deleteEventually();
                                             }
                                         }

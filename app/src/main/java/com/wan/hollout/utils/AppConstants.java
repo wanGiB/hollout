@@ -204,6 +204,7 @@ public class AppConstants {
     public static final String SERVER_UPTIME = "ServerUpTime";
     public static final String USER_CURRENT_TIME_STAMP = "user_current_time_stamp";
     public static final String ACTIVITY_COUNT = "activity_count";
+    public static boolean CHAT_INVITATION_ACCEPTED = false;
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
@@ -265,8 +266,6 @@ public class AppConstants {
     public static SparseBooleanArray messageReplyAttachmentMediaPlayPositions = new SparseBooleanArray();
     public static SparseBooleanArray bounceablePositions = new SparseBooleanArray();
 
-    public static ArrayList<ParseObject> recentConversations = new ArrayList<>();
-
     public static SparseBooleanArray wavePositions = new SparseBooleanArray();
 
     static int NEARBY_KIND_NOTIFICATION_COUNT = 0;
@@ -289,5 +288,6 @@ public class AppConstants {
     public static final String DATUM_URL = "http://api.datumbox.com/1.0/TopicClassification.json";
 
 
+    public static List<ParseObject> recentConversations = new ArrayList<>();
 }
 

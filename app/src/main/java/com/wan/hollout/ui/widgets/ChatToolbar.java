@@ -333,7 +333,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.back_button:
-                mContext.finish();
+                mContext.onBackPressed();
                 break;
             case R.id.launch_user_profile:
                 if (recipientObject != null && recipientObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {

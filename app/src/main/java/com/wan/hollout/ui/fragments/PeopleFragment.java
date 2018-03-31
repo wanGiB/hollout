@@ -137,6 +137,14 @@ public class PeopleFragment extends BaseFragment {
             initBasicViews();
         }
         fetchPeopleOfCommonInterestFromCache();
+        checkAutoInvitationAccepted();
+    }
+
+    private void checkAutoInvitationAccepted() {
+        if (AppConstants.CHAT_INVITATION_ACCEPTED) {
+            countChatRequests();
+            AppConstants.CHAT_INVITATION_ACCEPTED = false;
+        }
     }
 
     private void fetchPeople() {

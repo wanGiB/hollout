@@ -2,13 +2,12 @@ package com.wan.hollout.ui.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -111,7 +110,6 @@ public class ConversationsFragment extends BaseFragment {
             }
         }
     };
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -286,46 +284,41 @@ public class ConversationsFragment extends BaseFragment {
     }
 
     private void sortConversations() {
-        Collections.sort(conversations);
+        if (!conversations.isEmpty()) {
+            Collections.sort(conversations);
+        }
     }
 
     private void invalidateEmptyView() {
         UiUtils.toggleFlipperState(contentFlipper, conversations.isEmpty() ? 0 : 2);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        initSignedInUser();
-        refreshConversations();
-        invalidateAdapter();
-        AppConstants.recentConversations.clear();
-    }
-
     private void refreshConversations() {
-        if (!AppConstants.recentConversations.isEmpty()) {
-            for (ParseObject parseObject : AppConstants.recentConversations) {
-                ConversationItem conversationItem = new ConversationItem(parseObject,
-                        HolloutPreferences.getLastConversationTime(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
-                if (conversations.isEmpty()) {
-                    conversations.add(conversationItem);
-                } else {
-                    int indexOfConversationItem = conversations.indexOf(conversationItem);
-                    if (indexOfConversationItem == -1) {
+        if (!conversations.isEmpty()) {
+            if (!AppConstants.recentConversations.isEmpty()) {
+                for (ParseObject parseObject : AppConstants.recentConversations) {
+                    ConversationItem conversationItem = new ConversationItem(parseObject,
+                            HolloutPreferences.getLastConversationTime(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
+                    if (!conversations.contains(conversationItem)) {
                         conversations.add(0, conversationItem);
+                        sortConversations();
                     } else {
-                        Collections.swap(conversations, 0, indexOfConversationItem);
+                        int indexOfConversation = conversations.indexOf(conversationItem);
+                        if (indexOfConversation != -1) {
+                            Collections.swap(conversations, indexOfConversation, 0);
+                            int newIndex = conversations.indexOf(conversationItem);
+                            conversations.set(newIndex, conversationItem);
+                        }
                     }
                 }
+                if (conversationsAdapter != null) {
+                    conversationsAdapter.notifyDataSetChanged();
+                }
+                invalidateEmptyView();
+                AppConstants.recentConversations.clear();
             }
-            Collections.sort(conversations);
-            invalidateEmptyView();
-        }
-    }
-
-    private void invalidateAdapter() {
-        if (conversationsAdapter != null) {
-            conversationsAdapter.notifyDataSetChanged();
+        } else {
+            fetchConversations(0);
         }
     }
 
@@ -333,8 +326,15 @@ public class ConversationsFragment extends BaseFragment {
     public void onStart() {
         super.onStart();
         initSignedInUser();
-        invalidateAdapter();
+        refreshConversations();
         DirectModelNotifier.get().registerForModelChanges(ChatMessage.class, onModelStateChangedListener);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initSignedInUser();
+        refreshConversations();
     }
 
     @Override

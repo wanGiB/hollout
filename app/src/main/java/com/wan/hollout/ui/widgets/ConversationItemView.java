@@ -132,6 +132,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         setOnClickListener(this);
         setOnLongClickListener(this);
         parentView.setOnClickListener(this);
+        parentView.setOnLongClickListener(this);
     }
 
     public void bindData(Activity activity, String searchString, ParseObject parseObject) {

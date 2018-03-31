@@ -131,7 +131,7 @@ public class WelcomeActivity extends BaseActivity
         } else {
             trueButton.setVisibility(View.GONE);
         }
-        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font>,  <font color=#3EB890>Discover</font> and meet new people around you."));
+        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect</font>,  <font color=#E8A723>Discover</font> and meet new people around you."));
         continueWithGoogle.setOnClickListener(this);
     }
 
