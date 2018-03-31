@@ -320,6 +320,10 @@ public class ConversationsFragment extends BaseFragment {
         } else {
             fetchConversations(0);
         }
+        if (AppConstants.CHAT_INVITATION_ACCEPTED) {
+            fetchConversations(0);
+            AppConstants.CHAT_INVITATION_ACCEPTED = false;
+        }
     }
 
     @Override

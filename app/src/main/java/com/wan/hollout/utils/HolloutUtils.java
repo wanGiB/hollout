@@ -1035,6 +1035,7 @@ public class HolloutUtils {
                                     }
                                 }
                                 UiUtils.showSafeToast("Chat request from " + WordUtils.capitalize(requesterName) + " " + (accept ? "accepted" : "declined") + " successfully");
+                                AppConstants.CHAT_INVITATION_ACCEPTED = true;
                             } else {
                                 UiUtils.showSafeToast("Failed to " + (accept ? "accept" : "decline") + " chat request from " + WordUtils.capitalize(requesterName));
                                 EventBus.getDefault().post(new ChatRequestNegotiationResult(requestObject, false, 0));
