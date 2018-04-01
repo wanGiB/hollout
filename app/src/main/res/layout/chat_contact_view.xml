@@ -31,10 +31,10 @@
         android:layout_marginStart="8dp"
         android:layout_toEndOf="@id/contact_photo"
         android:layout_toRightOf="@id/contact_photo"
+        android:animateLayoutChanges="true"
         android:orientation="vertical"
         android:paddingBottom="2.0dip"
         android:paddingLeft="4.0dip"
-        android:animateLayoutChanges="true"
         android:paddingTop="0.0dip"
         tools:ignore="RtlHardcoded,RtlSymmetry">
 
@@ -63,17 +63,15 @@
             android:orientation="horizontal"
             android:paddingRight="15dip">
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
+            <com.wan.hollout.ui.widgets.SubTitleTextView
                 android:id="@+id/contact_subtitle"
                 style="@style/TextAppearance.AppCompat.Widget.ActionBar.Subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:maxLines="1"
-                android:text="Subtitle"
                 android:textColor="@color/whitesmoke"
-                android:textSize="13sp"
-                app:textStyle="medium" />
+                android:textSize="13sp" />
 
             <com.wang.avi.AVLoadingIndicatorView
                 android:id="@+id/typing_indicator"

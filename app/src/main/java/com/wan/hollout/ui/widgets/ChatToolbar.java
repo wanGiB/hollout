@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
-import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,7 +62,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     public HolloutTextView contactNameView;
 
     @BindView(R.id.contact_subtitle)
-    public HolloutTextView contactSubTitle;
+    public SubTitleTextView contactSubTitle;
 
     @BindView(R.id.launch_user_profile)
     public RelativeLayout launchUserProfile;
@@ -159,16 +158,20 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     public void setLastSeenText(final long userLastSeen) {
         if (UiUtils.canShowPresence(recipientObject, AppConstants.ENTITY_TYPE_CHATS, new HashMap<String, Object>())) {
-            UiUtils.showView(contactSubtitleLayout, true);
-            contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
-            final String fullLastSeenTExt = getLastSeen(userLastSeen);
-            contactSubTitle.setText(fullLastSeenTExt);
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    contactSubTitle.setText(StringUtils.strip(StringUtils.remove(StringUtils.remove(fullLastSeenTExt, "Active"), "on")));
-                }
-            }, 2000);
+            try {
+                UiUtils.showView(contactSubtitleLayout, true);
+                contactSubTitle.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
+                final String fullLastSeenTExt = getLastSeen(userLastSeen);
+                animateText(fullLastSeenTExt);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        animateText(StringUtils.strip(StringUtils.remove(StringUtils.remove(fullLastSeenTExt, "Active"), "on")));
+                    }
+                }, 3000);
+            } catch (NullPointerException ignored) {
+                HolloutLogger.d("ContactSubtitle", "Exception is text animation");
+            }
         } else {
             UiUtils.showView(contactSubtitleLayout, false);
         }
@@ -205,7 +208,6 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
     }
 
     public void attachCallbacks() {
-        contactSubTitle.setMovementMethod(new ScrollingMovementMethod());
         goBack.setOnClickListener(this);
         launchUserProfile.setOnClickListener(this);
     }
@@ -245,24 +247,36 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             Long userLastSeen = recipientUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) != 0
                     ? recipientUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) :
                     recipientUser.getLong(AppConstants.APP_USER_LAST_SEEN);
-
-            if (chatStates != null) {
-                String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
-                if (chatStateToSignedInUser != null) {
-                    if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && timeStampsAreTheSame(recipientUser)
-                            && userConnected()) {
-                        UiUtils.showView(contactSubtitleLayout, true);
-                        contactSubTitle.setText(mContext.getString(R.string.online));
-                        UiUtils.showView(typingIndicator, false);
-                    } else if (chatStateToSignedInUser.contains(mContext.getString(R.string.typing)) && timeStampsAreTheSame(recipientUser)) {
-                        UiUtils.showView(contactSubtitleLayout, true);
-                        UiUtils.showView(typingIndicator, true);
-                        contactSubTitle.setText(StringUtils.strip(mContext.getString(R.string.typing_), "…"));
-                        UiUtils.bangSound(getContext(), R.raw.typing);
+            try {
+                if (chatStates != null) {
+                    String chatStateToSignedInUser = chatStates.optString(signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
+                    if (chatStateToSignedInUser != null) {
+                        if (chatStateToSignedInUser.equals(mContext.getString(R.string.idle)) && timeStampsAreTheSame(recipientUser)
+                                && userConnected()) {
+                            UiUtils.showView(contactSubtitleLayout, true);
+                            animateText(mContext.getString(R.string.online));
+                            UiUtils.showView(typingIndicator, false);
+                        } else if (chatStateToSignedInUser.contains(mContext.getString(R.string.typing)) && timeStampsAreTheSame(recipientUser)) {
+                            UiUtils.showView(contactSubtitleLayout, true);
+                            UiUtils.showView(typingIndicator, true);
+                            if (contactSubTitle != null) {
+                                animateText(StringUtils.strip(mContext.getString(R.string.typing_), "…"));
+                            }
+                            UiUtils.bangSound(getContext(), R.raw.typing);
+                        } else {
+                            if (timeStampsAreTheSame(recipientUser) && userConnected()) {
+                                UiUtils.showView(contactSubtitleLayout, true);
+                                animateText(mContext.getString(R.string.online));
+                                UiUtils.showView(typingIndicator, false);
+                            } else {
+                                UiUtils.showView(typingIndicator, false);
+                                setLastSeenText(userLastSeen);
+                            }
+                        }
                     } else {
                         if (timeStampsAreTheSame(recipientUser) && userConnected()) {
                             UiUtils.showView(contactSubtitleLayout, true);
-                            contactSubTitle.setText(mContext.getString(R.string.online));
+                            animateText(mContext.getString(R.string.online));
                             UiUtils.showView(typingIndicator, false);
                         } else {
                             UiUtils.showView(typingIndicator, false);
@@ -270,28 +284,25 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
                         }
                     }
                 } else {
-                    if (timeStampsAreTheSame(recipientUser) && userConnected()) {
+                    String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
+                    if (userOnlineStatus != null && timeStampsAreTheSame(recipientUser) && userConnected()) {
                         UiUtils.showView(contactSubtitleLayout, true);
-                        contactSubTitle.setText(mContext.getString(R.string.online));
-                        UiUtils.showView(typingIndicator, false);
+                        animateText(mContext.getString(R.string.online));
                     } else {
-                        UiUtils.showView(typingIndicator, false);
                         setLastSeenText(userLastSeen);
                     }
                 }
-            } else {
-                String userOnlineStatus = recipientUser.getString(AppConstants.APP_USER_ONLINE_STATUS);
-                if (userOnlineStatus != null && timeStampsAreTheSame(recipientUser) && userConnected()) {
-                    UiUtils.showView(contactSubtitleLayout, true);
-                    contactSubTitle.setText(mContext.getString(R.string.online));
-                } else {
-                    setLastSeenText(userLastSeen);
-                }
+            } catch (NullPointerException ignored) {
+                HolloutLogger.d("ContactSubtitle", "Exception is text animation");
             }
         }
         if (StringUtils.isNotEmpty(recipientPhotoUrl)) {
             UiUtils.loadImage(mContext, recipientPhotoUrl, contactPhotoView);
         }
+    }
+
+    public void animateText(final CharSequence charSequence) {
+        contactSubTitle.animateText(charSequence);
     }
 
     private boolean timeStampsAreTheSame(ParseObject recipientUser) {

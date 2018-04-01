@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.ImageView;
@@ -17,8 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.wan.hollout.R;
-import com.wan.hollout.emoji.EmojiDrawer;
-import com.wan.hollout.emoji.EmojiToggle;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.ViewUtil;
@@ -29,7 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author Wan Clem
  ***/
-public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayout.OnKeyboardShownListener, EmojiDrawer.EmojiEventListener {
+public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayout.OnKeyboardShownListener {
 
     private static final int FADE_TIME = 150;
 
@@ -114,10 +111,6 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
         });
     }
 
-    public void setEmojiDrawer(@NonNull EmojiDrawer emojiDrawer) {
-        emojiToggle.attach(emojiDrawer);
-    }
-
     public void startRecorder() {
         if (listener != null) {
             listener.onRecorderStarted();
@@ -150,10 +143,6 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
         emojiToggle.setEnabled(enabled);
     }
 
-    public AtomicLong getStartTime() {
-        return recordTime.getStartTime();
-    }
-
     public long getElapsedTime() {
         return recordTime.getElapsedTime();
     }
@@ -163,18 +152,16 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
         emojiToggle.setToEmoji();
     }
 
-    @Override
-    public void onKeyEvent(KeyEvent keyEvent) {
-        composeText.dispatchKeyEvent(keyEvent);
-    }
-
-    @Override
-    public void onEmojiSelected(String emoji) {
-        composeText.insertEmoji(emoji);
-    }
-
     public void displayControl(View control) {
         controlsToggle.display(control);
+    }
+
+    public void setEmojiToggleToKeyboard() {
+        emojiToggle.setToIme();
+    }
+
+    public void setEmojiToggleToEmoji() {
+        emojiToggle.setToEmoji();
     }
 
     public interface Listener {
@@ -204,11 +191,10 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
             handler.postDelayed(this, TimeUnit.SECONDS.toMillis(1));
         }
 
-        long hide() {
+        void hide() {
             elapsedTime = System.currentTimeMillis() - startTime.get();
             this.startTime.set(0);
             ViewUtil.fadeOut(this.recordTimeView, FADE_TIME, View.INVISIBLE);
-            return elapsedTime;
         }
 
         @Override
@@ -221,12 +207,7 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
             }
         }
 
-        AtomicLong getStartTime() {
-            return startTime;
-        }
-
-
-        public long getElapsedTime() {
+        long getElapsedTime() {
             return elapsedTime;
         }
 

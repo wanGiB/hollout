@@ -56,6 +56,10 @@ import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.raizlabs.android.dbflow.structure.BaseModel;
+import com.vanniktech.emoji.EmojiPopup;
+import com.vanniktech.emoji.listeners.OnEmojiPopupDismissListener;
+import com.vanniktech.emoji.listeners.OnEmojiPopupShownListener;
+import com.vanniktech.emoji.listeners.OnSoftKeyboardOpenListener;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
@@ -63,7 +67,6 @@ import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.clients.ChatClient;
-import com.wan.hollout.emoji.EmojiDrawer;
 import com.wan.hollout.enums.MessageDirection;
 import com.wan.hollout.enums.MessageStatus;
 import com.wan.hollout.enums.MessageType;
@@ -93,7 +96,6 @@ import com.wan.hollout.ui.widgets.InputPanel;
 import com.wan.hollout.ui.widgets.KeyboardAwareLinearLayout;
 import com.wan.hollout.ui.widgets.LinkPreview;
 import com.wan.hollout.ui.widgets.RoundedImageView;
-import com.wan.hollout.ui.widgets.Stub;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
@@ -111,7 +113,6 @@ import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.SafeLayoutManager;
 import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.VCFContactData;
-import com.wan.hollout.utils.ViewUtil;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 import net.alhazmy13.mediapicker.Video.VideoPicker;
@@ -142,6 +143,7 @@ import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_DOCUMENT;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_GIF;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_IMAGE;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_LOCATION;
+import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_REACTION;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.ADD_VIDEO;
 import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
 
@@ -160,7 +162,6 @@ public class ChatActivity extends BaseActivity implements
     protected static final int MESSAGE_TYPE_SENT_CALL = 2;
 
     private AttachmentTypeSelector attachmentTypeSelector;
-    private Stub<EmojiDrawer> emojiDrawerStub;
 
     @BindView(R.id.bottom_panel)
     InputPanel inputPanel;
@@ -378,6 +379,9 @@ public class ChatActivity extends BaseActivity implements
         return messages;
     }
 
+    private boolean canGoBackToMain = false;
+    private EmojiPopup emojiPopup;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -385,6 +389,7 @@ public class ChatActivity extends BaseActivity implements
         setContentView(R.layout.activity_chat);
         dynamicLanguage.onCreate(this);
         ButterKnife.bind(this);
+        setupEmojiPopup();
         setSupportActionBar(chatToolbar.getToolbar());
         Bundle intentExtras = getIntent().getExtras();
         initBasicComponents();
@@ -395,6 +400,7 @@ public class ChatActivity extends BaseActivity implements
             finish();
             return;
         }
+        canGoBackToMain = intentExtras.getBoolean(AppConstants.CAN_LAUNCH_MAIN, false);
         recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
         if (recipientProperties != null) {
             chatType = recipientProperties.getInt(AppConstants.CHAT_TYPE);
@@ -413,6 +419,27 @@ public class ChatActivity extends BaseActivity implements
         checkBlackListStatus();
         createDeleteConversationProgressDialog();
         setActiveChat();
+    }
+
+    private void setupEmojiPopup() {
+        emojiPopup = EmojiPopup.Builder.fromRootView(container)
+                .setOnEmojiPopupShownListener(new OnEmojiPopupShownListener() {
+                    @Override
+                    public void onEmojiPopupShown() {
+                        inputPanel.setEmojiToggleToKeyboard();
+                    }
+                }).setOnSoftKeyboardOpenListener(new OnSoftKeyboardOpenListener() {
+                    @Override
+                    public void onKeyboardOpen(int keyBoardHeight) {
+                        inputPanel.setEmojiToggleToEmoji();
+                    }
+                }).setOnEmojiPopupDismissListener(new OnEmojiPopupDismissListener() {
+                    @Override
+                    public void onEmojiPopupDismiss() {
+                        inputPanel.setEmojiToggleToEmoji();
+                    }
+                })
+                .build(composeText);
     }
 
     private void replaceMessageAtIndexAsync(final int indexOfMessage, final ChatMessage newMessage) {
@@ -474,6 +501,7 @@ public class ChatActivity extends BaseActivity implements
         String lastAttemptedMessageForRecipient = HolloutPreferences.getLastAttemptedMessage(recipientId);
         if (StringUtils.isNotEmpty(lastAttemptedMessageForRecipient)) {
             composeText.setText(lastAttemptedMessageForRecipient);
+            HolloutPreferences.clearPreviousAttemptedMessage(recipientId);
         } else {
             if (!isAContact() && messages.isEmpty()) {
                 composeText.setText(getString(R.string.nice_to_meet_you));
@@ -771,6 +799,9 @@ public class ChatActivity extends BaseActivity implements
             case ADD_GIF:
                 attachmentTypeSelector.loadGifs(this, null, 0);
                 break;
+            case ADD_REACTION:
+                attachmentTypeSelector.loadReactions();
+                break;
         }
     }
 
@@ -779,7 +810,6 @@ public class ChatActivity extends BaseActivity implements
             attachmentTypeSelector = new AttachmentTypeSelector(this, getSupportLoaderManager(), new AttachmentTypeListener());
         }
         attachmentTypeSelector.show(attachButton);
-        UiUtils.showView(inputPanel, false);
         attachmentTypeSelector.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
@@ -789,8 +819,6 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void initializeViews() {
-        emojiDrawerStub = ViewUtil.findStubById(this, R.id.emoji_drawer_stub);
-
         container.addOnKeyboardShownListener(this);
         inputPanel.setListener(this);
 
@@ -840,7 +868,12 @@ public class ChatActivity extends BaseActivity implements
         recipientProperties = null;
         recipientId = null;
         DirectModelNotifier.get().unregisterForModelChanges(ChatMessage.class, onModelStateChangedListener);
-        super.onBackPressed();
+        if (canGoBackToMain) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private class ComposeKeyPressedListener implements View.OnKeyListener, View.OnClickListener, TextWatcher, View.OnFocusChangeListener {
@@ -1480,15 +1513,7 @@ public class ChatActivity extends BaseActivity implements
 
     @Override
     public void onEmojiToggle() {
-        if (!emojiDrawerStub.resolved()) {
-            inputPanel.setEmojiDrawer(emojiDrawerStub.get());
-            emojiDrawerStub.get().setEmojiEventListener(inputPanel);
-        }
-        if (container.getCurrentInput() == emojiDrawerStub.get()) {
-            container.showSoftKeyboard(composeText);
-        } else {
-            container.show(composeText, emojiDrawerStub.get());
-        }
+        emojiPopup.toggle();
     }
 
     @Override

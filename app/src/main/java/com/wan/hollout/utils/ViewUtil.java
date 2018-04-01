@@ -40,8 +40,7 @@ import android.view.animation.Animation;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 
-import com.wan.hollout.emoji.concurrent.ListenableFuture;
-import com.wan.hollout.emoji.concurrent.SettableFuture;
+import com.wan.hollout.interfaces.ListenableFuture;
 import com.wan.hollout.language.DynamicLanguage;
 import com.wan.hollout.ui.widgets.Stub;
 

@@ -60,9 +60,9 @@
                 android:layout_marginRight="10dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone"
-                tools:ignore="RtlHardcoded"
-                android:focusable="true">
+                tools:ignore="RtlHardcoded">
 
                 <ImageView
                     android:id="@+id/scroll_to_bottom_button"
@@ -91,13 +91,6 @@
         </FrameLayout>
 
         <include layout="@layout/conversation_input_panel" />
-
-        <ViewStub
-            android:id="@+id/emoji_drawer_stub"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inflatedId="@+id/emoji_drawer"
-            android:layout="@layout/conversation_activity_emojidrawer_stub" />
 
     </LinearLayout>
 

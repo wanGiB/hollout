@@ -245,21 +245,18 @@
                 android:gravity="center"
                 android:orientation="vertical">
 
-                <com.wan.hollout.ui.widgets.CircleColorImageView
-                    android:id="@+id/close_button"
+                <ImageView
+                    android:id="@+id/reactions_invoker"
                     android:layout_width="55dp"
                     android:layout_height="55dp"
-                    android:contentDescription="@string/attachment_type_selector__drawer_description"
-                    android:scaleType="center"
-                    android:src="@drawable/ic_keyboard_arrow_down_white_36dp"
-                    app:circleColor="@color/gray50" />
+                    android:contentDescription="@string/attachment_type_selector__drawer_description" />
 
                 <com.wan.hollout.ui.widgets.HolloutTextView
                     style="@style/AttachmentTypeLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="@string/empty_content"
+                    android:text="Reaction"
                     app:textStyle="medium" />
 
             </LinearLayout>
@@ -271,7 +268,7 @@
     <RelativeLayout
         android:id="@+id/giphy_window"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
+        android:layout_height="320dp"
         android:background="@color/white"
         android:visibility="gone">
 
@@ -361,6 +358,34 @@
                 android:layout_gravity="center" />
 
         </FrameLayout>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/reactions_window"
+        android:layout_width="match_parent"
+        android:layout_height="320dp"
+        android:background="@color/white"
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/close_reactions_view"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_close_black_48dp"
+            tools:ignore="ContentDescription" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/reactions_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/close_reactions_view"
+            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp" />
 
     </RelativeLayout>
 

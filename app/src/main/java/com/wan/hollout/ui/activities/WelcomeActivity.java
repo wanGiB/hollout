@@ -173,7 +173,7 @@ public class WelcomeActivity extends BaseActivity
         UiUtils.dismissProgressDialog(progressDialog);
         progressDialog = UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
         if (comingFromLogIn) {
-            tryRetrieveChats(new DoneCallback<Boolean>() {
+            tryRetrieveChats(progressDialog, new DoneCallback<Boolean>() {
                 @Override
                 public void done(Boolean signInSuccess, Exception e) {
                     if (e == null && signInSuccess) {
@@ -192,7 +192,7 @@ public class WelcomeActivity extends BaseActivity
         }
     }
 
-    protected void tryRetrieveChats(final DoneCallback<Boolean> backUpCompletedOptionCallback) {
+    protected void tryRetrieveChats(final ProgressDialog progressDialog, final DoneCallback<Boolean> backUpCompletedOptionCallback) {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
             FirebaseUtils.getArchives().child(signedInUser.getString(AppConstants.REAL_OBJECT_ID)).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -201,6 +201,7 @@ public class WelcomeActivity extends BaseActivity
                     if (dataSnapshot != null && dataSnapshot.exists()) {
                         String fetchedContent = dataSnapshot.getValue(String.class);
                         if (StringUtils.isNotEmpty(fetchedContent)) {
+                            progressDialog.setMessage("Retrieving Messages...");
                             JsonReader jsonReader = new JsonReader(new StringReader(fetchedContent));
                             jsonReader.setLenient(true);
                             HolloutLogger.d("FetchedMessagesString", fetchedContent);

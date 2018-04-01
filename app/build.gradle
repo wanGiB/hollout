@@ -6,6 +6,7 @@ repositories {
 }
 
 def dbflow_version = "4.2.4"
+def htextview_version = "0.1.2"
 
 android {
     compileSdkVersion 27
@@ -15,8 +16,8 @@ android {
         applicationId "com.wan.hollout"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 35
-        versionName "3.2.5"
+        versionCode 38
+        versionName "3.2.8"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true //important
@@ -128,6 +129,10 @@ dependencies {
     implementation 'com.tonyodev.fetch2:fetch2:2.0.0-RC8'
     implementation project(':truesdk')
     implementation "com.mikepenz:iconics-core:3.0.3@aar"
+    compile "com.hanks:htextview-base:${htextview_version}"
+    compile "com.hanks:htextview-scale:${htextview_version}"
+    compile 'com.github.javiersantos:AppUpdater:2.6.4'
+    compile 'com.vanniktech:emoji-ios:0.5.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

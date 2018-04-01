@@ -22,10 +22,9 @@ import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
-import com.wan.hollout.emoji.EmojiEditText;
 import com.wan.hollout.utils.HolloutPreferences;
 
-public class ComposeText extends EmojiEditText {
+public class ComposeText extends com.vanniktech.emoji.EmojiEditText {
 
     private SpannableString hint;
     private SpannableString subHint;
@@ -36,10 +35,6 @@ public class ComposeText extends EmojiEditText {
 
     public ComposeText(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    public ComposeText(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
     }
 
     @SuppressLint("DrawAllocation")

@@ -87,7 +87,7 @@
                     android:background="@android:color/white"
                     android:clipToPadding="false">
 
-                    <com.wan.hollout.emoji.EmojiToggle
+                    <com.wan.hollout.ui.widgets.EmojiToggle
                         android:id="@+id/emoji_toggle"
                         android:layout_width="30dp"
                         android:layout_height="30dp"

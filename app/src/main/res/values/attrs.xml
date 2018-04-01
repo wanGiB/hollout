@@ -3,13 +3,13 @@
 
     <attr name="ate_key" format="string" />
 
-    <attr name="mcab_title" format="string"/>
-    <attr name="mcab_title_color" format="color"/>
-    <attr name="mcab_popup_theme" format="reference"/>
-    <attr name="mcab_contentinset_start" format="dimension"/>
-    <attr name="mcab_menu" format="reference"/>
-    <attr name="mcab_background_color" format="color"/>
-    <attr name="mcab_close_drawable" format="reference"/>
+    <attr name="mcab_title" format="string" />
+    <attr name="mcab_title_color" format="color" />
+    <attr name="mcab_popup_theme" format="reference" />
+    <attr name="mcab_contentinset_start" format="dimension" />
+    <attr name="mcab_menu" format="reference" />
+    <attr name="mcab_background_color" format="color" />
+    <attr name="mcab_close_drawable" format="reference" />
 
     <declare-styleable name="PageIndicator">
         <attr name="indicator_spacing" format="dimension" />
@@ -94,9 +94,12 @@
     <declare-styleable name="HolloutTextView">
         <attr name="textStyle" />
         <attr name="text_animationStyle" />
-        <attr name="typerSpeed" format="integer" />
-        <attr name="charIncrease" format="integer" />
-        <attr name="emojiconSize" format="dimension" />
+         />
+    </declare-styleable>
+
+    <declare-styleable name="ChatMessageTextView">
+        <attr name="textStyle" />
+        <attr name="text_animationStyle" />
     </declare-styleable>
 
     <attr name="textStyle" format="enum">
@@ -109,7 +112,7 @@
         <enum name="colophon" value="6" />
         <enum name="font_awesome" value="7" />
         <enum name="none" value="8" />
-        <enum name="bold_normal" value="9"/>
+        <enum name="bold_normal" value="9" />
     </attr>
 
     <attr name="text_animationStyle" format="enum">
@@ -220,34 +223,6 @@
     <declare-styleable name="CircleImageView">
         <attr name="border_width" format="dimension" />
         <attr name="border_color" format="color" />
-    </declare-styleable>
-
-    <declare-styleable name="PagerSlidingTabStrip">
-        <attr name="pstsIndicatorColor" format="color" />
-        <attr name="pstsUnderlineColor" format="color" />
-        <attr name="pstsDividerColor" format="color" />
-        <attr name="pstsDividerWidth" format="dimension" />
-        <attr name="pstsIndicatorHeight" format="dimension" />
-        <attr name="pstsUnderlineHeight" format="dimension" />
-        <attr name="pstsDividerPadding" format="dimension" />
-        <attr name="pstsTabPaddingLeftRight" format="dimension" />
-        <attr name="pstsScrollOffset" format="dimension" />
-        <attr name="pstsTabBackground" format="reference" />
-        <attr name="pstsShouldExpand" format="boolean" />
-        <attr name="pstsTextAllCaps" format="boolean" />
-        <attr name="pstsPaddingMiddle" format="boolean" />
-        <attr name="pstsTextColorSelected" format="color" />
-        <attr name="pstsTextAlpha" format="integer" />
-        <attr name="pstsTextStyle">
-            <flag name="normal" value="0x0" />
-            <flag name="bold" value="0x1" />
-            <flag name="italic" value="0x2" />
-        </attr>
-        <attr name="pstsTextSelectedStyle">
-            <flag name="normal" value="0x0" />
-            <flag name="bold" value="0x1" />
-            <flag name="italic" value="0x2" />
-        </attr>
     </declare-styleable>
 
     <attr name="emoji_tab_strip_background" format="color" />

@@ -351,4 +351,6 @@
     <string name="tap_to_change_profile_photo">Tap to change profile photo</string>
     <string name="age_">Age:</string>
     <string name="invite_friends_via">Invite Friends Via</string>
+    <string name="a_new_version_of_hollout_is_available">A new version of hollout is available.</string>
+    <string name="update_">UPDATE</string>
 </resources>

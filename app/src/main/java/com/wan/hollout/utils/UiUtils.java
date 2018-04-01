@@ -63,15 +63,13 @@ import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
-import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.emoji.concurrent.ListenableFuture;
-import com.wan.hollout.emoji.concurrent.SettableFuture;
+import com.wan.hollout.interfaces.DoneCallback;
+import com.wan.hollout.interfaces.ListenableFuture;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.ui.adapters.FeaturedPhotosCircleAdapter;
-import com.wan.hollout.ui.utils.Preconditions;
 import com.wan.hollout.ui.widgets.CircularProgressButton;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
@@ -289,7 +287,8 @@ public class UiUtils {
                                 @Override
                                 public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                                     imageView.setImageResource(R.mipmap.ic_launcher);
-                                    HolloutLogger.d(TAG, "An exception was raised while loading an image ");
+                                    HolloutLogger.d(TAG, "An exception was raised while loading an image. Error Message = "
+                                            + (e != null && e.getMessage() != null ? e.getMessage() : "") + " For Photo Url = " + photoPath);
                                     return false;
                                 }
 

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
@@ -35,10 +36,16 @@ import com.esotericsoftware.kryo.NotNull;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.wan.hollout.R;
+import com.wan.hollout.animations.KeyframesDrawable;
+import com.wan.hollout.animations.KeyframesDrawableBuilder;
+import com.wan.hollout.animations.deserializers.KFImageDeserializer;
+import com.wan.hollout.animations.model.KFImage;
+import com.wan.hollout.eventbuses.ReactionMessageEvent;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.listeners.OnSingleClickListener;
 import com.wan.hollout.ui.adapters.GifsAdapter;
+import com.wan.hollout.ui.adapters.ReactionsAdapter;
 import com.wan.hollout.utils.ApiUtils;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.ItemOffSetDecoration;
@@ -46,10 +53,15 @@ import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.ViewUtil;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.raizlabs.android.dbflow.config.FlowManager.getContext;
 
 @SuppressWarnings("deprecation")
 public class AttachmentTypeSelector extends PopupWindow {
@@ -61,6 +73,7 @@ public class AttachmentTypeSelector extends PopupWindow {
     public static final int ADD_DOCUMENT = 5;
     public static final int ADD_LOCATION = 6;
     public static final int ADD_GIF = 7;
+    public static final int ADD_REACTION = 8;
 
     private static final int ANIMATION_DURATION = 300;
 
@@ -87,7 +100,7 @@ public class AttachmentTypeSelector extends PopupWindow {
     ImageView gifButton;
     private final
     @NonNull
-    ImageView closeButton;
+    ImageView reactionsInvoker;
 
     private
     @NonNull
@@ -101,8 +114,14 @@ public class AttachmentTypeSelector extends PopupWindow {
     @NonNull
     View gifWindow;
 
+    @NonNull
+    private View reactionsWindow;
+
     @NotNull
     private RecyclerView gifRecyclerView;
+
+    @NonNull
+    private RecyclerView reactionsRecyclerView;
 
     @NonNull
     private ProgressBar gifLoadingProgressWheel;
@@ -115,6 +134,9 @@ public class AttachmentTypeSelector extends PopupWindow {
     @Nullable
     View currentAnchor;
 
+    @NonNull
+    private ImageView closeReactionsView;
+
     private
     @Nullable
     AttachmentClickedListener listener;
@@ -125,6 +147,8 @@ public class AttachmentTypeSelector extends PopupWindow {
     private List<String> gifs = new ArrayList<>();
     private Activity activity;
     private View footerView;
+
+    private ReactionsAdapter reactionsAdapter;
 
     public AttachmentTypeSelector(@NonNull Context context, @NonNull LoaderManager loaderManager, @Nullable AttachmentClickedListener listener) {
         super(context);
@@ -140,15 +164,18 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.documentButton = ViewUtil.findById(layout, R.id.document_button);
         this.locationButton = ViewUtil.findById(layout, R.id.location_button);
         this.gifButton = ViewUtil.findById(layout, R.id.giphy_button);
-        this.closeButton = ViewUtil.findById(layout, R.id.close_button);
+        this.reactionsInvoker = ViewUtil.findById(layout, R.id.reactions_invoker);
         this.closeGifWindow = ViewUtil.findById(layout, R.id.close_giphy);
         this.attachmentWindow = ViewUtil.findById(layout, R.id.attachment_window);
         this.gifWindow = ViewUtil.findById(layout, R.id.giphy_window);
+        this.reactionsWindow = ViewUtil.findById(layout, R.id.reactions_window);
+        this.closeReactionsView = ViewUtil.findById(layout, R.id.close_reactions_view);
 
         ImageView dummySearchGifImageView = ViewUtil.findById(layout, R.id.dummy_search_image_view);
 
         this.gifSearchBox = ViewUtil.findById(layout, R.id.gif_search_box);
         this.gifRecyclerView = ViewUtil.findById(layout, R.id.gif_recycler_view);
+        reactionsRecyclerView = ViewUtil.findById(layout, R.id.reactions_recycler_view);
         this.gifLoadingProgressWheel = ViewUtil.findById(layout, R.id.gif_progress_wheel);
 
         this.imageButton.setOnClickListener(new PropagatingClickListener(ADD_IMAGE));
@@ -158,7 +185,9 @@ public class AttachmentTypeSelector extends PopupWindow {
         this.documentButton.setOnClickListener(new PropagatingClickListener(ADD_DOCUMENT));
         this.locationButton.setOnClickListener(new PropagatingClickListener(ADD_LOCATION));
         this.gifButton.setOnClickListener(new PropagatingClickListener(ADD_GIF));
-        this.closeButton.setOnClickListener(new CloseClickListener());
+        this.reactionsInvoker.setOnClickListener(new PropagatingClickListener(ADD_REACTION));
+
+        loadHahaToReactionsInvoker();
 
         dummySearchGifImageView.setOnClickListener(new OnSingleClickListener() {
 
@@ -190,6 +219,14 @@ public class AttachmentTypeSelector extends PopupWindow {
 
         });
 
+        closeReactionsView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UiUtils.showView(attachmentWindow, true);
+                UiUtils.showView(reactionsWindow, false);
+            }
+        });
+
         loaderManager.initLoader(1, null, recentPhotos);
         setupGifsFooterLoader();
         setupGifsAdapter();
@@ -217,6 +254,28 @@ public class AttachmentTypeSelector extends PopupWindow {
 
         });
 
+    }
+
+    private static InputStream stream;
+
+    private KFImage getKFImage(Context context, String fileName) {
+        AssetManager assetManager = context.getAssets();
+        KFImage kfImage = null;
+        try {
+            stream = assetManager.open(fileName);
+            kfImage = KFImageDeserializer.deserialize(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return kfImage;
+    }
+
+    private void loadHahaToReactionsInvoker() {
+        String hahaReactions = "reactions/Haha.json";
+        KeyframesDrawable imageDrawable = new KeyframesDrawableBuilder().withImage(getKFImage(getContext(),
+                hahaReactions)).build();
+        reactionsInvoker.setImageDrawable(imageDrawable);
+        imageDrawable.startAnimation();
     }
 
     @SuppressLint("InflateParams")
@@ -254,7 +313,7 @@ public class AttachmentTypeSelector extends PopupWindow {
             animateButtonIn(videoButton, ANIMATION_DURATION / 4);
             animateButtonIn(gifButton, ANIMATION_DURATION / 4);
             animateButtonIn(contactButton, 0);
-            animateButtonIn(closeButton, 0);
+            animateButtonIn(reactionsInvoker, 0);
         }
 
     }
@@ -263,10 +322,16 @@ public class AttachmentTypeSelector extends PopupWindow {
         closeGifWindow.performClick();
     }
 
+    private void closeReactionsWindow() {
+        closeReactionsView.performClick();
+    }
+
     @Override
     public void dismiss() {
         if (gifWindow.getVisibility() == View.VISIBLE) {
             closeGifWindow();
+        } else if (reactionsWindow.getVisibility() == View.VISIBLE) {
+            closeReactionsWindow();
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 animateWindowOutCircular(currentAnchor, getContentView());
@@ -356,6 +421,7 @@ public class AttachmentTypeSelector extends PopupWindow {
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
+
             }
 
             @Override
@@ -499,6 +565,33 @@ public class AttachmentTypeSelector extends PopupWindow {
 
     }
 
+    public void loadReactions() {
+        UiUtils.showView(gifWindow, false);
+        UiUtils.showView(attachmentWindow, false);
+        UiUtils.showView(reactionsWindow, true);
+        if (reactionsAdapter == null) {
+            initReactionsAdapter();
+        } else {
+            reactionsAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void initReactionsAdapter() {
+        reactionsAdapter = new ReactionsAdapter(getContext(),
+                new ReactionsAdapter.ReactionSelectedListener() {
+                    @Override
+                    public void onReactionSelected(String reaction) {
+                        EventBus.getDefault().post(new ReactionMessageEvent(reaction));
+                        dismiss();
+                        dismiss();
+                    }
+                });
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 3);
+        reactionsRecyclerView.addItemDecoration(new ItemOffSetDecoration(getContext(), R.dimen.item_offset_eight));
+        reactionsRecyclerView.setLayoutManager(gridLayoutManager);
+        reactionsRecyclerView.setAdapter(reactionsAdapter);
+    }
+
     private class RecentPhotoSelectedListener implements RecentPhotoViewRail.OnItemClickedListener {
 
         @Override
@@ -519,19 +612,10 @@ public class AttachmentTypeSelector extends PopupWindow {
 
         @Override
         public void onClick(View v) {
-            if (v.getId() != R.id.giphy_button) {
+            if (v.getId() != R.id.giphy_button && v.getId() != R.id.reactions_invoker) {
                 animateWindowOutTranslate(getContentView());
             }
             if (listener != null) listener.onClick(type);
-        }
-
-    }
-
-    private class CloseClickListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            dismiss();
         }
 
     }

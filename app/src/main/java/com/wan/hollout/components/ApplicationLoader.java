@@ -19,6 +19,8 @@ import com.raizlabs.android.dbflow.config.FlowConfig;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.tonyodev.fetch2.Fetch;
+import com.vanniktech.emoji.EmojiManager;
+import com.vanniktech.emoji.ios.IosEmojiProvider;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.database.HolloutDb;
@@ -77,6 +79,11 @@ public class ApplicationLoader extends Application {
         startAppInstanceDetector();
         defaultSystemEmojiPref();
         checkAndRegEventBus();
+        setupEmoji();
+    }
+
+    private void setupEmoji() {
+        EmojiManager.install(new IosEmojiProvider());
     }
 
     @SuppressWarnings("unused")
