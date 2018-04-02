@@ -201,7 +201,9 @@ public class WelcomeActivity extends BaseActivity
                     if (dataSnapshot != null && dataSnapshot.exists()) {
                         String fetchedContent = dataSnapshot.getValue(String.class);
                         if (StringUtils.isNotEmpty(fetchedContent)) {
-                            progressDialog.setMessage("Retrieving Messages...");
+                            if (progressDialog != null) {
+                                progressDialog.setMessage("Retrieving Messages...");
+                            }
                             JsonReader jsonReader = new JsonReader(new StringReader(fetchedContent));
                             jsonReader.setLenient(true);
                             HolloutLogger.d("FetchedMessagesString", fetchedContent);

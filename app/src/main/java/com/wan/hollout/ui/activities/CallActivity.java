@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.activities;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
@@ -11,10 +12,13 @@ import android.media.SoundPool;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.Vibrator;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 
+import com.github.nisrulz.sensey.ProximityDetector;
+import com.github.nisrulz.sensey.Sensey;
 import com.wan.hollout.R;
 import com.wan.hollout.utils.AppConstants;
 
@@ -50,6 +54,9 @@ public abstract class CallActivity extends BaseActivity {
     protected Vibrator mVibrator;
     protected MediaPlayer mediaPlayer;
 
+    private ProximityDetector.ProximityListener proximityListener;
+    private PowerManager.WakeLock wakeLock;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,12 +64,54 @@ public abstract class CallActivity extends BaseActivity {
             finish();
             return;
         }
-        // keep the screen lit, close the input method, and unlock the device
+        keepScreeOn();
+        EventBus.getDefault().post(AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER);
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        if (powerManager != null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
+                    | PowerManager.ACQUIRE_CAUSES_WAKEUP, "TAG");
+        }
+        proximityListener = new ProximityDetector.ProximityListener() {
+
+            @Override
+            public void onNear() {
+                if (wakeLock != null) {
+                    if (wakeLock.isHeld()) {
+                        wakeLock.release();
+                    }
+                }
+            }
+
+            @SuppressLint("WakelockTimeout")
+            @Override
+            public void onFar() {
+                if (wakeLock != null) {
+                    wakeLock.acquire();
+                }
+            }
+
+        };
+        Sensey.getInstance().startProximityDetection(proximityListener);
+    }
+
+    private void keepScreeOn() {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
                 | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
-        EventBus.getDefault().post(AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (proximityListener != null) {
+            Sensey.getInstance().stopProximityDetection(proximityListener);
+            if (wakeLock != null) {
+                if (wakeLock.isHeld()) {
+                    wakeLock.release();
+                }
+            }
+        }
     }
 
     /**

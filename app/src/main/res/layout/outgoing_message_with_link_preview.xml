@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:visibility="visible" />
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
+            <com.wan.hollout.ui.widgets.ChatMessageTextView
                 android:id="@+id/message_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

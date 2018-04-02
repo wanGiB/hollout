@@ -60,13 +60,18 @@
             android:id="@+id/bottom_panel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@android:color/white"
             android:clickable="true"
             android:clipChildren="false"
             android:clipToPadding="false"
             android:focusable="true"
-            android:background="@android:color/white"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:paddingBottom="14dp"
+            android:paddingEnd="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingStart="10dp"
+            android:paddingTop="14dp">
 
             <com.wan.hollout.ui.widgets.AnimatingToggle
                 android:id="@+id/compose_or_record_toggle"
@@ -74,8 +79,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:clipChildren="false"
                 android:background="@android:color/white"
+                android:clipChildren="false"
                 android:clipToPadding="false">
 
                 <LinearLayout
@@ -83,8 +88,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:clipChildren="false"
                     android:background="@android:color/white"
+                    android:clipChildren="false"
                     android:clipToPadding="false">
 
                     <com.wan.hollout.ui.widgets.EmojiToggle
@@ -124,6 +129,8 @@
                         android:layout_width="30dp"
                         android:layout_height="30dp"
                         android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginRight="10dp"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:contentDescription="@string/conversation_activity__quick_attachment_drawer_toggle_camera_description"
@@ -131,8 +138,6 @@
                         android:paddingBottom="4dp"
                         android:paddingEnd="20dp"
                         android:paddingLeft="12dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_marginEnd="10dp"
                         android:paddingRight="20dp"
                         android:paddingStart="12dp"
                         android:rotation="-45"
@@ -200,6 +205,7 @@
             <com.wan.hollout.ui.widgets.AnimatingToggle
                 android:id="@+id/control_toggle"
                 android:layout_width="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:layout_height="wrap_content">
 
                 <android.support.design.widget.FloatingActionButton
@@ -222,6 +228,7 @@
                     android:id="@+id/send_button_container"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true">
@@ -229,12 +236,14 @@
                     <FrameLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:background="@color/colorAccent">
 
                         <ImageView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:padding="10dp"
+                            android:layout_gravity="center_vertical"
                             android:src="@drawable/ic_ami_send_24dp"
                             tools:ignore="ContentDescription" />
 

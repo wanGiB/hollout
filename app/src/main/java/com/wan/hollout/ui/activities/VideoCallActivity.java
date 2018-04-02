@@ -353,6 +353,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            CallClient.getInstance().startCallClient();
             if (isInComingCall) {
                 answerCall();
             } else {

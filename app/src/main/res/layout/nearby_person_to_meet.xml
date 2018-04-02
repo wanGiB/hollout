@@ -19,14 +19,14 @@
         android:paddingStart="5dp"
         tools:ignore="UselessParent">
 
-        <FrameLayout
+        <RelativeLayout
             android:id="@+id/icon_profile_container"
             android:layout_width="@dimen/icon_width_height"
             android:layout_height="@dimen/icon_width_height"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="16dp"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="8dp"
+            android:layout_marginLeft="16dp"
             android:layout_marginStart="16dp">
 
             <com.wan.hollout.ui.widgets.CircleImageView
@@ -36,16 +36,17 @@
                 android:src="@drawable/empty_profile"
                 tools:ignore="ContentDescription" />
 
-            <com.wan.hollout.ui.widgets.CircleImageView
+            <ImageView
                 android:id="@+id/online_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="3dp"
-                android:layout_marginStart="3dp"
-                android:src="@drawable/ic_online"
-                android:visibility="gone" />
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_alignRight="@id/icon_profile"
+                android:layout_alignTop="@id/icon_profile"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/shape_bubble_online"
+                />
 
-        </FrameLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/message_container"

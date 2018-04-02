@@ -53,7 +53,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
 
     private static final String TAG = "MessageReplyRecyclerItemView";
     private HolloutTextView replyTitleView;
-    private HolloutTextView replySubTitleView;
+    private ChatMessageTextView replySubTitleView;
     private FrameLayout replyAttachmentView;
     private ImageView replyIconView;
     private ImageView playReplyIconView;
@@ -78,7 +78,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
 
     private void initView() {
         replyTitleView = (HolloutTextView) findViewById(R.id.reply_title);
-        replySubTitleView = (HolloutTextView) findViewById(R.id.reply_message_body);
+        replySubTitleView = (ChatMessageTextView) findViewById(R.id.reply_message_body);
         replyAttachmentView = (FrameLayout) findViewById(R.id.reply_attachment_view);
         replyIconView = (ImageView) findViewById(R.id.reply_icon);
         playReplyIconView = (ImageView) findViewById(R.id.play_reply_msg_if_video);

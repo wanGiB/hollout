@@ -116,4 +116,5 @@
     <dimen name="dimen_24_dp">24dp</dimen>
     <dimen name="dimen_swipe_minumum_x">32dp</dimen>
 
+    <dimen name="emoji_size">30dp</dimen>
 </resources>

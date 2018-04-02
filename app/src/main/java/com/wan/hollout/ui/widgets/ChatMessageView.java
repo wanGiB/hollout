@@ -138,7 +138,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     @Nullable
     @BindView(R.id.message_body)
-    TextView messageBodyView;
+    ChatMessageTextView messageBodyView;
 
     @Nullable
     @BindView(R.id.textview_time)
@@ -190,6 +190,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         this.activity = context;
         this.message = messageObject;
         this.searchString = searchString;
+        if (messageBodyView != null) {
+            messageBodyView.setEmojiSizeRes(R.dimen.emoji_size,true);
+        }
         setupMessageBubble();
         setupMessageBody(searchString);
         setupMessageTimeAndDeliveryStatus();

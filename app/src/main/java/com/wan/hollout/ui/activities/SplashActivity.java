@@ -68,7 +68,7 @@ public class SplashActivity extends AppCompatActivity {
             }
         } else {
             if (fromMain) {
-                FlowManager.close();
+                FlowManager.reset();
                 reInitializeDatabase();
             }
             launchWelcomeActivity();

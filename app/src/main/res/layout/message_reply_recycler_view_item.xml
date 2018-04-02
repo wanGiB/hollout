@@ -39,7 +39,7 @@
                 app:textStyle="bold_normal"
                 tools:ignore="RtlSymmetry" />
 
-            <com.wan.hollout.ui.widgets.HolloutTextView
+            <com.wan.hollout.ui.widgets.ChatMessageTextView
                 android:id="@+id/reply_message_body"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

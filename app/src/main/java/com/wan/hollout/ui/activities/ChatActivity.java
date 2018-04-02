@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
@@ -27,11 +28,13 @@ import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SimpleItemAnimator;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.FrameLayout;
@@ -98,6 +101,7 @@ import com.wan.hollout.ui.widgets.LinkPreview;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.DateFormatter;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FilePathFinder;
 import com.wan.hollout.utils.FileUtils;
@@ -132,6 +136,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -551,7 +556,9 @@ public class ChatActivity extends BaseActivity implements
         messagesRecyclerView.setLayoutManager(messagesLayoutManager);
         StickyRecyclerHeadersDecoration stickyRecyclerHeadersDecoration = new StickyRecyclerHeadersDecoration(messagesAdapter);
         messagesRecyclerView.addItemDecoration(stickyRecyclerHeadersDecoration);
-        messagesRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        SimpleItemAnimator itemAnimator = new DefaultItemAnimator();
+        itemAnimator.setSupportsChangeAnimations(false);
+        messagesRecyclerView.setItemAnimator(itemAnimator);
         messagesRecyclerView.setAdapter(messagesAdapter);
         messagesRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(messagesLayoutManager) {
 
@@ -818,6 +825,7 @@ public class ChatActivity extends BaseActivity implements
         });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initializeViews() {
         container.addOnKeyboardShownListener(this);
         inputPanel.setListener(this);
@@ -828,6 +836,7 @@ public class ChatActivity extends BaseActivity implements
         ComposeKeyPressedListener composeKeyPressedListener = new ComposeKeyPressedListener();
 
         composeText.setOnEditorActionListener(sendButtonOnClickListener);
+        initTouchListener();
         attachButton.setOnClickListener(new AttachButtonListener());
 
         recordAudioButton.setOnClickListener(sendButtonOnClickListener);
@@ -842,6 +851,18 @@ public class ChatActivity extends BaseActivity implements
         composeText.setOnFocusChangeListener(composeKeyPressedListener);
         cancelPickedSingleMedia.setOnClickListener(this);
         scrollToBottomFrame.setOnClickListener(this);
+    }
+
+    private void initTouchListener() {
+        composeText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (emojiPopup.isShowing()) {
+                    emojiPopup.dismiss();
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -2277,6 +2298,13 @@ public class ChatActivity extends BaseActivity implements
         checkAcceptPendingInvitation();
     }
 
+    @SuppressWarnings("unchecked")
+    private boolean isPreviousSameDate(int position, Date dateToCompare) {
+        if (messages.size() <= position) return false;
+        Date previousPositionDate = new Date(messages.get(position).getTimeStamp());
+        return DateFormatter.isSameDay(dateToCompare, previousPositionDate);
+    }
+
     private void checkAndAddNewMessage(ChatMessage newMessage) {
         if (!messages.contains(newMessage)) {
             messages.add(0, newMessage);
@@ -2284,9 +2312,19 @@ public class ChatActivity extends BaseActivity implements
                 UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
             }
         }
-        notifyDataSetChanged();
+        if (messagesAdapter.getItemCount() == 0) {
+            notifyDataSetChanged();
+        } else {
+            messagesAdapter.notifyItemInserted(messages.size());
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    notifyDataSetChanged();
+                }
+            }, 100);
+        }
         invalidateEmptyView();
-        messagesRecyclerView.smoothScrollToPosition(0);
+        messagesRecyclerView.scrollToPosition(0);
     }
 
     public void checkAcceptPendingInvitation() {

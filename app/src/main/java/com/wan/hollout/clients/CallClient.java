@@ -192,7 +192,10 @@ public class CallClient extends ContextWrapper {
     }
 
     public Call getCall(String callId) {
-        return sinchClient.getCallClient().getCall(callId);
+        if (sinchClient != null) {
+            return sinchClient.getCallClient().getCall(callId);
+        }
+        return null;
     }
 
     public boolean isCallClientStarted() {

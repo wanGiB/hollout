@@ -297,7 +297,7 @@ public class ConversationsFragment extends BaseFragment {
         if (!conversations.isEmpty()) {
             if (!AppConstants.recentConversations.isEmpty()) {
                 for (ParseObject parseObject : AppConstants.recentConversations) {
-                    ConversationItem conversationItem = new ConversationItem(parseObject,
+                    final ConversationItem conversationItem = new ConversationItem(parseObject,
                             HolloutPreferences.getLastConversationTime(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
                     if (!conversations.contains(conversationItem)) {
                         conversations.add(0, conversationItem);
@@ -306,8 +306,13 @@ public class ConversationsFragment extends BaseFragment {
                         int indexOfConversation = conversations.indexOf(conversationItem);
                         if (indexOfConversation != -1) {
                             Collections.swap(conversations, indexOfConversation, 0);
-                            int newIndex = conversations.indexOf(conversationItem);
-                            conversations.set(newIndex, conversationItem);
+                            conversationsRecyclerView.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    int newIndex = conversations.indexOf(conversationItem);
+                                    conversations.set(newIndex, conversationItem);
+                                }
+                            });
                         }
                     }
                 }
