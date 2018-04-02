@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.Vibrator;
-import android.support.annotation.Nullable;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 
@@ -119,7 +118,7 @@ public abstract class CallActivity extends BaseActivity {
         }
     }
 
-    private void turnOffScreen() {
+    protected void turnOffScreen() {
         if (wakeLock != null && wakeLock.isHeld()) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         }
