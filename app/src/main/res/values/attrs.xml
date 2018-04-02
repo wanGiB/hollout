@@ -282,30 +282,4 @@
 
     <attr name="attachment_type_selector_background" format="color" />
 
-    <declare-styleable name="LeBubbleView">
-        <!-- Corner radius for LeBubbleTextView. -->
-        <attr name="bubbleCornerRadius" format="dimension"/>
-        <!-- Background color for LeBubbleTextView. -->
-        <attr name="bubbleBackgroundColor" format="color"/>
-        <!-- text size for LeBubbleTextView. -->
-        <attr name="bubbleTextSize" format="dimension"/>
-        <!-- text color for LeBubbleTextView. -->
-        <attr name="bubbleTextColor" format="color"/>
-        <!-- text for LeBubbleTextView. -->
-        <attr name="bubbleText" format="string"/>
-        <!-- text for LeBubbleTitleView. -->
-        <attr name="bubbleTitleText" format="string"/>
-        <!-- direction for arrow. -->
-        <attr name="bubbleArrowDirection">
-            <enum name="left" value="1"/>
-            <enum name="top" value="2"/>
-            <enum name="right" value="3"/>
-            <enum name="bottom" value="4"/>
-        </attr>
-        <!-- direction for arrow. -->
-        <attr name = "relativePosition" format = "fraction" />
-        <!-- Press state Background color for LeBubbleTextView. -->
-        <attr name="bubbleBackgroundPressColor" format="color"/>
-    </declare-styleable>
-
 </resources>

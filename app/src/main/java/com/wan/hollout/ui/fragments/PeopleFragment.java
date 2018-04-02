@@ -357,7 +357,7 @@ public class PeopleFragment extends BaseFragment {
 
     private void attachGeoPoint(ParseQuery<ParseObject> peopleQuery, ParseGeoPoint signedInUserGeoPoint) {
         if (signedInUserGeoPoint != null) {
-            peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 1000.0);
+            peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 100.0);
         }
     }
 

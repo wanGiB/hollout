@@ -45,9 +45,6 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.github.javiersantos.appupdater.AppUpdaterUtils;
-import com.github.javiersantos.appupdater.enums.AppUpdaterError;
-import com.github.javiersantos.appupdater.objects.Update;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -71,7 +68,6 @@ import com.wan.hollout.ui.fragments.PeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.services.TimeChangeDetectionService;
 import com.wan.hollout.ui.widgets.CircleImageView;
-import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
@@ -83,7 +79,6 @@ import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.GeneralNotifier;
-import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -150,15 +145,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     @BindView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
 
-    @BindView(R.id.app_update_available_prompt)
-    View appUpdateAvailablePrompt;
-
-    @BindView(R.id.app_version_title)
-    HolloutTextView appVersionTitleView;
-
-    @BindView(R.id.update_app)
-    HolloutTextView updateAppView;
-
     private HolloutPermissions holloutPermissions;
 
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
@@ -197,56 +183,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
         initEventHandlers();
         createDeleteConversationProgressDialog();
-        checkForNewAppUpdate();
-    }
-
-    private void checkForNewAppUpdate() {
-        AppUpdaterUtils appUpdaterUtils = new AppUpdaterUtils(this);
-        appUpdaterUtils.withListener(new AppUpdaterUtils.UpdateListener() {
-
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onSuccess(final Update update, Boolean isUpdateAvailable) {
-                if (isUpdateAvailable) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            UiUtils.showView(appUpdateAvailablePrompt, true);
-                            appVersionTitleView.setText("Hollout Version " + update.getLatestVersion());
-                            updateAppView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    UiUtils.showView(appUpdateAvailablePrompt, false);
-                                    updateAppOnGooglePlay();
-                                }
-                            });
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onFailed(AppUpdaterError appUpdaterError) {
-                HolloutLogger.d("AppUpdater Error", "Something went wrong");
-            }
-
-        });
-        appUpdaterUtils.start();
-    }
-
-    private void updateAppOnGooglePlay() {
-        Uri uri = Uri.parse("market://details?id=com.wan.hollout");
-        Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
-        goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            goToMarket.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-        }
-        try {
-            startActivity(goToMarket);
-        } catch (ActivityNotFoundException e) {
-            startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("http://play.google.com/store/apps/details?id=com.wan.hollout")));
-        }
     }
 
     private void createDeleteConversationProgressDialog() {

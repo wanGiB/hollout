@@ -1,6 +1,7 @@
 package com.wan.hollout.utils;
 
 import android.provider.MediaStore;
+import android.text.SpannableStringBuilder;
 import android.util.SparseBooleanArray;
 
 import com.parse.ParseObject;
@@ -290,5 +291,6 @@ public class AppConstants {
     public static List<ParseObject> recentConversations = new ArrayList<>();
     public static final String NO_USERS_FOUND_ERROR_MESSAGE = "no_nearby_users_found_message";
 
+    public static String composeText;
 }
 

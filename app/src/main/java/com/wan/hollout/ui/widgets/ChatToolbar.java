@@ -309,7 +309,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         return recipientUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) == signedInUserObject.getLong(AppConstants.USER_CURRENT_TIME_STAMP);
     }
 
-    private void subscribeToObjectChanges() {
+    public void subscribeToObjectChanges() {
         if (recipientObject != null) {
             recipientObjectStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
             recipientObjectStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, recipientObject.getString(AppConstants.REAL_OBJECT_ID));
@@ -415,7 +415,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
         subscribeToObjectChanges();
     }
 
-    private void unSubscribeFromUserChanges() {
+    public void unSubscribeFromUserChanges() {
         if (recipientObjectStateQuery != null) {
             try {
                 ApplicationLoader.getParseLiveQueryClient().unsubscribe(recipientObjectStateQuery);

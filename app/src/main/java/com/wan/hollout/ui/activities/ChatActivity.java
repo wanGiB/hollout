@@ -405,6 +405,10 @@ public class ChatActivity extends BaseActivity implements
             finish();
             return;
         }
+        setupUIFromIntent(intentExtras);
+    }
+
+    private void setupUIFromIntent(Bundle intentExtras) {
         canGoBackToMain = intentExtras.getBoolean(AppConstants.CAN_LAUNCH_MAIN, false);
         recipientProperties = intentExtras.getParcelable(AppConstants.USER_PROPERTIES);
         if (recipientProperties != null) {
@@ -734,7 +738,16 @@ public class ChatActivity extends BaseActivity implements
         if (!StringUtils.isNotEmpty(composeText.getText().toString().trim()) || !pickedMediaFiles.isEmpty()) {
             composeText.setText("");
         }
-        setIntent(intent);
+        messages.clear();
+        messagesAdapter.notifyDataSetChanged();
+        setupUIFromIntent(intent.getExtras());
+        chatToolbar.unSubscribeFromUserChanges();
+        chatToolbar.subscribeToObjectChanges();
+        if (onModelStateChangedListener != null) {
+            DirectModelNotifier.get().unregisterForModelChanges(ChatMessage.class, onModelStateChangedListener);
+            DirectModelNotifier.get().registerForModelChanges(ChatMessage.class, onModelStateChangedListener);
+        }
+        canGoBackToMain = false;
     }
 
     @Override

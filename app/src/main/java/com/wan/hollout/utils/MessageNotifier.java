@@ -112,7 +112,9 @@ public class MessageNotifier {
                 Intent userProfileIntent;
                 if (HolloutUtils.isAContact(message.getFrom())) {
                     userProfileIntent = new Intent(ApplicationLoader.getInstance(), ChatActivity.class);
-                    userProfileIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, true);
+                    if (AppConstants.activeChatId == null) {
+                        userProfileIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, true);
+                    }
                     userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, sender);
                 } else {
                     userProfileIntent = new Intent(ApplicationLoader.getInstance(), MainActivity.class);
@@ -177,7 +179,9 @@ public class MessageNotifier {
                 Intent userProfileIntent;
                 if (HolloutUtils.isAContact(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                     userProfileIntent = new Intent(ApplicationLoader.getInstance(), ChatActivity.class);
-                    userProfileIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, true);
+                    if (AppConstants.activeChatId == null) {
+                        userProfileIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, true);
+                    }
                     userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
                 } else {
                     userProfileIntent = new Intent(ApplicationLoader.getInstance(), MainActivity.class);

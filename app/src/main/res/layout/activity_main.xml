@@ -143,64 +143,6 @@
 
         <include layout="@layout/footer_snack" />
 
-        <LinearLayout
-            android:id="@+id/app_update_available_prompt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="#c42f3e51"
-            android:orientation="horizontal"
-            android:padding="10dp"
-            android:visibility="gone"
-            android:weightSum="1">
-
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center_vertical"
-                android:src="@mipmap/ic_launcher"
-                tools:ignore="ContentDescription" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="10dp"
-                android:layout_marginStart="10dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:id="@+id/app_version_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    app:textStyle="medium" />
-
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/a_new_version_of_hollout_is_available"
-                    android:textColor="@color/gray27"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
-
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/update_app"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:text="@string/update_"
-                android:textColor="@color/colorAccent"
-                app:textStyle="bold" />
-
-        </LinearLayout>
-
     </RelativeLayout>
 
     <android.support.design.widget.NavigationView

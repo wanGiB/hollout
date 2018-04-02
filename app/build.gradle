@@ -17,8 +17,8 @@ android {
         applicationId "com.wan.hollout"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 40
-        versionName "3.3.0"
+        versionCode 41
+        versionName "3.3.1"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true //important
@@ -132,7 +132,6 @@ dependencies {
     implementation "com.mikepenz:iconics-core:3.0.3@aar"
     compile "com.hanks:htextview-base:${htextview_version}"
     compile "com.hanks:htextview-scale:${htextview_version}"
-    compile 'com.github.javiersantos:AppUpdater:2.6.4'
     compile 'com.vanniktech:emoji-ios:0.5.1'
     compile "com.github.nisrulz:sensey:${sensey_version}"
 }
