@@ -69,6 +69,7 @@ public class InputPanel extends LinearLayout implements KeyboardAwareLinearLayou
 
         this.emojiToggle = ViewUtil.findById(this, R.id.emoji_toggle);
         this.composeText = ViewUtil.findById(this, R.id.embedded_text_editor);
+
         this.recordTime = new RecordTime((TextView) ViewUtil.findById(this, R.id.record_time));
         TextView slideToCancel = ViewUtil.findById(this, R.id.slide_to_cancel);
         composeOrRecordAnimationToggle = ViewUtil.findById(this, R.id.compose_or_record_toggle);

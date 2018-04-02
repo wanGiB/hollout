@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.Vibrator;
+import android.support.annotation.Nullable;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 
@@ -55,7 +56,9 @@ public abstract class CallActivity extends BaseActivity {
     protected MediaPlayer mediaPlayer;
 
     private ProximityDetector.ProximityListener proximityListener;
+
     private PowerManager.WakeLock wakeLock;
+    private int field = 0x00000020;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,32 +69,69 @@ public abstract class CallActivity extends BaseActivity {
         }
         keepScreeOn();
         EventBus.getDefault().post(AppConstants.SUSPEND_ALL_USE_OF_AUDIO_MANAGER);
+        Sensey.getInstance().init(this);
+        try {
+            // Yeah, this is hidden field.
+            field = PowerManager.class.getField("PROXIMITY_SCREEN_OFF_WAKE_LOCK").getInt(null);
+        } catch (Throwable ignored) {
+
+        }
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         if (powerManager != null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
-                    | PowerManager.ACQUIRE_CAUSES_WAKEUP, "TAG");
+            wakeLock = powerManager.newWakeLock(field, getLocalClassName());
         }
         proximityListener = new ProximityDetector.ProximityListener() {
 
             @Override
             public void onNear() {
-                if (wakeLock != null) {
-                    if (wakeLock.isHeld()) {
-                        wakeLock.release();
-                    }
-                }
+                turnOffScreen();
             }
 
-            @SuppressLint("WakelockTimeout")
             @Override
             public void onFar() {
-                if (wakeLock != null) {
-                    wakeLock.acquire();
-                }
+                turnScreenOn();
             }
-
         };
+        checkStartProximityDetector();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkStartProximityDetector();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        releaseProximityDetector();
+    }
+
+    protected void checkStartProximityDetector() {
+        releaseProximityDetector();
         Sensey.getInstance().startProximityDetection(proximityListener);
+    }
+
+    @SuppressLint("WakelockTimeout")
+    protected void turnScreenOn() {
+        if (wakeLock != null && !wakeLock.isHeld()) {
+            wakeLock.acquire();
+        }
+    }
+
+    private void turnOffScreen() {
+        if (wakeLock != null && wakeLock.isHeld()) {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Sensey.getInstance().stop();
+        if (wakeLock != null && wakeLock.isHeld()) {
+            wakeLock.release();
+        }
     }
 
     private void keepScreeOn() {
@@ -102,15 +142,20 @@ public abstract class CallActivity extends BaseActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        checkStartProximityDetector();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
+        releaseProximityDetector();
+    }
+
+    private void releaseProximityDetector() {
         if (proximityListener != null) {
             Sensey.getInstance().stopProximityDetection(proximityListener);
-            if (wakeLock != null) {
-                if (wakeLock.isHeld()) {
-                    wakeLock.release();
-                }
-            }
         }
     }
 

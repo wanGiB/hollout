@@ -15,6 +15,7 @@ import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.wan.hollout.interfaces.DoneCallback;
 
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 /**
@@ -84,24 +85,28 @@ public class AuthUtil {
         personQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(final ParseObject updatableObject, ParseException e) {
-                if (updatableObject != null) {
-                    for (String key : updatableProps.keySet()) {
-                        HolloutLogger.d("UpdatableUserKey", key);
-                        if (!key.equals(AppConstants.OBJECT_ID)) {
-                            updatableObject.put(key, updatableProps.get(key));
+                try {
+                    if (updatableObject != null) {
+                        for (String key : updatableProps.keySet()) {
+                            HolloutLogger.d("UpdatableUserKey", key);
+                            if (!key.equals(AppConstants.OBJECT_ID)) {
+                                updatableObject.put(key, updatableProps.get(key));
+                            }
                         }
+                        updatableObject.saveInBackground(new SaveCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                if (successCallback != null) {
+                                    successCallback.done(true, null);
+                                }
+                                if (e != null) {
+                                    updatableObject.saveEventually();
+                                }
+                            }
+                        });
                     }
-                    updatableObject.saveInBackground(new SaveCallback() {
-                        @Override
-                        public void done(ParseException e) {
-                            if (successCallback != null) {
-                                successCallback.done(true, null);
-                            }
-                            if (e != null) {
-                                updatableObject.saveEventually();
-                            }
-                        }
-                    });
+                } catch (ConcurrentModificationException ignored) {
+
                 }
             }
         });

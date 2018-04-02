@@ -853,6 +853,7 @@ public class ChatActivity extends BaseActivity implements
         scrollToBottomFrame.setOnClickListener(this);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void initTouchListener() {
         composeText.setOnTouchListener(new View.OnTouchListener() {
             @Override

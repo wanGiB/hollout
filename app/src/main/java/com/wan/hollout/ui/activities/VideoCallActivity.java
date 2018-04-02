@@ -323,6 +323,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
         stopCallSound();
         CallClient.getInstance().hangUp(callId);
         saveCallMessage();
+        turnScreenOn();
         onFinish();
         removeVideoViews();
     }

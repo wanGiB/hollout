@@ -17,6 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.text.SpannableString;
+import android.text.util.Linkify;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -191,7 +192,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         this.message = messageObject;
         this.searchString = searchString;
         if (messageBodyView != null) {
-            messageBodyView.setEmojiSizeRes(R.dimen.emoji_size,true);
+            messageBodyView.setEmojiSizeRes(R.dimen.emoji_size, true);
+            messageBodyView.setLinkTextColor(ContextCompat.getColor(activity, R.color.hollout_color_one));
+            messageBodyView.setAutoLinkMask(Linkify.ALL);
         }
         setupMessageBubble();
         setupMessageBody(searchString);

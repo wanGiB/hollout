@@ -117,4 +117,9 @@
     <dimen name="dimen_swipe_minumum_x">32dp</dimen>
 
     <dimen name="emoji_size">30dp</dimen>
+    <dimen name="depth">3dp</dimen>
+    <!-- Default radius for LeBubbleView corners. -->
+    <dimen name="bubbleView_default_radius">4dp</dimen>
+    <!-- Default text size for content text. -->
+    <dimen name="bubbleView_default_text_size">14sp</dimen>
 </resources>
