@@ -6,7 +6,6 @@ import com.google.gson.reflect.TypeToken;
 import com.sinch.gson.Gson;
 import com.wan.hollout.models.ChatMessage;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -16,14 +15,6 @@ public class JsonUtils {
 
     static {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    }
-
-    public static String toJson(Object object) throws IOException {
-        return objectMapper.writeValueAsString(object);
-    }
-
-    public static ObjectMapper getMapper() {
-        return objectMapper;
     }
 
     public static Gson getGSon() {

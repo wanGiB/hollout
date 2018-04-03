@@ -8,6 +8,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.media.MediaRecorder;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
@@ -30,7 +32,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SimpleItemAnimator;
 import android.text.Editable;
+import android.text.Spanned;
 import android.text.TextWatcher;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StrikethroughSpan;
+import android.text.style.StyleSpan;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -139,6 +145,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -386,6 +394,10 @@ public class ChatActivity extends BaseActivity implements
 
     private boolean canGoBackToMain = false;
     private EmojiPopup emojiPopup;
+
+    private List<String> boldTags;
+    private List<String> italicTags;
+    private List<String> strikeThroughTags;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -911,7 +923,9 @@ public class ChatActivity extends BaseActivity implements
         }
     }
 
-    private class ComposeKeyPressedListener implements View.OnKeyListener, View.OnClickListener, TextWatcher, View.OnFocusChangeListener {
+    private class ComposeKeyPressedListener implements View.OnKeyListener,
+            View.OnClickListener, TextWatcher,
+            View.OnFocusChangeListener {
 
         private int beforeLength;
 
@@ -947,6 +961,8 @@ public class ChatActivity extends BaseActivity implements
                     }
                 }, 50);
             }
+            String entireString = s.toString();
+            applyRichTextFormatting(s, entireString);
         }
 
         @Override
@@ -967,6 +983,57 @@ public class ChatActivity extends BaseActivity implements
 
         }
 
+    }
+
+    private void applyRichTextFormatting(Editable s, String entireString) {
+        boldTags = UiUtils.pullBoldTags(entireString);
+        italicTags = UiUtils.pullItalicTags(entireString);
+        strikeThroughTags = UiUtils.pullStrikeThroughTags(entireString);
+
+        if (!boldTags.isEmpty()) {
+            for (String boldTag : boldTags) {
+                int startOfWord = getStartOfWord(entireString, boldTag);
+                int endOfWord = getEndOfWord(boldTag, startOfWord);
+                StyleSpan bss = new StyleSpan(Typeface.BOLD);
+                s.setSpan(bss, startOfWord, endOfWord, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                grayStartAndEndTags(s, startOfWord, endOfWord);
+            }
+        }
+
+        if (!italicTags.isEmpty()) {
+            for (String italicTag : italicTags) {
+                int startOfWord = getStartOfWord(entireString, italicTag);
+                int endOfWord = getEndOfWord(italicTag, startOfWord);
+                StyleSpan bss = new StyleSpan(Typeface.ITALIC);
+                s.setSpan(bss, startOfWord, endOfWord, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                grayStartAndEndTags(s, startOfWord, endOfWord);
+            }
+        }
+
+        if (!strikeThroughTags.isEmpty()) {
+            for (String strikeThrough : strikeThroughTags) {
+                int startOfWord = getStartOfWord(entireString, strikeThrough);
+                int endOfWord = getEndOfWord(strikeThrough, startOfWord);
+                StrikethroughSpan bss = new StrikethroughSpan();
+                s.setSpan(bss, startOfWord, endOfWord, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                grayStartAndEndTags(s, startOfWord, endOfWord);
+            }
+        }
+    }
+
+    private void grayStartAndEndTags(Editable s, int startOfWord, int endOfWord) {
+        s.setSpan(new ForegroundColorSpan(Color.GRAY), startOfWord - 1, startOfWord,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        s.setSpan(new ForegroundColorSpan(Color.GRAY), endOfWord, endOfWord + 1,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+    }
+
+    private int getEndOfWord(String word, int startingPosition) {
+        return startingPosition + word.length();
+    }
+
+    private int getStartOfWord(String sentence, String word) {
+        return sentence.indexOf(word);
     }
 
     private void displayInactiveSendButton() {
@@ -1032,7 +1099,8 @@ public class ChatActivity extends BaseActivity implements
         for (HolloutFile holloutFile : pickedMediaFiles) {
             switch (holloutFile.getFileType()) {
                 case AppConstants.FILE_TYPE_PHOTO:
-                    sendImageMessage(holloutFile.getLocalFilePath(), composeText.getText().toString().trim());
+                    sendImageMessage(holloutFile.getLocalFilePath(), StringUtils.isNotEmpty(composeText.getText().toString().trim())
+                            ? processSpansIfAvailable(composeText.getText().toString().trim()) : "Photo");
                     break;
                 case AppConstants.FILE_TYPE_AUDIO:
                     //Send file message with file type audio
@@ -1049,7 +1117,7 @@ public class ChatActivity extends BaseActivity implements
                 case AppConstants.FILE_TYPE_VIDEO:
                     sendVideoMessage(holloutFile.getLocalFilePath(), holloutFile.getLocalFilePath(),
                             StringUtils.isNotEmpty(composeText.getText().toString().trim())
-                                    ? composeText.getText().toString().trim() : "Video");
+                                    ? processSpansIfAvailable(composeText.getText().toString().trim()) : "Video");
                     break;
             }
         }
@@ -1981,6 +2049,7 @@ public class ChatActivity extends BaseActivity implements
                     UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
                     checkAndAddNewMessage(chatMessage);
                     sendNewMessage(chatMessage);
+                    onBackPressed();
                 } else if (o instanceof ScrollToMessageEvent) {
                     ScrollToMessageEvent scrollToMessageEvent = (ScrollToMessageEvent) o;
                     final ChatMessage emMessage = scrollToMessageEvent.getEmMessage();
@@ -2168,11 +2237,32 @@ public class ChatActivity extends BaseActivity implements
     }
 
     protected void sendTextMessage(String content) {
+        content = processSpansIfAvailable(content);
         ChatMessage message = new ChatMessage();
         attachRequiredPropsToMessage(message, MessageType.TXT);
         message.setMessageBody(content);
         checkAndAddNewMessage(message);
         sendNewMessage(message);
+    }
+
+    private String processSpansIfAvailable(String content) {
+        if (boldTags != null && !boldTags.isEmpty()) {
+            for (String s : boldTags) {
+                content = content.replace(s, "<font color=#111111>" + "<b>" + s + "</b>" + "</font>").replace("*", "");
+            }
+        }
+        if (italicTags != null && !italicTags.isEmpty()) {
+            for (String s : italicTags) {
+                content = content.replace(s, "<font color=#888888>" + "<i>" + s + "</i>" + "</font>").replace("_", "");
+            }
+        }
+
+        if (strikeThroughTags != null && !strikeThroughTags.isEmpty()) {
+            for (String s : strikeThroughTags) {
+                content = content.replace(s, "<font color=#777777>" + "<strike>" + s + "</strike>" + "</font>").replace("-", "");
+            }
+        }
+        return content;
     }
 
     protected void sendVoiceMessage(String filePath, long duration) {

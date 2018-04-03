@@ -367,8 +367,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (StringUtils.isNotEmpty(locationName)) {
             UiUtils.showView(messageBodyView, true);
             messageBodyView.setText(StringUtils.isNotEmpty(searchString)
-                    ? UiUtils.highlightTextIfNecessary(searchString, locationName,
-                    ContextCompat.getColor(activity, R.color.colorAccent)) : locationName);
+                    ? UiUtils.fromHtml(Html.toHtml(UiUtils.highlightTextIfNecessary(searchString,
+                    locationName, ContextCompat.getColor(activity, R.color.colorAccent)))) :
+                    UiUtils.fromHtml(locationName));
             AppConstants.messageBodyPositions.put(getMessageHash(), true);
         } else {
             UiUtils.showView(messageBodyView, false);
@@ -489,7 +490,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         String fileCaption = message.getFileCaption();
         if (StringUtils.isNotEmpty(fileCaption)) {
             UiUtils.showView(messageBodyView, true);
-            messageBodyView.setText(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)) : fileCaption);
+            messageBodyView.setText(StringUtils.isNotEmpty(searchString)
+                    ? UiUtils.fromHtml(Html.toHtml(UiUtils.highlightTextIfNecessary(searchString,
+                    fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)))) :
+                    UiUtils.fromHtml(fileCaption));
             AppConstants.messageBodyPositions.put(getMessageHash(), true);
         } else {
             UiUtils.showView(messageBodyView, false);
@@ -531,7 +535,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         String fileCaption = message.getFileCaption();
         if (fileCaption != null && StringUtils.isNotEmpty(fileCaption) && !StringUtils.containsIgnoreCase(fileCaption, activity.getString(R.string.photo))) {
             UiUtils.showView(messageBodyView, true);
-            messageBodyView.setText(StringUtils.isNotEmpty(searchString) ? UiUtils.highlightTextIfNecessary(searchString, fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)) : fileCaption);
+            messageBodyView.setText(StringUtils.isNotEmpty(searchString)
+                    ? UiUtils.fromHtml(Html.toHtml(UiUtils.highlightTextIfNecessary(searchString,
+                    fileCaption, ContextCompat.getColor(activity, R.color.colorAccent)))) :
+                    UiUtils.fromHtml(fileCaption));
             AppConstants.messageBodyPositions.put(getMessageHash(), true);
         } else {
             UiUtils.showView(messageBodyView, false);

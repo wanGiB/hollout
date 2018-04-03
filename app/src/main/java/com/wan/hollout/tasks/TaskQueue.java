@@ -26,12 +26,4 @@ public class TaskQueue {
         }
     }
 
-    public void offerNewTask(String key, UploadTask uploadTask) {
-        uploadQueue.put(key, uploadTask);
-    }
-
-    public UploadTask getTask(String currentLocalFilePath) {
-        return uploadQueue.get(currentLocalFilePath);
-    }
-
 }

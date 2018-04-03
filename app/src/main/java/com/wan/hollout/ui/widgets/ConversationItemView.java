@@ -326,14 +326,14 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
                 String userStatusString = parseObject.getString(AppConstants.APP_USER_STATUS);
                 if (StringUtils.isNotEmpty(userStatusString) && UiUtils.canShowStatus(parseObject, AppConstants.ENTITY_TYPE_CHATS, new HashMap<String, Object>())) {
-                    userStatusOrLastMessageView.setText(userStatusString);
+                    userStatusOrLastMessageView.setText(UiUtils.fromHtml(userStatusString));
                 } else {
                     userStatusOrLastMessageView.setText(activity.getString(R.string.hey_there_holla_me_on_hollout));
                 }
             } else {
                 String groupDescription = parseObject.getString(AppConstants.ROOM_DESCRIPTION);
                 if (StringUtils.isNotEmpty(groupDescription)) {
-                    userStatusOrLastMessageView.setText(groupDescription);
+                    userStatusOrLastMessageView.setText(UiUtils.fromHtml(groupDescription));
                 } else {
                     userStatusOrLastMessageView.setText(activity.getString(R.string.conferencing_happens_here));
                 }
@@ -497,7 +497,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_cam, UiUtils.DrawableDirection.LEFT);
             String messageBody = message.getFileCaption();
             if (StringUtils.isNotEmpty(messageBody)) {
-                userStatusOrLastMessageView.setText(messageBody);
+                userStatusOrLastMessageView.setText(UiUtils.fromHtml(messageBody));
             } else {
                 userStatusOrLastMessageView.setText(activity.getString(R.string.photo));
             }
@@ -506,7 +506,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_video, UiUtils.DrawableDirection.LEFT);
             String messageBody = message.getFileCaption();
             if (StringUtils.isNotEmpty(messageBody)) {
-                userStatusOrLastMessageView.setText(messageBody);
+                userStatusOrLastMessageView.setText(UiUtils.fromHtml(messageBody));
             } else {
                 userStatusOrLastMessageView.setText(activity.getString(R.string.video));
             }
@@ -515,7 +515,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_location, UiUtils.DrawableDirection.LEFT);
             String messageBody = message.getLocationAddress();
             if (StringUtils.isNotEmpty(messageBody)) {
-                userStatusOrLastMessageView.setText(messageBody);
+                userStatusOrLastMessageView.setText(UiUtils.fromHtml(messageBody));
             } else {
                 userStatusOrLastMessageView.setText(activity.getString(R.string.location));
             }
@@ -529,24 +529,24 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             UiUtils.showView(reactionsIndicatorView, false);
             AppConstants.reactionsOpenPositions.put(getMessageId(), false);
             UiUtils.showView(userStatusOrLastMessageView, true);
-            userStatusOrLastMessageView.setText(message.getMessageBody());
+            userStatusOrLastMessageView.setText(UiUtils.fromHtml(message.getMessageBody()));
         }
 
         String messageBody;
         if (messageType == MessageType.CONTACT) {
             messageBody = "Contact";
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_contact, UiUtils.DrawableDirection.LEFT);
-            userStatusOrLastMessageView.setText(messageBody);
+            userStatusOrLastMessageView.setText(UiUtils.fromHtml(messageBody));
         }
         if (messageType == MessageType.AUDIO) {
             messageBody = "Music";
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.msg_status_audio, UiUtils.DrawableDirection.LEFT);
-            userStatusOrLastMessageView.setText(messageBody);
+            userStatusOrLastMessageView.setText(UiUtils.fromHtml(messageBody));
         }
         if (messageType == MessageType.DOCUMENT) {
             messageBody = "Document";
             UiUtils.attachDrawableToTextView(activity, userStatusOrLastMessageView, R.drawable.icon_file_doc_grey_mini, UiUtils.DrawableDirection.LEFT);
-            userStatusOrLastMessageView.setText(messageBody);
+            userStatusOrLastMessageView.setText(UiUtils.fromHtml(messageBody));
         }
 
     }

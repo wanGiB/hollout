@@ -5,8 +5,6 @@ package com.wan.hollout.utils;
  */
 public class LocationUtils {
 
-    private static final String TAG = "LocationUtils";
-
     public static String loadStaticMap(String lat,String lon) {
         String location = getLocationFromMessage(lat,lon);
         return "http://maps.googleapis.com/maps/api/staticmap?center=" + location

@@ -36,6 +36,7 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.View;
@@ -79,6 +80,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -940,6 +942,37 @@ public class UiUtils {
             links.add(urlStr);
         }
         return links;
+    }
+
+    //Pull all links from the body for easy retrieval
+    @SuppressWarnings("unchecked")
+    public static List<String> pullBoldTags(String text) {
+        String[] substringsBetweenAsteriks = StringUtils.substringsBetween(text, "*", "*");
+        List<String> boldTags = new ArrayList<>();
+        if (substringsBetweenAsteriks != null && substringsBetweenAsteriks.length > 0) {
+            boldTags = Arrays.asList(substringsBetweenAsteriks);
+        }
+        return boldTags;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> pullItalicTags(String text) {
+        String[] substringsBetweenUnderscores = StringUtils.substringsBetween(text, "_", "_");
+        List<String> italicTags = new ArrayList<>();
+        if (substringsBetweenUnderscores != null && substringsBetweenUnderscores.length > 0) {
+            italicTags = Arrays.asList(substringsBetweenUnderscores);
+        }
+        return italicTags;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<String> pullStrikeThroughTags(String text) {
+        String[] substringsBetweenHyphens = StringUtils.substringsBetween(text, "-", "-");
+        List<String> strikeThroughTags = new ArrayList<>();
+        if (substringsBetweenHyphens != null && substringsBetweenHyphens.length > 0) {
+            strikeThroughTags = Arrays.asList(substringsBetweenHyphens);
+        }
+        return strikeThroughTags;
     }
 
     public static int resolveDimension(Context context, @AttrRes int attr, @DimenRes int fallbackRes) {
