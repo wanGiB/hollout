@@ -292,5 +292,6 @@ public class AppConstants {
     public static final String NO_USERS_FOUND_ERROR_MESSAGE = "no_nearby_users_found_message";
 
     public static String composeText;
+    public static boolean retrievingMessages = false;
 }
 

@@ -2049,7 +2049,6 @@ public class ChatActivity extends BaseActivity implements
                     UiUtils.bangSound(ChatActivity.this, R.raw.message_sent);
                     checkAndAddNewMessage(chatMessage);
                     sendNewMessage(chatMessage);
-                    onBackPressed();
                 } else if (o instanceof ScrollToMessageEvent) {
                     ScrollToMessageEvent scrollToMessageEvent = (ScrollToMessageEvent) o;
                     final ChatMessage emMessage = scrollToMessageEvent.getEmMessage();

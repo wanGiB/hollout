@@ -99,23 +99,25 @@ public class ChatClient {
                                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                     final ChatMessage chatMessage = snapshot.getValue(ChatMessage.class);
                                     if (chatMessage != null) {
-                                        final String from = chatMessage.getFrom();
-                                        //Mark Message as delivered
-                                        chatMessage.setMessageStatus(MessageStatus.DELIVERED);
-                                        chatMessage.setMessageDirection(MessageDirection.INCOMING);
-                                        chatMessage.setConversationId(chatMessage.getFrom());
-                                        chatMessage.setFromName(chatMessage.getFromName());
-                                        DbUtils.createMessage(chatMessage);
-                                        markMessageAsDelivered(chatMessage, from, userId);
-                                        HolloutPreferences.updateConversationTime(chatMessage.getFrom());
-                                        if (HolloutUtils.isAContact(from)) {
-                                            HolloutPreferences.incrementUnreadMessagesFrom(chatMessage.getFrom());
-                                            incrementTotalUnreadChats(chatMessage);
+                                        if (!AppConstants.retrievingMessages) {
+                                            final String from = chatMessage.getFrom();
+                                            //Mark Message as delivered
+                                            chatMessage.setMessageStatus(MessageStatus.DELIVERED);
+                                            chatMessage.setMessageDirection(MessageDirection.INCOMING);
+                                            chatMessage.setConversationId(chatMessage.getFrom());
+                                            chatMessage.setFromName(chatMessage.getFromName());
+                                            DbUtils.createMessage(chatMessage);
+                                            markMessageAsDelivered(chatMessage, from, userId);
+                                            HolloutPreferences.updateConversationTime(chatMessage.getFrom());
+                                            if (HolloutUtils.isAContact(from)) {
+                                                HolloutPreferences.incrementUnreadMessagesFrom(chatMessage.getFrom());
+                                                incrementTotalUnreadChats(chatMessage);
+                                            }
+                                            List<ChatMessage> allUnreadMessages = DbUtils.fetchAllUnreadMessages();
+                                            HolloutPreferences.setTotalUnreadMessagesCount(allUnreadMessages.size());
+                                            MessageNotifier.getInstance().notifyOnUnreadMessages();
+                                            EventBus.getDefault().post(new MessageReceivedEvent(chatMessage));
                                         }
-                                        List<ChatMessage> allUnreadMessages = DbUtils.fetchAllUnreadMessages();
-                                        HolloutPreferences.setTotalUnreadMessagesCount(allUnreadMessages.size());
-                                        MessageNotifier.getInstance().notifyOnUnreadMessages();
-                                        EventBus.getDefault().post(new MessageReceivedEvent(chatMessage));
                                     }
                                 }
                             }

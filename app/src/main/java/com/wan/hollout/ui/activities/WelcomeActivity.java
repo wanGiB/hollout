@@ -171,12 +171,14 @@ public class WelcomeActivity extends BaseActivity
 
     private void finishUp(boolean comingFromLogIn) {
         UiUtils.dismissProgressDialog(progressDialog);
+        AppConstants.retrievingMessages = true;
         progressDialog = UiUtils.showProgressDialog(getCurrentActivityInstance(), "Please wait...");
         if (comingFromLogIn) {
             tryRetrieveChats(progressDialog, new DoneCallback<Boolean>() {
                 @Override
                 public void done(Boolean signInSuccess, Exception e) {
                     if (e == null && signInSuccess) {
+                        AppConstants.retrievingMessages = false;
                         navigateToAppropriateScreen();
                     } else {
                         UiUtils.dismissProgressDialog(progressDialog);
@@ -218,6 +220,7 @@ public class WelcomeActivity extends BaseActivity
                                             if (current != -1 && total != 0) {
                                                 double percentage = (100.0 * (current + 1)) / total;
                                                 if (percentage == 100) {
+                                                    AppConstants.retrievingMessages = false;
                                                     backUpCompletedOptionCallback.done(true, null);
                                                 }
                                             } else {
@@ -258,6 +261,7 @@ public class WelcomeActivity extends BaseActivity
                     if (userAge.equals(AppConstants.UNKNOWN) || userGender.equals(AppConstants.UNKNOWN)) {
                         launchGenderAndAgeActivity();
                     } else {
+                        ChatClient.getInstance().startChatClient();
                         navigateToMainActivity();
                     }
                 } else {
