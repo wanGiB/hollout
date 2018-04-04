@@ -1033,6 +1033,9 @@ public class HolloutUtils {
                                         HolloutPreferences.updateConversationTime(requestOriginatorId);
                                         AuthUtil.updateCurrentLocalUser(signedInUser, null);
                                     }
+                                } else {
+                                    //Delete all messages from this user from the local database
+                                    DbUtils.deleteConversation(requestOriginatorId, null);
                                 }
                                 UiUtils.showSafeToast("Chat request from " + WordUtils.capitalize(requesterName) + " " + (accept ? "accepted" : "declined") + " successfully");
                                 AppConstants.CHAT_INVITATION_ACCEPTED = true;

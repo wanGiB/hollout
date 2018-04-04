@@ -131,20 +131,38 @@
 
             </LinearLayout>
 
-            <CheckBox
-                android:id="@+id/accept_app_license"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:id="@+id/accept_app_license_container"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:layout_marginBottom="20dp"
                 android:layout_marginTop="20dp"
-                android:paddingLeft="20dp"
-                android:paddingStart="20dp"
-                android:textColor="@color/text_black"
-                android:textColorLink="@color/colorAccent"
-                android:textSize="18sp"
-                android:visibility="gone"
-                tools:ignore="RtlHardcoded,RtlSymmetry" />
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <CheckBox
+                    android:id="@+id/accept_app_license"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    tools:ignore="RtlHardcoded,RtlSymmetry" />
+
+                <TextView
+                    android:id="@+id/license_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:paddingEnd="16dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="16dp"
+                    android:paddingStart="20dp"
+                    android:textColor="@color/text_black"
+                    android:textColorLink="@color/colorAccent"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

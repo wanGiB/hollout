@@ -198,7 +198,9 @@ public class DbUtils {
                         if (!tResult.isEmpty()) {
                             performConversationDeletion(tResult, operationDoneCallback);
                         } else {
-                            operationDoneCallback.done(new Long[]{-1L, 0L}, null);
+                            if (operationDoneCallback != null) {
+                                operationDoneCallback.done(new Long[]{-1L, 0L}, null);
+                            }
                         }
                     }
                 }).execute();

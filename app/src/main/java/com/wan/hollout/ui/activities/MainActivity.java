@@ -62,7 +62,7 @@ import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
-import com.wan.hollout.ui.fragments.PeopleFragment;
+import com.wan.hollout.ui.fragments.NearbyPeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.services.TimeChangeDetectionService;
 import com.wan.hollout.ui.widgets.CircleImageView;
@@ -249,7 +249,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 dialog.dismiss();
-                                for (ConversationItem conversationItem : AppConstants.selectedPeople) {
+                                for (final ConversationItem conversationItem : AppConstants.selectedPeople) {
                                     deleteConversationProgressDialog.show();
                                     deleteConversationProgressDialog.setTitle("Deleting Conversation" + (AppConstants.selectedPeople.size() > 1 ? (AppConstants.selectedPeople.size()) : ""));
                                     String recipientId = conversationItem.getRecipient().getString(AppConstants.REAL_OBJECT_ID);
@@ -264,6 +264,16 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                                 if (percentage == 100) {
                                                     checkDismissConversationProgressDialog();
                                                     UiUtils.showSafeToast("Conversation cleared");
+                                                    ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+                                                    if (signedInUserObject != null) {
+                                                        List<String> userChats = signedInUserObject.getList(AppConstants.APP_USER_CHATS);
+                                                        if (userChats != null && userChats.contains(conversationItem.getRecipient().getString(AppConstants.REAL_OBJECT_ID).toUpperCase())) {
+                                                            userChats.remove(conversationItem.getRecipient().getString(AppConstants.REAL_OBJECT_ID).toUpperCase());
+                                                            signedInUserObject.put(AppConstants.APP_USER_CHATS, userChats);
+                                                            AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
+                                                            EventBus.getDefault().post(AppConstants.REFRESH_CONVERSATIONS);
+                                                        }
+                                                    }
                                                 }
                                             } else {
                                                 checkDismissConversationProgressDialog();
@@ -592,7 +602,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     private Adapter setupViewPagerAdapter(ViewPager viewPager) {
         Adapter adapter = new Adapter(this, getSupportFragmentManager());
-        adapter.addFragment(new PeopleFragment(), this.getString(R.string.nearby));
+        adapter.addFragment(new NearbyPeopleFragment(), this.getString(R.string.nearby));
         adapter.addFragment(new ConversationsFragment(), this.getString(R.string.chats));
         viewPager.setAdapter(adapter);
         return adapter;

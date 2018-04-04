@@ -16,8 +16,10 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import com.parse.ParseObject;
 import com.wan.hollout.R;
@@ -56,6 +58,12 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
 
     @BindView(R.id.accept_app_license)
     CheckBox acceptLicenseCheck;
+
+    @BindView(R.id.license_text)
+    TextView acceptLicenseTextView;
+
+    @BindView(R.id.accept_app_license_container)
+    LinearLayout acceptLicenceContainer;
 
     @BindView(R.id.male)
     RadioButton maleRadioButton;
@@ -114,21 +122,21 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
     }
 
     private void checkAndContinue() {
-        if (acceptLicenseCheck.getVisibility() == View.GONE) {
-            acceptLicenseCheck.setVisibility(View.VISIBLE);
+        if (acceptLicenceContainer.getVisibility() == View.GONE) {
+            acceptLicenceContainer.setVisibility(View.VISIBLE);
         } else {
             if (!acceptLicenseCheck.isChecked()) {
                 Snackbar.make(acceptLicenseCheck, "You must accept our privacy policy", Snackbar.LENGTH_LONG).show();
                 return;
             }
             if (selectedGenderType.equals(AppConstants.UNKNOWN)) {
-                Snackbar.make(acceptLicenseCheck, "Your gender please", Snackbar.LENGTH_LONG).show();
+                Snackbar.make(acceptLicenceContainer, "Your gender please", Snackbar.LENGTH_LONG).show();
                 return;
             }
             String age = ageBox.getText().toString().trim();
             if (StringUtils.isNotEmpty(age)) {
                 if (Integer.parseInt(age) < 16) {
-                    Snackbar.make(acceptLicenseCheck, "Sorry, hollout is for 16yrs and above", Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(acceptLicenceContainer, "Sorry, hollout is for 16yrs and above", Snackbar.LENGTH_LONG).show();
                     return;
                 }
             } else {
@@ -145,7 +153,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
                     if (e == null) {
                         navigateBackToCaller();
                     } else {
-                        Snackbar.make(acceptLicenseCheck, "An error occurred while updating details. Please review your data and try again",
+                        Snackbar.make(acceptLicenceContainer, "An error occurred while updating details. Please review your data and try again",
                                 Snackbar.LENGTH_LONG).show();
                     }
                 }
@@ -154,9 +162,9 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
     }
 
     private void setupTermsAndConditionsView() {
-        acceptLicenseCheck.setText(UiUtils.fromHtml("By continuing, you agree to our <a href=https://firebasestorage.googleapis.com/v0/b/hollout-860db.appspot.com/o/WebComponents%2Fprivacy_policy.html?alt=media&token=e4b6c9b9-524c-45a9-847b-6f3bb1157a6f>Privacy Policy</a>"));
-        acceptLicenseCheck.setMovementMethod(LinkMovementMethod.getInstance());
-        acceptLicenseCheck.setClickable(true);
+        acceptLicenseTextView.setText(UiUtils.fromHtml("By continuing, you agree to our <a href=https://firebasestorage.googleapis.com/v0/b/hollout-860db.appspot.com/o/WebComponents%2Fprivacy_policy.html?alt=media&token=e4b6c9b9-524c-45a9-847b-6f3bb1157a6f>Privacy Policy</a>"));
+        acceptLicenseTextView.setMovementMethod(LinkMovementMethod.getInstance());
+        acceptLicenseTextView.setClickable(true);
     }
 
     private void navigateBackToCaller() {
