@@ -1,13 +1,12 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -19,20 +18,25 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.flaviofaria.kenburnsview.KenBurnsView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
+import com.parse.DeleteCallback;
+import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.soundcloud.android.crop.Crop;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.interfaces.DoneCallback;
@@ -43,6 +47,7 @@ import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FontUtils;
+import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
@@ -52,8 +57,8 @@ import net.alhazmy13.mediapicker.Image.ImagePicker;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.greenrobot.eventbus.EventBus;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -97,6 +102,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @BindView(R.id.start_chat_view)
     FloatingActionButton startChatView;
+
+    @BindView(R.id.delete_account)
+    Button deleteAccountButton;
 
     @BindView(R.id.user_location_and_distance)
     HolloutTextView userLocationAndDistanceView;
@@ -146,6 +154,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     private void initClickListeners() {
         goBack.setOnClickListener(this);
+        deleteAccountButton.setOnClickListener(this);
     }
 
     private void offloadIntent() {
@@ -270,6 +279,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         startActivityForResult(composeStatusIntent, RequestCodes.COMPOSE_STATUS);
                     }
                 });
+                UiUtils.showView(deleteAccountButton, true);
+            } else {
+                UiUtils.showView(deleteAccountButton, false);
             }
             UiUtils.attachDrawableToTextView(UserProfileActivity.this, userLocationAndDistanceView, R.drawable.ic_location_on, UiUtils.DrawableDirection.LEFT);
 
@@ -341,6 +353,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                 });
                         profilePhotoOptionsBuilder.create().show();
                     }
+
                 });
 
                 signedInUserCoverPhotoView.setOnClickListener(new View.OnClickListener() {
@@ -380,6 +393,119 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             }
         }
         scrollView.smoothScrollTo(0, 0);
+    }
+
+    private void tryDeleteAccount() {
+        AlertDialog.Builder deleteAccountBuilder = new AlertDialog.Builder(UserProfileActivity.this);
+        deleteAccountBuilder.setTitle("Delete Account");
+        deleteAccountBuilder.setMessage("This would permanently remove your account from Hollout");
+        deleteAccountBuilder.setPositiveButton("DELETE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dissolveLoggedInUser();
+            }
+        });
+        deleteAccountBuilder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        deleteAccountBuilder.create().show();
+    }
+
+    private void deleteObjectReferences(String signedInUserId, final DoneCallback<Boolean> objectReferenceDeletionCallBack) {
+        final ParseQuery<ParseObject> userQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+        userQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUserId);
+        userQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (objects != null) {
+                    ParseObject.deleteAllInBackground(objects, new DeleteCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            objectReferenceDeletionCallBack.done(true, null);
+                        }
+                    });
+                } else {
+                    objectReferenceDeletionCallBack.done(true, null);
+                }
+            }
+        });
+    }
+
+    private void dissolveLoggedInUser() {
+        final ProgressDialog progressDialog = ProgressDialog.show(this, "Deleting your account", "Please wait...");
+        final ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        if (signedInUserObject != null) {
+            String signedInUserId = signedInUserObject.getString(AppConstants.REAL_OBJECT_ID);
+            deleteObjectReferences(signedInUserId, new DoneCallback<Boolean>() {
+                @Override
+                public void done(Boolean result, Exception e) {
+                    proceedWithAccountDissolution(progressDialog, signedInUserObject);
+                }
+            });
+        }
+    }
+
+    private void proceedWithAccountDissolution(final ProgressDialog progressDialog, final ParseObject signedInUserObject) {
+        if (signedInUserObject != null) {
+            String signedInUserId = signedInUserObject.getString(AppConstants.REAL_OBJECT_ID);
+            if (StringUtils.isNotEmpty(signedInUserId)) {
+                final ParseQuery<ParseObject> userQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+                userQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, signedInUserId);
+                userQuery.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> objects, ParseException e) {
+                        if (objects != null && !objects.isEmpty()) {
+                            ParseObject.deleteAllInBackground(objects, new DeleteCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    if (e == null) {
+                                        HolloutPreferences.setUserWelcomed(false);
+                                        HolloutPreferences.clearPersistedCredentials();
+                                        HolloutPreferences.getInstance().getAll().clear();
+                                        ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
+                                        ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
+                                        HolloutUtils.getKryoInstance().reset();
+                                        signedInUserObject.unpinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS);
+                                        FirebaseAuth.getInstance().signOut();
+                                        AuthUtil.signOut(UserProfileActivity.this)
+                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                        if (task.isSuccessful()) {
+                                                            UiUtils.dismissProgressDialog(progressDialog);
+                                                            UiUtils.showSafeToast("Your account was deleted successfully!");
+                                                            startActivity(new Intent(UserProfileActivity.this, SplashActivity.class));
+                                                            EventBus.getDefault().postSticky(AppConstants.ACCOUNT_DELETED_EVENT);
+                                                            finish();
+                                                        } else {
+                                                            UiUtils.dismissProgressDialog(progressDialog);
+                                                            UiUtils.showSafeToast("Failed to sign you out.Please try again");
+                                                        }
+                                                    }
+                                                });
+                                    } else {
+                                        UiUtils.dismissProgressDialog(progressDialog);
+                                        UiUtils.showSafeToast("Error deleting profile. Please can you try again.");
+                                    }
+                                }
+                            });
+                        } else {
+                            UiUtils.dismissProgressDialog(progressDialog);
+                            UiUtils.showSafeToast("Error deleting profile. Please can you try again.");
+                        }
+                    }
+                });
+            } else {
+                UiUtils.dismissProgressDialog(progressDialog);
+                UiUtils.showSafeToast("No valid user session exists for account dissolution.");
+            }
+        } else {
+            UiUtils.dismissProgressDialog(progressDialog);
+            UiUtils.showSafeToast("No valid user session exists for account dissolution.");
+        }
     }
 
     private void detailCoverPhoto(ParseObject parseUser) {
@@ -567,21 +693,21 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 if (pickedPhotoFilePath != null) {
                     final int currentAction = getCurrentUploadAction();
                     if (currentAction == UPLOAD_ACTION_TYPE_COVER_PHOTO || currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
-                        AlertDialog.Builder cropConsentDialog = new AlertDialog.Builder(UserProfileActivity.this);
-                        cropConsentDialog.setMessage("Crop Photo ?");
-                        cropConsentDialog.setPositiveButton("CROP", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Crop.of(Uri.fromFile(new File(pickedPhotoFilePath)), Uri.fromFile(new File(getCacheDir(), "cropped")))
-                                        .asSquare().start(UserProfileActivity.this);
-                            }
-                        }).setNegativeButton("DON'T CROP", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                prepareForUpload(pickedPhotoFilePath, currentAction);
-                            }
-                        });
-                        cropConsentDialog.create().show();
+//                        AlertDialog.Builder cropConsentDialog = new AlertDialog.Builder(UserProfileActivity.this);
+//                        cropConsentDialog.setMessage("Crop Photo ?");
+//                        cropConsentDialog.setPositiveButton("CROP", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                Crop.of(Uri.fromFile(new File(pickedPhotoFilePath)), Uri.fromFile(new File(getCacheDir(), "cropped")))
+//                                        .asSquare().start(UserProfileActivity.this);
+//                            }
+//                        }).setNegativeButton("DON'T CROP", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                            }
+//                        });
+//                        cropConsentDialog.create().show();
+                        prepareForUpload(pickedPhotoFilePath, currentAction);
                     } else {
                         final ProgressDialog progressDialog = UiUtils.showProgressDialog(UserProfileActivity.this, "Featuring Photo");
                         HolloutUtils.uploadFileAsync(pickedPhotoFilePath, AppConstants.PHOTO_DIRECTORY, new DoneCallback<String>() {
@@ -634,14 +760,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     }
                 }
             }
-        } else if (requestCode == Crop.REQUEST_CROP) {
+        } /*else if (requestCode == Crop.REQUEST_CROP) {
             if (resultCode == Activity.RESULT_OK) {
                 Uri result = Crop.getOutput(data);
                 if (result != null) {
                     prepareForUpload(result.getPath(), getCurrentUploadAction());
                 }
             }
-        }
+        }*/
     }
 
     private void prepareForUpload(String pickedPhotoFilePath, int currentAction) {
@@ -744,6 +870,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         switch (view.getId()) {
             case R.id.go_back:
                 onBackPressed();
+                break;
+            case R.id.delete_account:
+                tryDeleteAccount();
                 break;
         }
     }

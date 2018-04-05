@@ -143,7 +143,7 @@ public class HolloutPreferences {
         getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH + "_" + recipient, System.currentTimeMillis()).commit();
     }
 
-    public static void updateConversationTime(String recipient,long time) {
+    public static void updateConversationTime(String recipient, long time) {
         getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH + "_" + recipient, time).commit();
     }
 
@@ -201,6 +201,14 @@ public class HolloutPreferences {
     public static void destroyActivityCount() {
         getInstance().edit().putInt(AppConstants.ACTIVITY_COUNT, 0).commit();
         EventBus.getDefault().post(new ActivityCountChangedEvent());
+    }
+
+    public static long getLastVibrateTime() {
+        return getInstance().getLong(AppConstants.LAST_VIBRATE_TIME, 0);
+    }
+
+    public static void setLastVibrateTime(long lastVibrateTime) {
+        getInstance().edit().putLong(AppConstants.LAST_VIBRATE_TIME, lastVibrateTime).commit();
     }
 
 }

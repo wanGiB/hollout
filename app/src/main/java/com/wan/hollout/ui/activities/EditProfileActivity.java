@@ -1,19 +1,15 @@
 package com.wan.hollout.ui.activities;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +24,6 @@ import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.typeface.IIcon;
 import com.parse.ParseObject;
-import com.soundcloud.android.crop.Crop;
 import com.wan.hollout.R;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.utils.AppConstants;
@@ -41,7 +36,6 @@ import net.alhazmy13.mediapicker.Image.ImagePicker;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
-import java.io.File;
 import java.util.List;
 
 import butterknife.BindView;
@@ -128,7 +122,6 @@ public class EditProfileActivity extends BaseActivity implements View.OnClickLis
             String signedInUserName = signedInUserObject.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String profilePhotoUrl = signedInUserObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             String coverPhotoUrl = signedInUserObject.getString(AppConstants.APP_USER_COVER_PHOTO);
-
             displayNameBox.setText(WordUtils.capitalize(signedInUserName));
             if (StringUtils.isNotEmpty(profilePhotoUrl)) {
                 UiUtils.loadImage(this, profilePhotoUrl, userProfilePhotoView);
@@ -260,32 +253,36 @@ public class EditProfileActivity extends BaseActivity implements View.OnClickLis
                 if (pickedPhotoFilePath != null) {
                     final int currentAction = getCurrentUploadAction();
                     if (currentAction == UPLOAD_ACTION_TYPE_COVER_PHOTO || currentAction == UPLOAD_ACTION_TYPE_PROFILE_PHOTO) {
-                        AlertDialog.Builder cropConsentDialog = new AlertDialog.Builder(EditProfileActivity.this);
-                        cropConsentDialog.setMessage("Crop Photo ?");
-                        cropConsentDialog.setPositiveButton("CROP", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Crop.of(Uri.fromFile(new File(pickedPhotoFilePath)), Uri.fromFile(new File(getCacheDir(), "cropped")))
-                                        .asSquare().start(EditProfileActivity.this);
-                            }
-                        }).setNegativeButton("DON'T CROP", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                prepareForUpload(pickedPhotoFilePath, currentAction);
-                            }
-                        });
-                        cropConsentDialog.create().show();
+//                        AlertDialog.Builder cropConsentDialog = new AlertDialog.Builder(EditProfileActivity.this);
+//                        cropConsentDialog.setMessage("Edit Photo ?");
+//                        cropConsentDialog.setPositiveButton("CROP", new DialogInterface.OnClickListener() {
+//
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                Crop.of(Uri.fromFile(new File(pickedPhotoFilePath)), Uri.fromFile(new File(getCacheDir(), "cropped")))
+//                                        .asSquare().start(EditProfileActivity.this);
+//                            }
+//
+//                        }).setNegativeButton("Don't Edit", new DialogInterface.OnClickListener() {
+//
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                            }
+//
+//                        });
+//                        cropConsentDialog.create().show();
+                        prepareForUpload(pickedPhotoFilePath, currentAction);
                     }
                 }
             }
-        } else if (requestCode == Crop.REQUEST_CROP) {
+        } /*else if (requestCode == Crop.REQUEST_CROP) {
             if (resultCode == Activity.RESULT_OK) {
                 Uri result = Crop.getOutput(data);
                 if (result != null) {
                     prepareForUpload(result.getPath(), getCurrentUploadAction());
                 }
             }
-        }
+        }*/
     }
 
     private void prepareForUpload(String pickedPhotoFilePath, int currentAction) {

@@ -88,7 +88,7 @@ public class ConversationsFragment extends BaseFragment {
         }
 
         @Override
-        public void onModelChanged(@NonNull final ChatMessage model, @NonNull BaseModel.Action action) {
+        public void onModelChanged(@NonNull final ChatMessage model, @NonNull final BaseModel.Action action) {
             if (getActivity() != null) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
@@ -100,7 +100,12 @@ public class ConversationsFragment extends BaseFragment {
                                 if (model.getConversationId().equals(conversationId)) {
                                     int indexOfConversation = conversations.indexOf(conversationItem);
                                     if (indexOfConversation != -1) {
-                                        conversationsAdapter.notifyItemChanged(indexOfConversation);
+                                        if (action == BaseModel.Action.DELETE) {
+                                            conversations.remove(indexOfConversation);
+                                            conversationsAdapter.notifyDataSetChanged();
+                                        } else {
+                                            conversationsAdapter.notifyItemChanged(indexOfConversation);
+                                        }
                                     }
                                 }
                             }

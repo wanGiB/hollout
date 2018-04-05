@@ -168,7 +168,7 @@ public class AppConstants {
     public static final String OBJECT_TYPE_GROUP = "object_type_group";
 
     public static final String ATTEMPT_LOGOUT = "attempt_logout";
-    static final String AUTHENTICATED_USER_DETAILS = "authenticated_user_details";
+    public static final String AUTHENTICATED_USER_DETAILS = "authenticated_user_details";
     static final String LAST_ATTEMPTED_MESSAGE_FOR = "last_attempted_msg_for_";
     public static final String TURN_OFF_ALL_TAB_LAYOUTS = "turn_off_all_tablayouts";
     public static final String DELETE_ALL_SELECTED_MESSAGES = "delete_all_selected_messages";
@@ -206,6 +206,8 @@ public class AppConstants {
     public static final String USER_CURRENT_TIME_STAMP = "user_current_time_stamp";
     public static final String ACTIVITY_COUNT = "activity_count";
     public static final String FROM_MAIN = "from_main";
+    public static final String ACCOUNT_DELETED_EVENT = "account_deleted_event";
+    public static final String LAST_VIBRATE_TIME = "last_vibrate_time";
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;

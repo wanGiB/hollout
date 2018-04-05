@@ -24,6 +24,7 @@ import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.parse.CountCallback;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
+import com.parse.ParseConfig;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -89,6 +90,8 @@ public class NearbyPeopleFragment extends BaseFragment {
 
     private View footerView;
     public String searchString;
+
+    private ParseQuery<ParseObject> joinedQuery;
 
     public NearbyPeopleFragment() {
         // Required empty public constructor
@@ -422,6 +425,10 @@ public class NearbyPeopleFragment extends BaseFragment {
     }
 
     private void searchPeople(final int skip, String searchString) {
+        if (joinedQuery != null) {
+            joinedQuery.cancel();
+            joinedQuery = null;
+        }
         peopleAdapter.setSearchString(searchString);
         ParseQuery<ParseObject> parseUserParseQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         parseUserParseQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
@@ -439,7 +446,9 @@ public class NearbyPeopleFragment extends BaseFragment {
         List<ParseQuery<ParseObject>> queries = new ArrayList<>();
         queries.add(parseUserParseQuery);
         queries.add(categoryQuery);
-        ParseQuery<ParseObject> joinedQuery = ParseQuery.or(queries);
+
+        joinedQuery = ParseQuery.or(queries);
+        joinedQuery.orderByDescending(AppConstants.APP_USER_GEO_POINT);
         joinedQuery.setLimit(100);
         if (skip != 0) {
             joinedQuery.setSkip(skip);

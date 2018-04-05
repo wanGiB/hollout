@@ -307,6 +307,24 @@
 
                 </FrameLayout>
 
+                <Button
+                    android:id="@+id/delete_account"
+                    android:layout_width="330dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/featured_photos_frame"
+                    android:layout_centerHorizontal="true"
+                    android:layout_gravity="center_horizontal"
+                    android:gravity="center"
+                    android:padding="5dp"
+                    android:text="@string/delete_my_account"
+                    android:textAllCaps="false"
+                    android:textSize="18sp"
+                    android:textStyle="normal"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:theme="@style/Widget.Button.Login.Google"
+                    android:visibility="gone" />
+
             </RelativeLayout>
 
         </RelativeLayout>

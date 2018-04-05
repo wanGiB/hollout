@@ -159,9 +159,10 @@ public class MessageNotifier {
 
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;
-                notification.defaults |= Notification.DEFAULT_VIBRATE;
+                if (HolloutUtils.canVibrate()) {
+                    notification.defaults |= Notification.DEFAULT_VIBRATE;
+                }
                 notification.defaults |= Notification.DEFAULT_SOUND;
-
                 if (pendingIntent != null) {
                     notificationHelper.notify(AppConstants.NEW_MESSAGE_NOTIFICATION_ID, notification);
                 }
@@ -226,7 +227,9 @@ public class MessageNotifier {
                 }
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;
-                notification.defaults |= Notification.DEFAULT_VIBRATE;
+                if (HolloutUtils.canVibrate()) {
+                    notification.defaults |= Notification.DEFAULT_VIBRATE;
+                }
                 notification.defaults |= Notification.DEFAULT_SOUND;
                 if (pendingIntent != null) {
                     notificationHelper.notify(AppConstants.NEW_MESSAGE_NOTIFICATION_ID, notification);
@@ -282,7 +285,9 @@ public class MessageNotifier {
                 }
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;
-                notification.defaults |= Notification.DEFAULT_VIBRATE;
+                if (HolloutUtils.canVibrate()) {
+                    notification.defaults |= Notification.DEFAULT_VIBRATE;
+                }
                 notification.defaults |= Notification.DEFAULT_SOUND;
                 if (pendingIntent != null) {
                     notificationHelper.notify(AppConstants.NEW_MESSAGE_NOTIFICATION_ID, notification);
@@ -448,7 +453,9 @@ public class MessageNotifier {
                     }
                     Notification notification = builder.build();
                     notification.defaults |= Notification.DEFAULT_LIGHTS;
-                    notification.defaults |= Notification.DEFAULT_VIBRATE;
+                    if (HolloutUtils.canVibrate()) {
+                        notification.defaults |= Notification.DEFAULT_VIBRATE;
+                    }
                     notification.defaults |= Notification.DEFAULT_SOUND;
                     if (pendingIntent != null) {
                         notificationHelper.notify(AppConstants.MISSED_CALLS_NOTIFICATIONS_ID, notification);

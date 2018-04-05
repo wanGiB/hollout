@@ -60,6 +60,7 @@ import net.alhazmy13.mediapicker.Image.ImagePicker;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.greenrobot.eventbus.EventBus;
+import org.joda.time.DateTimeUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -77,6 +78,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 import static com.wan.hollout.utils.AppConstants.LANGUAGE_PREF;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -1048,6 +1050,20 @@ public class HolloutUtils {
                 }
             }
         });
+    }
+
+    //This method prevents incessant device vibration on new messages.
+    // Vibrate on new message if and only if the last vibration has lasted for more than 45seconds
+    static boolean canVibrate() {
+        long currentTimeInMills = System.currentTimeMillis();
+        long lastVibrateTime = HolloutPreferences.getLastVibrateTime();
+        long MAX_DURATION = TimeUnit.MILLISECONDS.convert(45, TimeUnit.SECONDS);
+        long duration = currentTimeInMills - lastVibrateTime;
+        boolean canVibrate = duration >= MAX_DURATION;
+        if (canVibrate) {
+            HolloutPreferences.setLastVibrateTime(currentTimeInMills);
+        }
+        return canVibrate;
     }
 
 }

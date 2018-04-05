@@ -77,6 +77,7 @@ import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.GeneralNotifier;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -466,45 +467,59 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     }
 
     private void displaySignedInUserProps(ParseObject signedInUser) {
-        String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-        String userPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-        String userCoverPhotoUrl = signedInUser.getString(AppConstants.APP_USER_COVER_PHOTO);
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (signedInUser != null) {
+            String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+            String userPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            String userCoverPhotoUrl = signedInUser.getString(AppConstants.APP_USER_COVER_PHOTO);
+            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        View headerView = navigationView.getHeaderView(0);
+            View headerView = navigationView.getHeaderView(0);
 
-        TextView signedInUserNameView = headerView.findViewById(R.id.signed_in_user_name_view);
-        CircleImageView signedInUserProfilePhotoView = headerView.findViewById(R.id.signed_in_user_profile_image_view);
-        ImageView signedInUserCoverPhotoView = headerView.findViewById(R.id.signed_in_user_cover_image_view);
-        TextView signedInUserEmailView = headerView.findViewById(R.id.signed_in_user_email_view);
+            TextView signedInUserNameView = headerView.findViewById(R.id.signed_in_user_name_view);
+            CircleImageView signedInUserProfilePhotoView = headerView.findViewById(R.id.signed_in_user_profile_image_view);
+            ImageView signedInUserCoverPhotoView = headerView.findViewById(R.id.signed_in_user_cover_image_view);
+            TextView signedInUserEmailView = headerView.findViewById(R.id.signed_in_user_email_view);
 
-        //Load Data
-        signedInUserNameView.setText(WordUtils.capitalize(userDisplayName));
-        if (StringUtils.isNotEmpty(userPhotoUrl)) {
-            UiUtils.loadImage(this, userPhotoUrl, signedInUserProfilePhotoView);
-        }
-        if (StringUtils.isNotEmpty(userCoverPhotoUrl)) {
-            UiUtils.loadImage(this, userCoverPhotoUrl, signedInUserCoverPhotoView);
-            signedInUserCoverPhotoView.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.MULTIPLY));
-        }
-        if (firebaseUser != null) {
-            String userEmail = firebaseUser.getEmail();
-            if (userEmail != null) {
-                userEmail = StringUtils.remove(userEmail, "@hollout.com");
-                signedInUserEmailView.setText(userEmail);
+            //Load Data
+            signedInUserNameView.setText(WordUtils.capitalize(userDisplayName));
+            if (StringUtils.isNotEmpty(userPhotoUrl)) {
+                UiUtils.loadImage(this, userPhotoUrl, signedInUserProfilePhotoView);
             }
-        }
-
-        View.OnClickListener onClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchUserProfile();
+            if (StringUtils.isNotEmpty(userCoverPhotoUrl)) {
+                UiUtils.loadImage(this, userCoverPhotoUrl, signedInUserCoverPhotoView);
+                signedInUserCoverPhotoView.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.MULTIPLY));
             }
-        };
+            if (firebaseUser != null) {
+                String userEmail = firebaseUser.getEmail();
+                if (userEmail != null) {
+                    userEmail = StringUtils.remove(userEmail, "@hollout.com");
+                    signedInUserEmailView.setText(userEmail);
+                }
+            }
 
-        headerView.setOnClickListener(onClickListener);
-        signedInUserCoverPhotoView.setOnClickListener(onClickListener);
-        signedInUserProfilePhotoView.setOnClickListener(onClickListener);
+            View.OnClickListener onClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    launchUserProfile();
+                }
+            };
+
+            headerView.setOnClickListener(onClickListener);
+            signedInUserCoverPhotoView.setOnClickListener(onClickListener);
+            signedInUserProfilePhotoView.setOnClickListener(onClickListener);
+        } else {
+            AlertDialog.Builder invalidSessionDialog = new AlertDialog.Builder(this);
+            invalidSessionDialog.setTitle("Invalid Session");
+            invalidSessionDialog.setMessage("Sorry, your app session has expired. Please try login in again.");
+            invalidSessionDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    finishLogOut();
+                }
+            });
+            invalidSessionDialog.create().show();
+        }
     }
 
     private void initSharing() {
@@ -758,6 +773,11 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                         case AppConstants.CHECK_SELECTED_CONVERSATIONS:
                             updateActionMode();
                             ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
+                            break;
+                        case AppConstants.ACCOUNT_DELETED_EVENT:
+                            if (!isFinishing()) {
+                                finish();
+                            }
                             break;
                     }
                 } else if (o instanceof UnreadFeedsBadge) {
