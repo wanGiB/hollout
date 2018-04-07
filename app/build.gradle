@@ -133,6 +133,9 @@ dependencies {
     compile "com.hanks:htextview-scale:${htextview_version}"
     compile 'com.vanniktech:emoji-ios:0.5.1'
     compile "com.github.nisrulz:sensey:${sensey_version}"
+    compile 'com.nightonke:boommenu:2.1.1'
+    compile 'com.androidadvance:topsnackbar:1.1.1'
+    compile 'com.klinkerapps:sliding-activity:1.5.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

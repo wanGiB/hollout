@@ -50,7 +50,7 @@ public class FetchUserInfoService {
     }
 
     private void fetchUserDetailsAndBlowNotification(final String idToFetch, final String notificationType, @Nullable final ChatMessage unreadMessage, @Nullable final List<ChatMessage> unreadMessagesFromSameSender) {
-        ParseQuery<ParseObject> userInfo = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> userInfo = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         userInfo.whereEqualTo(AppConstants.REAL_OBJECT_ID, idToFetch.toLowerCase());
         userInfo.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
@@ -79,6 +79,7 @@ public class FetchUserInfoService {
                         AppConstants.recentConversations.add(0, userObject);
                     }
                 }
+                userInfo.cancel();
             }
         });
     }

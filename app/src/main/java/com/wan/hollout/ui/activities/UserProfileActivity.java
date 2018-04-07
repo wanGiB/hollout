@@ -169,7 +169,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private void resolveReceivedChatRequestIfAny() {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null && parseUser != null) {
-            ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            final ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
             chatRequestsQuery.include(AppConstants.FEED_CREATOR);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
@@ -187,6 +187,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                             }
                         }).show();
                     }
+                    chatRequestsQuery.cancel();
                 }
             });
         }
@@ -430,6 +431,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 } else {
                     objectReferenceDeletionCallBack.done(true, null);
                 }
+                userQuery.cancel();
             }
         });
     }
@@ -496,6 +498,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                             UiUtils.dismissProgressDialog(progressDialog);
                             UiUtils.showSafeToast("Error deleting profile. Please can you try again.");
                         }
+                        userQuery.cancel();
                     }
                 });
             } else {
@@ -821,6 +824,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private void openPhotoViewActivity(String photo, List<String> photos, ParseObject parseUser) {
         Intent mProfilePhotoViewIntent = new Intent(UserProfileActivity.this, SlidePagerActivity.class);
         mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_TITLE, parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
+        mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_USER_ID, parseUser.getString(AppConstants.REAL_OBJECT_ID));
         ArrayList<String> photoExtras = new ArrayList<>();
         photoExtras.add(0, photo);
         for (String photoItem : photos) {

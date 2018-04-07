@@ -143,6 +143,40 @@
 
         <include layout="@layout/footer_snack" />
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bottom_bar"
+            android:layout_alignParentBottom="true">
+
+            <com.wan.hollout.ui.widgets.HolloutButterBar
+                android:id="@+id/space_navigation_item"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true"
+                app:active_item_color="#99acc4"
+                app:butter_bar_background_color="@color/colorPrimary"
+                app:centre_button_color="#4e6787"
+                app:centre_button_icon_color="@color/white"
+                app:centre_button_visible="false"
+                app:inactive_item_color="#99acc4" />
+
+            <com.nightonke.boommenu.BoomMenuButton
+                android:id="@+id/boom_menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                app:bmb_buttonEnum="ham"
+                app:bmb_buttonPlaceEnum="buttonPlace_ham_2"
+                app:bmb_draggable="false"
+                app:bmb_highlightedColor="#4e6787"
+                app:bmb_normalColor="#4e6787"
+                app:bmb_piecePlaceEnum="piecePlace_ham_2" />
+
+        </RelativeLayout>
+
+
     </RelativeLayout>
 
     <android.support.design.widget.NavigationView

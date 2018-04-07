@@ -125,8 +125,8 @@
             android:name=".ui.activities.ChatActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/chat"
-            android:theme="@style/AppTheme"
             android:launchMode="singleTop"
+            android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden" />
 
         <activity
@@ -183,7 +183,6 @@
             android:name=".ui.activities.SelectPeopleToForwardMessageActivity"
             android:configChanges="orientation"
             android:theme="@style/AppTheme" />
-        <activity android:name="com.soundcloud.android.crop.CropImageActivity" />
         <activity android:name=".ui.activities.EaseShowImageActivity" />
         <activity
             android:name=".ui.activities.PrivacyPolicyPreview"
@@ -218,9 +217,14 @@
         <service android:name=".ui.services.TimeChangeDetectionService" />
 
         <activity
-            android:name="com.yalantis.ucrop.UCropActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:name=".ui.activities.NewsFeedActivity"
+            android:configChanges="orientation|screenSize|screenLayout"
+            android:theme="@style/Theme.Sliding.Light" />
+
+        <activity
+            android:name=".ui.activities.PhotoLikesActivity"
+            android:configChanges="orientation|screenSize|screenLayout"
+            android:theme="@style/Theme.Sliding.Light" />
 
     </application>
 

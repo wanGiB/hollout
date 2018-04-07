@@ -2,7 +2,6 @@ package com.wan.hollout.ui.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.NestedScrollView;
@@ -26,6 +25,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
+import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
@@ -173,6 +173,7 @@ public class ConversationsFragment extends BaseFragment {
                 fetchConversations(0);
             }
         });
+        UiUtils.attachViewToNestedScrollViewState(nestedScrollView, MainActivity.bottomBar, MainActivity.materialSearchView);
     }
 
     private void loadAdapter(List<ParseObject> users) {
@@ -189,7 +190,7 @@ public class ConversationsFragment extends BaseFragment {
     }
 
     private void attemptOffloadConversationsFromCache() {
-        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             peopleAndGroupsQuery.fromPin(AppConstants.CONVERSATIONS);
@@ -204,6 +205,7 @@ public class ConversationsFragment extends BaseFragment {
                     }
                     invalidateEmptyView();
                     fetchConversations(0);
+                    peopleAndGroupsQuery.cancel();
                 }
             });
         } else {
@@ -226,7 +228,7 @@ public class ConversationsFragment extends BaseFragment {
     }
 
     private void fetchConversations(final int skip) {
-        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
@@ -261,8 +263,8 @@ public class ConversationsFragment extends BaseFragment {
                             showConversationEmptyViewAsNecessary(e.getCode());
                         }
                     }
+                    peopleAndGroupsQuery.cancel();
                 }
-
             });
         } else {
             UiUtils.toggleFlipperState(contentFlipper, 1);
@@ -376,6 +378,12 @@ public class ConversationsFragment extends BaseFragment {
                         case AppConstants.REFRESH_CONVERSATIONS:
                             fetchConversations(0);
                             break;
+                        case AppConstants.SEARCH_VIEW_CLOSED:
+                            conversations.clear();
+                            conversationsAdapter.notifyDataSetChanged();
+                            conversationsAdapter.setSearchString(null);
+                            fetchConversations(0);
+                            break;
                     }
                 } else if (o instanceof SearchChatsEvent) {
                     SearchChatsEvent searchChatsEvent = (SearchChatsEvent) o;
@@ -394,7 +402,7 @@ public class ConversationsFragment extends BaseFragment {
         } else {
             conversationsAdapter.setSearchString(null);
         }
-        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
@@ -430,6 +438,7 @@ public class ConversationsFragment extends BaseFragment {
                             showConversationEmptyViewAsNecessary(e.getCode());
                         }
                     }
+                    peopleAndGroupsQuery.cancel();
                 }
 
             });

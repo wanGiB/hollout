@@ -94,7 +94,7 @@
     <declare-styleable name="HolloutTextView">
         <attr name="textStyle" />
         <attr name="text_animationStyle" />
-         />
+        />
     </declare-styleable>
 
     <declare-styleable name="ChatMessageTextView">
@@ -281,5 +281,18 @@
     </declare-styleable>
 
     <attr name="attachment_type_selector_background" format="color" />
+
+    <declare-styleable name="HolloutButterBar">
+        <attr name="butter_bar_item_icon_size" format="dimension" />
+        <attr name="butter_bar_item_icon_only_size" format="dimension" />
+        <attr name="butter_bar_item_text_size" format="dimension" />
+        <attr name="butter_bar_background_color" format="color" />
+        <attr name="centre_button_color" format="color" />
+        <attr name="active_item_color" format="color" />
+        <attr name="inactive_item_color" format="color" />
+        <attr name="centre_button_icon" format="reference" />
+        <attr name="centre_button_icon_color" format="color" />
+        <attr name="centre_button_visible" format="boolean" />
+    </declare-styleable>
 
 </resources>

@@ -2,6 +2,7 @@ package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -34,22 +35,25 @@ public class FeaturedPhotosCircleAdapter extends RecyclerView.Adapter<RecyclerVi
     private Activity activity;
     private List<String> photos;
     private String username;
+    private String userId;
 
-    public FeaturedPhotosCircleAdapter(Activity activity, List<String> photos, String username) {
+    public FeaturedPhotosCircleAdapter(Activity activity, List<String> photos, String username, String userId) {
         this.activity = activity;
         this.photos = photos;
         this.username = username;
+        this.userId = userId;
         this.layoutInflater = LayoutInflater.from(activity);
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View photoView = layoutInflater.inflate(R.layout.circle_featured_photo_item, parent, false);
         return new PhotoItemHolder(photoView);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position) {
         final ParseObject signedInUserObject = AuthUtil.getCurrentUser();
         if (signedInUserObject != null) {
             final FeaturedPhotosCircleAdapter.PhotoItemHolder photoItemHolder = (PhotoItemHolder) holder;
@@ -64,6 +68,7 @@ public class FeaturedPhotosCircleAdapter extends RecyclerView.Adapter<RecyclerVi
                             UiUtils.blinkView(v);
                             Intent mProfilePhotoViewIntent = new Intent(activity, SlidePagerActivity.class);
                             mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_TITLE, username);
+                            mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_USER_ID, userId);
                             ArrayList<String> photoExtras = new ArrayList<>();
                             photoExtras.add(0, photo);
                             for (String photoItem : photos) {

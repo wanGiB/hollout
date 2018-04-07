@@ -131,17 +131,18 @@ public class WelcomeActivity extends BaseActivity
         } else {
             trueButton.setVisibility(View.GONE);
         }
-        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#0096DE>Connect,</font>  <font color=#E8A723>Discover</font> and meet new people around you."));
+        appIntroMessageView.setText(UiUtils.fromHtml("<font color=#3EB890>Connect,</font>  <font color=#E8A723>Discover</font> and meet new people around you."));
         continueWithGoogle.setOnClickListener(this);
     }
 
     private void authenticateUser(final FirebaseUser firebaseUser) {
-        ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         peopleQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, getValidAppUserId(firebaseUser));
         peopleQuery.whereEqualTo(AppConstants.APP_USER_PASSWORD, getValidAppUserId(firebaseUser));
         peopleQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
             public void done(ParseObject object, ParseException e) {
+                peopleQuery.cancel();
                 if (e == null && object != null) {
                     AuthUtil.createLocalUser(object);
                     HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());

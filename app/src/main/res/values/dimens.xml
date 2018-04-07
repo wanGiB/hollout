@@ -14,6 +14,8 @@
     <dimen name="search_icon_padding">12dp</dimen>
     <dimen name="search_view_text_padding">65dp</dimen>
 
+    <dimen name="butter_bar_item_icon_only_size">25dp</dimen>
+
     <dimen name="y_offset">72dp</dimen>
     <dimen name="btn_size_show_pwd">18dp</dimen>
     <dimen name="default_textsize">12sp</dimen>
@@ -122,4 +124,12 @@
     <dimen name="bubbleView_default_radius">4dp</dimen>
     <!-- Default text size for content text. -->
     <dimen name="bubbleView_default_text_size">14sp</dimen>
+    <dimen name="butter_bar_item_icon_default_size">25dp</dimen>
+    <dimen name="butter_bar_item_text_default_size">14sp</dimen>
+    <dimen name="butter_bar_navigation_height">72dp</dimen>
+    <dimen name="butter_bar_centre_button_default_size">56dp</dimen>
+    <!--Butter bar NavigationView defaults-->
+    <dimen name="main_content_height">50dp</dimen>
+    <dimen name="centre_content_width">110dp</dimen>
+
 </resources>

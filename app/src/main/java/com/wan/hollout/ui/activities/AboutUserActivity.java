@@ -155,7 +155,7 @@ public class AboutUserActivity extends BaseActivity {
     }
 
     private void suggestOccupation(final String searchKey) {
-        ParseQuery<ParseObject> interestsQuery = ParseQuery.getQuery(AppConstants.INTERESTS);
+        final ParseQuery<ParseObject> interestsQuery = ParseQuery.getQuery(AppConstants.INTERESTS);
         interestsQuery.whereContains(AppConstants.NAME, searchKey.trim().toLowerCase());
         interestsQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
@@ -178,6 +178,7 @@ public class AboutUserActivity extends BaseActivity {
                 } else {
                     UiUtils.showView(interestsSuggestionRecyclerView, false);
                 }
+                interestsQuery.cancel();
             }
         });
     }
@@ -316,7 +317,7 @@ public class AboutUserActivity extends BaseActivity {
 
     private void checkAndPushInterests(List<String> interests) {
         for (final String s : interests) {
-            ParseQuery<ParseObject> parseObjectParseQuery = ParseQuery.getQuery(AppConstants.INTERESTS);
+            final ParseQuery<ParseObject> parseObjectParseQuery = ParseQuery.getQuery(AppConstants.INTERESTS);
             parseObjectParseQuery.whereEqualTo(AppConstants.NAME, s.trim().toLowerCase());
             parseObjectParseQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                 @Override
@@ -325,6 +326,7 @@ public class AboutUserActivity extends BaseActivity {
                         ParseObject newObject = new ParseObject(AppConstants.INTERESTS);
                         newObject.put(AppConstants.NAME, s.trim().toLowerCase());
                         newObject.saveInBackground();
+                        parseObjectParseQuery.cancel();
                     }
                 }
             });

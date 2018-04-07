@@ -110,7 +110,7 @@ public class VoiceCallActivity extends CallActivity {
 
     private void fetchCallerUserDetails() {
         CallStateTracker.getInstance().setCallerId(mCallerId);
-        ParseQuery<ParseObject> callerQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> callerQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         callerQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, mCallerId);
         callerQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
@@ -133,6 +133,7 @@ public class VoiceCallActivity extends CallActivity {
                         }
                     }
                 }
+                callerQuery.cancel();
             }
         });
         mCallBackgroundView.setOnClickListener(new View.OnClickListener() {

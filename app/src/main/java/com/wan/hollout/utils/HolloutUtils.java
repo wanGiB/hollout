@@ -65,7 +65,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1010,7 +1012,7 @@ public class HolloutUtils {
 
     public static void acceptOrDeclineChat(final ParseObject requestObject, final boolean accept, final String requestOriginatorId,
                                            final String requesterName) {
-        ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+        final ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
         requestObjectQuery.whereEqualTo(AppConstants.OBJECT_ID, requestObject.getObjectId());
         requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
@@ -1035,6 +1037,7 @@ public class HolloutUtils {
                                         HolloutPreferences.updateConversationTime(requestOriginatorId);
                                         AuthUtil.updateCurrentLocalUser(signedInUser, null);
                                     }
+                                    EventBus.getDefault().postSticky(AppConstants.REFRESH_CONVERSATIONS);
                                 } else {
                                     //Delete all messages from this user from the local database
                                     DbUtils.deleteConversation(requestOriginatorId, null);
@@ -1048,6 +1051,7 @@ public class HolloutUtils {
                         }
                     });
                 }
+                requestObjectQuery.cancel();
             }
         });
     }
@@ -1064,6 +1068,20 @@ public class HolloutUtils {
             HolloutPreferences.setLastVibrateTime(currentTimeInMills);
         }
         return canVibrate;
+    }
+
+    public static String hashString(String inputString) {
+        String sha1 = "";
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            digest.reset();
+            digest.update(inputString.getBytes("utf8"));
+            sha1 = String.format("%040x", new BigInteger(1, digest.digest()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        HolloutLogger.d("SHA1ofLike", sha1);
+        return sha1;
     }
 
 }

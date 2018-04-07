@@ -221,7 +221,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
         selectPeopleAdapter = new SelectPeopleAdapter(this, people);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         peopleRecyclerView.setLayoutManager(linearLayoutManager);
-        peopleRecyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
+        peopleRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         peopleRecyclerView.setAdapter(selectPeopleAdapter);
         peopleRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
@@ -234,7 +234,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
     }
 
     private void fetchConversations(final int skip) {
-        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
             List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
@@ -266,6 +266,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
                                 loadAdapter(objects);
                             }
                         }
+                        peopleAndGroupsQuery.cancel();
                     }
                 });
             }
@@ -274,7 +275,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
 
     private void searchChats(final int skip, final String searchString) {
         selectPeopleAdapter.setSearchString(searchString);
-        ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         if (signedInUser != null) {
             List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
@@ -306,6 +307,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
                                 loadAdapter(objects);
                             }
                         }
+                        peopleAndGroupsQuery.cancel();
                     }
                 });
             }
@@ -354,7 +356,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
                             }
                         } else {
                             doneFab.hide();
-                            if (getSupportActionBar()!=null){
+                            if (getSupportActionBar() != null) {
                                 getSupportActionBar().setTitle("Forward Message to:");
                             }
                         }

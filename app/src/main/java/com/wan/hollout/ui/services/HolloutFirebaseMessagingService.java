@@ -8,6 +8,7 @@ import com.google.firebase.messaging.RemoteMessage;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.GeneralNotifier;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,6 +42,8 @@ public class HolloutFirebaseMessagingService extends FirebaseMessagingService {
                     }
                 } else if (notificationType.equals(AppConstants.NEW_INCOMING_CALL)) {
                     CallClient.getInstance().startCallClient();
+                }else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_PHOTO_LIKE)){
+                    GeneralNotifier.fetchMyPhotoLikes();
                 }
             }
         }

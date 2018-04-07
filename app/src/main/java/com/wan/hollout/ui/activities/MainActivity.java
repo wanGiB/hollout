@@ -6,12 +6,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
@@ -41,23 +43,32 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.androidadvance.topsnackbar.TSnackbar;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.typeface.IIcon;
+import com.nightonke.boommenu.BoomButtons.HamButton;
+import com.nightonke.boommenu.BoomMenuButton;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.eventbuses.UnreadFeedsBadge;
+import com.wan.hollout.interfaces.ButterBarOnClickListener;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
@@ -66,18 +77,19 @@ import com.wan.hollout.ui.fragments.NearbyPeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.services.TimeChangeDetectionService;
 import com.wan.hollout.ui.widgets.CircleImageView;
+import com.wan.hollout.ui.widgets.HolloutButterBar;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheetStyle;
 import com.wan.hollout.ui.widgets.sharesheet.SharingHelper;
+import com.wan.hollout.ui.widgets.validation.ButterBarItem;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.GeneralNotifier;
-import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -93,6 +105,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -102,6 +115,7 @@ import butterknife.ButterKnife;
 import static com.wan.hollout.utils.UiUtils.showView;
 
 @SuppressWarnings("RedundantCast")
+@SuppressLint("StaticFieldLeak")
 public class MainActivity extends BaseActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     @BindView(R.id.footerAd)
@@ -119,8 +133,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     @BindView(R.id.tabs)
     TabLayout tabLayout;
 
-    @BindView(R.id.search_view)
-    MaterialSearchView materialSearchView;
+    public static MaterialSearchView materialSearchView;
 
     //=======Action Mode Shits=====//
     @SuppressLint("StaticFieldLeak")
@@ -144,11 +157,21 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     @BindView(R.id.drawer_layout)
     DrawerLayout drawerLayout;
 
-    private HolloutPermissions holloutPermissions;
+    public static RelativeLayout bottomBar;
 
+    @BindView(R.id.boom_menu)
+    BoomMenuButton boomMenuButton;
+
+    @BindView(R.id.space_navigation_item)
+    HolloutButterBar spaceNavigationView;
+
+    private HolloutPermissions holloutPermissions;
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
     public static Vibrator vibrator;
     private ProgressDialog deleteConversationProgressDialog;
+
+    private boolean newsFeedOpen = false;
+    private boolean photoLikesOpen = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -156,7 +179,10 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        bottomBar = findViewById(R.id.bottom_bar);
         actionModeBar = findViewById(R.id.action_mode_bar);
+        initSpaceNavigationItemView(savedInstanceState);
+        materialSearchView = findViewById(R.id.search_view);
         setSupportActionBar(toolbar);
         ParseObject signedInUser = AuthUtil.getCurrentUser();
         Adapter adapter = setupViewPagerAdapter(viewPager);
@@ -182,6 +208,110 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
         initEventHandlers();
         createDeleteConversationProgressDialog();
+        buildHamButtonBuilder();
+    }
+
+    public void fetchMyPhotoLikes() {
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        if (signedInUserObject != null) {
+            String signedInUserId = signedInUserObject.getString(AppConstants.REAL_OBJECT_ID);
+            if (StringUtils.isNotEmpty(signedInUserId)) {
+                FirebaseUtils.getPhotoLikesReference().child(signedInUserId)
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot != null && dataSnapshot.exists()) {
+                                    long dataSnapShotCount = dataSnapshot.getChildrenCount();
+                                    if (dataSnapShotCount != 0) {
+                                        GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new
+                                                GenericTypeIndicator<HashMap<String, Object>>() {
+                                                };
+                                        List<HashMap<String, Object>> unseenPhotoLikes = new ArrayList<>();
+                                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                            HashMap<String, Object> photoLike = snapshot.getValue(genericTypeIndicator);
+                                            if (photoLike != null) {
+                                                Boolean previewedByOwner = photoLike.containsKey(AppConstants.PREVIEWED);
+                                                if (!previewedByOwner) {
+                                                    unseenPhotoLikes.add(photoLike);
+                                                }
+                                            }
+                                        }
+                                        if (spaceNavigationView != null && !unseenPhotoLikes.isEmpty()) {
+                                            spaceNavigationView.showBadgeAtIndex(1, unseenPhotoLikes.size(),
+                                                    ContextCompat.getColor(MainActivity.this, R.color.colorAccent));
+                                        }
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+
+                        });
+
+            }
+        }
+    }
+
+    private void buildHamButtonBuilder() {
+        HamButton.Builder workOutRequestBuilder = new HamButton.Builder();
+        workOutRequestBuilder.normalText("Workout Request");
+        workOutRequestBuilder.subNormalText("Request 5 people nearby to join you in a workout");
+        workOutRequestBuilder.normalImageRes(R.drawable.ic_directions_run_white_48dp);
+        workOutRequestBuilder.pieceColor(Color.WHITE);
+        workOutRequestBuilder.normalColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        boomMenuButton.addBuilder(workOutRequestBuilder);
+
+        HamButton.Builder eventInviteBuilder = new HamButton.Builder();
+        eventInviteBuilder.normalText("Event Invite");
+        eventInviteBuilder.subNormalText("Invite 10 people nearby to an event");
+        eventInviteBuilder.normalImageRes(R.drawable.ic_event_available_white_48dp);
+        workOutRequestBuilder.normalColor(ContextCompat.getColor(this, R.color.material_deep_teal_50));
+        eventInviteBuilder.pieceColor(Color.WHITE);
+        boomMenuButton.addBuilder(eventInviteBuilder);
+    }
+
+    private void initSpaceNavigationItemView(Bundle savedInstanceState) {
+        spaceNavigationView.initWithSaveInstanceState(savedInstanceState);
+        spaceNavigationView.showIconOnly();
+        spaceNavigationView.addButterBarItem(new ButterBarItem("Feed", R.drawable.ic_format_list_bulleted_black_48dp));
+        spaceNavigationView.addButterBarItem(new ButterBarItem("Likes", R.drawable.like));
+
+        spaceNavigationView.setButterBarOnClickListener(new ButterBarOnClickListener() {
+
+            @Override
+            public void onCentreButtonClick() {
+
+            }
+
+            @Override
+            public void onItemClick(int itemIndex, String itemName) {
+                if (itemIndex == 0) {
+                    newsFeedOpen = true;
+                    startActivity(new Intent(MainActivity.this, NewsFeedActivity.class));
+                } else if (itemIndex == 1) {
+                    photoLikesOpen = true;
+                    startActivity(new Intent(MainActivity.this, PhotoLikesActivity.class));
+                }
+            }
+
+            @Override
+            public void onItemReselected(int itemIndex, String itemName) {
+                if (itemIndex == 0) {
+                    if (!newsFeedOpen) {
+                        startActivity(new Intent(MainActivity.this, NewsFeedActivity.class));
+                    }
+                } else if (itemIndex == 1) {
+                    if (!photoLikesOpen) {
+                        startActivity(new Intent(MainActivity.this, PhotoLikesActivity.class));
+                    }
+                }
+            }
+
+        });
+
     }
 
     private void createDeleteConversationProgressDialog() {
@@ -310,6 +440,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             @Override
             public void onSearchViewShown() {
                 EventBus.getDefault().post(AppConstants.DISABLE_NESTED_SCROLLING);
+                UiUtils.showView(bottomBar, false);
             }
 
             @Override
@@ -317,6 +448,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 EventBus.getDefault().post(AppConstants.ENABLE_NESTED_SCROLLING);
                 showView(tabLayout, true);
                 EventBus.getDefault().post(AppConstants.SEARCH_VIEW_CLOSED);
+                UiUtils.showView(bottomBar, true);
             }
 
         });
@@ -437,7 +569,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         editProfileView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(getCurrentActivityInstance(), EditProfileActivity.class));
+                attemptProfileEdit();
             }
         });
 
@@ -464,6 +596,10 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 }
             }
         }
+    }
+
+    private void attemptProfileEdit() {
+        startActivity(new Intent(getCurrentActivityInstance(), EditProfileActivity.class));
     }
 
     private void displaySignedInUserProps(ParseObject signedInUser) {
@@ -628,6 +764,8 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         super.onResume();
         checkAndRegEventBus();
         fetchUnreadMessagesCount();
+        newsFeedOpen = false;
+        photoLikesOpen = false;
     }
 
     private void setupTabs(Adapter pagerAdapter) {
@@ -809,6 +947,53 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         tryAskForPermissions();
+        fetchMyPhotoLikes();
+        checkIfPhotoIsBlurredOrUnclear();
+    }
+
+    private void indicateNewsFeedAvailable() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                View firstBadgeView = spaceNavigationView.getViewAtIndex(0);
+                if (firstBadgeView != null) {
+                    firstBadgeView.findViewById(R.id.news_feed_available).setVisibility(View.VISIBLE);
+                }
+            }
+        }, 1000);
+    }
+
+    private void checkIfPhotoIsBlurredOrUnclear() {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            String userPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            String message = null;
+            if (userPhotoUrl == null) {
+                message = "Please setup your profile pic";
+            } else {
+                if (!StringUtils.containsIgnoreCase(userPhotoUrl, "firebase")) {
+                    message = "Your current photo is blurred or unclear.";
+                }
+            }
+            if (message != null) {
+                displayTopSnackBar(message);
+            }
+        }
+    }
+
+    private void displayTopSnackBar(String message) {
+        TSnackbar snackbar = TSnackbar.make(toolbar, message,
+                TSnackbar.LENGTH_INDEFINITE).setAction("UPLOAD NEW",
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        attemptProfileEdit();
+                    }
+                });
+        View snackbarView = snackbar.getView();
+        TextView textView = (TextView) snackbarView.findViewById(com.androidadvance.topsnackbar.R.id.snackbar_text);
+        textView.setTextColor(Color.WHITE);
+        snackbar.show();
     }
 
     private void tryAskForPermissions() {
@@ -858,11 +1043,13 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
         if (materialSearchView.isSearchOpen()) {
             materialSearchView.closeSearch();
+            UiUtils.showView(bottomBar, true);
             return;
         }
+        newsFeedOpen = false;
+        photoLikesOpen = false;
 
         super.onBackPressed();
-
     }
 
     public static void destroyActionMode() {

@@ -156,6 +156,7 @@ public class AppConstants {
     public static final Object OBJECT_TYPE_INDIVIDUAL = "object_type_individual";
     public static final String NOTIFICATION_TYPE_INDIVIDUAL_CHAT_REQUEST = "individual_chat_request";
     public static final int NEARBY_KIND_NOTIFICATION_ID = 0x14;
+    public static final int PHOTO_LIKES_NOTIFICATION_ID = 0x15;
     public static final String NOTIFICATION_TYPE_AM_NEARBY = "am_nearby";
     public static final String GENDER_FILTER = "gender_filter";
 
@@ -208,6 +209,13 @@ public class AppConstants {
     public static final String FROM_MAIN = "from_main";
     public static final String ACCOUNT_DELETED_EVENT = "account_deleted_event";
     public static final String LAST_VIBRATE_TIME = "last_vibrate_time";
+    public static final String PHOTO_LIKES = "PhotoLikes";
+    public static final String PHOTO_LIKE_ID = "photo_like_id";
+    public static final String SEEN_BY_OWNER = "seen_by_owner";
+    public static final String NOTIFICATION_TYPE_PHOTO_LIKE = "notification_type_photo_like";
+    public static final String PREVIEWED = "previewed";
+    public static final String LIKED_PHOTO = "liked_photo";
+    public static final String PHOTO_LIKE_DATE = "photo_liked_date";
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;

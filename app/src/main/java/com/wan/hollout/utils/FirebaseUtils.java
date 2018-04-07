@@ -45,6 +45,10 @@ public class FirebaseUtils {
         return getRootRef().child(AppConstants.MESSAGE_DELIVERY_STATUS);
     }
 
+    public static DatabaseReference getPhotoLikesReference() {
+        return getRootRef().child(AppConstants.PHOTO_LIKES);
+    }
+
     public static UploadTask uploadFileAsync(final String filePath, String directory, final String uniqueIdOfProcessInitiator, final boolean fromThumbnail,
                                              @Nullable final DoneCallback<String> doneCallback) {
         Uri uri = Uri.fromFile(new File(filePath));

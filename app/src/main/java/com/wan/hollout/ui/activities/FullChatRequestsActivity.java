@@ -155,7 +155,7 @@ public class FullChatRequestsActivity extends BaseActivity {
 
     private void fetchChatRequests(final int skip) {
         if (signedInUser != null) {
-            ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            final ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
             chatRequestsQuery.setLimit(30);
             if (skip != 0) {
@@ -172,6 +172,7 @@ public class FullChatRequestsActivity extends BaseActivity {
                     if (e == null && objects != null && !objects.isEmpty()) {
                         loadAdapter(objects);
                     }
+                    chatRequestsQuery.cancel();
                 }
             });
         }

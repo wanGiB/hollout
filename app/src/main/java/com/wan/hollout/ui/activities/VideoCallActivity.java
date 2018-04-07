@@ -121,7 +121,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
     }
 
     private void fetchCallerUserDetails() {
-        ParseQuery<ParseObject> callerQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> callerQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         callerQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, mCallerId);
         callerQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
@@ -134,6 +134,7 @@ public class VideoCallActivity extends CallActivity implements ActivityCompat.On
                         UiUtils.loadImage(VideoCallActivity.this, userPhotoUrl, mAvatarView);
                     }
                 }
+                callerQuery.cancel();
             }
         });
     }

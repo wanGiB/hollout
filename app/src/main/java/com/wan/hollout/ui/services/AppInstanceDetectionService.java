@@ -58,7 +58,6 @@ public class AppInstanceDetectionService extends JobIntentService implements
     private String TAG = AppInstanceDetectionService.class.getSimpleName();
 
     private static ParseObject signedInUser;
-
     private AppStateManager appStateManager;
 
     private AppStateManager.Listener myListener = new AppStateManager.Listener() {
@@ -257,7 +256,7 @@ public class AppInstanceDetectionService extends JobIntentService implements
         List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
         ArrayList<String> newUserChats = new ArrayList<>();
-        ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
         if (signedInUserGeoPoint != null && aboutUser != null) {
             if (savedUserChats != null) {
@@ -286,6 +285,7 @@ public class AppInstanceDetectionService extends JobIntentService implements
                             }
                         }
                     }
+                    peopleQuery.cancel();
                 }
             });
         }

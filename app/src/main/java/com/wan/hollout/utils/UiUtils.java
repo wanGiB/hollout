@@ -28,6 +28,7 @@ import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -36,7 +37,6 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.TypedValue;
 import android.view.View;
@@ -67,6 +67,8 @@ import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.interfaces.ListenableFuture;
+import com.wan.hollout.listeners.NestedViewHideShowScrollListener;
+import com.wan.hollout.listeners.RecyclerViewHideScrollListener;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
@@ -547,6 +549,7 @@ public class UiUtils {
                     public void onDismiss(DialogInterface dialogInterface) {
                         try {
                             ApplicationLoader.getParseLiveQueryClient().unsubscribe(userStateQuery);
+                            userStateQuery.cancel();
                             dialogInterface.cancel();
                         } catch (NullPointerException ignored) {
 
@@ -618,6 +621,7 @@ public class UiUtils {
 
     private static void refreshUserData(final ParseObject signedInUser, RecyclerView additionalPhotosRecyclerView, RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseObject parseUser, final Activity activity) {
         final String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+        final String userId = parseUser.getString(AppConstants.REAL_OBJECT_ID);
         final String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
         Long userLastSeenAt = parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) != 0
                 ? parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) :
@@ -649,7 +653,9 @@ public class UiUtils {
         }
 
         FeaturedPhotosCircleAdapter featuredPhotosCircleAdapter = new
-                FeaturedPhotosCircleAdapter(activity, userPhotos, parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME));
+                FeaturedPhotosCircleAdapter(activity, userPhotos,
+                parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME),
+                parseUser.getString(AppConstants.REAL_OBJECT_ID));
 
         LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
         additionalPhotosRecyclerView.setLayoutManager(horizontalLayoutManager);
@@ -693,6 +699,7 @@ public class UiUtils {
                         mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_TITLE, username);
                         ArrayList<String> photos = HolloutUtils.getAllOfAUserPhotos(userProfilePhotoUrl, userPhotos);
                         mProfilePhotoViewIntent.putStringArrayListExtra(AppConstants.EXTRA_PICTURES, photos);
+                        mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_USER_ID, userId);
                         activity.startActivity(mProfilePhotoViewIntent);
                         break;
                 }
@@ -1090,5 +1097,105 @@ public class UiUtils {
             view.setBackgroundColor(ContextCompat.getColor(context, randomColors[random.nextInt(randomColors.length - 1)]));
         }
     }
+
+    public static void attachViewToRecyclerViewState(RecyclerView recyclerView, final View viewToAttach) {
+        recyclerView.addOnScrollListener(new RecyclerViewHideScrollListener() {
+            @Override
+            public void onHide() {
+                UiUtils.showSafeToast("OnHide Called");
+                //Hide View
+                //Hide the Bottom Space NavigationView here
+                Animation slideOutAnimation = AnimationUtils.loadAnimation(ApplicationLoader.getInstance(), R.anim.slide_out_bottom);
+                slideOutAnimation.setAnimationListener(new Animation.AnimationListener() {
+
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        showView(viewToAttach, false);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+
+                });
+                viewToAttach.startAnimation(slideOutAnimation);
+            }
+
+            @Override
+            public void onShow() {
+                UiUtils.showSafeToast("OnShow Called");
+                showView(viewToAttach, true);
+                Animation slideInBottom = AnimationUtils.loadAnimation(ApplicationLoader.getInstance(), R.anim.slide_in_bottom);
+                viewToAttach.startAnimation(slideInBottom);
+            }
+
+        });
+
+    }
+
+    public static void attachViewToNestedScrollViewState(NestedScrollView nestedScrollView, final View viewToAttach, final View relativeView) {
+        nestedScrollView.setOnScrollChangeListener(new NestedViewHideShowScrollListener(viewToAttach) {
+            @Override
+            public void onHide() {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (relativeView.getVisibility() == View.GONE) {
+                            runHideAnimation(viewToAttach);
+                        }
+                    }
+                }, 100);
+            }
+
+            @Override
+            public void onShow() {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (relativeView.getVisibility() == View.GONE) {
+                            showView(viewToAttach, true);
+                            Animation slideInBottom = AnimationUtils.loadAnimation(ApplicationLoader.getInstance(), R.anim.slide_in_bottom);
+                            viewToAttach.startAnimation(slideInBottom);
+                        }
+                    }
+                }, 100);
+
+            }
+
+        });
+
+    }
+
+    private static void runHideAnimation(final View viewToAttach) {
+        //Hide View
+        //Hide the Bottom Space NavigationView here
+        Animation slideOutAnimation = AnimationUtils.loadAnimation(ApplicationLoader.getInstance(), R.anim.slide_out_bottom);
+        slideOutAnimation.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                showView(viewToAttach, false);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+
+        });
+        viewToAttach.startAnimation(slideOutAnimation);
+    }
+
 
 }

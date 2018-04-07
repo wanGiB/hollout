@@ -16,7 +16,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
@@ -145,8 +144,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -510,6 +507,7 @@ public class ChatActivity extends BaseActivity implements
             if (totalUnreadMessages.contains(getRecipient())) {
                 totalUnreadMessages.remove(getRecipient());
                 HolloutPreferences.saveTotalUnreadChats(totalUnreadMessages);
+                GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
             }
         }
     }
@@ -2360,7 +2358,7 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void sendNewChatRequest() {
-        if (signedInUser != null) {
+        if (signedInUser != null && getRecipient() != null) {
             final String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
             final ParseObject newChatRequestObject = new ParseObject(AppConstants.HOLLOUT_FEED);
             newChatRequestObject.put(AppConstants.FEED_CREATOR_ID, signedInUserId.toLowerCase());
@@ -2414,24 +2412,14 @@ public class ChatActivity extends BaseActivity implements
             if (newMessage.getConversationId().toLowerCase().equals(getRecipient())) {
                 UiUtils.bangSound(ChatActivity.this, R.raw.iapetus);
             }
-        }
-        if (messagesAdapter.getItemCount() == 0) {
             notifyDataSetChanged();
-        } else {
-            messagesAdapter.notifyItemInserted(messages.size());
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    notifyDataSetChanged();
-                }
-            }, 100);
         }
         invalidateEmptyView();
         messagesRecyclerView.scrollToPosition(0);
     }
 
     public void checkAcceptPendingInvitation() {
-        ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+        final ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
         chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
         chatRequestsQuery.include(AppConstants.FEED_CREATOR);
         chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
@@ -2478,6 +2466,7 @@ public class ChatActivity extends BaseActivity implements
                         }
                     }
                 }
+                chatRequestsQuery.cancel();
             }
         });
     }

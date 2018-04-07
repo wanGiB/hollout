@@ -296,10 +296,10 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             Date msgDate = new Date(lastMessageTime);
             boolean isYesterday = dayIsYesterday(new DateTime(msgDate.getTime()));
 
-            String todaysString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(new Date());
+            String todayString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(new Date());
             String messageDateString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(new Date(lastMessageTime));
 
-            if (todaysString.equals(messageDateString)) {
+            if (todayString.equals(messageDateString)) {
                 //Msg received date = today
                 String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(msgDate);
                 msgTimeStampView.setText(msgTime);
@@ -378,6 +378,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             } catch (NullPointerException ignored) {
 
             }
+            objectStateQuery.cancel();
         }
     }
 

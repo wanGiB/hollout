@@ -332,7 +332,7 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
             } catch (NullPointerException ignored) {
 
             }
-
+            recipientObjectStateQuery.cancel();
         }
     }
 

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/item_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/lighter_blue"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/clickable_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <com.wan.hollout.ui.widgets.CircleImageView
+            android:id="@+id/photo_liker"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/empty_profile" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:orientation="vertical">
+
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/description_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                app:textStyle="medium" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.wan.hollout.ui.widgets.CircleImageView
+                    android:id="@+id/liked_photo_view"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/empty_profile"
+                    app:border_color="@color/white"
+                    app:border_width="2dp" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/time_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"
+                    android:textSize="15sp"
+                    app:textStyle="regular" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

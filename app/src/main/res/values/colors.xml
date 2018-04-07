@@ -42,6 +42,7 @@
     <color name="background_tab_pressed">#6633B5E5</color>
     <color name="info_message_background_color">#f6f6f6</color>
     <color name="colorPrimary">#35465c</color>
+    <color name="butter_bar_transparent">#00000000</color>
     <color name="colorPrimaryDark">#2f3e51</color>
     <color name="colorPrimaryDarker">#2f3e51</color>
     <color name="bubble_tint">#F6F4F6</color>
@@ -296,5 +297,13 @@
     <color name="em_green_54">#8900ba6e</color>
     <color name="em_green_38">#6100ba6e</color>
     <color name="em_green_12">#1e00ba6e</color>
+
+    <color name="space_background_color">#757575</color>
+    <color name="butter_bar_white">#ffffff</color>
+    <color name="butter_bar_default_color">#2A3137</color>
+    <color name="centre_button_color">#55acee</color>
+
+    <color name="default_inactive_item_color">#9e9e9e</color>
+    <color name="colorBackgroundHighlightWhite">#8dffffff</color>
 
 </resources>

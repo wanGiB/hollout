@@ -39,10 +39,15 @@ public class AuthUtil {
         ParseQuery<ParseObject> currentUserQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         currentUserQuery.fromPin(AppConstants.AUTHENTICATED_USER_DETAILS);
         try {
-            return currentUserQuery.getFirst();
+            ParseObject parseObject = currentUserQuery.getFirst();
+            if (parseObject != null) {
+                currentUserQuery.cancel();
+            }
+            return parseObject;
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        currentUserQuery.cancel();
         return null;
     }
 
@@ -80,7 +85,7 @@ public class AuthUtil {
     }
 
     private static void updateRemoteUserVariant(final ParseObject updatableProps, String realObjectId, @Nullable final DoneCallback<Boolean> successCallback) {
-        ParseQuery<ParseObject> personQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        final ParseQuery<ParseObject> personQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         personQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, realObjectId);
         personQuery.getFirstInBackground(new GetCallback<ParseObject>() {
             @Override
@@ -108,6 +113,7 @@ public class AuthUtil {
                 } catch (ConcurrentModificationException ignored) {
 
                 }
+                personQuery.cancel();
             }
         });
     }

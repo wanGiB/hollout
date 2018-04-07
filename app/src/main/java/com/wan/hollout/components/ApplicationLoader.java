@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.firebase.database.FirebaseDatabase;
 import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseLiveQueryClient;
@@ -75,6 +76,7 @@ public class ApplicationLoader extends Application {
         sInstance = this;
         initParse();
         Fabric.with(this, new Crashlytics());
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         setupDatabase();
         startAppInstanceDetector();
         defaultSystemEmojiPref();

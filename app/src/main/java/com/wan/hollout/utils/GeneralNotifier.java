@@ -12,10 +12,14 @@ import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import android.text.Spanned;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 
 import org.apache.commons.lang3.StringUtils;
@@ -153,6 +157,64 @@ public class GeneralNotifier {
                 }
             }
         });
+    }
+
+    private static void displayPhotoLikesNotification(String message) {
+        Intent userProfileIntent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, userProfileIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
+        NotificationHelper notificationHelper = new NotificationHelper(ApplicationLoader.getInstance().getApplicationContext(), message, message);
+        builder.setContentTitle(context.getString(R.string.app_name));
+        builder.setContentText(message);
+        builder.setTicker(message);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setLights(Color.parseColor("blue"), 500, 1000);
+        Bitmap notifInitiatorBitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
+        builder.setLargeIcon(notifInitiatorBitmap);
+        builder.setAutoCancel(true);
+        builder.setContentIntent(pendingIntent);
+        builder.setContentText(message);
+        builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+        builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message).
+                setBigContentTitle(context.getString(R.string.app_name)));
+        Notification notification = builder.build();
+        notification.defaults |= Notification.DEFAULT_LIGHTS;
+        if (AppConstants.NEARBY_KIND_NOTIFICATION_COUNT == 0) {
+            notification.defaults |= Notification.DEFAULT_VIBRATE;
+        }
+        notification.defaults |= Notification.DEFAULT_SOUND;
+        if (pendingIntent != null) {
+            notificationHelper.notify(AppConstants.PHOTO_LIKES_NOTIFICATION_ID, notification);
+        }
+
+    }
+
+    public static void fetchMyPhotoLikes() {
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        if (signedInUserObject != null) {
+            String signedInUserId = signedInUserObject.getString(AppConstants.REAL_OBJECT_ID);
+            if (StringUtils.isNotEmpty(signedInUserId)) {
+                FirebaseUtils.getPhotoLikesReference().child(signedInUserId)
+                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                if (dataSnapshot != null && dataSnapshot.exists()) {
+                                    long dataSnapShotCount = dataSnapshot.getChildrenCount();
+                                    String message = dataSnapShotCount == 1 ? "1 person liked your photo"
+                                            : dataSnapShotCount + " people liked your photo";
+                                    if (dataSnapShotCount != 0) {
+                                        displayPhotoLikesNotification(message);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+            }
+        }
     }
 
     private static Bitmap getBitmapFromURL(final String strURL) {
