@@ -15,6 +15,7 @@ import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.wan.hollout.R;
+import com.wan.hollout.interfaces.EndlessRecyclerViewScrollListener;
 import com.wan.hollout.ui.adapters.PhotoLikesAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
@@ -46,9 +47,10 @@ public class PhotoLikesActivity extends SlidingActivity {
     @BindView(R.id.photo_likes_recycler_view)
     RecyclerView photoLikesRecyclerView;
 
-    private HashMap<String, List<HashMap<String, Object>>> idObjectMap = new HashMap<>();
     private PhotoLikesAdapter photoLikesAdapter;
     private List<ParseObject> photoLikes = new ArrayList<>();
+
+    private ParseObject signedInUserObject;
 
     @Override
     public void init(Bundle savedInstanceState) {
@@ -59,14 +61,23 @@ public class PhotoLikesActivity extends SlidingActivity {
         );
         setContent(R.layout.activity_photo_likes);
         ButterKnife.bind(this);
+
+        signedInUserObject = AuthUtil.getCurrentUser();
         photoLikesAdapter = new PhotoLikesAdapter(this, photoLikes);
-        photoLikesRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        photoLikesRecyclerView.setLayoutManager(linearLayoutManager);
         photoLikesRecyclerView.setAdapter(photoLikesAdapter);
-        fetchMyPhotoLikes();
+        fetchMyPhotoLikesFromFirebase();
+        fetchMyPhotoLikesFromParse(0);
+        photoLikesRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                fetchMyPhotoLikesFromParse(photoLikes.size());
+            }
+        });
     }
 
-    public void fetchMyPhotoLikes() {
-        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+    public void fetchMyPhotoLikesFromFirebase() {
         if (signedInUserObject != null) {
             final String signedInUserId = signedInUserObject.getString(AppConstants.REAL_OBJECT_ID);
             if (StringUtils.isNotEmpty(signedInUserId)) {
@@ -77,66 +88,29 @@ public class PhotoLikesActivity extends SlidingActivity {
                                 if (dataSnapshot != null && dataSnapshot.exists()) {
                                     long dataSnapShotCount = dataSnapshot.getChildrenCount();
                                     if (dataSnapShotCount != 0) {
-                                        UiUtils.showView(nothingToLoadView, false);
                                         GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new
                                                 GenericTypeIndicator<HashMap<String, Object>>() {
                                                 };
-                                        List<String> idsOfPhotoLikes = new ArrayList<>();
                                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                             HashMap<String, Object> photoLike = snapshot.getValue(genericTypeIndicator);
                                             if (photoLike != null) {
-
-                                                String likerId = (String) photoLike.get("liker");
-
-                                                List<HashMap<String, Object>> idMapList = idObjectMap.get(likerId);
-
-                                                if (idMapList == null) {
-                                                    idMapList = new ArrayList<>();
-                                                }
-
-                                                if (!idMapList.contains(photoLike)) {
-                                                    idMapList.add(photoLike);
-                                                    idObjectMap.put(likerId, idMapList);
-                                                }
-
-                                                if (!idsOfPhotoLikes.contains(likerId)) {
-                                                    idsOfPhotoLikes.add(likerId);
-                                                }
-
                                                 Boolean photoPreviewed = (Boolean) photoLike.get(AppConstants.PREVIEWED);
-
-                                                if (photoPreviewed != null && !photoPreviewed) {
-                                                    HashMap<String, Object> updatableProps = new HashMap<>();
-                                                    updatableProps.put(AppConstants.PREVIEWED, true);
-                                                    FirebaseUtils.getPhotoLikesReference()
-                                                            .child(signedInUserId)
-                                                            .child(snapshot.getKey())
-                                                            .updateChildren(updatableProps);
+                                                if (photoPreviewed == null) {
+                                                    markAsPreviewed(snapshot, signedInUserId);
+                                                } else {
+                                                    if (!photoPreviewed) {
+                                                        markAsPreviewed(snapshot, signedInUserId);
+                                                    }
                                                 }
-
                                             }
-
                                         }
-                                        if (!idsOfPhotoLikes.isEmpty()) {
-                                            fetchPhotoLikesFromParse(idsOfPhotoLikes);
-                                        } else {
-                                            UiUtils.showView(nothingToLoadView, true);
-                                            UiUtils.showView(progressBar, false);
-                                        }
-                                    } else {
-                                        UiUtils.showView(nothingToLoadView, true);
-                                        UiUtils.showView(progressBar, false);
                                     }
-                                } else {
-                                    UiUtils.showView(nothingToLoadView, true);
-                                    UiUtils.showView(progressBar, false);
                                 }
                             }
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
-                                UiUtils.showView(nothingToLoadView, true);
-                                UiUtils.showView(progressBar, false);
+
                             }
 
                         });
@@ -145,42 +119,34 @@ public class PhotoLikesActivity extends SlidingActivity {
         }
     }
 
-    private void fetchPhotoLikesFromParse(List<String> idsOfPhotoLikers) {
-        ParseQuery<ParseObject> parseObjectParseQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        parseObjectParseQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, idsOfPhotoLikers);
-        parseObjectParseQuery.findInBackground(new FindCallback<ParseObject>() {
+    private void markAsPreviewed(DataSnapshot snapshot, String signedInUserId) {
+        HashMap<String, Object> updatableProps = new HashMap<>();
+        updatableProps.put(AppConstants.PREVIEWED, true);
+        FirebaseUtils.getPhotoLikesReference()
+                .child(signedInUserId)
+                .child(snapshot.getKey())
+                .updateChildren(updatableProps);
+    }
+
+    private void fetchMyPhotoLikesFromParse(final int skip) {
+        ParseQuery<ParseObject> photoLikesQuery = ParseQuery.getQuery(AppConstants.PHOTO_LIKES);
+        photoLikesQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
+        photoLikesQuery.include(AppConstants.FEED_CREATOR);
+        if (!photoLikes.isEmpty()) {
+            photoLikesQuery.setSkip(skip);
+        }
+        photoLikesQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null && objects != null && !objects.isEmpty()) {
-                    photoLikes.clear();
-                    for (ParseObject parseObject : objects) {
-                        String realObjectId = parseObject.getString(AppConstants.REAL_OBJECT_ID);
-                        List<HashMap<String, Object>> photoLikesListByUser = idObjectMap.get(realObjectId);
-                        HashMap<String, Object> objectHashMap = photoLikesListByUser.get(0);
-
-                        //Get the properties of the current photo like
-                        long createdAt = (long) objectHashMap.get("createdAt");
-                        Boolean seenByOwner = (Boolean) objectHashMap.get(AppConstants.SEEN_BY_OWNER);
-                        String photoUrl = (String) objectHashMap.get("photo_url");
-
-                        parseObject.put(AppConstants.PHOTO_LIKE_DATE, createdAt);
-                        if (seenByOwner != null) {
-                            parseObject.put(AppConstants.SEEN_BY_OWNER, seenByOwner);
-                        }
-                        parseObject.put(AppConstants.LIKED_PHOTO, photoUrl);
-
-                        photoLikes.add(parseObject);
-
-                        photoLikesListByUser.remove(objectHashMap);
-                        idObjectMap.put(realObjectId, photoLikesListByUser);
+                    if (skip == 0) {
+                        photoLikes.clear();
                     }
+                    photoLikes.addAll(objects);
                     photoLikesAdapter.notifyDataSetChanged();
-                    UiUtils.showView(nothingToLoadView, false);
-                    UiUtils.showView(progressBar, false);
-                } else {
-                    UiUtils.showView(nothingToLoadView, true);
-                    UiUtils.showView(progressBar, false);
                 }
+                UiUtils.showView(nothingToLoadView, photoLikes.isEmpty());
+                UiUtils.showView(progressBar, false);
             }
         });
     }

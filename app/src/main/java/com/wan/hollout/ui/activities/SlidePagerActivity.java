@@ -21,10 +21,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.SaveCallback;
 import com.wan.hollout.R;
 import com.wan.hollout.api.JsonApiClient;
 import com.wan.hollout.ui.adapters.SlidePagerAdapter;
@@ -80,7 +82,7 @@ public class SlidePagerActivity extends AppCompatActivity {
         if (getIntent() == null) return;
         String title = getIntent().getStringExtra(AppConstants.EXTRA_TITLE);
 
-        String userId = getIntent().getStringExtra(AppConstants.EXTRA_USER_ID);
+        final String userId = getIntent().getStringExtra(AppConstants.EXTRA_USER_ID);
         signedInUser = AuthUtil.getCurrentUser();
 
         if (signedInUser != null) {
@@ -114,10 +116,20 @@ public class SlidePagerActivity extends AppCompatActivity {
                             if (photoLikesMap.containsKey(newLikeHash)) {
                                 photoLikesMap.remove(newLikeHash);
                             }
-                            //Send Push notification to user that I liked his photo
-                            if (userFirebaseCapture != null && userFirebaseCapture.get() != null) {
-                                JsonApiClient.sendFirebasePushNotification(userFirebaseCapture.get(), AppConstants.NOTIFICATION_TYPE_PHOTO_LIKE);
-                            }
+                            ParseObject newPhotoLike = new ParseObject(AppConstants.PHOTO_LIKES);
+                            newPhotoLike.put(AppConstants.FEED_CREATOR, signedInUser);
+                            newPhotoLike.put(AppConstants.FEED_CREATOR_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+                            newPhotoLike.put(AppConstants.FEED_RECIPIENT_ID, userId);
+                            newPhotoLike.put(AppConstants.LIKED_PHOTO, selectedPic);
+                            newPhotoLike.saveInBackground(new SaveCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    //Send Push notification to user that I liked his photo
+                                    if (userFirebaseCapture != null && userFirebaseCapture.get() != null) {
+                                        JsonApiClient.sendFirebasePushNotification(userFirebaseCapture.get(), AppConstants.NOTIFICATION_TYPE_PHOTO_LIKE);
+                                    }
+                                }
+                            });
                         } else {
                             //user already liked this photo
                             //Remove Photo
@@ -128,6 +140,18 @@ public class SlidePagerActivity extends AppCompatActivity {
                                 userPhotosReference.child(photoKey).removeValue();
                             }
                             checkLiked(selectedPic);
+                            ParseQuery<ParseObject> photoLikeQuery = ParseQuery.getQuery(AppConstants.PHOTO_LIKES);
+                            photoLikeQuery.whereEqualTo(AppConstants.LIKED_PHOTO, selectedPic);
+                            photoLikeQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+                            photoLikeQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, userId);
+                            photoLikeQuery.findInBackground(new FindCallback<ParseObject>() {
+                                @Override
+                                public void done(List<ParseObject> objects, ParseException e) {
+                                    if (e == null && objects != null && !objects.isEmpty()) {
+                                        ParseObject.deleteAllInBackground(objects);
+                                    }
+                                }
+                            });
                         }
                     }
                 });

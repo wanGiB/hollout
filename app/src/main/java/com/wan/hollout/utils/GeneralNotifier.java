@@ -14,6 +14,7 @@ import android.text.Spanned;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
@@ -29,6 +30,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -198,11 +200,24 @@ public class GeneralNotifier {
                         .addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                if (dataSnapshot != null && dataSnapshot.exists()) {
-                                    long dataSnapShotCount = dataSnapshot.getChildrenCount();
-                                    String message = dataSnapShotCount == 1 ? "1 person liked your photo"
-                                            : dataSnapShotCount + " people liked your photo";
-                                    if (dataSnapShotCount != 0) {
+                                if (dataSnapshot != null && dataSnapshot.exists() && dataSnapshot.getChildrenCount() > 0) {
+                                    GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new
+                                            GenericTypeIndicator<HashMap<String, Object>>() {
+                                            };
+                                    List<HashMap<String, Object>> unseenPhotoLikes = new ArrayList<>();
+                                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                        HashMap<String, Object> photoLike = snapshot.getValue(genericTypeIndicator);
+                                        if (photoLike != null) {
+                                            Boolean previewedByOwner = photoLike.containsKey(AppConstants.PREVIEWED);
+                                            if (previewedByOwner == null) {
+                                                unseenPhotoLikes.add(photoLike);
+                                            }
+                                        }
+                                    }
+                                    if (!unseenPhotoLikes.isEmpty()) {
+                                        String message = unseenPhotoLikes.size() == 1 ? "1 person liked your photo"
+                                                : unseenPhotoLikes.size() + " people liked your photo";
+
                                         displayPhotoLikesNotification(message);
                                     }
                                 }

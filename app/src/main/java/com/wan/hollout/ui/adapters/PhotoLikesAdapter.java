@@ -90,16 +90,16 @@ public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.Ph
         }
 
         void bindData(final Activity activity, final ParseObject photoLikerObject) {
-            String displayName = photoLikerObject.getString(AppConstants.APP_USER_DISPLAY_NAME);
-            String profilePhotoUrl = photoLikerObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            ParseObject originator = photoLikerObject.getParseObject(AppConstants.FEED_CREATOR);
+            String displayName = originator.getString(AppConstants.APP_USER_DISPLAY_NAME);
+            String profilePhotoUrl = originator.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             final String likedPhoto = photoLikerObject.getString(AppConstants.LIKED_PHOTO);
             boolean seenByOwner = photoLikerObject.getBoolean(AppConstants.SEEN_BY_OWNER);
+            Date likeDate = photoLikerObject.getDate("createdAt");
 
-            long photoLikedDate = photoLikerObject.getLong(AppConstants.PHOTO_LIKE_DATE);
-            Date likeDate = new Date(photoLikedDate);
             boolean isYesterday = dayIsYesterday(new DateTime(likeDate.getTime()));
             String todayString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(new Date());
-            String photoLikeDateString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(new Date(photoLikedDate));
+            String photoLikeDateString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(likeDate);
             descriptionView.setText(UiUtils.fromHtml("<font color=#000000><b>" + displayName + "</b></font> likes your photo"));
             if (todayString.equals(photoLikeDateString)) {
                 //Photo Liked date = today
@@ -126,6 +126,7 @@ public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.Ph
                 @Override
                 public void onClick(View v) {
                     photoLikerObject.put(AppConstants.SEEN_BY_OWNER, true);
+                    photoLikerObject.saveInBackground();
                     ParseObject signedInUser = AuthUtil.getCurrentUser();
                     Intent photoViewIntent = new Intent(activity, SlidePagerActivity.class);
                     if (signedInUser != null) {
@@ -140,6 +141,7 @@ public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.Ph
             photoLiker.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    UiUtils.loadUserData(activity, photoLikerObject);
                 }
             });
         }

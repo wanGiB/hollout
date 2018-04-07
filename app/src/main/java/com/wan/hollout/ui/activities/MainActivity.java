@@ -293,6 +293,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     startActivity(new Intent(MainActivity.this, NewsFeedActivity.class));
                 } else if (itemIndex == 1) {
                     photoLikesOpen = true;
+                    spaceNavigationView.hideBudgeAtIndex(1);
                     startActivity(new Intent(MainActivity.this, PhotoLikesActivity.class));
                 }
             }

@@ -28,7 +28,6 @@ import com.wan.hollout.utils.UiUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -142,14 +141,12 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
             List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
             if (aboutUser != null && aboutSignedInUser != null) {
                 try {
-                    List<String> common = new ArrayList<>(aboutUser);
-                    common.retainAll(aboutSignedInUser);
-                    String firstInterest = !common.isEmpty() ? common.get(0) : aboutUser.get(0);
+                    String aboutUserString = TextUtils.join(",",aboutUser);
                     if (StringUtils.isNotEmpty(searchString)) {
-                        aboutPerson.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(firstInterest),
+                        aboutPerson.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(aboutUserString),
                                 ContextCompat.getColor(activity, R.color.hollout_color_three)));
                     } else {
-                        aboutPerson.setText(WordUtils.capitalize(firstInterest));
+                        aboutPerson.setText(WordUtils.capitalize(aboutUserString));
                     }
                 } catch (NullPointerException ignored) {
 
