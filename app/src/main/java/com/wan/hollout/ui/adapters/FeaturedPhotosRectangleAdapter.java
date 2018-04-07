@@ -18,7 +18,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.wan.hollout.R;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
@@ -118,7 +121,7 @@ public class FeaturedPhotosRectangleAdapter extends RecyclerView.Adapter<Recycle
                                                         //Remove all references to this photo on firebase
                                                         final DatabaseReference userDatabaseRef = FirebaseUtils
                                                                 .getPhotoLikesReference().child(signedInUserObject
-                                                                .getString(AppConstants.REAL_OBJECT_ID));
+                                                                        .getString(AppConstants.REAL_OBJECT_ID));
 
                                                         userDatabaseRef
                                                                 .orderByChild("photo_url")
@@ -143,6 +146,17 @@ public class FeaturedPhotosRectangleAdapter extends RecyclerView.Adapter<Recycle
                                                                                     }
                                                                                 }
                                                                             }
+
+                                                                            ParseQuery<ParseObject> parseObjectParseQuery = ParseQuery.getQuery(AppConstants.PHOTO_LIKES);
+                                                                            parseObjectParseQuery.whereEqualTo(AppConstants.LIKED_PHOTO, photo);
+                                                                            parseObjectParseQuery.findInBackground(new FindCallback<ParseObject>() {
+                                                                                @Override
+                                                                                public void done(List<ParseObject> objects, ParseException e) {
+                                                                                    if (e == null && objects != null && !objects.isEmpty()) {
+                                                                                        ParseObject.deleteAllInBackground(objects);
+                                                                                    }
+                                                                                }
+                                                                            });
                                                                         }
 
                                                                     }
