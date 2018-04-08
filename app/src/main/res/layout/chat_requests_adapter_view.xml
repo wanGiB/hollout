@@ -95,10 +95,10 @@
         android:background="#eeeeee"
         android:gravity="start"
         android:padding="10dp"
-        android:text="@string/nearby"
+        android:text="@string/more"
         android:textColor="@color/ease_gray"
         android:textSize="13sp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:textStyle="medium" />
 
 </LinearLayout>

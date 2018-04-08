@@ -21,6 +21,24 @@
         android:visible="false"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/button_view_profile"
+        android:title="@string/view_profile_info"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/invite_friends"
+        android:title="@string/invite_friends"
+        android:visible="false"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/log_out"
+        android:title="@string/log_out"
+        android:visible="false"
+        app:showAsAction="never" />
+
     <!--<item-->
     <!--android:id="@+id/create_new_group"-->
     <!--android:title="@string/create_new_group"-->

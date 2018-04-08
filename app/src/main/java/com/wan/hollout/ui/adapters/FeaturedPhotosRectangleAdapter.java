@@ -59,6 +59,7 @@ public class FeaturedPhotosRectangleAdapter extends RecyclerView.Adapter<Recycle
         this.layoutInflater = LayoutInflater.from(activity);
     }
 
+    @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View photoView = layoutInflater.inflate(R.layout.rectangular_featured_photo_item, parent, false);
@@ -147,8 +148,9 @@ public class FeaturedPhotosRectangleAdapter extends RecyclerView.Adapter<Recycle
                                                                                 }
                                                                             }
 
-                                                                            ParseQuery<ParseObject> parseObjectParseQuery = ParseQuery.getQuery(AppConstants.PHOTO_LIKES);
+                                                                            ParseQuery<ParseObject> parseObjectParseQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
                                                                             parseObjectParseQuery.whereEqualTo(AppConstants.LIKED_PHOTO, photo);
+                                                                            parseObjectParseQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_PHOTO_LIKE);
                                                                             parseObjectParseQuery.findInBackground(new FindCallback<ParseObject>() {
                                                                                 @Override
                                                                                 public void done(List<ParseObject> objects, ParseException e) {

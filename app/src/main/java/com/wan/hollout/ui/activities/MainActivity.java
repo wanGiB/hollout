@@ -6,11 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,22 +15,18 @@ import android.provider.Settings;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,10 +35,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.androidadvance.topsnackbar.TSnackbar;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -57,33 +47,25 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
-import com.mikepenz.google_material_typeface_library.GoogleMaterial;
-import com.mikepenz.iconics.IconicsDrawable;
-import com.mikepenz.iconics.typeface.IIcon;
-import com.nightonke.boommenu.BoomButtons.HamButton;
-import com.nightonke.boommenu.BoomMenuButton;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.eventbuses.UnreadFeedsBadge;
-import com.wan.hollout.interfaces.ButterBarOnClickListener;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
+import com.wan.hollout.ui.fragments.ActivitiesFragment;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.NearbyPeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.services.TimeChangeDetectionService;
-import com.wan.hollout.ui.widgets.CircleImageView;
-import com.wan.hollout.ui.widgets.HolloutButterBar;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheetStyle;
 import com.wan.hollout.ui.widgets.sharesheet.SharingHelper;
-import com.wan.hollout.ui.widgets.validation.ButterBarItem;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
@@ -127,15 +109,13 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     @BindView(R.id.rootLayout)
     View rootLayout;
 
-    @BindView(R.id.viewpager)
-    ViewPager viewPager;
+    @BindView(R.id.user_photo_container)
+    View userPhotoContainer;
 
-    @BindView(R.id.tabs)
-    TabLayout tabLayout;
-
+    public static ViewPager viewPager;
+    public static TabLayout tabLayout;
     public static MaterialSearchView materialSearchView;
 
-    //=======Action Mode Shits=====//
     @SuppressLint("StaticFieldLeak")
     public static View actionModeBar;
 
@@ -151,27 +131,13 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     @BindView(R.id.block_user)
     ImageView blockUser;
 
-    @BindView(R.id.nav_view)
-    NavigationView navigationView;
-
-    @BindView(R.id.drawer_layout)
-    DrawerLayout drawerLayout;
-
-    public static RelativeLayout bottomBar;
-
-    @BindView(R.id.boom_menu)
-    BoomMenuButton boomMenuButton;
-
-    @BindView(R.id.space_navigation_item)
-    HolloutButterBar spaceNavigationView;
+    @BindView(R.id.signed_in_user_profile_image_view)
+    ImageView signedInUserImageView;
 
     private HolloutPermissions holloutPermissions;
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
     public static Vibrator vibrator;
     private ProgressDialog deleteConversationProgressDialog;
-
-    private boolean newsFeedOpen = false;
-    private boolean photoLikesOpen = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -179,12 +145,13 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        bottomBar = findViewById(R.id.bottom_bar);
+        tabLayout = findViewById(R.id.tabs);
+        viewPager = findViewById(R.id.viewpager);
         actionModeBar = findViewById(R.id.action_mode_bar);
-        initSpaceNavigationItemView(savedInstanceState);
         materialSearchView = findViewById(R.id.search_view);
         setSupportActionBar(toolbar);
-        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        loadSignedInUserImage(signedInUserObject);
         Adapter adapter = setupViewPagerAdapter(viewPager);
         viewPager.setOffscreenPageLimit(3);
         tabLayout.setSelectedTabIndicatorHeight(7);
@@ -194,10 +161,9 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         initAndroidPermissions();
-        setupNavigationDrawer(signedInUser);
         if (!HolloutPreferences.isUserWelcomed()) {
-            if (signedInUser != null) {
-                UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME)));
+            if (signedInUserObject != null) {
+                UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUserObject.getString(AppConstants.APP_USER_DISPLAY_NAME)));
             }
             HolloutPreferences.setUserWelcomed(true);
         }
@@ -208,7 +174,15 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
         initEventHandlers();
         createDeleteConversationProgressDialog();
-        buildHamButtonBuilder();
+    }
+
+    private void loadSignedInUserImage(ParseObject signedInUserObject) {
+        if (signedInUserObject != null) {
+            String userPhotoUrl = signedInUserObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            if (StringUtils.isNotEmpty(userPhotoUrl)) {
+                UiUtils.loadImage(this, userPhotoUrl, signedInUserImageView);
+            }
+        }
     }
 
     public void fetchMyPhotoLikes() {
@@ -236,9 +210,15 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                                 }
                                             }
                                         }
-                                        if (spaceNavigationView != null && !unseenPhotoLikes.isEmpty()) {
-                                            spaceNavigationView.showBadgeAtIndex(1, unseenPhotoLikes.size(),
-                                                    ContextCompat.getColor(MainActivity.this, R.color.colorAccent));
+                                        if (!unseenPhotoLikes.isEmpty()) {
+                                            TabLayout.Tab tab = MainActivity.tabLayout.getTabAt(2);
+                                            if (tab != null) {
+                                                View viewAtTab = tab.getCustomView();
+                                                if (viewAtTab != null && MainActivity.viewPager != null &&
+                                                        MainActivity.viewPager.getCurrentItem() != 2) {
+                                                    UiUtils.showView(viewAtTab.findViewById(R.id.activity_indicator), true);
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -253,66 +233,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
             }
         }
-    }
-
-    private void buildHamButtonBuilder() {
-        HamButton.Builder workOutRequestBuilder = new HamButton.Builder();
-        workOutRequestBuilder.normalText("Workout Request");
-        workOutRequestBuilder.subNormalText("Request 5 people nearby to join you in a workout");
-        workOutRequestBuilder.normalImageRes(R.drawable.ic_directions_run_white_48dp);
-        workOutRequestBuilder.pieceColor(Color.WHITE);
-        workOutRequestBuilder.normalColor(ContextCompat.getColor(this, R.color.colorPrimary));
-        boomMenuButton.addBuilder(workOutRequestBuilder);
-
-        HamButton.Builder eventInviteBuilder = new HamButton.Builder();
-        eventInviteBuilder.normalText("Event Invite");
-        eventInviteBuilder.subNormalText("Invite 10 people nearby to an event");
-        eventInviteBuilder.normalImageRes(R.drawable.ic_event_available_white_48dp);
-        workOutRequestBuilder.normalColor(ContextCompat.getColor(this, R.color.material_deep_teal_50));
-        eventInviteBuilder.pieceColor(Color.WHITE);
-        boomMenuButton.addBuilder(eventInviteBuilder);
-    }
-
-    private void initSpaceNavigationItemView(Bundle savedInstanceState) {
-        spaceNavigationView.initWithSaveInstanceState(savedInstanceState);
-        spaceNavigationView.showIconOnly();
-        spaceNavigationView.addButterBarItem(new ButterBarItem("Feed", R.drawable.ic_format_list_bulleted_black_48dp));
-        spaceNavigationView.addButterBarItem(new ButterBarItem("Likes", R.drawable.like));
-
-        spaceNavigationView.setButterBarOnClickListener(new ButterBarOnClickListener() {
-
-            @Override
-            public void onCentreButtonClick() {
-
-            }
-
-            @Override
-            public void onItemClick(int itemIndex, String itemName) {
-                if (itemIndex == 0) {
-                    newsFeedOpen = true;
-                    startActivity(new Intent(MainActivity.this, NewsFeedActivity.class));
-                } else if (itemIndex == 1) {
-                    photoLikesOpen = true;
-                    spaceNavigationView.hideBudgeAtIndex(1);
-                    startActivity(new Intent(MainActivity.this, PhotoLikesActivity.class));
-                }
-            }
-
-            @Override
-            public void onItemReselected(int itemIndex, String itemName) {
-                if (itemIndex == 0) {
-                    if (!newsFeedOpen) {
-                        startActivity(new Intent(MainActivity.this, NewsFeedActivity.class));
-                    }
-                } else if (itemIndex == 1) {
-                    if (!photoLikesOpen) {
-                        startActivity(new Intent(MainActivity.this, PhotoLikesActivity.class));
-                    }
-                }
-            }
-
-        });
-
     }
 
     private void createDeleteConversationProgressDialog() {
@@ -427,12 +347,16 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     case R.id.destroy_action_mode:
                         destroyActionMode();
                         break;
+                    case R.id.user_photo_container:
+                        launchUserProfile();
+                        break;
                 }
             }
         };
         blockUser.setOnClickListener(onClickListener);
         deleteConversation.setOnClickListener(onClickListener);
         destroyActionModeView.setOnClickListener(onClickListener);
+        userPhotoContainer.setOnClickListener(onClickListener);
     }
 
     private void attachEventHandlers() {
@@ -441,7 +365,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             @Override
             public void onSearchViewShown() {
                 EventBus.getDefault().post(AppConstants.DISABLE_NESTED_SCROLLING);
-                UiUtils.showView(bottomBar, false);
+//                UiUtils.showView(floatingActionButton, false);
             }
 
             @Override
@@ -449,7 +373,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 EventBus.getDefault().post(AppConstants.ENABLE_NESTED_SCROLLING);
                 showView(tabLayout, true);
                 EventBus.getDefault().post(AppConstants.SEARCH_VIEW_CLOSED);
-                UiUtils.showView(bottomBar, true);
+//                UiUtils.showView(floatingActionButton, true);
             }
 
         });
@@ -473,6 +397,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                         materialSearchView.closeSearch();
                     }
                 }
+                hideActivityIndicator(position);
             }
 
             @Override
@@ -508,92 +433,13 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     }
 
-    private Drawable getDrawableFromIcon(IIcon icon) {
-        return new IconicsDrawable(this)
-                .sizeDp(18)
-                .icon(icon);
-    }
-
-    private void setupNavigationDrawer(ParseObject signedInUser) {
-
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        Menu navMenu = navigationView.getMenu();
-
-        navMenu.add(0, 0, 0, "Profile").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_account_circle));
-        navMenu.add(0, 1, 1, "Invite Friends").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_insert_link));
-
-        navMenu.addSubMenu("Help & Settings");
-        navMenu.add(1, 3, 3, "Notification Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_notifications));
-        navMenu.add(1, 4, 4, "Chats & Calls Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_chat));
-        navMenu.add(1, 5, 5, "Privacy Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_security));
-        navMenu.add(1, 6, 6, "Support Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_help));
-        navMenu.add(1, 7, 7, "Log Out").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_chevron_left));
-
-        displaySignedInUserProps(signedInUser);
-
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch (item.getItemId()) {
-                    case 0:
-                        launchUserProfile();
-                        break;
-                    case 1:
-                        initSharing();
-                        break;
-                    case 3:
-                        launchSettings(AppConstants.NOTIFICATION_SETTINGS_FRAGMENT);
-                        break;
-                    case 4:
-                        launchSettings(AppConstants.CHATS_SETTINGS_FRAGMENT);
-                        break;
-                    case 5:
-                        launchSettings(AppConstants.PRIVACY_AND_SECURITY_FRAGMENT);
-                        break;
-                    case 6:
-                        launchSettings(AppConstants.SUPPORT_SETTINGS_FRAGMENT);
-                        break;
-                    case 7:
-                        attemptLogOut();
-                        break;
-                }
-                drawerLayout.closeDrawer(GravityCompat.START);
-                return true;
-            }
-        });
-
-        View editProfileView = findViewById(R.id.edit_profile);
-        editProfileView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                attemptProfileEdit();
-            }
-        });
-
-        String userFirebaseTokenFromPreference = HolloutPreferences.getUserFirebaseToken();
-        String userFirebaseTokenFromSignedInUser = signedInUser.getString(AppConstants.USER_FIREBASE_TOKEN);
-        if (userFirebaseTokenFromPreference != null) {
-            if (userFirebaseTokenFromSignedInUser == null) {
-                signedInUser.put(AppConstants.USER_FIREBASE_TOKEN, userFirebaseTokenFromPreference);
-                AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                    @Override
-                    public void done(Boolean result, Exception e) {
-                        //User Prefs updated;
-                    }
-                });
-            } else {
-                if (!userFirebaseTokenFromPreference.equals(userFirebaseTokenFromSignedInUser)) {
-                    signedInUser.put(AppConstants.USER_FIREBASE_TOKEN, userFirebaseTokenFromPreference);
-                    AuthUtil.updateCurrentLocalUser(signedInUser, new DoneCallback<Boolean>() {
-                        @Override
-                        public void done(Boolean result, Exception e) {
-                            //User Prefs updated;
-                        }
-                    });
+    private void hideActivityIndicator(int position) {
+        if (position == 2) {
+            TabLayout.Tab tab = MainActivity.tabLayout.getTabAt(2);
+            if (tab != null) {
+                View viewAtTab = tab.getCustomView();
+                if (viewAtTab != null) {
+                    UiUtils.showView(viewAtTab.findViewById(R.id.activity_indicator), false);
                 }
             }
         }
@@ -601,62 +447,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     private void attemptProfileEdit() {
         startActivity(new Intent(getCurrentActivityInstance(), EditProfileActivity.class));
-    }
-
-    private void displaySignedInUserProps(ParseObject signedInUser) {
-        if (signedInUser != null) {
-            String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-            String userPhotoUrl = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-            String userCoverPhotoUrl = signedInUser.getString(AppConstants.APP_USER_COVER_PHOTO);
-            FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
-            View headerView = navigationView.getHeaderView(0);
-
-            TextView signedInUserNameView = headerView.findViewById(R.id.signed_in_user_name_view);
-            CircleImageView signedInUserProfilePhotoView = headerView.findViewById(R.id.signed_in_user_profile_image_view);
-            ImageView signedInUserCoverPhotoView = headerView.findViewById(R.id.signed_in_user_cover_image_view);
-            TextView signedInUserEmailView = headerView.findViewById(R.id.signed_in_user_email_view);
-
-            //Load Data
-            signedInUserNameView.setText(WordUtils.capitalize(userDisplayName));
-            if (StringUtils.isNotEmpty(userPhotoUrl)) {
-                UiUtils.loadImage(this, userPhotoUrl, signedInUserProfilePhotoView);
-            }
-            if (StringUtils.isNotEmpty(userCoverPhotoUrl)) {
-                UiUtils.loadImage(this, userCoverPhotoUrl, signedInUserCoverPhotoView);
-                signedInUserCoverPhotoView.setColorFilter(new PorterDuffColorFilter(ContextCompat.getColor(this, R.color.colorPrimary), PorterDuff.Mode.MULTIPLY));
-            }
-            if (firebaseUser != null) {
-                String userEmail = firebaseUser.getEmail();
-                if (userEmail != null) {
-                    userEmail = StringUtils.remove(userEmail, "@hollout.com");
-                    signedInUserEmailView.setText(userEmail);
-                }
-            }
-
-            View.OnClickListener onClickListener = new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    launchUserProfile();
-                }
-            };
-
-            headerView.setOnClickListener(onClickListener);
-            signedInUserCoverPhotoView.setOnClickListener(onClickListener);
-            signedInUserProfilePhotoView.setOnClickListener(onClickListener);
-        } else {
-            AlertDialog.Builder invalidSessionDialog = new AlertDialog.Builder(this);
-            invalidSessionDialog.setTitle("Invalid Session");
-            invalidSessionDialog.setMessage("Sorry, your app session has expired. Please try login in again.");
-            invalidSessionDialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                    finishLogOut();
-                }
-            });
-            invalidSessionDialog.create().show();
-        }
     }
 
     private void initSharing() {
@@ -756,6 +546,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         Adapter adapter = new Adapter(this, getSupportFragmentManager());
         adapter.addFragment(new NearbyPeopleFragment(), this.getString(R.string.nearby));
         adapter.addFragment(new ConversationsFragment(), this.getString(R.string.chats));
+        adapter.addFragment(new ActivitiesFragment(), this.getString(R.string.activities));
         viewPager.setAdapter(adapter);
         return adapter;
     }
@@ -764,9 +555,11 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     public void onResume() {
         super.onResume();
         checkAndRegEventBus();
+        ParseObject parseObject = AuthUtil.getCurrentUser();
+        if (parseObject != null) {
+            loadSignedInUserImage(parseObject);
+        }
         fetchUnreadMessagesCount();
-        newsFeedOpen = false;
-        photoLikesOpen = false;
     }
 
     private void setupTabs(Adapter pagerAdapter) {
@@ -827,7 +620,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         super.onStart();
         checkAndRegEventBus();
         fetchUnreadMessagesCount();
-        displaySignedInUserProps(AuthUtil.getCurrentUser());
+//        displaySignedInUserProps(AuthUtil.getCurrentUser());
         checkStartTimeStampUpdateServer();
         HolloutPreferences.incrementActivityCount();
     }
@@ -868,6 +661,24 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     }
                 });
 
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+        MenuItem peopleFilterMenuItem = menu.findItem(R.id.filter_people);
+        MenuItem continueMenuItem = menu.findItem(R.id.button_continue);
+        MenuItem profileMenuItem = menu.findItem(R.id.button_view_profile);
+        MenuItem inviteFriends = menu.findItem(R.id.invite_friends);
+        MenuItem logOut = menu.findItem(R.id.log_out);
+        logOut.setVisible(true);
+        inviteFriends.setVisible(true);
+        profileMenuItem.setVisible(true);
+        continueMenuItem.setVisible(false);
+        searchMenuItem.setVisible(viewPager.getCurrentItem() != 2);
+        peopleFilterMenuItem.setVisible(viewPager.getCurrentItem() == 0);
+        supportInvalidateOptionsMenu();
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @SuppressWarnings("deprecation")
@@ -956,10 +767,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                View firstBadgeView = spaceNavigationView.getViewAtIndex(0);
-                if (firstBadgeView != null) {
-                    firstBadgeView.findViewById(R.id.news_feed_available).setVisibility(View.VISIBLE);
-                }
+
             }
         }, 1000);
     }
@@ -977,23 +785,20 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                 }
             }
             if (message != null) {
-                displayTopSnackBar(message);
+                displayProfileImageBrokenSnackBar(message);
             }
         }
     }
 
-    private void displayTopSnackBar(String message) {
-        TSnackbar snackbar = TSnackbar.make(toolbar, message,
-                TSnackbar.LENGTH_INDEFINITE).setAction("UPLOAD NEW",
+    private void displayProfileImageBrokenSnackBar(String message) {
+        Snackbar snackbar = Snackbar.make(rootLayout, message,
+                Snackbar.LENGTH_INDEFINITE).setAction("UPLOAD NEW",
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         attemptProfileEdit();
                     }
                 });
-        View snackbarView = snackbar.getView();
-        TextView textView = (TextView) snackbarView.findViewById(com.androidadvance.topsnackbar.R.id.snackbar_text);
-        textView.setTextColor(Color.WHITE);
         snackbar.show();
     }
 
@@ -1023,11 +828,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     @Override
     public void onBackPressed() {
-        if (drawerLayout.isDrawerOpen(Gravity.START)) {
-            drawerLayout.closeDrawer(Gravity.START);
-            return;
-        }
-
         if (actionModeBar.getVisibility() == View.VISIBLE) {
             destroyActionMode();
             return;
@@ -1044,11 +844,9 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
         if (materialSearchView.isSearchOpen()) {
             materialSearchView.closeSearch();
-            UiUtils.showView(bottomBar, true);
+//            UiUtils.showView(floatingActionButton, true);
             return;
         }
-        newsFeedOpen = false;
-        photoLikesOpen = false;
 
         super.onBackPressed();
     }
@@ -1062,16 +860,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
 
     public static boolean isActionModeActivated() {
         return actionModeBar.getVisibility() == View.VISIBLE;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem filterPeopleMenuItem = menu.findItem(R.id.filter_people);
-//        MenuItem createNewGroupChatItem = menu.findItem(R.id.create_new_group);
-        filterPeopleMenuItem.setVisible(viewPager.getCurrentItem() == 0);
-//        createNewGroupChatItem.setVisible(viewPager.getCurrentItem() == 1);
-        supportInvalidateOptionsMenu();
-        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -1093,6 +881,15 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             return true;
         } else if (id == R.id.action_search) {
             toggleViews();
+            return true;
+        } else if (id == R.id.button_view_profile) {
+            launchUserProfile();
+            return true;
+        } else if (id == R.id.invite_friends) {
+            initSharing();
+            return true;
+        } else if (id == R.id.log_out) {
+            attemptLogOut();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -1122,7 +919,9 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             } else {
                 endAgeEditText.setText("70");
             }
+
             genderChoice = signedInUser.getString(AppConstants.GENDER_FILTER);
+
             if (StringUtils.isNotEmpty(genderChoice)) {
                 if (genderChoice.equals(AppConstants.Both)) {
                     genderFilterOptionsGroup.check(R.id.both);
@@ -1132,6 +931,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     genderFilterOptionsGroup.check(R.id.females_only);
                 }
             }
+
             genderFilterOptionsGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
 
                 @Override
@@ -1298,12 +1098,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         splashIntent.putExtra(AppConstants.FROM_MAIN, true);
         startActivity(splashIntent);
         finish();
-    }
-
-    private void launchSettings(String settingsFragmentName) {
-        Intent settingsIntent = new Intent(MainActivity.this, SettingsActivity.class);
-        settingsIntent.putExtra(AppConstants.SETTINGS_FRAGMENT_NAME, settingsFragmentName);
-        startActivity(settingsIntent);
     }
 
     private void launchUserProfile() {

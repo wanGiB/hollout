@@ -25,7 +25,6 @@ import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
-import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
@@ -173,7 +172,6 @@ public class ConversationsFragment extends BaseFragment {
                 fetchConversations(0);
             }
         });
-        UiUtils.attachViewToNestedScrollViewState(nestedScrollView, MainActivity.bottomBar, MainActivity.materialSearchView);
     }
 
     private void loadAdapter(List<ParseObject> users) {

@@ -19,8 +19,10 @@
 
         <com.wan.hollout.ui.widgets.CircleImageView
             android:id="@+id/photo_liker"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="5dp"
+            android:layout_gravity="center_vertical"
             android:src="@drawable/empty_profile" />
 
         <LinearLayout

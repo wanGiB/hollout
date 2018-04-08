@@ -188,7 +188,6 @@ public class GeneralNotifier {
         if (pendingIntent != null) {
             notificationHelper.notify(AppConstants.PHOTO_LIKES_NOTIFICATION_ID, notification);
         }
-
     }
 
     public static void fetchMyPhotoLikes() {

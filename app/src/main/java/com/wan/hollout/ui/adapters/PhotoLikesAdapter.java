@@ -16,16 +16,20 @@ import android.widget.TextView;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
+import com.wan.hollout.ui.utils.DateUtils;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,16 +38,19 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 
-public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.PhotoLikeHolder> {
+public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.PhotoLikeHolder> implements StickyRecyclerHeadersAdapter<PhotoLikesAdapter.DateItemHolder> {
 
     private List<ParseObject> photoLikes;
     private Activity activity;
     private LayoutInflater layoutInflater;
 
+    private Calendar calendar;
+
     public PhotoLikesAdapter(Activity activity, List<ParseObject> photoLikes) {
         this.activity = activity;
         this.photoLikes = photoLikes;
         this.layoutInflater = LayoutInflater.from(activity);
+        this.calendar = Calendar.getInstance();
     }
 
     @NonNull
@@ -57,6 +64,30 @@ public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.Ph
     public void onBindViewHolder(@NonNull PhotoLikeHolder holder, int position) {
         ParseObject parseObject = photoLikes.get(position);
         holder.bindData(activity, parseObject);
+    }
+
+    @Override
+    public String getHeaderId(int position) {
+        ParseObject parseObject = photoLikes.get(position);
+        Date createdAt = parseObject.getCreatedAt();
+        calendar.setTime(createdAt);
+        return String.valueOf(HolloutUtils.hashCode(calendar.get(Calendar.YEAR), calendar.get(Calendar.DAY_OF_YEAR)));
+    }
+
+    @Override
+    public DateItemHolder onCreateHeaderViewHolder(ViewGroup parent) {
+        View messageDatesHeaderView = layoutInflater.inflate(R.layout.activity_date_header_view, parent, false);
+        return new DateItemHolder(messageDatesHeaderView);
+    }
+
+    @Override
+    public void onBindHeaderViewHolder(DateItemHolder holder, int position) {
+        ParseObject parseObject = photoLikes.get(position);
+        if (parseObject != null) {
+            Date createdAt = parseObject.getCreatedAt();
+            String currentYear = AppConstants.DATE_FORMATTER_IN_YEARS.format(new Date());
+            holder.bindData(DateUtils.getRelativeDate(activity, Locale.getDefault(), createdAt.getTime()).replace(", " + currentYear, ""));
+        }
     }
 
     @Override
@@ -90,31 +121,17 @@ public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.Ph
         }
 
         void bindData(final Activity activity, final ParseObject photoLikerObject) {
-            ParseObject originator = photoLikerObject.getParseObject(AppConstants.FEED_CREATOR);
+            final ParseObject originator = photoLikerObject.getParseObject(AppConstants.FEED_CREATOR);
             String displayName = originator.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String profilePhotoUrl = originator.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             final String likedPhoto = photoLikerObject.getString(AppConstants.LIKED_PHOTO);
             boolean seenByOwner = photoLikerObject.getBoolean(AppConstants.SEEN_BY_OWNER);
-            Date likeDate = photoLikerObject.getDate("createdAt");
+            Date likeDate = photoLikerObject.getCreatedAt();
 
-            boolean isYesterday = dayIsYesterday(new DateTime(likeDate.getTime()));
-            String todayString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(new Date());
-            String photoLikeDateString = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(likeDate);
             descriptionView.setText(UiUtils.fromHtml("<font color=#000000><b>" + displayName + "</b></font> likes your photo"));
-            if (todayString.equals(photoLikeDateString)) {
-                //Photo Liked date = today
-                String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(likeDate);
-                timeView.setText(msgTime);
-            } else {
-                if (isYesterday) {
-                    timeView.setText("yesterday");
-                } else {
-                    String daysAgo = AppConstants.DATE_FORMATTER_IN_BIRTHDAY_FORMAT.format(likeDate);
-                    String currentYear = AppConstants.DATE_FORMATTER_IN_YEARS.format(new Date());
-                    daysAgo = daysAgo.replace(currentYear, "");
-                    timeView.setText(daysAgo);
-                }
-            }
+            String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(likeDate);
+            timeView.setText(msgTime);
+
             if (StringUtils.isNotEmpty(profilePhotoUrl)) {
                 UiUtils.loadImage(activity, profilePhotoUrl, photoLiker);
             } else {
@@ -125,6 +142,7 @@ public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.Ph
             clickableContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    parentView.setBackgroundColor(Color.WHITE);
                     photoLikerObject.put(AppConstants.SEEN_BY_OWNER, true);
                     photoLikerObject.saveInBackground();
                     ParseObject signedInUser = AuthUtil.getCurrentUser();
@@ -141,10 +159,26 @@ public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.Ph
             photoLiker.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    UiUtils.loadUserData(activity, photoLikerObject);
+                    UiUtils.loadUserData(activity, originator);
                 }
             });
         }
+    }
+
+    static class DateItemHolder extends RecyclerView.ViewHolder {
+
+        @BindView(R.id.date_view)
+        TextView dateView;
+
+        DateItemHolder(View itemView) {
+            super(itemView);
+            ButterKnife.bind(this, itemView);
+        }
+
+        void bindData(String dateString) {
+            dateView.setText(dateString);
+        }
+
     }
 
     static boolean dayIsYesterday(DateTime day) {

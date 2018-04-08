@@ -21,7 +21,6 @@ import android.widget.ViewFlipper;
 
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
-import com.parse.CountCallback;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -32,9 +31,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.models.NearbyPerson;
-import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.adapters.PeopleAdapter;
-import com.wan.hollout.ui.widgets.ChatRequestsHeaderView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -77,9 +74,6 @@ public class NearbyPeopleFragment extends BaseFragment {
     @BindView(R.id.meet_people_textview)
     HolloutTextView meetPeopleTextView;
 
-    @BindView(R.id.chat_requests_view)
-    ChatRequestsHeaderView chatRequestsHeaderView;
-
     @BindView(R.id.nested_scroll_view)
     NestedScrollView nestedScrollView;
 
@@ -113,14 +107,13 @@ public class NearbyPeopleFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         initSignedInUser();
-        countChatRequests();
     }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_people, container, false);
+        View view = inflater.inflate(R.layout.fragment_nearby_people, container, false);
         ButterKnife.bind(this, view);
         return view;
     }
@@ -139,69 +132,12 @@ public class NearbyPeopleFragment extends BaseFragment {
             initBasicViews();
         }
         fetchPeopleOfCommonInterestFromCache();
-        checkAutoInvitationAccepted();
-        UiUtils.attachViewToNestedScrollViewState(nestedScrollView, MainActivity.bottomBar, MainActivity.materialSearchView);
     }
 
-    private void checkAutoInvitationAccepted() {
-        if (AppConstants.CHAT_INVITATION_ACCEPTED) {
-            countChatRequests();
-            AppConstants.CHAT_INVITATION_ACCEPTED = false;
-        }
-    }
 
     private void fetchPeople() {
         swipeRefreshLayout.setRefreshing(true);
         fetchPeopleOfCommonInterestFromCache();
-    }
-
-    private void countChatRequests() {
-        ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (signedInUser != null) {
-            final ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-            chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-            chatRequestsQuery.include(AppConstants.FEED_CREATOR);
-            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
-            chatRequestsQuery.countInBackground(new CountCallback() {
-                @Override
-                public void done(int count, ParseException e) {
-                    if (e == null && count != 0) {
-                        fetchChatRequests(count);
-                    } else {
-                        if (e != null) {
-                            UiUtils.showView(chatRequestsHeaderView, false);
-                        }
-                    }
-                    chatRequestsQuery.cancel();
-                }
-            });
-        }
-    }
-
-    private void fetchChatRequests(final int totalCount) {
-        ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (signedInUser != null) {
-            final ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-            chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
-            chatRequestsQuery.include(AppConstants.FEED_CREATOR);
-            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
-            chatRequestsQuery.setLimit(3);
-            chatRequestsQuery.findInBackground(new FindCallback<ParseObject>() {
-                @Override
-                public void done(List<ParseObject> objects, ParseException e) {
-                    if (e == null && objects != null && !objects.isEmpty()) {
-                        UiUtils.showView(chatRequestsHeaderView, true);
-                        chatRequestsHeaderView.setChatRequests(getActivity(), objects, totalCount);
-                        UiUtils.toggleFlipperState(peopleContentFlipper, 2);
-                        if (!nearbyPeople.isEmpty()) {
-                            chatRequestsHeaderView.showNearbyHeader(true);
-                        }
-                    }
-                    chatRequestsQuery.cancel();
-                }
-            });
-        }
-        chatRequestsHeaderView.attachEventHandlers(getActivity());
     }
 
     private void fetchPeopleOfCommonInterestFromCache() {
@@ -342,9 +278,6 @@ public class NearbyPeopleFragment extends BaseFragment {
                             if (!nearbyPeople.isEmpty()) {
                                 UiUtils.toggleFlipperState(peopleContentFlipper, 2);
                                 cacheListOfPeople();
-                                if (chatRequestsHeaderView.getVisibility() == View.VISIBLE) {
-                                    chatRequestsHeaderView.showNearbyHeader(true);
-                                }
                             } else {
                                 displayFetchErrorMessage(false);
                             }
@@ -508,9 +441,6 @@ public class NearbyPeopleFragment extends BaseFragment {
                             break;
                         case AppConstants.REFRESH_PEOPLE:
                             fetchPeopleOfCommonInterestsFromNetwork(0);
-                            break;
-                        case AppConstants.CHECK_FOR_NEW_CHAT_REQUESTS:
-                            countChatRequests();
                             break;
                         case AppConstants.SEARCH_VIEW_CLOSED:
                             peopleAdapter.setSearchString(null);

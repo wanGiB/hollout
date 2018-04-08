@@ -11,44 +11,73 @@
         android:id="@+id/scroller"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:paddingBottom="50dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.github.florent37.diagonallayout.DiagonalLayout
-                android:id="@+id/diagonalLayout"
+            <RelativeLayout
+                android:id="@+id/top_panel"
                 android:layout_width="match_parent"
-                android:layout_height="350dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:paddingBottom="16dp"
-                app:diagonal_angle="10"
-                app:diagonal_direction="left"
-                app:diagonal_position="bottom"
-                app:elevation="10dp">
+                android:layout_height="wrap_content">
 
-                <com.flaviofaria.kenburnsview.KenBurnsView
-                    android:id="@+id/signed_in_user_cover_image_view"
+                <FrameLayout
+                    android:id="@+id/diagonalLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/authentication_background_image" />
+                    android:layout_height="250dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true">
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="#6b000000" />
+                    <com.flaviofaria.kenburnsview.KenBurnsView
+                        android:id="@+id/signed_in_user_cover_image_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/drawer_background" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="#6b000000" />
+
+                    <com.wan.hollout.ui.widgets.HolloutTextView
+                        android:id="@+id/user_location_and_distance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical|bottom|end"
+                        android:layout_margin="20dp"
+                        android:drawablePadding="3dp"
+                        android:textColor="@color/whitesmoke"
+                        android:textSize="18sp"
+                        app:textStyle="medium" />
+
+                </FrameLayout>
+
+                <com.wan.hollout.ui.widgets.CircleImageView
+                    android:id="@+id/user_profile_photo_view"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="200dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:src="@drawable/authentication_background_image"
+                    app:border_color="@color/white"
+                    app:border_width="3dp" />
 
                 <LinearLayout
+                    android:id="@+id/name_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_below="@+id/user_profile_photo_view"
                     android:layout_gravity="bottom"
-                    android:layout_marginBottom="80dp"
-                    android:orientation="horizontal"
-                    android:paddingBottom="20dp">
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal">
 
                     <com.wan.hollout.ui.widgets.HolloutTextView
                         android:id="@+id/user_display_name"
@@ -61,8 +90,8 @@
                         android:maxLines="2"
                         android:paddingLeft="20dp"
                         android:paddingStart="20dp"
-                        android:textColor="@color/white"
-                        android:textSize="26sp"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
                         app:textStyle="medium"
                         tools:ignore="RtlSymmetry" />
 
@@ -73,64 +102,18 @@
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true"
-                        android:textColor="@color/white"
-                        android:textSize="25sp"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
                         app:textStyle="medium" />
 
                 </LinearLayout>
 
-            </com.github.florent37.diagonallayout.DiagonalLayout>
-
-            <com.wan.hollout.ui.widgets.CircleImageView
-                android:id="@+id/user_profile_photo_view"
-                android:layout_width="90dp"
-                android:layout_height="90dp"
-                android:layout_marginLeft="40dp"
-                android:layout_marginStart="40dp"
-                android:layout_marginTop="280dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                android:src="@drawable/authentication_background_image"
-                app:border_color="@color/white"
-                app:border_width="3dp" />
-
-            <com.wan.hollout.ui.widgets.CircleImageView
-                android:id="@+id/user_gender"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_alignEnd="@id/user_profile_photo_view"
-                android:layout_alignRight="@id/user_profile_photo_view"
-                android:layout_marginLeft="250dp"
-                android:layout_marginStart="250dp"
-                android:layout_marginTop="282dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:focusable="true"
-                android:src="@drawable/authentication_background_image"
-                android:visibility="gone"
-                app:border_color="@color/white"
-                app:border_width="2dp" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/start_chat_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_marginEnd="25dp"
-                android:layout_marginRight="25dp"
-                android:layout_marginTop="250dp"
-                android:src="@drawable/floating_message"
-                app:backgroundTint="@color/colorPrimary"
-                app:fabSize="normal"
-                app:rippleColor="@color/colorPrimaryDark"
-                tools:ignore="RelativeOverlap" />
+            </RelativeLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/diagonalLayout"
+                android:layout_below="@id/top_panel"
                 android:animateLayoutChanges="true"
                 android:clipChildren="false"
                 android:clipToPadding="false">
@@ -139,9 +122,6 @@
                     android:id="@+id/about_user"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="13dp"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:ellipsize="end"
@@ -151,72 +131,21 @@
                     android:paddingLeft="22dp"
                     android:paddingRight="20dp"
                     android:paddingStart="22dp"
-                    android:textColor="@color/text_dark"
-                    android:textSize="25sp" />
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/about_user_recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/about_user"
-                    android:background="@color/whitesmoke"
-                    android:paddingEnd="10dp"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:paddingStart="10dp"
-                    android:visibility="gone" />
-
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:id="@+id/edit_about_you"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
-                    android:layout_below="@+id/about_user_recycler_view"
-                    android:layout_marginEnd="10dp"
-                    android:layout_marginRight="10dp"
-                    android:background="@drawable/get_started_button_background"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:paddingBottom="5dp"
-                    android:paddingEnd="14dp"
-                    android:paddingLeft="14dp"
-                    android:paddingRight="14dp"
-                    android:paddingStart="14dp"
-                    android:paddingTop="5dp"
-                    android:text="@string/edit"
-                    android:textSize="10sp"
-                    android:visibility="gone"
-                    tools:ignore="SmallSp" />
-
-                <com.wan.hollout.ui.widgets.HolloutTextView
-                    android:id="@+id/user_location_and_distance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/edit_about_you"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="20dp"
-                    android:drawablePadding="3dp"
-                    android:gravity="center_vertical"
-                    android:textColor="@color/ease_gray"
-                    android:textSize="15sp"
-                    app:textStyle="medium" />
+                    android:textColor="@color/colorAccent"
+                    android:textSize="16sp" />
 
                 <FrameLayout
                     android:id="@+id/user_status_frame"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/user_location_and_distance"
-                    android:layout_marginBottom="8dp"
-                    android:layout_marginTop="8dp"
-                    android:background="#f4f4f4">
+                    android:layout_below="@+id/about_user"
+                    android:layout_marginBottom="8dp">
 
                     <com.wan.hollout.ui.widgets.HolloutTextView
                         android:id="@+id/user_status"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
+                        android:layout_gravity="start"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:drawableEnd="@drawable/ic_close_quote"
@@ -225,12 +154,12 @@
                         android:drawableRight="@drawable/ic_close_quote"
                         android:drawableStart="@drawable/ic_open_quote"
                         android:focusable="true"
-                        android:gravity="center_horizontal"
+                        android:gravity="start"
                         android:padding="16dp"
                         android:text="@string/hey_there_holla_me_on_hollout"
                         android:textColor="@color/grey500"
                         android:textSize="18sp"
-                        app:textStyle="medium" />
+                        app:textStyle="regular" />
 
                 </FrameLayout>
 
@@ -246,7 +175,7 @@
                     android:paddingStart="16dp"
                     android:paddingTop="16dp"
                     android:text="@string/featured_photos"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     app:textStyle="medium" />
 
                 <View
@@ -277,7 +206,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/authentication_background_image"
+                        android:src="@drawable/drawer_background"
                         tools:ignore="ContentDescription" />
 
                     <View
@@ -361,6 +290,45 @@
             android:textColor="@color/white"
             android:textSize="14sp"
             app:textStyle="medium" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorPrimary">
+
+        <ImageView
+            android:id="@+id/bb_bottom_bar_shadow"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:src="@drawable/bb_bottom_bar_top_shadow"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/start_chat_or_edit_profile_view"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerInParent="true"
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/home_chat_icon"
+            tools:ignore="RelativeOverlap" />
+
+        <ImageView
+            android:id="@+id/settings_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="20dp"
+            android:layout_marginRight="20dp"/>
 
     </RelativeLayout>
 

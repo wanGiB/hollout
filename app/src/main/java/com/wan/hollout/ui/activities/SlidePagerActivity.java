@@ -116,11 +116,12 @@ public class SlidePagerActivity extends AppCompatActivity {
                             if (photoLikesMap.containsKey(newLikeHash)) {
                                 photoLikesMap.remove(newLikeHash);
                             }
-                            ParseObject newPhotoLike = new ParseObject(AppConstants.PHOTO_LIKES);
+                            ParseObject newPhotoLike = new ParseObject(AppConstants.HOLLOUT_FEED);
                             newPhotoLike.put(AppConstants.FEED_CREATOR, signedInUser);
                             newPhotoLike.put(AppConstants.FEED_CREATOR_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
                             newPhotoLike.put(AppConstants.FEED_RECIPIENT_ID, userId);
                             newPhotoLike.put(AppConstants.LIKED_PHOTO, selectedPic);
+                            newPhotoLike.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_PHOTO_LIKE);
                             newPhotoLike.saveInBackground(new SaveCallback() {
                                 @Override
                                 public void done(ParseException e) {
@@ -140,10 +141,11 @@ public class SlidePagerActivity extends AppCompatActivity {
                                 userPhotosReference.child(photoKey).removeValue();
                             }
                             checkLiked(selectedPic);
-                            ParseQuery<ParseObject> photoLikeQuery = ParseQuery.getQuery(AppConstants.PHOTO_LIKES);
+                            ParseQuery<ParseObject> photoLikeQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
                             photoLikeQuery.whereEqualTo(AppConstants.LIKED_PHOTO, selectedPic);
                             photoLikeQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
                             photoLikeQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, userId);
+                            photoLikeQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_PHOTO_LIKE);
                             photoLikeQuery.findInBackground(new FindCallback<ParseObject>() {
                                 @Override
                                 public void done(List<ParseObject> objects, ParseException e) {

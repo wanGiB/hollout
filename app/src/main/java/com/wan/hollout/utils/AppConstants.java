@@ -216,6 +216,7 @@ public class AppConstants {
     public static final String PREVIEWED = "previewed";
     public static final String LIKED_PHOTO = "liked_photo";
     public static final String PHOTO_LIKE_DATE = "photo_liked_date";
+    public static final String FEED_TYPE_PHOTO_LIKE = "feed_type_photo_like";
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;

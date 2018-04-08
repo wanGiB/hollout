@@ -4,10 +4,10 @@ import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -15,21 +15,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import com.amulyakhare.textdrawable.TextDrawable;
 import com.flaviofaria.kenburnsview.KenBurnsView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
+import com.mikepenz.iconics.typeface.IIcon;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
@@ -41,7 +45,6 @@ import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.adapters.FeaturedPhotosRectangleAdapter;
-import com.wan.hollout.ui.adapters.PeopleToMeetAdapter;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
@@ -100,8 +103,11 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.about_user)
     TextView aboutUserTextView;
 
-    @BindView(R.id.start_chat_view)
-    FloatingActionButton startChatView;
+    @BindView(R.id.start_chat_or_edit_profile_view)
+    ImageView startChatView;
+
+    @BindView(R.id.settings_icon)
+    ImageView settingsIcon;
 
     @BindView(R.id.delete_account)
     Button deleteAccountButton;
@@ -109,23 +115,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     @BindView(R.id.user_location_and_distance)
     HolloutTextView userLocationAndDistanceView;
 
-    @BindView(R.id.about_user_recycler_view)
-    RecyclerView aboutUserRecyclerView;
-
     @BindView(R.id.feature_photos_instruction)
     HolloutTextView featurePhotosInstruction;
 
     @BindView(R.id.featured_photos_place_holder_image)
     ImageView featuredPhotosPlaceHolderImageView;
 
-    @BindView(R.id.edit_about_you)
-    HolloutTextView editAboutYou;
-
     @BindView(R.id.age_view)
     HolloutTextView ageView;
-
-    @BindView(R.id.user_gender)
-    CircleImageView userGenderView;
 
     @BindView(R.id.featured_photos_recycler_view)
     RecyclerView featuredPhotosRecyclerView;
@@ -215,14 +212,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 }
             }
         }
-        setupUserAboutAdapter(aboutUserList);
-    }
-
-    private void setupUserAboutAdapter(List<ParseObject> parseObjects) {
-        PeopleToMeetAdapter peopleToMeetAdapter = new PeopleToMeetAdapter(this, parseObjects, AppConstants.PEOPLE_TO_MEET_HOST_TYPE_SELECTED);
-        LinearLayoutManager horizontalLinearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        aboutUserRecyclerView.setLayoutManager(horizontalLinearLayoutManager);
-        aboutUserRecyclerView.setAdapter(peopleToMeetAdapter);
     }
 
     @SuppressLint("SetTextI18n")
@@ -231,7 +220,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         if (signedInUser != null) {
             String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
             String userAge = parseUser.getString(AppConstants.APP_USER_AGE);
-            String userLocation = HolloutUtils.resolveToBestLocation(parseUser);
             ParseGeoPoint userGeoPoint = parseUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
             ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
             String distanceToUser = String.valueOf(Math.rint(RandomUtils.nextDouble(0, 10)));
@@ -240,30 +228,14 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 distanceToUser = HolloutUtils.formatDistance(distanceInKills);
             }
             if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
-                if (userLocation != null) {
-                    userLocationAndDistanceView.setText(userLocation);
-                } else {
-                    String formattedDistanceToUser = HolloutUtils.formatDistanceToUser(distanceToUser);
-                    if (formattedDistanceToUser != null) {
-                        userLocationAndDistanceView.setText(formattedDistanceToUser + "KM from nearbyPeople Nearby");
-                    }
-                }
+                userLocationAndDistanceView.setText("");
+
             } else {
                 if (UiUtils.canShowLocation(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
-                    if (StringUtils.isNotEmpty(userLocation)) {
-                        String formattedDistance = HolloutUtils.formatDistanceToUser(distanceToUser);
-                        if (formattedDistance != null) {
-                            userLocationAndDistanceView.setText(userLocation + ", " + formattedDistance + "KM from you");
-                        } else {
-                            userLocationAndDistanceView.setText(userLocation + ", " + "0KM from you");
-                        }
-                    } else {
-                        String formattedDistance = HolloutUtils.formatDistanceToUser(distanceToUser);
-                        userLocationAndDistanceView.setText(formattedDistance + "KM from you");
-                    }
-                } else {
                     String formattedDistance = HolloutUtils.formatDistanceToUser(distanceToUser);
-                    userLocationAndDistanceView.setText(formattedDistance + "KM from you");
+                    userLocationAndDistanceView.setText(formattedDistance + "KM");
+                } else {
+                    userLocationAndDistanceView.setText("");
                 }
             }
 
@@ -284,7 +256,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             } else {
                 UiUtils.showView(deleteAccountButton, false);
             }
-            UiUtils.attachDrawableToTextView(UserProfileActivity.this, userLocationAndDistanceView, R.drawable.ic_location_on, UiUtils.DrawableDirection.LEFT);
 
             userDisplayNameView.setText(WordUtils.capitalize(username));
             if (UiUtils.canShowAge(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
@@ -294,22 +265,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             }
             if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                 ageView.setText(WordUtils.capitalize(", " + userAge));
-            }
-
-            String userGender = parseUser.getString(AppConstants.APP_USER_GENDER);
-            if (!userGender.equals(AppConstants.UNKNOWN)) {
-                UiUtils.showView(userGenderView, true);
-                String firstChar = userGender.charAt(0) + "";
-                int color = ContextCompat.getColor(UserProfileActivity.this, R.color.colorPrimary);
-                TextDrawable.IBuilder builder = TextDrawable.builder()
-                        .beginConfig()
-                        .endConfig()
-                        .round();
-                TextDrawable colouredDrawable = builder.build(firstChar, color);
-                Bitmap textBitmap = HolloutUtils.convertDrawableToBitmap(colouredDrawable);
-                userGenderView.setImageBitmap(textBitmap);
-            } else {
-                UiUtils.showView(userGenderView, false);
             }
 
             String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
@@ -394,6 +349,43 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             }
         }
         scrollView.smoothScrollTo(0, 0);
+    }
+
+    private Drawable getDrawableFromIcon(IIcon icon) {
+        return new IconicsDrawable(this)
+                .sizeDp(18)
+                .icon(icon);
+    }
+
+    private void launchSettings(String settingsFragmentName) {
+        Intent settingsIntent = new Intent(UserProfileActivity.this, SettingsActivity.class);
+        settingsIntent.putExtra(AppConstants.SETTINGS_FRAGMENT_NAME, settingsFragmentName);
+        startActivity(settingsIntent);
+    }
+
+    private void iniSettingsPopupMenu() {
+        PopupMenu popupMenu = new PopupMenu(this, settingsIcon);
+        Menu menu = popupMenu.getMenu();
+        menu.add(1, 3, 3, "Notification Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_notifications));
+        menu.add(1, 4, 4, "Chats & Calls Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_chat));
+        menu.add(1, 5, 5, "Privacy Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_security));
+        menu.add(1, 6, 6, "Support Settings").setIcon(getDrawableFromIcon(GoogleMaterial.Icon.gmd_help));
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == 3) {
+                    launchSettings(AppConstants.NOTIFICATION_SETTINGS_FRAGMENT);
+                } else if (item.getItemId() == 4) {
+                    launchSettings(AppConstants.CHATS_SETTINGS_FRAGMENT);
+                } else if (item.getItemId() == 5) {
+                    launchSettings(AppConstants.PRIVACY_AND_SECURITY_FRAGMENT);
+                } else if (item.getItemId() == 6) {
+                    launchSettings(AppConstants.SUPPORT_SETTINGS_FRAGMENT);
+                }
+                return true;
+            }
+        });
+        popupMenu.show();
     }
 
     private void tryDeleteAccount() {
@@ -566,7 +558,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                         }
                     });
                 } else {
-                    setupFeaturedPhotos(parseUser);
+                    setupFeaturedPhotos(AuthUtil.getCurrentUser());
                 }
             } else {
                 if (featuredPhotos == null || featuredPhotos.isEmpty()) {
@@ -625,23 +617,36 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                 List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
                 if (aboutSignedInUser != null) {
-                    aboutUserTextView.setText(WordUtils.capitalize(aboutSignedInUser.get(0)));
-                    UiUtils.showView(startChatView, false);
+                    aboutUserTextView.setText(WordUtils.capitalize(TextUtils.join(",", aboutSignedInUser)));
+                    startChatView.setImageResource(R.drawable.edit_my_profile);
+                    settingsIcon.setImageDrawable(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_settings).color(Color.WHITE).sizeDp(20));
+                    settingsIcon.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            iniSettingsPopupMenu();
+                        }
+                    });
                 }
-            } else {
-                UiUtils.showView(startChatView, true);
-                List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
-                List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
-                if (aboutUser != null && aboutSignedInUser != null) {
-                    try {
-                        List<String> common = new ArrayList<>(aboutUser);
-                        common.retainAll(aboutSignedInUser);
-                        String firstInterest = !common.isEmpty() ? common.get(0) : aboutUser.get(0);
-                        aboutUserTextView.setText(WordUtils.capitalize(firstInterest));
-                    } catch (NullPointerException ignored) {
-
+                aboutUserTextView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent editAboutYouIntent = new Intent(UserProfileActivity.this, AboutUserActivity.class);
+                        editAboutYouIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, false);
+                        startActivityForResult(editAboutYouIntent, RequestCodes.UPDATE_ABOUT_YOU);
                     }
-                }
+                });
+                startChatView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent editProfileIntent = new Intent(UserProfileActivity.this, EditProfileActivity.class);
+                        startActivity(editProfileIntent);
+                    }
+                });
+            } else {
+                startChatView.setImageResource(R.drawable.home_chat_icon);
+                List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
+                aboutUserTextView.setText(WordUtils.capitalize(TextUtils.join(",", aboutUser)));
+
                 startChatView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -653,28 +658,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 });
             }
             handleUserOnlineStatus(parseUser);
-            aboutUserTextView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (aboutUserRecyclerView.getVisibility() != View.VISIBLE) {
-                        aboutUserRecyclerView.setVisibility(View.VISIBLE);
-                        if (signedInUser.getString(AppConstants.REAL_OBJECT_ID).equals(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
-                            editAboutYou.setVisibility(View.VISIBLE);
-                        }
-                    } else {
-                        aboutUserRecyclerView.setVisibility(View.GONE);
-                        UiUtils.showView(editAboutYou, false);
-                    }
-                    editAboutYou.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent editAboutYouIntent = new Intent(UserProfileActivity.this, AboutUserActivity.class);
-                            editAboutYouIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, false);
-                            startActivityForResult(editAboutYouIntent, RequestCodes.UPDATE_ABOUT_YOU);
-                        }
-                    });
-                }
-            });
         }
     }
 
@@ -883,11 +866,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onBackPressed() {
-        if (aboutUserRecyclerView.getVisibility() == View.VISIBLE) {
-            aboutUserTextView.performClick();
-        } else {
-            super.onBackPressed();
-        }
+        super.onBackPressed();
     }
 
     @Override

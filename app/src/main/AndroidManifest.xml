@@ -203,6 +203,7 @@
             android:name=".ui.activities.EditProfileActivity"
             android:configChanges="orientation|screenSize|keyboard|screenLayout"
             android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".ui.activities.ProfilePreviewActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -215,16 +216,6 @@
         </provider>
 
         <service android:name=".ui.services.TimeChangeDetectionService" />
-
-        <activity
-            android:name=".ui.activities.NewsFeedActivity"
-            android:configChanges="orientation|screenSize|screenLayout"
-            android:theme="@style/Theme.Sliding.Light" />
-
-        <activity
-            android:name=".ui.activities.PhotoLikesActivity"
-            android:configChanges="orientation|screenSize|screenLayout"
-            android:theme="@style/Theme.Sliding.Light" />
 
     </application>
 

@@ -355,4 +355,7 @@
     <string name="update_">UPDATE</string>
     <string name="delete_my_account">DELETE MY ACCOUNT</string>
     <string name="nothing_for_now">Nothing For Now</string>
+    <string name="likes">Likes</string>
+    <string name="activities">Activities</string>
+    <string name="more">MORE</string>
 </resources>
