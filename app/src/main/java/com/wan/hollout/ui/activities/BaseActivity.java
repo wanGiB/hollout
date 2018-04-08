@@ -1,8 +1,10 @@
 package com.wan.hollout.ui.activities;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.view.Menu;
@@ -18,6 +20,7 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.UiUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -130,7 +133,40 @@ public abstract class BaseActivity extends AppCompatActivity {
     @SuppressWarnings("unused")
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
     public void onEventAsync(final Object o) {
+        checkReceivedEvent(o);
+    }
 
+    private void checkReceivedEvent(final Object o) {
+        UiUtils.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                if (o instanceof String) {
+                    String s = (String) o;
+                    if (s.equals(AppConstants.TERMINATE_APPLICATION)) {
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(BaseActivity.this);
+                        alertDialogBuilder.setTitle("Attention!");
+                        alertDialogBuilder.setMessage("Something screwy happened. You need to re-authenticate.");
+                        alertDialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                AuthUtil.signOut(BaseActivity.this);
+                                finishUpTheShit();
+                            }
+                        });
+                        alertDialogBuilder.create().show();
+                    }
+                }
+            }
+        });
+    }
+
+    private void finishUpTheShit() {
+        UiUtils.showSafeToast("You've being logged out");
+        Intent splashIntent = new Intent(BaseActivity.this, SplashActivity.class);
+        splashIntent.putExtra(AppConstants.FROM_MAIN, true);
+        startActivity(splashIntent);
+        finish();
     }
 
     @Override

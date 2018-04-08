@@ -8,6 +8,7 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.parse.DeleteCallback;
+import com.parse.FindCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -15,6 +16,9 @@ import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.wan.hollout.interfaces.DoneCallback;
 
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
@@ -79,12 +83,55 @@ public class AuthUtil {
         updatableProps.pinInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
-                updateRemoteUserVariant(updatableProps, updatableProps.getString(AppConstants.REAL_OBJECT_ID), successCallback);
+                checkRunDataCleanUpBeforeUpdate(updatableProps, updatableProps.getString(AppConstants.REAL_OBJECT_ID), successCallback);
             }
         });
     }
 
-    private static void updateRemoteUserVariant(final ParseObject updatableProps, String realObjectId, @Nullable final DoneCallback<Boolean> successCallback) {
+    private static void checkRunDataCleanUpBeforeUpdate(final ParseObject updatableProps, final String realObjectId, @Nullable final DoneCallback<Boolean> successCallback) {
+        final ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+        peopleQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, realObjectId);
+        peopleQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null) {
+                    if (objects != null && !objects.isEmpty()) {
+                        if (objects.size() > 1) {
+                            List<ParseObject> deletableObjects = new ArrayList<>();
+                            for (ParseObject parseObject : objects) {
+                                if (parseObject != null) {
+                                    List<String> aboutUser = parseObject.getList(AppConstants.ABOUT_USER);
+                                    if (aboutUser == null) {
+                                        deletableObjects.add(parseObject);
+                                    } else {
+                                        if (aboutUser.isEmpty()) {
+                                            deletableObjects.add(parseObject);
+                                        }
+                                    }
+                                }
+                            }
+                            if (!deletableObjects.isEmpty()) {
+                                ParseObject.deleteAllInBackground(deletableObjects, new DeleteCallback() {
+                                    @Override
+                                    public void done(ParseException e) {
+                                        updateRemoteUserVariant(updatableProps, realObjectId, successCallback);
+                                    }
+                                });
+                            } else {
+                                updateRemoteUserVariant(updatableProps, realObjectId, successCallback);
+                            }
+                        } else {
+                            updateRemoteUserVariant(updatableProps, realObjectId, successCallback);
+                        }
+                    }
+                }
+                peopleQuery.cancel();
+            }
+        });
+    }
+
+    private static void updateRemoteUserVariant(final ParseObject updatableProps, String realObjectId,
+                                                @Nullable final DoneCallback<Boolean> successCallback) {
         final ParseQuery<ParseObject> personQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         personQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, realObjectId);
         personQuery.getFirstInBackground(new GetCallback<ParseObject>() {
@@ -109,6 +156,9 @@ public class AuthUtil {
                                 }
                             }
                         });
+                    } else {
+                        //No such object was found, log out user
+                        doLowKeyLogOut();
                     }
                 } catch (ConcurrentModificationException ignored) {
 
@@ -118,12 +168,22 @@ public class AuthUtil {
         });
     }
 
+    private static void doLowKeyLogOut() {
+        HolloutPreferences.setUserWelcomed(false);
+        HolloutPreferences.clearPersistedCredentials();
+        HolloutPreferences.getInstance().getAll().clear();
+        ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
+        ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
+        HolloutUtils.getKryoInstance().reset();
+        EventBus.getDefault().post(AppConstants.TERMINATE_APPLICATION);
+    }
+
     public static void logOutAuthenticatedUser(final DoneCallback<Boolean> dissolutionCallback) {
         final ParseObject localObject = getCurrentUser();
         if (localObject != null) {
             localObject.put(AppConstants.APP_USER_ONLINE_STATUS, AppConstants.OFFLINE);
             localObject.put(AppConstants.APP_USER_LAST_SEEN, System.currentTimeMillis());
-            updateRemoteUserVariant(localObject, localObject.getString(AppConstants.REAL_OBJECT_ID), new DoneCallback<Boolean>() {
+            checkRunDataCleanUpBeforeUpdate(localObject, localObject.getString(AppConstants.REAL_OBJECT_ID), new DoneCallback<Boolean>() {
                 @Override
                 public void done(Boolean success, Exception e) {
                     localObject.unpinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS, new DeleteCallback() {

@@ -619,7 +619,10 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         super.onStart();
         checkAndRegEventBus();
         fetchUnreadMessagesCount();
-//        displaySignedInUserProps(AuthUtil.getCurrentUser());
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        if (signedInUserObject != null) {
+            loadSignedInUserImage(signedInUserObject);
+        }
         checkStartTimeStampUpdateServer();
         HolloutPreferences.incrementActivityCount();
     }
