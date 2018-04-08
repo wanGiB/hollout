@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
@@ -761,15 +760,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         tryAskForPermissions();
         fetchMyPhotoLikes();
         checkIfPhotoIsBlurredOrUnclear();
-    }
-
-    private void indicateNewsFeedAvailable() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        }, 1000);
     }
 
     private void checkIfPhotoIsBlurredOrUnclear() {
