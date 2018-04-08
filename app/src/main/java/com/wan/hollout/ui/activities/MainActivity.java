@@ -20,6 +20,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.JobIntentService;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
@@ -559,6 +560,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             loadSignedInUserImage(parseObject);
         }
         fetchUnreadMessagesCount();
+        checkIfPhotoIsBlurredOrUnclear();
     }
 
     private void setupTabs(Adapter pagerAdapter) {
@@ -716,9 +718,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                                 turnOnLocationMessage();
                             }
                             break;
-                        case AppConstants.ATTEMPT_LOGOUT:
-                            attemptLogOut();
-                            break;
                         case AppConstants.TURN_OFF_ALL_TAB_LAYOUTS:
                             toggleViews();
                             break;
@@ -808,8 +807,11 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     }
 
     private void startAppInstanceDetectionService() {
-        Intent mAppInstanceDetectIntent = new Intent(this, AppInstanceDetectionService.class);
-        startService(mAppInstanceDetectIntent);
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        if (signedInUserObject != null) {
+            Intent serviceIntent = new Intent();
+            JobIntentService.enqueueWork(this, AppInstanceDetectionService.class, AppConstants.FIXED_JOB_ID, serviceIntent);
+        }
     }
 
     @Override

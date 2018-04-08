@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.fragments;
 
 import android.annotation.SuppressLint;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -65,6 +66,8 @@ public class ConversationsFragment extends BaseFragment {
 
     @BindView(R.id.no_hollout_users_text_view)
     HolloutTextView errorTextView;
+
+    private SwapTask swapTask;
 
     @SuppressLint("StaticFieldLeak")
     public static ConversationsAdapter conversationsAdapter;
@@ -301,31 +304,7 @@ public class ConversationsFragment extends BaseFragment {
     private void refreshConversations() {
         if (!conversations.isEmpty()) {
             if (!AppConstants.recentConversations.isEmpty()) {
-                for (ParseObject parseObject : AppConstants.recentConversations) {
-                    final ConversationItem conversationItem = new ConversationItem(parseObject,
-                            HolloutPreferences.getLastConversationTime(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
-                    if (!conversations.contains(conversationItem)) {
-                        conversations.add(0, conversationItem);
-                        sortConversations();
-                    } else {
-                        int indexOfConversation = conversations.indexOf(conversationItem);
-                        if (indexOfConversation != -1) {
-                            Collections.swap(conversations, indexOfConversation, 0);
-                            conversationsRecyclerView.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    int newIndex = conversations.indexOf(conversationItem);
-                                    conversations.set(newIndex, conversationItem);
-                                }
-                            });
-                        }
-                    }
-                }
-                if (conversationsAdapter != null) {
-                    conversationsAdapter.notifyDataSetChanged();
-                }
-                invalidateEmptyView();
-                AppConstants.recentConversations.clear();
+                checkRunSwapTask();
             }
         } else {
             fetchConversations(0);
@@ -333,6 +312,50 @@ public class ConversationsFragment extends BaseFragment {
         if (AppConstants.CHAT_INVITATION_ACCEPTED) {
             fetchConversations(0);
             AppConstants.CHAT_INVITATION_ACCEPTED = false;
+        }
+    }
+
+    private void checkRunSwapTask() {
+        if (swapTask != null && !swapTask.isCancelled()) {
+            swapTask.cancel(true);
+            swapTask = null;
+        }
+        swapTask = new SwapTask();
+        swapTask.execute();
+    }
+
+    private void runSwap() {
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    for (ParseObject parseObject : AppConstants.recentConversations) {
+                        final ConversationItem conversationItem = new ConversationItem(parseObject,
+                                HolloutPreferences.getLastConversationTime(parseObject.getString(AppConstants.REAL_OBJECT_ID)));
+                        if (!conversations.contains(conversationItem)) {
+                            conversations.add(0, conversationItem);
+                            sortConversations();
+                        } else {
+                            int indexOfConversation = conversations.indexOf(conversationItem);
+                            if (indexOfConversation != -1) {
+                                Collections.swap(conversations, indexOfConversation, 0);
+                                conversationsRecyclerView.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        int newIndex = conversations.indexOf(conversationItem);
+                                        conversations.set(newIndex, conversationItem);
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    if (conversationsAdapter != null) {
+                        conversationsAdapter.notifyDataSetChanged();
+                    }
+                    invalidateEmptyView();
+                    AppConstants.recentConversations.clear();
+                }
+            });
         }
     }
 
@@ -443,6 +466,24 @@ public class ConversationsFragment extends BaseFragment {
         } else {
             UiUtils.toggleFlipperState(contentFlipper, 1);
         }
+    }
+
+    @SuppressLint("StaticFieldLeak")
+    class SwapTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            runSwap();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            cancel(true);
+            swapTask = null;
+        }
+
     }
 
 }

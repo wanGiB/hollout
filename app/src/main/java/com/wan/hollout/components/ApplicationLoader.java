@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.support.annotation.NonNull;
 import android.support.multidex.MultiDex;
+import android.support.v4.app.JobIntentService;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.database.FirebaseDatabase;
@@ -126,13 +127,15 @@ public class ApplicationLoader extends Application {
     }
 
     private void startAppInstanceDetector() {
-        try {
-            Intent serviceIntent = new Intent(this, AppInstanceDetectionService.class);
-            startService(serviceIntent);
-        } catch (IllegalStateException ignored) {
+        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        if (signedInUserObject != null) {
+            try {
+                Intent serviceIntent = new Intent();
+                JobIntentService.enqueueWork(this, AppInstanceDetectionService.class, AppConstants.FIXED_JOB_ID, serviceIntent);
+            } catch (IllegalStateException ignored) {
 
+            }
         }
-
     }
 
     private void initParse() {

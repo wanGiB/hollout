@@ -432,7 +432,6 @@ public class ChatToolbar extends AppBarLayout implements View.OnClickListener {
 
     public void updateActionMode(int selectionCount) {
         UiUtils.showView(actionModeBar, selectionCount > 0);
-        mContext.vibrateVibrator();
         if (selectionCount > 1) {
             selectedItemCountView.setText(String.valueOf(selectionCount));
             UiUtils.showView(replyToMessageView, false);

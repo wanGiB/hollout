@@ -17,8 +17,8 @@ android {
         applicationId "com.wan.hollout"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 49
-        versionName "3.3.9"
+        versionCode 53
+        versionName "3.4.3"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true //important
@@ -108,8 +108,8 @@ dependencies {
     compile 'joda-time:joda-time:2.9.9'
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.esotericsoftware:kryo:4.0.0'
-    compile 'com.parse:parse-livequery-android:1.0.4'
-    compile 'com.parse:parse-android:1.16.1'
+    compile 'com.parse:parse-livequery-android:1.0.5'
+    compile 'com.parse:parse-android:1.16.7'
     compile 'net.alhazmy13.MediaPicker:libary:2.2.5'
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'com.github.florent37:diagonallayout:1.0.7'

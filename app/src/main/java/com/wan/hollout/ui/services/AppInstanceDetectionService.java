@@ -89,6 +89,7 @@ public class AppInstanceDetectionService extends JobIntentService implements
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
+        HolloutLogger.d("OnHandleWork","OnHandleWorkCalled");
         if (signedInUser == null) {
             signedInUser = AuthUtil.getCurrentUser();
         }
@@ -167,8 +168,8 @@ public class AppInstanceDetectionService extends JobIntentService implements
                 if (StringUtils.isNotEmpty(adminAddress)) {
                     signedInUser.put(AppConstants.APP_USER_ADMIN_AREA, HolloutUtils.stripDollar(adminAddress));
                 }
-                updateSignedInUserProps(true);
             }
+            updateSignedInUserProps(true);
             return null;
         }
 
@@ -252,43 +253,47 @@ public class AppInstanceDetectionService extends JobIntentService implements
     }
 
     private static void sendAmNearbyPushNotification() {
-        String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
-        List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-        List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
-        ArrayList<String> newUserChats = new ArrayList<>();
-        final ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
-        if (signedInUserGeoPoint != null && aboutUser != null) {
-            if (savedUserChats != null) {
-                if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
-                    savedUserChats.add(signedInUserId.toLowerCase());
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
+            List<String> savedUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+            List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
+            ArrayList<String> newUserChats = new ArrayList<>();
+            final ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
+            ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+            if (signedInUserGeoPoint != null && aboutUser != null) {
+                if (savedUserChats != null) {
+                    if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
+                        savedUserChats.add(signedInUserId.toLowerCase());
+                    }
+                    peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, savedUserChats);
+                } else {
+                    if (!newUserChats.contains(signedInUserId)) {
+                        newUserChats.add(signedInUserId);
+                    }
+                    peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
                 }
-                peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, savedUserChats);
-            } else {
-                if (!newUserChats.contains(signedInUserId)) {
-                    newUserChats.add(signedInUserId);
-                }
-                peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
-            }
-            peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
-            peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, aboutUser);
-            peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 10.0);
-            peopleQuery.findInBackground(new FindCallback<ParseObject>() {
-                @Override
-                public void done(List<ParseObject> parseUsers, ParseException e) {
-                    if (e == null && parseUsers != null && !parseUsers.isEmpty()) {
-                        //Send notification to them one after the other
-                        for (ParseObject user : parseUsers) {
-                            String userFirebaseToken = user.getString(AppConstants.USER_FIREBASE_TOKEN);
-                            if (StringUtils.isNotEmpty(userFirebaseToken)) {
-                                JsonApiClient.sendFirebasePushNotification(userFirebaseToken, AppConstants.NOTIFICATION_TYPE_AM_NEARBY);
+                peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
+                peopleQuery.whereContainedIn(AppConstants.ABOUT_USER, aboutUser);
+                peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 10.0);
+                peopleQuery.findInBackground(new FindCallback<ParseObject>() {
+                    @Override
+                    public void done(List<ParseObject> parseUsers, ParseException e) {
+                        if (e == null && parseUsers != null && !parseUsers.isEmpty()) {
+                            //Send notification to them one after the other
+                            for (ParseObject user : parseUsers) {
+                                String userFirebaseToken = user.getString(AppConstants.USER_FIREBASE_TOKEN);
+                                if (StringUtils.isNotEmpty(userFirebaseToken)) {
+                                    JsonApiClient.sendFirebasePushNotification(userFirebaseToken, AppConstants.NOTIFICATION_TYPE_AM_NEARBY);
+                                }
                             }
                         }
+                        peopleQuery.cancel();
                     }
-                    peopleQuery.cancel();
-                }
-            });
+                });
+            }
         }
+
     }
 
 }

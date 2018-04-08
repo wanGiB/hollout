@@ -112,6 +112,7 @@ public class MessageNotifier {
                 Intent userProfileIntent;
                 if (HolloutUtils.isAContact(message.getFrom())) {
                     userProfileIntent = new Intent(ApplicationLoader.getInstance(), ChatActivity.class);
+                    HolloutPreferences.setStartPageIndex(1);
                     if (AppConstants.activeChatId == null) {
                         userProfileIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, true);
                     }
@@ -180,6 +181,7 @@ public class MessageNotifier {
                 Intent userProfileIntent;
                 if (HolloutUtils.isAContact(parseUser.getString(AppConstants.REAL_OBJECT_ID))) {
                     userProfileIntent = new Intent(ApplicationLoader.getInstance(), ChatActivity.class);
+                    HolloutPreferences.setStartPageIndex(1);
                     if (AppConstants.activeChatId == null) {
                         userProfileIntent.putExtra(AppConstants.CAN_LAUNCH_MAIN, true);
                     }

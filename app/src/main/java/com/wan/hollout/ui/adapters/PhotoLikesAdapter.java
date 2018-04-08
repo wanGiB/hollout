@@ -138,7 +138,7 @@ public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.Ph
                 photoLiker.setImageResource(R.drawable.empty_profile);
             }
             UiUtils.loadImage(activity, likedPhoto, likedPhotoImageView);
-            parentView.setBackgroundColor(seenByOwner ? Color.WHITE : ContextCompat.getColor(activity, R.color.lighter_blue));
+            parentView.setBackgroundColor(seenByOwner ? Color.WHITE : ContextCompat.getColor(activity, R.color.unread_news_feed_background));
             clickableContainer.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

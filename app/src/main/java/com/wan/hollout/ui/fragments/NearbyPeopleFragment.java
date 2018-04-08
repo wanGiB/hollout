@@ -237,12 +237,10 @@ public class NearbyPeopleFragment extends BaseFragment {
                     //Init Query here
                     final ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
                     peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
-
                     if (filterStartAgeValue != null && filterEndAgeValue != null) {
                         List<String> ageRanges = HolloutUtils.computeAgeRanges(filterStartAgeValue, filterEndAgeValue);
                         peopleQuery.whereContainedIn(AppConstants.APP_USER_AGE, ageRanges);
                     }
-
                     String genderFilter = signedInUser.getString(AppConstants.GENDER_FILTER);
                     checkGender(peopleQuery, genderFilter);
                     excludeUserChats(signedInUserId, signedInUserChats, newUserChats, peopleQuery);

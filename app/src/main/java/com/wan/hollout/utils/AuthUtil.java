@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.Tasks;
 import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.GetCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -96,7 +97,9 @@ public class AuthUtil {
             public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null) {
                     if (objects != null && !objects.isEmpty()) {
+                        HolloutLogger.d("ObjectResult", "Objects found");
                         if (objects.size() > 1) {
+                            HolloutLogger.d("ObjectResult", "Objects size greater than 1");
                             List<ParseObject> deletableObjects = new ArrayList<>();
                             for (ParseObject parseObject : objects) {
                                 if (parseObject != null) {
@@ -121,6 +124,7 @@ public class AuthUtil {
                                 updateRemoteUserVariant(updatableProps, realObjectId, successCallback);
                             }
                         } else {
+                            HolloutLogger.d("ObjectResult", "Objects size is less than or equal to 1");
                             updateRemoteUserVariant(updatableProps, realObjectId, successCallback);
                         }
                     }
@@ -158,6 +162,7 @@ public class AuthUtil {
                         });
                     } else {
                         //No such object was found, log out user
+                        HolloutLogger.d("ObjectResult", "On a Low Key");
                         doLowKeyLogOut();
                     }
                 } catch (ConcurrentModificationException ignored) {

@@ -4,7 +4,7 @@
     android:id="@+id/item_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/lighter_blue"
+    android:background="@color/unread_news_feed_background"
     android:orientation="horizontal">
 
     <LinearLayout

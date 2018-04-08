@@ -56,7 +56,7 @@
     <color name="hollout_color_three">#E8A723</color>
     <color name="hollout_color_four">#E01765</color>
     <color name="hollout_color_five">#443642</color>
-    <color name="news_feed_indicator_icons">#715B6E</color>
+    <color name="news_feed_indicator_icons">#edf2fa</color>
     <color name="list_items_selector_background">#C9BBC7</color>
     <color name="text_hint_primary_dark">#ff808c92</color>
     <color name="ripple_background_color">#70CADB</color>
@@ -305,5 +305,6 @@
 
     <color name="default_inactive_item_color">#9e9e9e</color>
     <color name="colorBackgroundHighlightWhite">#8dffffff</color>
+
 
 </resources>

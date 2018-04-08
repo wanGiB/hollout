@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.MenuItem;
@@ -327,11 +328,16 @@ public class WelcomeActivity extends BaseActivity
             @Override
             public void done(ParseException e) {
                 if (e == null) {
-                    AuthUtil.createLocalUser(newHolloutUser);
-                    HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
-                    startChatClient();
-                    UiUtils.dismissProgressDialog(progressDialog);
-                    finishUp(false);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            AuthUtil.createLocalUser(newHolloutUser);
+                            HolloutPreferences.persistCredentials(firebaseUser.getUid(), firebaseUser.getUid());
+                            startChatClient();
+                            UiUtils.dismissProgressDialog(progressDialog);
+                            finishUp(false);
+                        }
+                    }, 5000);
                 } else {
                     String errorMessage = e.getMessage();
                     if (StringUtils.isNotEmpty(errorMessage)) {

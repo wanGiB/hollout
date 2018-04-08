@@ -3,12 +3,16 @@ package com.wan.hollout.receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.JobIntentService;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.parse.ParseObject;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
+import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FirebaseUtils;
 
 /**
@@ -26,8 +30,11 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
     private void startAppDetectionService(Context context) {
         try {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-                Intent mAppInstanceDetectIntent = new Intent(context, AppInstanceDetectionService.class);
-                context.startService(mAppInstanceDetectIntent);
+                ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+                if (signedInUserObject != null) {
+                    Intent serviceIntent = new Intent();
+                    JobIntentService.enqueueWork(context, AppInstanceDetectionService.class, AppConstants.FIXED_JOB_ID, serviceIntent);
+                }
                 ChatClient.getInstance().startChatClient();
                 CallClient.getInstance().startCallClient();
 
