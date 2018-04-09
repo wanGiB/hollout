@@ -77,7 +77,6 @@ public class ApplicationLoader extends Application {
         sInstance = this;
         initParse();
         Fabric.with(this, new Crashlytics());
-        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         setupDatabase();
         startAppInstanceDetector();
         defaultSystemEmojiPref();
