@@ -1,6 +1,8 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
+import android.support.v7.util.SortedList;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,18 +43,19 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
         return searchString;
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View convertView = layoutInflater.inflate(R.layout.chat_recycler_item,parent,false);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View convertView = layoutInflater.inflate(R.layout.chat_recycler_item, parent, false);
         return new ConversationsItemHolder(convertView);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        ConversationsItemHolder conversationsItemHolder = (ConversationsItemHolder)holder;
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        ConversationsItemHolder conversationsItemHolder = (ConversationsItemHolder) holder;
         ConversationItem conversation = conversations.get(position);
-        if (conversation!=null){
-            conversationsItemHolder.bindData(context,getSearchString(),conversation.getRecipient());
+        if (conversation != null) {
+            conversationsItemHolder.bindData(context, getSearchString(), conversation.getRecipient());
         }
     }
 
@@ -62,18 +65,18 @@ public class ConversationsAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     @SuppressWarnings("WeakerAccess")
-    static class ConversationsItemHolder extends RecyclerView.ViewHolder{
+    static class ConversationsItemHolder extends RecyclerView.ViewHolder {
 
         @BindView(R.id.conversation_view)
         ConversationItemView conversationItemView;
 
         public ConversationsItemHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this,itemView);
+            ButterKnife.bind(this, itemView);
         }
 
-        public void bindData(Activity context, String searchString,ParseObject chat){
-            conversationItemView.bindData(context,searchString,chat);
+        public void bindData(Activity context, String searchString, ParseObject chat) {
+            conversationItemView.bindData(context, searchString, chat);
         }
 
     }

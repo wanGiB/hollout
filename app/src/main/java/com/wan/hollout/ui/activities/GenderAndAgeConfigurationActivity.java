@@ -133,7 +133,7 @@ public class GenderAndAgeConfigurationActivity extends BaseActivity {
                 Snackbar.make(acceptLicenceContainer, "Your gender please", Snackbar.LENGTH_LONG).show();
                 return;
             }
-            String age = ageBox.getText().toString().trim();
+            String age = StringUtils.deleteWhitespace(ageBox.getText().toString().trim());
             if (StringUtils.isNotEmpty(age)) {
                 if (Integer.parseInt(age) < 16) {
                     Snackbar.make(acceptLicenceContainer, "Sorry, hollout is for 16yrs and above", Snackbar.LENGTH_LONG).show();

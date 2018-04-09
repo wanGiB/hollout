@@ -2,6 +2,7 @@ package com.wan.hollout.ui.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.NestedScrollView;
@@ -68,9 +69,11 @@ public class ConversationsFragment extends BaseFragment {
     @BindView(R.id.no_hollout_users_text_view)
     HolloutTextView errorTextView;
 
+
+    private List<ConversationItem> conversations = new ArrayList<>();
+
     @SuppressLint("StaticFieldLeak")
     public static ConversationsAdapter conversationsAdapter;
-    public List<ConversationItem> conversations = new ArrayList<>();
     private ParseObject signedInUser;
     public String searchString;
 
@@ -94,7 +97,7 @@ public class ConversationsFragment extends BaseFragment {
                     @Override
                     public void run() {
                         //Check for the model that just changed
-                        if (!conversations.isEmpty()) {
+                        if (conversationsAdapter.getItemCount() != 0) {
                             for (ConversationItem conversationItem : conversations) {
                                 String conversationId = conversationItem.getObjectId();
                                 if (model.getConversationId().equals(conversationId)) {
@@ -102,7 +105,7 @@ public class ConversationsFragment extends BaseFragment {
                                     if (indexOfConversation != -1) {
                                         if (action == BaseModel.Action.DELETE) {
                                             conversations.remove(indexOfConversation);
-                                            conversationsAdapter.notifyDataSetChanged();
+                                            conversationsAdapter.notifyItemRemoved(indexOfConversation);
                                         } else {
                                             conversationsAdapter.notifyItemChanged(indexOfConversation);
                                         }
@@ -137,7 +140,6 @@ public class ConversationsFragment extends BaseFragment {
     }
 
     private void setupAdapter() {
-        conversations = ConversationsList.getConversationItems();
         conversationsAdapter = new ConversationsAdapter(getActivity(), conversations);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         conversationsRecyclerView.setLayoutManager(linearLayoutManager);
@@ -149,7 +151,7 @@ public class ConversationsFragment extends BaseFragment {
                 if (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1) != null) {
                     if ((scrollY >= (nestedScrollView.getChildAt(nestedScrollView.getChildCount() - 1).getMeasuredHeight() - v.getMeasuredHeight())) &&
                             scrollY > oldScrollY) {
-                        if (!conversations.isEmpty()) {
+                        if (conversationsAdapter.getItemCount() != 0) {
                             if (StringUtils.isNotEmpty(searchString)) {
                                 searchChats(searchString, conversations.size());
                             } else {
@@ -305,9 +307,24 @@ public class ConversationsFragment extends BaseFragment {
 
     private void refreshConversations() {
         if (!conversations.isEmpty()) {
-            conversations = !ConversationsList.getConversationItems().isEmpty()
-                    ? ConversationsList.getConversationItems() : conversations;
-            orderConversations();
+            if (!ConversationsList.recentConversations().isEmpty()) {
+                for (ConversationItem recentConversationItem : ConversationsList.recentConversations()) {
+                    if (!conversations.contains(recentConversationItem)) {
+                        conversations.add(0, recentConversationItem);
+                        conversationsAdapter.notifyItemInserted(0);
+                    } else {
+                        int indexOfItem = conversations.indexOf(recentConversationItem);
+                        if (indexOfItem != -1) {
+                            conversations.remove(indexOfItem);
+                            conversationsAdapter.notifyItemRemoved(indexOfItem);
+                            conversations.add(0, recentConversationItem);
+                            sortConversations();
+                            conversationsAdapter.notifyItemInserted(0);
+                        }
+                    }
+                }
+                ConversationsList.recentConversations().clear();
+            }
         } else {
             fetchConversations(0);
         }
@@ -315,14 +332,6 @@ public class ConversationsFragment extends BaseFragment {
             fetchConversations(0);
             AppConstants.CHAT_INVITATION_ACCEPTED = false;
         }
-    }
-
-    private void orderConversations() {
-        sortConversations();
-        if (conversationsAdapter != null) {
-            conversationsAdapter.notifyDataSetChanged();
-        }
-        invalidateEmptyView();
     }
 
     @Override
