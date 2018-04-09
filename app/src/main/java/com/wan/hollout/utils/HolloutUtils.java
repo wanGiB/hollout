@@ -863,20 +863,17 @@ public class HolloutUtils {
     @SuppressWarnings("ConstantConditions")
     public static void sendChatState(String chatState, String recipientId) {
         ParseObject signedInUserObject = AuthUtil.getCurrentUser();
-        JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
-        JSONObject chatStates = existingChatStates != null ? existingChatStates : new JSONObject();
-        try {
-            chatStates.put(recipientId, chatState);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        signedInUserObject.put(AppConstants.APP_USER_CHAT_STATES, chatStates);
-        AuthUtil.updateCurrentLocalUser(signedInUserObject, new DoneCallback<Boolean>() {
-            @Override
-            public void done(Boolean result, Exception e) {
-
+        if (recipientId!=null){
+            JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
+            JSONObject chatStates = existingChatStates != null ? existingChatStates : new JSONObject();
+            try {
+                chatStates.put(recipientId, chatState);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        });
+            signedInUserObject.put(AppConstants.APP_USER_CHAT_STATES, chatStates);
+            AuthUtil.updateCurrentLocalUser(signedInUserObject,null);
+        }
     }
 
     public static String getDecimalFormattedString(String value) {
@@ -1034,7 +1031,6 @@ public class HolloutUtils {
                                             signedInUserChats.add(requestOriginatorId.toLowerCase());
                                         }
                                         signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
-                                        HolloutPreferences.updateConversationTime(requestOriginatorId);
                                         AuthUtil.updateCurrentLocalUser(signedInUser, null);
                                     }
                                     EventBus.getDefault().postSticky(AppConstants.REFRESH_CONVERSATIONS);

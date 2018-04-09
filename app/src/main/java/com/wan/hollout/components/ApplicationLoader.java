@@ -139,12 +139,7 @@ public class ApplicationLoader extends Application {
     }
 
     private void initParse() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                configureParse();
-            }
-        }).start();
+        configureParse();
     }
 
     private void configureParse() {

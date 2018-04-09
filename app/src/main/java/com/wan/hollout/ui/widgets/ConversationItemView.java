@@ -424,7 +424,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     }
 
     public ConversationItem getConversationItem() {
-        return new ConversationItem(parseObject, HolloutPreferences.getLastConversationTime(getConversationId()));
+        return new ConversationItem(parseObject);
     }
 
     @Override

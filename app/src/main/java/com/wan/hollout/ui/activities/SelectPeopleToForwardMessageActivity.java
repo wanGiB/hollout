@@ -144,7 +144,6 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
             message.setTimeStamp(System.currentTimeMillis());
             message.setMessageId(RandomStringUtils.random(6, true, true) + System.currentTimeMillis());
             ChatClient.getInstance().sendMessage(message, recipientProps);
-            HolloutPreferences.updateConversationTime(recipientProps.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
         }
     }
 
@@ -317,7 +316,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
     private void loadAdapter(List<ParseObject> users) {
         if (!users.isEmpty()) {
             for (ParseObject parseUser : users) {
-                ConversationItem conversationItem = new ConversationItem(parseUser, HolloutPreferences.getLastConversationTime(parseUser.getString(AppConstants.REAL_OBJECT_ID)));
+                ConversationItem conversationItem = new ConversationItem(parseUser);
                 if (!people.contains(conversationItem)) {
                     people.add(conversationItem);
                 }

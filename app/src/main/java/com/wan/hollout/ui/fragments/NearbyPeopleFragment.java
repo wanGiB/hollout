@@ -198,7 +198,9 @@ public class NearbyPeopleFragment extends BaseFragment {
                                 if (StringUtils.isNotEmpty(searchString)) {
                                     searchPeople(nearbyPeople.size(), searchString);
                                 } else {
-                                    fetchPeopleOfCommonInterestsFromNetwork(nearbyPeople.size());
+                                    if (nearbyPeople.size() >= 100) {
+                                        fetchPeopleOfCommonInterestsFromNetwork(nearbyPeople.size());
+                                    }
                                 }
                             }
                         }

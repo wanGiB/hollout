@@ -4,6 +4,8 @@ import android.support.annotation.NonNull;
 
 import com.parse.ParseObject;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.DbUtils;
+import com.wan.hollout.utils.HolloutPreferences;
 
 /**
  * @author Wan Clem
@@ -13,15 +15,13 @@ import com.wan.hollout.utils.AppConstants;
 public class ConversationItem implements Comparable<ConversationItem> {
 
     private ParseObject recipient;
-    private Long lastUpdate;
 
-    public ConversationItem(ParseObject recipient, Long lastUpdate) {
+    public ConversationItem(ParseObject recipient) {
         this.recipient = recipient;
-        this.lastUpdate = lastUpdate;
     }
 
     public Long getLastUpdate() {
-        return lastUpdate;
+        return HolloutPreferences.getLastConversationTime(getObjectId());
     }
 
     public ParseObject getRecipient() {
@@ -59,6 +59,12 @@ public class ConversationItem implements Comparable<ConversationItem> {
     @Override
     public int compareTo(@NonNull ConversationItem another) {
         return another.getLastUpdate().compareTo(getLastUpdate());
+    }
+
+    @Override
+    public String toString() {
+        String string = getRecipient().getString(AppConstants.APP_USER_DISPLAY_NAME);
+        return string + "=" + getLastUpdate();
     }
 
 }
