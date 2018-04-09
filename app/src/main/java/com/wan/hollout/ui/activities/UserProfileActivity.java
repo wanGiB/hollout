@@ -645,8 +645,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             } else {
                 startChatView.setImageResource(R.drawable.home_chat_icon);
                 List<String> aboutUser = parseUser.getList(AppConstants.ABOUT_USER);
-                aboutUserTextView.setText(WordUtils.capitalize(TextUtils.join(",", aboutUser)));
-
+                if (aboutUser != null) {
+                    aboutUserTextView.setText(WordUtils.capitalize(TextUtils.join(",", aboutUser)));
+                }
                 startChatView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

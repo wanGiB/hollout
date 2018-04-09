@@ -24,7 +24,6 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.UiUtils;
 
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -114,7 +113,6 @@ public class FullChatRequestsActivity extends BaseActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        checkAnUnRegEventBus();
         chatRequestsAdapter.unregisterAdapterDataObserver(adapterDataObserver);
     }
 
@@ -132,18 +130,6 @@ public class FullChatRequestsActivity extends BaseActivity {
                 }
             }
         });
-    }
-
-    private void checkAndRegEventBus() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    private void checkAnUnRegEventBus() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
     }
 
     @Override

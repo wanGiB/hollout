@@ -26,12 +26,10 @@ import com.wan.hollout.ui.adapters.SelectPeopleAdapter;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
-import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -145,42 +143,6 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
             message.setMessageId(RandomStringUtils.random(6, true, true) + System.currentTimeMillis());
             ChatClient.getInstance().sendMessage(message, recipientProps);
         }
-    }
-
-    private void checkAndRegEventBus() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    private void checkAnUnRegEventBus() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        checkAndRegEventBus();
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        checkAndRegEventBus();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        checkAnUnRegEventBus();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        checkAndRegEventBus();
     }
 
     @Override

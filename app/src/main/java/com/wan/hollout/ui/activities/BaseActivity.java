@@ -113,13 +113,13 @@ public abstract class BaseActivity extends AppCompatActivity {
         checkAndUnRegEventBus();
     }
 
-    private void checkAndRegEventBus() {
+    protected void checkAndRegEventBus() {
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
     }
 
-    private void checkAndUnRegEventBus() {
+    protected void checkAndUnRegEventBus() {
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this);
         }

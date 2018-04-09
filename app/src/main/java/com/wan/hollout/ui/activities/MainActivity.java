@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -26,7 +27,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,6 +37,14 @@ import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.ResolvableApiException;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -72,6 +80,7 @@ import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.GeneralNotifier;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -94,11 +103,46 @@ import java.util.Set;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.wan.hollout.utils.UiUtils.runOnMain;
 import static com.wan.hollout.utils.UiUtils.showView;
 
 @SuppressWarnings("RedundantCast")
 @SuppressLint("StaticFieldLeak")
-public class MainActivity extends BaseActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
+public class MainActivity extends BaseActivity
+        implements ActivityCompat.OnRequestPermissionsResultCallback {
+
+    /**
+     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
+     */
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 60000;
+
+    /**
+     * The fastest rate for active location updates. Exact. Updates will never be more frequent
+     * than this value.
+     */
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
+            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+
+    /**
+     * Constant used in the location settings dialog.
+     */
+    private static final int REQUEST_CHECK_SETTINGS = 0x1;
+
+    /**
+     * Provides access to the Location Settings API.
+     */
+    private SettingsClient mSettingsClient;
+
+    /**
+     * Stores the types of location services the client is interested in using. Used for checking
+     * settings to determine if the device has optimal location settings.
+     */
+    private LocationSettingsRequest mLocationSettingsRequest;
+
+    /**
+     * Stores parameters for requests to the FusedLocationProviderApi.
+     */
+    private LocationRequest mLocationRequest;
 
     @BindView(R.id.footerAd)
     LinearLayout footerView;
@@ -160,20 +204,102 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         fetchUnreadMessagesCount();
         viewPager.setCurrentItem(HolloutPreferences.getStartPageIndex());
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
-        initAndroidPermissions();
         if (!HolloutPreferences.isUserWelcomed()) {
             if (signedInUserObject != null) {
                 UiUtils.showSafeToast("Welcome, " + WordUtils.capitalize(signedInUserObject.getString(AppConstants.APP_USER_DISPLAY_NAME)));
             }
             HolloutPreferences.setUserWelcomed(true);
         }
-        checkAndRegEventBus();
+        initAndroidPermissions();
         attachEventHandlers();
         GeneralNotifier.getNotificationManager().cancel(AppConstants.CHAT_REQUEST_NOTIFICATION_ID);
         GeneralNotifier.getNotificationManager().cancel(AppConstants.NEARBY_KIND_NOTIFICATION_ID);
         GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
         initEventHandlers();
         createDeleteConversationProgressDialog();
+        createLocationRequest();
+        mSettingsClient = LocationServices.getSettingsClient(this);
+        buildLocationSettingsRequest();
+    }
+
+    /**
+     * Sets up the location request. Android has two location request settings:
+     * {@code ACCESS_COARSE_LOCATION} and {@code ACCESS_FINE_LOCATION}. These settings control
+     * the accuracy of the current location. This sample uses ACCESS_FINE_LOCATION, as defined in
+     * the AndroidManifest.xml.
+     * <p/>
+     * When the ACCESS_FINE_LOCATION setting is specified, combined with a fast update
+     * interval (5 seconds), the Fused Location Provider API returns location updates that are
+     * accurate to within a few feet.
+     * <p/>
+     * These settings are appropriate for mapping applications that show real-time location
+     * updates.
+     */
+    private void createLocationRequest() {
+        mLocationRequest = LocationRequest.create();
+
+        // Sets the desired interval for active location updates. This interval is
+        // inexact. You may not receive updates at all if no location sources are available, or
+        // you may receive them slower than requested. You may also receive updates faster than
+        // requested if other applications are requesting location at a faster interval.
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        // Sets the fastest rate for active location updates. This interval is exact, and your
+        // application will never receive updates faster than this value.
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    /**
+     * Uses a {@link com.google.android.gms.location.LocationSettingsRequest.Builder} to build
+     * a {@link com.google.android.gms.location.LocationSettingsRequest} that is used for checking
+     * if a device has the needed location settings.
+     */
+    private void buildLocationSettingsRequest() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        mLocationSettingsRequest = builder.build();
+    }
+
+    private void checkLocationSettingsAvailable() {
+        mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
+                .addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+                    @Override
+                    public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                        startAppInstanceDetectionService();
+                    }
+                }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                int statusCode = ((ApiException) e).getStatusCode();
+                switch (statusCode) {
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        HolloutLogger.i("AppInstanceDetectionService",
+                                "Location settings are not satisfied. Attempting to upgrade " +
+                                        "location settings ");
+                        try {
+                            // Show the dialog by calling startResolutionForResult(), and check the
+                            // result in onActivityResult().
+                            ResolvableApiException rae = (ResolvableApiException) e;
+                            rae.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException sie) {
+                            HolloutLogger.i("AppInstanceDetectionService", "PendingIntent unable to execute request.");
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        String errorMessage = "Location settings are inadequate, and cannot be " +
+                                "fixed here. Fix in Settings.";
+                        HolloutLogger.e("AppInstanceDetectionService", errorMessage);
+                        runOnMain(new Runnable() {
+                            @Override
+                            public void run() {
+                                turnOnLocationMessage();
+                            }
+                        });
+                }
+            }
+        });
     }
 
     private void loadSignedInUserImage(ParseObject signedInUserObject) {
@@ -554,7 +680,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     @Override
     public void onResume() {
         super.onResume();
-        checkAndRegEventBus();
         ParseObject parseObject = AuthUtil.getCurrentUser();
         if (parseObject != null) {
             loadSignedInUserImage(parseObject);
@@ -594,32 +719,14 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         }
     }
 
-    private void checkAndRegEventBus() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    private void checkAnUnRegEventBus() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
-    }
 
     private void initAndroidPermissions() {
         holloutPermissions = new HolloutPermissions(this, footerView);
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        checkAnUnRegEventBus();
-    }
-
-    @Override
     protected void onStart() {
         super.onStart();
-        checkAndRegEventBus();
         fetchUnreadMessagesCount();
         ParseObject signedInUserObject = AuthUtil.getCurrentUser();
         if (signedInUserObject != null) {
@@ -651,7 +758,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
     @Override
     protected void onRestart() {
         super.onRestart();
-        checkAndRegEventBus();
         fetchUnreadMessagesCount();
     }
 
@@ -685,23 +791,6 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         return super.onPrepareOptionsMenu(menu);
     }
 
-    @SuppressWarnings("deprecation")
-    public boolean isLocationEnabled(Context context) {
-        int locationMode = 0;
-        String locationProviders;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            try {
-                locationMode = Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
-            } catch (Settings.SettingNotFoundException e) {
-                e.printStackTrace();
-            }
-            return locationMode != Settings.Secure.LOCATION_MODE_OFF;
-        } else {
-            locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-            return !TextUtils.isEmpty(locationProviders);
-        }
-    }
-
     @SuppressWarnings("unused")
     @Subscribe(sticky = true, threadMode = ThreadMode.ASYNC)
     public void onEventAsync(final Object o) {
@@ -712,11 +801,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
                     String s = (String) o;
                     switch (s) {
                         case AppConstants.PLEASE_REQUEST_LOCATION_ACCESSS:
-                            if (isLocationEnabled(MainActivity.this)) {
-                                tryAskForPermissions();
-                            } else {
-                                turnOnLocationMessage();
-                            }
+                            tryAskForPermissions();
                             break;
                         case AppConstants.TURN_OFF_ALL_TAB_LAYOUTS:
                             toggleViews();
@@ -803,7 +888,7 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
             holloutPermissions.requestStoragePermissions();
             return;
         }
-        startAppInstanceDetectionService();
+        checkLocationSettingsAvailable();
     }
 
     private void startAppInstanceDetectionService() {
@@ -974,6 +1059,10 @@ public class MainActivity extends BaseActivity implements ActivityCompat.OnReque
         if (requestCode == RequestCodes.MEET_PEOPLE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 EventBus.getDefault().postSticky(AppConstants.REFRESH_PEOPLE);
+            }
+        } else if (requestCode == REQUEST_CHECK_SETTINGS) {
+            if (resultCode == RESULT_OK) {
+                startAppInstanceDetectionService();
             }
         }
     }

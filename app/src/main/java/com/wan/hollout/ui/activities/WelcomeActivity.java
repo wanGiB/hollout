@@ -64,7 +64,6 @@ import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
-import org.greenrobot.eventbus.EventBus;
 
 import java.io.StringReader;
 import java.util.List;
@@ -540,18 +539,6 @@ public class WelcomeActivity extends BaseActivity
         checkAndUnRegEventBus();
         if (isFinishing()) overridePendingTransition(R.anim.fade_scale_in, R.anim.slide_to_right);
         super.onPause();
-    }
-
-    private void checkAndRegEventBus() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-        }
-    }
-
-    private void checkAndUnRegEventBus() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().unregister(this);
-        }
     }
 
     @Override

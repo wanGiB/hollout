@@ -7,16 +7,17 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
-import android.os.Bundle;
+import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.JobIntentService;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -45,17 +46,43 @@ import java.util.Locale;
  */
 
 @SuppressWarnings("ConstantConditions")
-public class AppInstanceDetectionService extends JobIntentService implements
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+public class AppInstanceDetectionService extends JobIntentService {
+
+    /**
+     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
+     */
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 60000;
+
+    /**
+     * The fastest rate for active location updates. Exact. Updates will never be more frequent
+     * than this value.
+     */
+    private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
+            UPDATE_INTERVAL_IN_MILLISECONDS / 2;
+
+    /**
+     * Provides access to the Fused Location Provider API.
+     */
+    private FusedLocationProviderClient mFusedLocationClient;
+
+    /**
+     * Stores parameters for requests to the FusedLocationProviderApi.
+     */
+    private LocationRequest mLocationRequest;
+
+    /**
+     * Callback for Location events.
+     */
+    private LocationCallback mLocationCallback;
+
+    /**
+     * Represents a geographical location.
+     */
+    private Location mCurrentLocation;
 
     private GetLocationTask getLocationTask;
-    //Activity's Google Api Client
-    private GoogleApiClient googleApiClient;
-    //Activity's LocationRequest
-    private LocationRequest mLocationRequest;
-    private String TAG = AppInstanceDetectionService.class.getSimpleName();
+
+    public static String TAG = AppInstanceDetectionService.class.getSimpleName();
 
     private static ParseObject signedInUser;
     private AppStateManager appStateManager;
@@ -82,14 +109,23 @@ public class AppInstanceDetectionService extends JobIntentService implements
     @Override
     public void onCreate() {
         super.onCreate();
-        attemptToConnectGoogleApiClient();
         signedInUser = AuthUtil.getCurrentUser();
         appStateManager = AppStateManager.init(ApplicationLoader.getInstance());
+
+        if (mFusedLocationClient == null) {
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        }
+
     }
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        HolloutLogger.d("OnHandleWork","OnHandleWorkCalled");
+        HolloutLogger.d(TAG, "OnHandleWorkCalled");
+
+        if (mFusedLocationClient == null) {
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        }
+
         if (signedInUser == null) {
             signedInUser = AuthUtil.getCurrentUser();
         }
@@ -103,6 +139,107 @@ public class AppInstanceDetectionService extends JobIntentService implements
 
             }
         }
+
+        // Kick off the process of building the LocationCallback, LocationRequest, and
+        if (HolloutPreferences.canAccessLocation()) {
+            createLocationRequest();
+            createLocationCallback();
+            getLastLocation();
+        } else {
+            EventBus.getDefault().post(AppConstants.PLEASE_REQUEST_LOCATION_ACCESSS);
+            stopSelf();
+        }
+
+    }
+
+    /**
+     * Removes location updates. Note that in this sample we merely log the
+     * {@link SecurityException}.
+     */
+    public void removeLocationUpdates() {
+        HolloutLogger.i(TAG, "Removing location updates");
+        try {
+            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+            stopSelf();
+        } catch (SecurityException unlikely) {
+            HolloutLogger.e(TAG, "Lost location permission. Could not remove updates. " + unlikely);
+        }
+    }
+
+    private void getLastLocation() {
+        try {
+            mFusedLocationClient.getLastLocation()
+                    .addOnCompleteListener(new OnCompleteListener<Location>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Location> task) {
+                            if (task.isSuccessful() && task.getResult() != null) {
+                                mCurrentLocation = task.getResult();
+                                cancelRunningLocationTaskBeforeRun(mCurrentLocation);
+                            } else {
+                                HolloutLogger.w(TAG, "Failed to get location.");
+
+                            }
+                            startLocationUpdate();
+                        }
+                    });
+        } catch (SecurityException unlikely) {
+            HolloutLogger.e(TAG, "Lost location permission." + unlikely);
+        }
+    }
+
+    private void startLocationUpdate() {
+        try {
+            mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                    mLocationCallback, Looper.myLooper());
+        } catch (SecurityException unlikely) {
+            HolloutLogger.d(TAG, "Lost location permission. Could not request updates. " + unlikely);
+        }
+    }
+
+    /**
+     * Sets up the location request. Android has two location request settings:
+     * {@code ACCESS_COARSE_LOCATION} and {@code ACCESS_FINE_LOCATION}. These settings control
+     * the accuracy of the current location. This sample uses ACCESS_FINE_LOCATION, as defined in
+     * the AndroidManifest.xml.
+     * <p/>
+     * When the ACCESS_FINE_LOCATION setting is specified, combined with a fast update
+     * interval (5 seconds), the Fused Location Provider API returns location updates that are
+     * accurate to within a few feet.
+     * <p/>
+     * These settings are appropriate for mapping applications that show real-time location
+     * updates.
+     */
+    private void createLocationRequest() {
+        mLocationRequest = LocationRequest.create();
+
+        // Sets the desired interval for active location updates. This interval is
+        // inexact. You may not receive updates at all if no location sources are available, or
+        // you may receive them slower than requested. You may also receive updates faster than
+        // requested if other applications are requesting location at a faster interval.
+        mLocationRequest.setInterval(UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        // Sets the fastest rate for active location updates. This interval is exact, and your
+        // application will never receive updates faster than this value.
+        mLocationRequest.setFastestInterval(FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    /**
+     * Creates a callback for receiving location events.
+     */
+    private void createLocationCallback() {
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                mCurrentLocation = locationResult.getLastLocation();
+                HolloutLogger.d(TAG, "A new location was received");
+                if (mCurrentLocation != null) {
+                    cancelRunningLocationTaskBeforeRun(mCurrentLocation);
+                }
+            }
+        };
     }
 
     @Override
@@ -115,6 +252,7 @@ public class AppInstanceDetectionService extends JobIntentService implements
         } catch (IllegalStateException | NullPointerException ignored) {
 
         }
+        removeLocationUpdates();
     }
 
     private static class GetLocationTask extends AsyncTask<Location, Void, Void> {
@@ -137,6 +275,7 @@ public class AppInstanceDetectionService extends JobIntentService implements
                 ParseGeoPoint userGeoPoint = new ParseGeoPoint();
                 userGeoPoint.setLatitude(loc.getLatitude());
                 userGeoPoint.setLongitude(loc.getLongitude());
+                HolloutLogger.d(TAG, "New Geo Points =  " + loc.getLatitude() + ", " + loc.getLongitude());
                 signedInUser.put(AppConstants.APP_USER_GEO_POINT, userGeoPoint);
             }
             try {
@@ -151,21 +290,25 @@ public class AppInstanceDetectionService extends JobIntentService implements
                 final String countryName = address.getCountryName();
                 //COUNTRY
                 if (StringUtils.isNotEmpty(countryName)) {
+                    HolloutLogger.d(TAG, "Country Name = " + countryName);
                     signedInUser.put(AppConstants.APP_USER_COUNTRY, HolloutUtils.stripDollar(countryName));
                 }
                 //STREET
                 final String streetAddress = address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "";
                 if (StringUtils.isNotEmpty(streetAddress)) {
+                    HolloutLogger.d(TAG, "Street Name = " + streetAddress);
                     signedInUser.put(AppConstants.APP_USER_STREET, HolloutUtils.stripDollar(streetAddress));
                 }
                 //LOCALITY
                 String locality = address.getLocality();
                 if (StringUtils.isNotEmpty(locality)) {
+                    HolloutLogger.d(TAG, "Locality Name = " + locality);
                     signedInUser.put(AppConstants.APP_USER_LOCALITY, HolloutUtils.stripDollar(locality));
                 }
                 //Admin
                 String adminAddress = address.getAdminArea();
                 if (StringUtils.isNotEmpty(adminAddress)) {
+                    HolloutLogger.d(TAG, "Admin Name = " + adminAddress);
                     signedInUser.put(AppConstants.APP_USER_ADMIN_AREA, HolloutUtils.stripDollar(adminAddress));
                 }
             }
@@ -183,57 +326,6 @@ public class AppInstanceDetectionService extends JobIntentService implements
             }
             getLocationTask = new GetLocationTask(this);
             getLocationTask.execute(location);
-        }
-    }
-
-    private void attemptToConnectGoogleApiClient() {
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(60000);
-        mLocationRequest.setFastestInterval(60000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        googleApiClient.connect();
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (HolloutPreferences.canAccessLocation()) {
-            processLocation(null);
-        } else {
-            EventBus.getDefault().post(AppConstants.PLEASE_REQUEST_LOCATION_ACCESSS);
-        }
-    }
-
-    @SuppressWarnings({"MissingPermission"})
-    public void processLocation(Location location) {
-        if (location != null) {
-            cancelRunningLocationTaskBeforeRun(location);
-        } else {
-            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, mLocationRequest, this);
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        googleApiClient.connect();
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        googleApiClient.connect();
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        HolloutLogger.d(TAG, "Changed Location = " + location.toString());
-        if (HolloutPreferences.canAccessLocation()) {
-            processLocation(location);
-        } else {
-            EventBus.getDefault().post(AppConstants.PLEASE_REQUEST_LOCATION_ACCESSS);
         }
     }
 
