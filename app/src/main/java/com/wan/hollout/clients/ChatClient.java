@@ -17,6 +17,7 @@ import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.ChatRequestsManager;
 import com.wan.hollout.utils.ConversationsList;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
@@ -73,8 +74,18 @@ public class ChatClient {
         if (signedInUser != null) {
             listenForInBoundPrivateMessages(signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             listenForMessageDeliveryStatus(signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            migrateLegacyChatRequests();
             isStarted = true;
         }
+    }
+
+    private void migrateLegacyChatRequests() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ChatRequestsManager.initLegacyChatRequestsGrabber();
+            }
+        }).start();
     }
 
     public void execute(Runnable runnable) {
@@ -107,6 +118,11 @@ public class ChatClient {
                                             chatMessage.setMessageDirection(MessageDirection.INCOMING);
                                             chatMessage.setConversationId(chatMessage.getFrom());
                                             chatMessage.setFromName(chatMessage.getFromName());
+                                            ParseObject signedInUser = AuthUtil.getCurrentUser();
+                                            if (!HolloutUtils.isAContact(chatMessage.getFrom())) {
+                                                ChatRequestsManager.addToPendingChatRequests(chatMessage, true);
+                                                return;
+                                            }
                                             DbUtils.createMessage(chatMessage);
                                             markMessageAsDelivered(chatMessage, from, userId);
                                             HolloutPreferences.updateConversationTime(chatMessage.getFrom());

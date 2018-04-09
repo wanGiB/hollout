@@ -3,6 +3,7 @@ package com.wan.hollout.utils;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 
+import com.google.android.gms.auth.api.Auth;
 import com.parse.ParseObject;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
@@ -69,7 +70,22 @@ public class DbUtils {
         return SQLite.select()
                 .from(ChatMessage.class)
                 .where(ChatMessage_Table.messageDirection.eq(MessageDirection.INCOMING))
-                .and(ChatMessage_Table.messageStatus.notEq(MessageStatus.READ)).orderBy(ChatMessage_Table.timeStamp, false).queryList();
+                .and(ChatMessage_Table.messageStatus.notEq(MessageStatus.READ))
+                .orderBy(ChatMessage_Table.timeStamp, false).queryList();
+    }
+
+    public static List<ChatMessage> fetchPendingChatRequests() {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            List<String> userChatIds = signedInUser.getList(AppConstants.APP_USER_CHATS);
+            if (userChatIds != null && !userChatIds.isEmpty()) {
+                return SQLite.select()
+                        .from(ChatMessage.class)
+                        .where(ChatMessage_Table.messageDirection.eq(MessageDirection.INCOMING))
+                        .and(ChatMessage_Table.conversationId.notIn(userChatIds)).queryList();
+            }
+        }
+        return null;
     }
 
     public static List<ChatMessage> fetchAllUnseenMissedCalls() {

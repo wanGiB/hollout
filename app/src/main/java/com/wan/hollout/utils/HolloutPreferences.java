@@ -4,11 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.google.gson.reflect.TypeToken;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.ActivityCountChangedEvent;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -209,6 +212,29 @@ public class HolloutPreferences {
 
     public static void setLastVibrateTime(long lastVibrateTime) {
         getInstance().edit().putLong(AppConstants.LAST_VIBRATE_TIME, lastVibrateTime).commit();
+    }
+
+    public static HashMap<String, Object> getExistingChatRequests() {
+        String existingChatRequestsString = getInstance().getString(AppConstants.EXISTING_CHAT_REQUESTS_STRING, null);
+        if (existingChatRequestsString != null) {
+            Type mapType = getMapType();
+            HashMap<String, Object> chatRequestsMap = JsonUtils.getGSon().fromJson(existingChatRequestsString, mapType);
+            if (chatRequestsMap != null) {
+                return chatRequestsMap;
+            }
+        }
+        return new HashMap<>();
+    }
+
+    public static void updateChatRequests(HashMap<String, Object> chatRequestsMap) {
+        Type mapType = getMapType();
+        String chatString = JsonUtils.getGSon().toJson(chatRequestsMap, mapType);
+        getInstance().edit().putString(AppConstants.EXISTING_CHAT_REQUESTS_STRING, chatString).commit();
+    }
+
+    private static Type getMapType() {
+        return new TypeToken<HashMap<String, Object>>() {
+        }.getType();
     }
 
 }

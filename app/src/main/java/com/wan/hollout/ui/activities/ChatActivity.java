@@ -106,6 +106,7 @@ import com.wan.hollout.ui.widgets.LinkPreview;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.ChatRequestsManager;
 import com.wan.hollout.utils.ConversationsList;
 import com.wan.hollout.utils.DateFormatter;
 import com.wan.hollout.utils.DbUtils;
@@ -510,6 +511,9 @@ public class ChatActivity extends BaseActivity implements
                 HolloutPreferences.saveTotalUnreadChats(totalUnreadMessages);
                 GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
             }
+        }
+        if (getRecipient() != null) {
+            ChatRequestsManager.removeIdFromRequestIds(getRecipient());
         }
     }
 

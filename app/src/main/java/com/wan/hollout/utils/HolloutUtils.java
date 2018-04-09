@@ -863,7 +863,7 @@ public class HolloutUtils {
     @SuppressWarnings("ConstantConditions")
     public static void sendChatState(String chatState, String recipientId) {
         ParseObject signedInUserObject = AuthUtil.getCurrentUser();
-        if (recipientId!=null){
+        if (recipientId != null) {
             JSONObject existingChatStates = signedInUserObject.getJSONObject(AppConstants.APP_USER_CHAT_STATES);
             JSONObject chatStates = existingChatStates != null ? existingChatStates : new JSONObject();
             try {
@@ -872,7 +872,7 @@ public class HolloutUtils {
                 e.printStackTrace();
             }
             signedInUserObject.put(AppConstants.APP_USER_CHAT_STATES, chatStates);
-            AuthUtil.updateCurrentLocalUser(signedInUserObject,null);
+            AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
         }
     }
 
@@ -1032,11 +1032,13 @@ public class HolloutUtils {
                                         }
                                         signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
                                         AuthUtil.updateCurrentLocalUser(signedInUser, null);
+                                        ChatRequestsManager.removeIdFromRequestIds(requestOriginatorId.toLowerCase());
                                     }
                                     EventBus.getDefault().postSticky(AppConstants.REFRESH_CONVERSATIONS);
                                 } else {
                                     //Delete all messages from this user from the local database
                                     DbUtils.deleteConversation(requestOriginatorId, null);
+                                    ChatRequestsManager.removeIdFromRequestIds(requestOriginatorId.toLowerCase());
                                 }
                                 UiUtils.showSafeToast("Chat request from " + WordUtils.capitalize(requesterName) + " " + (accept ? "accepted" : "declined") + " successfully");
                                 AppConstants.CHAT_INVITATION_ACCEPTED = true;

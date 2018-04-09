@@ -24,6 +24,7 @@ import com.parse.ParseQuery;
 import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.wan.hollout.R;
+import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
@@ -384,6 +385,12 @@ public class ConversationsFragment extends BaseFragment {
                             conversationsAdapter.notifyDataSetChanged();
                             conversationsAdapter.setSearchString(null);
                             fetchConversations(0);
+                            break;
+                        case AppConstants.ORDER_CONVERSATIONS:
+                            sortConversations();
+                            if (conversationsAdapter!=null){
+                                conversationsAdapter.notifyDataSetChanged();
+                            }
                             break;
                     }
                 } else if (o instanceof SearchChatsEvent) {

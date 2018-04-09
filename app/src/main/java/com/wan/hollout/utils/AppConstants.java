@@ -219,6 +219,14 @@ public class AppConstants {
     public static final String FEED_TYPE_PHOTO_LIKE = "feed_type_photo_like";
     public static final String TERMINATE_APPLICATION = "terminate_application";
     public static final int FIXED_JOB_ID = 6;
+    public static final String EXISTING_CHAT_REQUESTS_STRING = "existing_chat_requests_string";
+
+    public static final String REQUESTER_NAME = "requester_name";
+    public static final String REQUESTER_PHOTO_URL = "requester_photo_url";
+    public static final String REQUESTER_ID = "requester_id";
+    public static final int CHAT_REQUESTS_NOTIFICATION_ID = 30;
+    public static final String ORDER_CONVERSATIONS = "order_conversations";
+
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;

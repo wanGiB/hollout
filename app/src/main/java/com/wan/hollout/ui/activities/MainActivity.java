@@ -827,6 +827,7 @@ public class MainActivity extends BaseActivity
                         EventBus.getDefault().post(AppConstants.CHECK_FOR_NEW_CHAT_REQUESTS);
                     } else {
                         fetchUnreadMessagesCount();
+                        EventBus.getDefault().post(AppConstants.ORDER_CONVERSATIONS);
                     }
                 }
             }
