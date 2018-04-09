@@ -26,7 +26,7 @@
             android:id="@+id/sub_parent_view"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:src="@drawable/ic_oobe_conv_list"
+            android:src="@drawable/conversation_list_empty_state"
             tools:ignore="ContentDescription" />
 
         <com.wan.hollout.ui.widgets.HolloutTextView

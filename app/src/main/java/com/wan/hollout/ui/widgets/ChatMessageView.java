@@ -204,10 +204,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         setOnLongClickListener(this);
         messageBubbleLayout.setOnClickListener(this);
         messageBubbleLayout.setOnLongClickListener(this);
-        HolloutLogger.d("MessageInAdapterProps", messageObject.toString());
-        checkAndRegEventBus();
         UiUtils.showView(timeTextView, false);
         UiUtils.showView(deliveryStatusView, false);
+        HolloutLogger.d("MessageInAdapterProps", messageObject.toString());
+        checkAndRegEventBus();
     }
 
     private void setupMessageBubble() {

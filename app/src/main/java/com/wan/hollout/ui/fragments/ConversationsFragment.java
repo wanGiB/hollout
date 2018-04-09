@@ -307,22 +307,27 @@ public class ConversationsFragment extends BaseFragment {
 
     private void refreshConversations() {
         if (!conversations.isEmpty()) {
-            if (!ConversationsList.recentConversations().isEmpty()) {
-                for (ConversationItem recentConversationItem : ConversationsList.recentConversations()) {
-                    if (!conversations.contains(recentConversationItem)) {
-                        conversations.add(0, recentConversationItem);
-                        conversationsAdapter.notifyItemInserted(0);
-                    } else {
-                        int indexOfItem = conversations.indexOf(recentConversationItem);
-                        if (indexOfItem != -1) {
-                            conversations.remove(indexOfItem);
-                            conversationsAdapter.notifyItemRemoved(indexOfItem);
+            try {
+                if (!ConversationsList.recentConversations().isEmpty()) {
+                    for (ConversationItem recentConversationItem : ConversationsList.recentConversations()) {
+                        if (!conversations.contains(recentConversationItem)) {
                             conversations.add(0, recentConversationItem);
-                            sortConversations();
                             conversationsAdapter.notifyItemInserted(0);
+                        } else {
+                            int indexOfItem = conversations.indexOf(recentConversationItem);
+                            if (indexOfItem != -1) {
+                                conversations.remove(indexOfItem);
+                                conversationsAdapter.notifyItemRemoved(indexOfItem);
+                                conversations.add(0, recentConversationItem);
+                                sortConversations();
+                                conversationsAdapter.notifyItemInserted(0);
+                            }
                         }
                     }
+                    ConversationsList.recentConversations().clear();
                 }
+            } catch (IndexOutOfBoundsException ignored) {
+                conversationsAdapter.notifyDataSetChanged();
                 ConversationsList.recentConversations().clear();
             }
         } else {
