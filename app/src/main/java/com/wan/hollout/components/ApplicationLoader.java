@@ -10,7 +10,6 @@ import android.support.multidex.MultiDex;
 import android.support.v4.app.JobIntentService;
 
 import com.crashlytics.android.Crashlytics;
-import com.google.firebase.database.FirebaseDatabase;
 import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseLiveQueryClient;
