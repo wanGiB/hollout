@@ -30,8 +30,8 @@ import com.wan.hollout.ui.adapters.ConversationsAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.ConversationsList;
 import com.wan.hollout.utils.HolloutLogger;
-import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +41,6 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import butterknife.BindView;
@@ -71,7 +70,7 @@ public class ConversationsFragment extends BaseFragment {
 
     @SuppressLint("StaticFieldLeak")
     public static ConversationsAdapter conversationsAdapter;
-    public static List<ConversationItem> conversations = new ArrayList<>();
+    public List<ConversationItem> conversations = new ArrayList<>();
     private ParseObject signedInUser;
     public String searchString;
 
@@ -138,6 +137,7 @@ public class ConversationsFragment extends BaseFragment {
     }
 
     private void setupAdapter() {
+        conversations = ConversationsList.getConversationItems();
         conversationsAdapter = new ConversationsAdapter(getActivity(), conversations);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         conversationsRecyclerView.setLayoutManager(linearLayoutManager);
@@ -305,9 +305,9 @@ public class ConversationsFragment extends BaseFragment {
 
     private void refreshConversations() {
         if (!conversations.isEmpty()) {
-            if (!AppConstants.recentConversations.isEmpty()) {
-                orderConversations();
-            }
+            conversations = !ConversationsList.getConversationItems().isEmpty()
+                    ? ConversationsList.getConversationItems() : conversations;
+            orderConversations();
         } else {
             fetchConversations(0);
         }
@@ -318,18 +318,11 @@ public class ConversationsFragment extends BaseFragment {
     }
 
     private void orderConversations() {
-        for (ParseObject parseObject : AppConstants.recentConversations) {
-            final ConversationItem conversationItem = new ConversationItem(parseObject);
-            if (!conversations.contains(conversationItem)) {
-                conversations.add(0, conversationItem);
-            }
-        }
         sortConversations();
         if (conversationsAdapter != null) {
             conversationsAdapter.notifyDataSetChanged();
         }
         invalidateEmptyView();
-        AppConstants.recentConversations.clear();
     }
 
     @Override

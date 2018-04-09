@@ -10,6 +10,7 @@ import com.parse.ParseQuery;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.PathEntity;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.ConversationsList;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
@@ -69,14 +70,14 @@ public class FetchUserInfoService {
                             return;
                         }
                         MessageNotifier.getInstance().sendSingleNotification(unreadMessage, userObject);
-                        AppConstants.recentConversations.add(0, userObject);
+                        ConversationsList.checkAddToConversation(userObject);
                     } else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE) && unreadMessagesFromSameSender != null) {
                         if (!isAContact(idToFetch.toLowerCase())) {
                             GeneralNotifier.displayIndividualChatRequestNotification(userObject);
                             return;
                         }
                         MessageNotifier.getInstance().sendSameSenderNotification(unreadMessagesFromSameSender, userObject);
-                        AppConstants.recentConversations.add(0, userObject);
+                        ConversationsList.checkAddToConversation(userObject);
                     }
                 }
                 userInfo.cancel();

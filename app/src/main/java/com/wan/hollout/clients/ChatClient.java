@@ -17,6 +17,7 @@ import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.ConversationsList;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.HolloutLogger;

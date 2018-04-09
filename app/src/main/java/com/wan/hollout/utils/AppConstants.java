@@ -301,10 +301,10 @@ public class AppConstants {
     public static String activeChatId = null;
 
     public static final String DATUM_URL = "http://api.datumbox.com/1.0/TopicClassification.json";
-    public static List<ParseObject> recentConversations = new ArrayList<>();
     public static final String NO_USERS_FOUND_ERROR_MESSAGE = "no_nearby_users_found_message";
 
     public static String composeText;
     public static boolean retrievingMessages = false;
+
 }
 

@@ -106,6 +106,7 @@ import com.wan.hollout.ui.widgets.LinkPreview;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.ConversationsList;
 import com.wan.hollout.utils.DateFormatter;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FilePathFinder;
@@ -2472,7 +2473,7 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void prioritizeConversation() {
-        AppConstants.recentConversations.add(0, recipientProperties);
+        ConversationsList.checkAddToConversation(recipientProperties);
     }
 
     private boolean isAContact() {
