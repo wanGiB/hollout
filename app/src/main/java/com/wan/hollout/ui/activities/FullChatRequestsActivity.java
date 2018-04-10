@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -24,6 +25,7 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -165,14 +167,31 @@ public class FullChatRequestsActivity extends BaseActivity {
     }
 
     private void loadAdapter(List<ParseObject> objects) {
+        final List<ParseObject> deletables = new ArrayList<>();
         for (ParseObject parseObject : objects) {
-            if (!chatRequests.contains(parseObject)) {
-                chatRequests.add(parseObject);
+            String userAppDisplayName = parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME);
+            if (StringUtils.isNotEmpty(userAppDisplayName)) {
+                if (!chatRequests.contains(parseObject)) {
+                    chatRequests.add(parseObject);
+                }
+            } else {
+                deletables.add(parseObject);
             }
         }
         chatRequestsAdapter.notifyDataSetChanged();
         if (!chatRequests.isEmpty()) {
             hideEmptyViewsAndShowRecyclerView();
+        }
+        if (!deletables.isEmpty()) {
+            ParseObject.deleteAllInBackground(deletables, new DeleteCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (chatRequests.containsAll(deletables)){
+                        chatRequests.removeAll(deletables);
+                    }
+                    deletables.clear();
+                }
+            });
         }
     }
 
