@@ -1020,6 +1020,8 @@ public class MainActivity extends BaseActivity
                 } else if (genderChoice.equals(AppConstants.FEMALE)) {
                     genderFilterOptionsGroup.check(R.id.females_only);
                 }
+            } else {
+                genderFilterOptionsGroup.check(R.id.both);
             }
 
             genderFilterOptionsGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -1030,14 +1032,21 @@ public class MainActivity extends BaseActivity
                         genderChoice = AppConstants.MALE;
                     } else if (checkedId == R.id.females_only) {
                         genderChoice = AppConstants.FEMALE;
+                    } else {
+                        genderChoice = AppConstants.Both;
                     }
                 }
 
             });
+
             peopleFilterDialog.setView(peopleFilterDialogView);
             peopleFilterDialog.setPositiveButton("UPDATE", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(final DialogInterface dialog, int which) {
+                    UiUtils.showSafeToast("Please wait...");
+                    if (genderChoice == null) {
+                        genderChoice = AppConstants.Both;
+                    }
                     signedInUser.put(AppConstants.GENDER_FILTER, genderChoice);
                     if (StringUtils.isNotEmpty(startAgeEditText.getText().toString().trim()) && StringUtils.isNotEmpty(endAgeEditText.getText().toString().trim())) {
                         signedInUser.put(AppConstants.AGE_START_FILTER, startAgeEditText.getText().toString().trim());

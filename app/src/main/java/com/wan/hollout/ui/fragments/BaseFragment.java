@@ -1,5 +1,7 @@
 package com.wan.hollout.ui.fragments;
 
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 import org.greenrobot.eventbus.EventBus;
@@ -11,6 +13,18 @@ import org.greenrobot.eventbus.ThreadMode;
  */
 
 public abstract class BaseFragment extends Fragment {
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        checkAndRegEventBus();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        checkAndRegEventBus();
+    }
 
     @Override
     public void onResume() {

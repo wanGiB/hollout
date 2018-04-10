@@ -440,6 +440,7 @@ public class NearbyPeopleFragment extends BaseFragment {
                             nestedScrollView.setNestedScrollingEnabled(true);
                             break;
                         case AppConstants.REFRESH_PEOPLE:
+                            UiUtils.toggleFlipperState(peopleContentFlipper, 0);
                             fetchPeopleOfCommonInterestsFromNetwork(0);
                             break;
                         case AppConstants.SEARCH_VIEW_CLOSED:
