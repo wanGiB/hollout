@@ -17,8 +17,8 @@ android {
         applicationId "com.wan.hollout"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 59
-        versionName "3.4.9"
+        versionCode 60
+        versionName "3.5.0"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true //important

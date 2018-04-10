@@ -305,8 +305,16 @@ public class MainActivity extends BaseActivity
     private void loadSignedInUserImage(ParseObject signedInUserObject) {
         if (signedInUserObject != null) {
             String userPhotoUrl = signedInUserObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            String userFirebaseToken = signedInUserObject.getString(AppConstants.USER_FIREBASE_TOKEN);
             if (StringUtils.isNotEmpty(userPhotoUrl)) {
                 UiUtils.loadImage(this, userPhotoUrl, signedInUserImageView);
+            }
+            if (StringUtils.isEmpty(userFirebaseToken)) {
+                String userFirebaseTokenInPrefs = HolloutPreferences.getUserFirebaseToken();
+                if (StringUtils.isNotEmpty(userFirebaseToken)) {
+                    signedInUserObject.put(AppConstants.USER_FIREBASE_TOKEN, userFirebaseTokenInPrefs);
+                    AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
+                }
             }
         }
     }
@@ -450,6 +458,7 @@ public class MainActivity extends BaseActivity
                                                             signedInUserObject.put(AppConstants.APP_USER_CHATS, userChats);
                                                             AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
                                                             EventBus.getDefault().post(AppConstants.REFRESH_CONVERSATIONS);
+                                                            HolloutUtils.deleteOutgoingChatRequests(conversationItem.getRecipient().getString(AppConstants.REAL_OBJECT_ID));
                                                         }
                                                     }
                                                 }

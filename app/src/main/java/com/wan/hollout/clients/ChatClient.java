@@ -14,13 +14,14 @@ import com.wan.hollout.api.JsonApiClient;
 import com.wan.hollout.enums.MessageDirection;
 import com.wan.hollout.enums.MessageStatus;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.ChatRequestsManager;
-import com.wan.hollout.utils.ConversationsList;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
+import com.wan.hollout.utils.GeneralNotifier;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -120,20 +121,27 @@ public class ChatClient {
                                             chatMessage.setFromName(chatMessage.getFromName());
                                             ParseObject signedInUser = AuthUtil.getCurrentUser();
                                             if (!HolloutUtils.isAContact(chatMessage.getFrom())) {
-                                                ChatRequestsManager.addToPendingChatRequests(chatMessage, true);
-                                                return;
+                                                ChatRequestsManager.fetchChatRequests(new DoneCallback<List<ParseObject>>() {
+                                                    @Override
+                                                    public void done(List<ParseObject> result, Exception e) {
+                                                        if (result != null && !result.isEmpty()) {
+                                                            GeneralNotifier.blowChatRequestsNotification(result);
+                                                        }
+                                                    }
+                                                });
+                                            } else {
+                                                DbUtils.createMessage(chatMessage);
+                                                markMessageAsDelivered(chatMessage, from, userId);
+                                                HolloutPreferences.updateConversationTime(chatMessage.getFrom());
+                                                if (HolloutUtils.isAContact(from)) {
+                                                    HolloutPreferences.incrementUnreadMessagesFrom(chatMessage.getFrom());
+                                                    incrementTotalUnreadChats(chatMessage);
+                                                }
+                                                List<ChatMessage> allUnreadMessages = DbUtils.fetchAllUnreadMessages();
+                                                HolloutPreferences.setTotalUnreadMessagesCount(allUnreadMessages.size());
+                                                MessageNotifier.getInstance().notifyOnUnreadMessages();
+                                                EventBus.getDefault().post(new MessageReceivedEvent(chatMessage));
                                             }
-                                            DbUtils.createMessage(chatMessage);
-                                            markMessageAsDelivered(chatMessage, from, userId);
-                                            HolloutPreferences.updateConversationTime(chatMessage.getFrom());
-                                            if (HolloutUtils.isAContact(from)) {
-                                                HolloutPreferences.incrementUnreadMessagesFrom(chatMessage.getFrom());
-                                                incrementTotalUnreadChats(chatMessage);
-                                            }
-                                            List<ChatMessage> allUnreadMessages = DbUtils.fetchAllUnreadMessages();
-                                            HolloutPreferences.setTotalUnreadMessagesCount(allUnreadMessages.size());
-                                            MessageNotifier.getInstance().notifyOnUnreadMessages();
-                                            EventBus.getDefault().post(new MessageReceivedEvent(chatMessage));
                                         }
                                     }
                                 }

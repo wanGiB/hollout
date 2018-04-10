@@ -81,8 +81,7 @@ public class DbUtils {
             if (userChatIds != null && !userChatIds.isEmpty()) {
                 return SQLite.select()
                         .from(ChatMessage.class)
-                        .where(ChatMessage_Table.messageDirection.eq(MessageDirection.INCOMING))
-                        .and(ChatMessage_Table.conversationId.notIn(userChatIds)).queryList();
+                        .where(ChatMessage_Table.conversationId.notIn(userChatIds)).queryList();
             }
         }
         return null;

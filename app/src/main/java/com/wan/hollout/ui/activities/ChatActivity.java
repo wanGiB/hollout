@@ -512,9 +512,6 @@ public class ChatActivity extends BaseActivity implements
                 GeneralNotifier.getNotificationManager().cancel(AppConstants.NEW_MESSAGE_NOTIFICATION_ID);
             }
         }
-        if (getRecipient() != null) {
-            ChatRequestsManager.removeIdFromRequestIds(getRecipient());
-        }
     }
 
     public ChatToolbar getChatToolbar() {

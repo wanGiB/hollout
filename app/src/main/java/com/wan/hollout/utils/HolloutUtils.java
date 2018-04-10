@@ -34,6 +34,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -43,6 +44,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.parse.DeleteCallback;
 import com.parse.GetCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -617,6 +619,31 @@ public class HolloutUtils {
         return originalGifProps.optString("url");
     }
 
+    public static void deleteOutgoingChatRequests(String recipientId) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            final ParseQuery<ParseObject> requestObjectQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            requestObjectQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, recipientId);
+            requestObjectQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            requestObjectQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
+            requestObjectQuery.getFirstInBackground(new GetCallback<ParseObject>() {
+                @Override
+                public void done(final ParseObject object, ParseException e) {
+                    if (e == null && object != null) {
+                        object.deleteInBackground(new DeleteCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                if (e != null) {
+                                    object.deleteEventually();
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    }
+
     public static class MediaEntry {
         int bucketId;
         int imageId;
@@ -1032,13 +1059,11 @@ public class HolloutUtils {
                                         }
                                         signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
                                         AuthUtil.updateCurrentLocalUser(signedInUser, null);
-                                        ChatRequestsManager.removeIdFromRequestIds(requestOriginatorId.toLowerCase());
                                     }
                                     EventBus.getDefault().postSticky(AppConstants.REFRESH_CONVERSATIONS);
                                 } else {
                                     //Delete all messages from this user from the local database
                                     DbUtils.deleteConversation(requestOriginatorId, null);
-                                    ChatRequestsManager.removeIdFromRequestIds(requestOriginatorId.toLowerCase());
                                 }
                                 UiUtils.showSafeToast("Chat request from " + WordUtils.capitalize(requesterName) + " " + (accept ? "accepted" : "declined") + " successfully");
                                 AppConstants.CHAT_INVITATION_ACCEPTED = true;

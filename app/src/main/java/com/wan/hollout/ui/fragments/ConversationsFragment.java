@@ -34,6 +34,7 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.ConversationsList;
 import com.wan.hollout.utils.HolloutLogger;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -388,7 +389,7 @@ public class ConversationsFragment extends BaseFragment {
                             break;
                         case AppConstants.ORDER_CONVERSATIONS:
                             sortConversations();
-                            if (conversationsAdapter!=null){
+                            if (conversationsAdapter != null) {
                                 conversationsAdapter.notifyDataSetChanged();
                             }
                             break;

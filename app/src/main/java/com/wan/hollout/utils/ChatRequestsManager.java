@@ -1,8 +1,12 @@
 package com.wan.hollout.utils;
 
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -11,45 +15,36 @@ import java.util.List;
 
 public class ChatRequestsManager {
 
-    public static void addToPendingChatRequests(ChatMessage chatMessage, boolean canBlowNotification) {
-        HashMap<String, Object> existingChatRequests = HolloutPreferences.getExistingChatRequests();
-
-        String conversationId = chatMessage.getFrom();
-        String conversationName = chatMessage.getFromName();
-        String conversationPhotoUrl = chatMessage.getFromPhotoUrl();
-
-        HashMap<String, Object> conversationProps = new HashMap<>();
-        conversationProps.put(AppConstants.REQUESTER_NAME, conversationName);
-        conversationProps.put(AppConstants.REQUESTER_ID, conversationId);
-        conversationProps.put(AppConstants.REQUESTER_PHOTO_URL, conversationPhotoUrl);
-
-        existingChatRequests.put(conversationId, conversationProps);
-        HolloutPreferences.updateChatRequests(existingChatRequests);
-
-        if (canBlowNotification) {
-            GeneralNotifier.blowChatRequestsNotification();
-        }
-    }
-
-    public static void removeIdFromRequestIds(String conversationId) {
-        HashMap<String, Object> existingChatRequests = HolloutPreferences.getExistingChatRequests();
-        if (existingChatRequests != null && !existingChatRequests.isEmpty()) {
-            if (existingChatRequests.containsKey(conversationId)) {
-                existingChatRequests.remove(conversationId);
-                HolloutPreferences.updateChatRequests(existingChatRequests);
-            }
-        }
-    }
-
     public static void initLegacyChatRequestsGrabber() {
         List<ChatMessage> pendingChatRequests = DbUtils.fetchPendingChatRequests();
         if (pendingChatRequests != null) {
             if (!pendingChatRequests.isEmpty()) {
                 for (ChatMessage chatMessage : pendingChatRequests) {
-                    addToPendingChatRequests(chatMessage, false);
                     DbUtils.deleteMessage(chatMessage);
                 }
             }
+        }
+    }
+
+    public static void fetchChatRequests(final DoneCallback<List<ParseObject>> doneCallback) {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            final ParseQuery<ParseObject> chatRequestsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_CHAT_REQUEST);
+            chatRequestsQuery.include(AppConstants.FEED_CREATOR);
+            chatRequestsQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID,
+                    signedInUser.getString(AppConstants.REAL_OBJECT_ID).toLowerCase());
+            chatRequestsQuery.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if (e == null && objects != null && !objects.isEmpty()) {
+                        doneCallback.done(objects, null);
+                    } else {
+                        doneCallback.done(null, e);
+                    }
+                    chatRequestsQuery.cancel();
+                }
+            });
         }
     }
 

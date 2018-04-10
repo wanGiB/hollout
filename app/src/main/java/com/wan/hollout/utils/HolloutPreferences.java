@@ -4,14 +4,14 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.google.gson.reflect.TypeToken;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.ActivityCountChangedEvent;
 
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -146,7 +146,7 @@ public class HolloutPreferences {
         getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH + "_" + recipient, System.currentTimeMillis()).commit();
     }
 
-    public static void updateConversationTime(String recipient, long time) {
+    static void updateConversationTime(String recipient, long time) {
         getInstance().edit().putLong(AppConstants.LAST_CONVERSATION_TIME_WITH + "_" + recipient, time).commit();
     }
 
@@ -193,48 +193,34 @@ public class HolloutPreferences {
         EventBus.getDefault().post(new ActivityCountChangedEvent());
     }
 
-    public static void decrementActivityCount() {
-        int currentActivityCount = getInstance().getInt(AppConstants.ACTIVITY_COUNT, 0);
-        if (currentActivityCount != 0) {
-            getInstance().edit().putInt(AppConstants.ACTIVITY_COUNT, currentActivityCount - 1).commit();
-        }
-        EventBus.getDefault().post(new ActivityCountChangedEvent());
-    }
-
     public static void destroyActivityCount() {
         getInstance().edit().putInt(AppConstants.ACTIVITY_COUNT, 0).commit();
         EventBus.getDefault().post(new ActivityCountChangedEvent());
     }
 
-    public static long getLastVibrateTime() {
+    static long getLastVibrateTime() {
         return getInstance().getLong(AppConstants.LAST_VIBRATE_TIME, 0);
     }
 
-    public static void setLastVibrateTime(long lastVibrateTime) {
+    static void setLastVibrateTime(long lastVibrateTime) {
         getInstance().edit().putLong(AppConstants.LAST_VIBRATE_TIME, lastVibrateTime).commit();
     }
 
-    public static HashMap<String, Object> getExistingChatRequests() {
+    static JSONObject getExistingChatRequests() {
         String existingChatRequestsString = getInstance().getString(AppConstants.EXISTING_CHAT_REQUESTS_STRING, null);
-        if (existingChatRequestsString != null) {
-            Type mapType = getMapType();
-            HashMap<String, Object> chatRequestsMap = JsonUtils.getGSon().fromJson(existingChatRequestsString, mapType);
-            if (chatRequestsMap != null) {
-                return chatRequestsMap;
+        if (StringUtils.isNotEmpty(existingChatRequestsString)) {
+            try {
+                return new JSONObject(existingChatRequestsString);
+            } catch (JSONException e) {
+                HolloutLogger.d("ChatRequest","Error "+e.getMessage());
+                return new JSONObject();
             }
         }
-        return new HashMap<>();
+        return new JSONObject();
     }
 
-    public static void updateChatRequests(HashMap<String, Object> chatRequestsMap) {
-        Type mapType = getMapType();
-        String chatString = JsonUtils.getGSon().toJson(chatRequestsMap, mapType);
-        getInstance().edit().putString(AppConstants.EXISTING_CHAT_REQUESTS_STRING, chatString).commit();
-    }
-
-    private static Type getMapType() {
-        return new TypeToken<HashMap<String, Object>>() {
-        }.getType();
+    static void updateChatRequests(JSONObject jsonObject) {
+        getInstance().edit().putString(AppConstants.EXISTING_CHAT_REQUESTS_STRING, jsonObject.toString()).commit();
     }
 
 }

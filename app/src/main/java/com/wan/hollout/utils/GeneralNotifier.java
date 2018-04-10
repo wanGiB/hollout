@@ -28,12 +28,12 @@ import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +41,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -269,66 +270,67 @@ public class GeneralNotifier {
         return null;
     }
 
-    static void blowChatRequestsNotification() {
-        final HashMap<String, Object> existingChatRequests = HolloutPreferences.getExistingChatRequests();
-        if (existingChatRequests != null && !existingChatRequests.isEmpty()) {
-            ChatClient.getInstance().execute(new Runnable() {
+    public static void blowChatRequestsNotification(final List<ParseObject> chatRequests) {
+        ChatClient.getInstance().execute(new Runnable() {
 
-                @Override
-                public void run() {
-                    Intent mainIntent = new Intent(ApplicationLoader.getInstance(), MainActivity.class);
-                    PendingIntent pendingIntent = PendingIntent.getActivity(ApplicationLoader.getInstance(), 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.getInstance(), getChatRequestsChannelId());
-                    NotificationHelper notificationHelper = new NotificationHelper(ApplicationLoader.getInstance().getApplicationContext(), getChatRequestsChannelId(),
-                            ApplicationLoader.getInstance().getString(R.string.app_name) + " Chat Requests");
-                    String messageSpannable = existingChatRequests.size() == 1 ? "1 chat request" : existingChatRequests.size() + " chat requests";
-                    builder.setTicker(messageSpannable);
-                    if (Build.VERSION.SDK_INT >= 26) {
-                        builder.setContentText((messageSpannable));
-                    }
-                    builder.setSmallIcon(R.drawable.ic_launcher);
-                    builder.setLights(Color.parseColor("blue"), 500, 1000);
-                    builder.setPriority(NotificationCompat.PRIORITY_HIGH);
-                    builder.setAutoCancel(true);
-                    NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
-                    builder.setColor(Color.parseColor("#00628F"));
-                    Resources res = ApplicationLoader.getInstance().getResources();
+            @Override
+            public void run() {
+                Intent mainIntent = new Intent(ApplicationLoader.getInstance(), MainActivity.class);
+                PendingIntent pendingIntent = PendingIntent.getActivity(ApplicationLoader.getInstance(), 0, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(ApplicationLoader.getInstance(), getChatRequestsChannelId());
+                NotificationHelper notificationHelper = new NotificationHelper(ApplicationLoader.getInstance().getApplicationContext(), getChatRequestsChannelId(),
+                        ApplicationLoader.getInstance().getString(R.string.app_name) + " Chat Requests");
+                String messageSpannable = chatRequests.size() == 1 ? "1 chat request"
+                        : chatRequests.size() + " chat requests";
+                builder.setTicker(messageSpannable);
+                if (Build.VERSION.SDK_INT >= 26) {
+                    builder.setContentText((messageSpannable));
+                }
+                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setLights(Color.parseColor("blue"), 500, 1000);
+                builder.setPriority(NotificationCompat.PRIORITY_HIGH);
+                builder.setAutoCancel(true);
+                NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+                builder.setColor(Color.parseColor("#00628F"));
+                Resources res = ApplicationLoader.getInstance().getResources();
 
-                    int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
-                    int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
+                int height = (int) res.getDimension(android.R.dimen.notification_large_icon_height);
+                int width = (int) res.getDimension(android.R.dimen.notification_large_icon_width);
 
-                    Bitmap notificationInitiatorBitmap =
-                            getCircleBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(ApplicationLoader.getInstance().getResources(),
-                                    R.mipmap.ic_launcher),
-                                    width, height, false));
+                Bitmap notificationInitiatorBitmap =
+                        getCircleBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(ApplicationLoader.getInstance().getResources(),
+                                R.mipmap.ic_launcher),
+                                width, height, false));
 
-                    builder.setContentTitle(WordUtils.capitalize(ApplicationLoader.getInstance().getString(R.string.app_name) + " Chat Requests"))
-                            .setLargeIcon(notificationInitiatorBitmap)
-                            .setContentIntent(pendingIntent)
-                            .setNumber(existingChatRequests.size())
-                            .setStyle(inboxStyle)
-                            .setSubText(messageSpannable);
+                builder.setContentTitle(WordUtils.capitalize(ApplicationLoader.getInstance().getString(R.string.app_name) + " Chat Requests"))
+                        .setLargeIcon(notificationInitiatorBitmap)
+                        .setContentIntent(pendingIntent)
+                        .setNumber(chatRequests.size())
+                        .setStyle(inboxStyle)
+                        .setSubText(messageSpannable);
 
-                    for (String key : existingChatRequests.keySet()) {
-                        HashMap<String, Object> requestForKey = (HashMap<String, Object>) existingChatRequests.get(key);
-                        if (requestForKey != null) {
-                            String conversationName = (String) requestForKey.get(AppConstants.REQUESTER_NAME);
-                            inboxStyle.addLine(WordUtils.capitalize(conversationName) + " wants to chat with you");
-                        }
-                    }
-                    Notification notification = builder.build();
-                    notification.defaults |= Notification.DEFAULT_LIGHTS;
-                    if (HolloutUtils.canVibrate()) {
-                        notification.defaults |= Notification.DEFAULT_VIBRATE;
-                    }
-                    notification.defaults |= Notification.DEFAULT_SOUND;
-                    if (pendingIntent != null) {
-                        notificationHelper.notify(AppConstants.CHAT_REQUESTS_NOTIFICATION_ID, notification);
+                for (ParseObject chatRequest : chatRequests) {
+                    ParseObject creator = chatRequest.getParseObject(AppConstants.FEED_CREATOR);
+                    if (creator != null) {
+                        String conversationName = creator.getString(AppConstants.APP_USER_DISPLAY_NAME);
+                        inboxStyle.addLine(WordUtils.capitalize(conversationName) + " wants to chat with you");
                     }
                 }
-            });
 
-        }
+                Notification notification = builder.build();
+                notification.defaults |= Notification.DEFAULT_LIGHTS;
+                if (HolloutUtils.canVibrate()) {
+                    notification.defaults |= Notification.DEFAULT_VIBRATE;
+                }
+                notification.defaults |= Notification.DEFAULT_SOUND;
+                if (pendingIntent != null) {
+                    notificationHelper.notify(AppConstants.CHAT_REQUESTS_NOTIFICATION_ID, notification);
+                }
+
+            }
+
+        });
+
     }
 
     private static Bitmap getCircleBitmap(Bitmap bitmap) {
