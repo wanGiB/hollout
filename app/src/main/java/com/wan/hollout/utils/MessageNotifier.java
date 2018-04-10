@@ -133,7 +133,7 @@ public class MessageNotifier {
                 Spanned messageSpannable = UiUtils.fromHtml(getMessage(message));
                 builder.setContentText(messageSpannable);
                 builder.setTicker(messageSpannable);
-                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setSmallIcon(R.mipmap.ic_launcher_outline);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
 
                 Bitmap notificationInitiatorBitmap = BitmapFactory.decodeResource(ApplicationLoader.getInstance().getResources(), R.mipmap.ic_launcher);
@@ -199,7 +199,7 @@ public class MessageNotifier {
 
                 Spanned messageSpannable = UiUtils.fromHtml(HolloutPreferences.getTotalUnreadMessagesCount() + " new messages");
                 builder.setTicker(messageSpannable);
-                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setSmallIcon(R.mipmap.ic_launcher_outline);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
                 builder.setColor(Color.parseColor("#00628F"));
                 if (Build.VERSION.SDK_INT >= 26) {
@@ -255,7 +255,7 @@ public class MessageNotifier {
                 if (Build.VERSION.SDK_INT >= 26) {
                     builder.setContentText((chatMessages.size() == 1 ? "1 new message " : chatMessages.size() + " new messages"));
                 }
-                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setSmallIcon(R.mipmap.ic_launcher_outline);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
                 builder.setPriority(NotificationCompat.PRIORITY_HIGH);
                 builder.setAutoCancel(true);

@@ -77,7 +77,7 @@ public class GeneralNotifier {
                 Spanned message = UiUtils.fromHtml("<b>" + senderName + "</b> wants to chat with you");
                 builder.setContentText(message);
                 builder.setTicker(message);
-                builder.setSmallIcon(R.mipmap.ic_launcher);
+                builder.setSmallIcon(R.mipmap.ic_launcher_outline);
                 builder.setLights(Color.parseColor("blue"), 500, 1000);
                 Bitmap notifInitiatorBitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
                 if (StringUtils.isNotEmpty(requesterPhoto)) {
@@ -130,7 +130,7 @@ public class GeneralNotifier {
                             builder.setContentTitle(context.getString(R.string.app_name));
                             builder.setContentText(message);
                             builder.setTicker(message);
-                            builder.setSmallIcon(R.mipmap.ic_launcher);
+                            builder.setSmallIcon(R.mipmap.ic_launcher_outline);
                             builder.setLights(Color.parseColor("blue"), 500, 1000);
                             Bitmap notifInitiatorBitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
                             if (StringUtils.isNotEmpty(requesterPhoto)) {
@@ -169,7 +169,7 @@ public class GeneralNotifier {
         builder.setContentTitle(context.getString(R.string.app_name));
         builder.setContentText(message);
         builder.setTicker(message);
-        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setSmallIcon(R.mipmap.ic_launcher_outline);
         builder.setLights(Color.parseColor("blue"), 500, 1000);
         Bitmap notifInitiatorBitmap = BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher);
         builder.setLargeIcon(notifInitiatorBitmap);
