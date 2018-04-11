@@ -33,6 +33,7 @@ import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.HolloutUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -126,7 +127,7 @@ public class ApplicationLoader extends Application {
 
     private void startAppInstanceDetector() {
         ParseObject signedInUserObject = AuthUtil.getCurrentUser();
-        if (signedInUserObject != null) {
+        if (signedInUserObject != null && HolloutPreferences.canAccessLocation()) {
             try {
                 Intent serviceIntent = new Intent();
                 JobIntentService.enqueueWork(this, AppInstanceDetectionService.class, AppConstants.FIXED_JOB_ID, serviceIntent);

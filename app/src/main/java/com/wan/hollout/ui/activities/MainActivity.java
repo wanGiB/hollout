@@ -718,6 +718,7 @@ public class MainActivity extends BaseActivity
         }
         fetchUnreadMessagesCount();
         checkIfPhotoIsBlurredOrUnclear();
+        checkIsLocationPermissionGranted();
     }
 
     private void setupTabs(Adapter pagerAdapter) {
@@ -733,10 +734,11 @@ public class MainActivity extends BaseActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PermissionsUtils.REQUEST_LOCATION
-                || requestCode == PermissionsUtils.REQUEST_STORAGE
-                && holloutPermissions.verifyPermissions(grantResults)) {
-            if (requestCode == PermissionsUtils.REQUEST_LOCATION) {
-                HolloutPreferences.setCanAccessLocation();
+                || requestCode == PermissionsUtils.REQUEST_STORAGE) {
+            if (holloutPermissions.verifyPermissions(grantResults)) {
+                if (requestCode == PermissionsUtils.REQUEST_LOCATION) {
+                    HolloutPreferences.setCanAccessLocation();
+                }
             }
             tryAskForPermissions();
         } else {
@@ -792,6 +794,7 @@ public class MainActivity extends BaseActivity
         super.onRestart();
         fetchUnreadMessagesCount();
     }
+
 
     private void turnOnLocationMessage() {
         UiUtils.snackMessage("To enjoy all features of hollout, please Turn on your location.",
@@ -914,6 +917,7 @@ public class MainActivity extends BaseActivity
 
     private void tryAskForPermissions() {
         if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfPermissionForLocation(this)) {
+            HolloutPreferences.setCantAccessLocation();
             holloutPermissions.requestLocationPermissions();
             return;
         }
@@ -924,9 +928,15 @@ public class MainActivity extends BaseActivity
         checkLocationSettingsAvailable();
     }
 
+    private void checkIsLocationPermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23 && PermissionsUtils.checkSelfPermissionForLocation(this)) {
+            HolloutPreferences.setCantAccessLocation();
+        }
+    }
+
     private void startAppInstanceDetectionService() {
         ParseObject signedInUserObject = AuthUtil.getCurrentUser();
-        if (signedInUserObject != null) {
+        if (signedInUserObject != null && HolloutPreferences.canAccessLocation()) {
             Intent serviceIntent = new Intent();
             JobIntentService.enqueueWork(this, AppInstanceDetectionService.class, AppConstants.FIXED_JOB_ID, serviceIntent);
         }

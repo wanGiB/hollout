@@ -10,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
-import android.text.TextUtils;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -114,8 +113,10 @@ public class AppInstanceDetectionService extends JobIntentService {
         super.onCreate();
         signedInUser = AuthUtil.getCurrentUser();
         appStateManager = AppStateManager.init(ApplicationLoader.getInstance());
-        if (mFusedLocationClient == null) {
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        if (HolloutPreferences.canAccessLocation()) {
+            if (mFusedLocationClient == null) {
+                mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            }
         }
     }
 
@@ -123,8 +124,10 @@ public class AppInstanceDetectionService extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         HolloutLogger.d(TAG, "OnHandleWorkCalled");
 
-        if (mFusedLocationClient == null) {
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        if (HolloutPreferences.canAccessLocation()) {
+            if (mFusedLocationClient == null) {
+                mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+            }
         }
 
         if (signedInUser == null) {
@@ -158,47 +161,53 @@ public class AppInstanceDetectionService extends JobIntentService {
      */
     public void removeLocationUpdates() {
         HolloutLogger.i(TAG, "Removing location updates");
-        try {
-            if (mFusedLocationClient != null) {
-                mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        if (HolloutPreferences.canAccessLocation()) {
+            try {
+                if (mFusedLocationClient != null) {
+                    mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+                }
+                stopSelf();
+            } catch (SecurityException unlikely) {
+                HolloutLogger.e(TAG, "Lost location permission. Could not remove updates. " + unlikely);
             }
-            stopSelf();
-        } catch (SecurityException unlikely) {
-            HolloutLogger.e(TAG, "Lost location permission. Could not remove updates. " + unlikely);
         }
     }
 
     private void getLastLocation() {
-        try {
-            if (mFusedLocationClient != null) {
-                mFusedLocationClient.getLastLocation()
-                        .addOnCompleteListener(new OnCompleteListener<Location>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Location> task) {
-                                if (task.isSuccessful() && task.getResult() != null) {
-                                    mCurrentLocation = task.getResult();
-                                    cancelRunningLocationTaskBeforeRun(mCurrentLocation);
-                                } else {
-                                    HolloutLogger.w(TAG, "Failed to get location.");
+        if (HolloutPreferences.canAccessLocation()) {
+            try {
+                if (mFusedLocationClient != null) {
+                    mFusedLocationClient.getLastLocation()
+                            .addOnCompleteListener(new OnCompleteListener<Location>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Location> task) {
+                                    if (task.isSuccessful() && task.getResult() != null) {
+                                        mCurrentLocation = task.getResult();
+                                        cancelRunningLocationTaskBeforeRun(mCurrentLocation);
+                                    } else {
+                                        HolloutLogger.w(TAG, "Failed to get location.");
 
+                                    }
+                                    startLocationUpdate();
                                 }
-                                startLocationUpdate();
-                            }
-                        });
+                            });
+                }
+            } catch (SecurityException unlikely) {
+                HolloutLogger.e(TAG, "Lost location permission." + unlikely);
             }
-        } catch (SecurityException unlikely) {
-            HolloutLogger.e(TAG, "Lost location permission." + unlikely);
         }
     }
 
     private void startLocationUpdate() {
-        try {
-            if (mFusedLocationClient != null) {
-                mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                        mLocationCallback, Looper.myLooper());
+        if (HolloutPreferences.canAccessLocation()) {
+            try {
+                if (mFusedLocationClient != null) {
+                    mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                            mLocationCallback, Looper.myLooper());
+                }
+            } catch (SecurityException unlikely) {
+                HolloutLogger.d(TAG, "Lost location permission. Could not request updates. " + unlikely);
             }
-        } catch (SecurityException unlikely) {
-            HolloutLogger.d(TAG, "Lost location permission. Could not request updates. " + unlikely);
         }
     }
 

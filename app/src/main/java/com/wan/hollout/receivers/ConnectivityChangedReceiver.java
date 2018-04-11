@@ -14,6 +14,7 @@ import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FirebaseUtils;
+import com.wan.hollout.utils.HolloutPreferences;
 
 /**
  * @author Wan Clem
@@ -31,7 +32,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
         try {
             if (FirebaseAuth.getInstance().getCurrentUser() != null) {
                 ParseObject signedInUserObject = AuthUtil.getCurrentUser();
-                if (signedInUserObject != null) {
+                if (signedInUserObject != null && HolloutPreferences.canAccessLocation()) {
                     Intent serviceIntent = new Intent();
                     JobIntentService.enqueueWork(context, AppInstanceDetectionService.class, AppConstants.FIXED_JOB_ID, serviceIntent);
                 }

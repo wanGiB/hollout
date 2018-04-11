@@ -32,6 +32,10 @@ public class HolloutPreferences {
         return getInstance().getBoolean(AppConstants.CAN_ACCESS_LOCATION, false);
     }
 
+    public static boolean setCantAccessLocation() {
+        return getInstance().edit().putBoolean(AppConstants.CAN_ACCESS_LOCATION, false).commit();
+    }
+
     @SuppressLint("ApplySharedPref")
     public static void setCanAccessLocation() {
         getInstance().edit().putBoolean(AppConstants.CAN_ACCESS_LOCATION, true).commit();
@@ -212,7 +216,7 @@ public class HolloutPreferences {
             try {
                 return new JSONObject(existingChatRequestsString);
             } catch (JSONException e) {
-                HolloutLogger.d("ChatRequest","Error "+e.getMessage());
+                HolloutLogger.d("ChatRequest", "Error " + e.getMessage());
                 return new JSONObject();
             }
         }
