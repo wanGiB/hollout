@@ -17,12 +17,13 @@ android {
         applicationId "com.wan.hollout"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 66
-        versionName "3.5.6"
+        versionCode 67
+        versionName "3.5.7"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true //important
     }
+
     signingConfigs {
         release {
             storeFile file("../Store/release_key.jks")

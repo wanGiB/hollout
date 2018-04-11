@@ -39,6 +39,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -1106,10 +1108,11 @@ public class HolloutUtils {
 
     public static String constructSearch() {
         ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (signedInUser != null) {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (signedInUser != null && firebaseUser != null) {
             List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
             String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-            String userEmail = signedInUser.getString(AppConstants.USER_EMAIL);
+            String userEmail = firebaseUser.getEmail();
             if (aboutUser == null) {
                 aboutUser = new ArrayList<>();
             }
