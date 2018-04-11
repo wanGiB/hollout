@@ -31,6 +31,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.ConnectivityChangedAction;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
 import com.wan.hollout.models.NearbyPerson;
+import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.adapters.PeopleAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
@@ -45,7 +46,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -79,13 +79,14 @@ public class NearbyPeopleFragment extends BaseFragment {
 
     @SuppressLint("StaticFieldLeak")
     public PeopleAdapter peopleAdapter;
+
     public List<NearbyPerson> nearbyPeople = new ArrayList<>();
+
     private ParseObject signedInUser;
 
     private View footerView;
-    public String searchString;
 
-    private ParseQuery<ParseObject> joinedQuery;
+    public String searchString;
 
     public NearbyPeopleFragment() {
         // Required empty public constructor
@@ -134,7 +135,6 @@ public class NearbyPeopleFragment extends BaseFragment {
         fetchPeopleOfCommonInterestFromCache();
     }
 
-
     private void fetchPeople() {
         swipeRefreshLayout.setRefreshing(true);
         fetchPeopleOfCommonInterestFromCache();
@@ -143,8 +143,7 @@ public class NearbyPeopleFragment extends BaseFragment {
     private void fetchPeopleOfCommonInterestFromCache() {
         final ParseQuery<ParseObject> localUsersQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         localUsersQuery.fromPin(AppConstants.APP_USERS);
-        localUsersQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
-        localUsersQuery.orderByDescending("updatedAt");
+        localUsersQuery.orderByAscending(AppConstants.APP_USER_GEO_POINT);
         localUsersQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
@@ -163,25 +162,20 @@ public class NearbyPeopleFragment extends BaseFragment {
         Activity activity = getActivity();
         if (activity != null) {
             LayoutInflater layoutInflater = activity.getLayoutInflater();
-
             footerView = layoutInflater.inflate(R.layout.loading_footer, null);
-
             UiUtils.setUpRefreshColorSchemes(getActivity(), swipeRefreshLayout);
             peopleAdapter = new PeopleAdapter(getActivity(), nearbyPeople);
-
             HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(peopleAdapter);
             swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
                 @Override
                 public void onRefresh() {
                     fetchPeopleOfCommonInterestsFromNetwork(0);
                 }
-
             });
-
             SafeLayoutManager linearLayoutManager = new SafeLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
             peopleRecyclerView.setLayoutManager(linearLayoutManager);
             peopleRecyclerView.setItemAnimator(new DefaultItemAnimator());
+            peopleRecyclerView.setHasFixedSize(true);
             peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
             RecyclerViewUtils.setFooterView(peopleRecyclerView, footerView);
             UiUtils.showView(footerView, false);
@@ -205,12 +199,10 @@ public class NearbyPeopleFragment extends BaseFragment {
                             }
                         }
                     }
-
                 }
             });
 
             cardMeetPeople.setOnClickListener(new View.OnClickListener() {
-
                 @Override
                 public void onClick(View view) {
                     UiUtils.blinkView(view);
@@ -219,23 +211,17 @@ public class NearbyPeopleFragment extends BaseFragment {
                         startActivity(dataSourceIntent);
                     }
                 }
-
             });
-
         }
-
     }
 
     public void fetchPeopleOfCommonInterestsFromNetwork(final int skip) {
         if (getActivity() != null) {
             if (HolloutUtils.isNetWorkConnected(getActivity())) {
                 if (signedInUser != null) {
-                    String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
                     List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-                    String signedInUserCountry = signedInUser.getString(AppConstants.APP_USER_COUNTRY);
                     String filterStartAgeValue = signedInUser.getString(AppConstants.START_AGE_FILTER_VALUE);
                     String filterEndAgeValue = signedInUser.getString(AppConstants.END_AGE_FILTER_VALUE);
-                    ArrayList<String> newUserChats = new ArrayList<>();
                     //Init Query here
                     final ParseQuery<ParseObject> peopleQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
                     peopleQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
@@ -245,8 +231,7 @@ public class NearbyPeopleFragment extends BaseFragment {
                     }
                     String genderFilter = signedInUser.getString(AppConstants.GENDER_FILTER);
                     checkGender(peopleQuery, genderFilter);
-                    excludeUserChats(signedInUserId, signedInUserChats, newUserChats, peopleQuery);
-                    attachCountry(signedInUserCountry, peopleQuery);
+                    excludeUserChats(signedInUserChats, peopleQuery);
                     ParseGeoPoint signedInUserGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
                     attachGeoPoint(peopleQuery, signedInUserGeoPoint);
                     peopleQuery.setLimit(100);
@@ -258,12 +243,13 @@ public class NearbyPeopleFragment extends BaseFragment {
 
                         @Override
                         public void done(final List<ParseObject> users, final ParseException e) {
+                            MainActivity.materialSearchView.hideProgressBar();
                             if (swipeRefreshLayout.isRefreshing()) {
                                 swipeRefreshLayout.setRefreshing(false);
                             }
                             if (e == null) {
                                 if (skip == 0) {
-                                    nearbyPeople.clear();
+                                    clearPeople();
                                 }
                                 if (users != null) {
                                     loadAdapter(users);
@@ -292,12 +278,6 @@ public class NearbyPeopleFragment extends BaseFragment {
         }
     }
 
-    private void attachCountry(String signedInUserCountry, ParseQuery<ParseObject> peopleQuery) {
-        if (signedInUserCountry != null) {
-            peopleQuery.whereEqualTo(AppConstants.APP_USER_COUNTRY, signedInUserCountry);
-        }
-    }
-
     private void attachGeoPoint(ParseQuery<ParseObject> peopleQuery, ParseGeoPoint signedInUserGeoPoint) {
         if (signedInUserGeoPoint != null) {
             peopleQuery.whereWithinKilometers(AppConstants.APP_USER_GEO_POINT, signedInUserGeoPoint, 100.0);
@@ -310,17 +290,9 @@ public class NearbyPeopleFragment extends BaseFragment {
         }
     }
 
-    private void excludeUserChats(String signedInUserId, List<String> savedUserChats, ArrayList<String> newUserChats, ParseQuery<ParseObject> peopleQuery) {
+    private void excludeUserChats(List<String> savedUserChats, ParseQuery<ParseObject> peopleQuery) {
         if (savedUserChats != null) {
-            if (!savedUserChats.contains(signedInUserId.toLowerCase())) {
-                savedUserChats.add(signedInUserId.toLowerCase());
-            }
             peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, savedUserChats);
-        } else {
-            if (!newUserChats.contains(signedInUserId)) {
-                newUserChats.add(signedInUserId);
-            }
-            peopleQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, newUserChats);
         }
     }
 
@@ -341,12 +313,18 @@ public class NearbyPeopleFragment extends BaseFragment {
         if (!users.isEmpty()) {
             for (ParseObject parseUser : users) {
                 NearbyPerson nearbyPerson = new NearbyPerson(parseUser);
-                if (!nearbyPeople.contains(nearbyPerson)) {
-                    nearbyPeople.add(nearbyPerson);
+                if (!nearbyPerson.getPerson().getString(AppConstants.REAL_OBJECT_ID)
+                        .equals(signedInUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                    if (!nearbyPeople.contains(nearbyPerson)) {
+                        nearbyPeople.add(nearbyPerson);
+                    }
                 }
             }
+            notifyDataSetChanged();
         }
-        Collections.sort(nearbyPeople);
+    }
+
+    private void notifyDataSetChanged() {
         peopleAdapter.notifyDataSetChanged();
     }
 
@@ -365,54 +343,35 @@ public class NearbyPeopleFragment extends BaseFragment {
     }
 
     private void searchPeople(final int skip, String searchString) {
-        if (joinedQuery != null) {
-            joinedQuery.cancel();
-            joinedQuery = null;
-        }
         peopleAdapter.setSearchString(searchString);
-        ParseQuery<ParseObject> parseUserParseQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        parseUserParseQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
+        final ParseQuery<ParseObject> parseUserParseQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         parseUserParseQuery.whereEqualTo(AppConstants.OBJECT_TYPE, AppConstants.OBJECT_TYPE_INDIVIDUAL);
-        if (signedInUser != null) {
-            parseUserParseQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
-        }
-        ParseQuery<ParseObject> categoryQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        if (signedInUser != null) {
-            categoryQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
-        }
-        List<String> elements = new ArrayList<>();
-        elements.add(StringUtils.stripEnd(searchString.toLowerCase(), "s"));
-        categoryQuery.whereContainsAll(AppConstants.ABOUT_USER, elements);
-        List<ParseQuery<ParseObject>> queries = new ArrayList<>();
-        queries.add(parseUserParseQuery);
-        queries.add(categoryQuery);
-
-        joinedQuery = ParseQuery.or(queries);
-        joinedQuery.orderByAscending(AppConstants.APP_USER_GEO_POINT);
-        joinedQuery.setLimit(100);
+        parseUserParseQuery.whereContains(AppConstants.SEARCH_CRITERIA, searchString);
+        parseUserParseQuery.orderByAscending(AppConstants.APP_USER_GEO_POINT);
+        parseUserParseQuery.setLimit(100);
         if (skip != 0) {
-            joinedQuery.setSkip(skip);
+            parseUserParseQuery.setSkip(skip);
         }
-        joinedQuery.findInBackground(new FindCallback<ParseObject>() {
+        parseUserParseQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
+                MainActivity.materialSearchView.hideProgressBar();
                 if (e == null) {
                     if (objects != null && !objects.isEmpty()) {
                         if (skip == 0) {
-                            nearbyPeople.clear();
+                            clearPeople();
                         }
-                        for (ParseObject parseUser : objects) {
-                            if (!nearbyPeople.contains(new NearbyPerson(parseUser))) {
-                                nearbyPeople.add(new NearbyPerson(parseUser));
-                            }
-                        }
-                        peopleAdapter.notifyDataSetChanged();
+                        loadAdapter(objects);
                     }
                     UiUtils.toggleFlipperState(peopleContentFlipper, 2);
                 }
-                joinedQuery.cancel();
+                parseUserParseQuery.cancel();
             }
         });
+        if (signedInUser != null) {
+            signedInUser.put(AppConstants.USER_LAST_SEARCH, searchString);
+            signedInUser.pinInBackground();
+        }
     }
 
     @Override
@@ -446,8 +405,7 @@ public class NearbyPeopleFragment extends BaseFragment {
                         case AppConstants.SEARCH_VIEW_CLOSED:
                             peopleAdapter.setSearchString(null);
                             searchString = null;
-                            nearbyPeople.clear();
-                            peopleAdapter.notifyDataSetChanged();
+                            clearPeople();
                             fetchPeople();
                             break;
                     }
@@ -458,11 +416,17 @@ public class NearbyPeopleFragment extends BaseFragment {
                     searchPeople(0, queryString);
                 }
                 EventBus.getDefault().removeAllStickyEvents();
-
             }
 
         });
 
+    }
+
+    private void clearPeople() {
+        if (!nearbyPeople.isEmpty()) {
+            nearbyPeople.clear();
+            notifyDataSetChanged();
+        }
     }
 
 }

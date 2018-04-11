@@ -28,13 +28,13 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -44,7 +44,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.parse.DeleteCallback;
 import com.parse.GetCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -55,14 +54,12 @@ import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.ChatRequestNegotiationResult;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
-import com.wan.hollout.ui.widgets.ChatRequestView;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.greenrobot.eventbus.EventBus;
-import org.joda.time.DateTimeUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -1105,6 +1102,21 @@ public class HolloutUtils {
         }
         HolloutLogger.d("SHA1ofLike", sha1);
         return sha1;
+    }
+
+    public static String constructSearch() {
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (signedInUser != null) {
+            List<String> aboutUser = signedInUser.getList(AppConstants.ABOUT_USER);
+            String userDisplayName = signedInUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
+            String userEmail = signedInUser.getString(AppConstants.USER_EMAIL);
+            if (aboutUser == null) {
+                aboutUser = new ArrayList<>();
+            }
+            String searchCriteria = TextUtils.join(",", aboutUser) + "," + userDisplayName + "," + (userEmail != null ? userEmail : " ");
+            return searchCriteria.toLowerCase();
+        }
+        return "none";
     }
 
 }

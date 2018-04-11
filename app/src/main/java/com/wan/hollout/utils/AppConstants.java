@@ -226,6 +226,8 @@ public class AppConstants {
     public static final String REQUESTER_ID = "requester_id";
     public static final int CHAT_REQUESTS_NOTIFICATION_ID = 30;
     public static final String ORDER_CONVERSATIONS = "order_conversations";
+    public static final String USER_LAST_SEARCH = "user_last_search";
+    public static final String SEARCH_CRITERIA = "search_criteria";
 
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 

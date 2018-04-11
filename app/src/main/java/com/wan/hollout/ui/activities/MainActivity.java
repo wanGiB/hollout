@@ -183,6 +183,8 @@ public class MainActivity extends BaseActivity
     public static Vibrator vibrator;
     private ProgressDialog deleteConversationProgressDialog;
 
+    ParseObject signedInUserObject;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -194,7 +196,7 @@ public class MainActivity extends BaseActivity
         actionModeBar = findViewById(R.id.action_mode_bar);
         materialSearchView = findViewById(R.id.search_view);
         setSupportActionBar(toolbar);
-        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+        signedInUserObject = AuthUtil.getCurrentUser();
         loadSignedInUserImage(signedInUserObject);
         Adapter adapter = setupViewPagerAdapter(viewPager);
         viewPager.setOffscreenPageLimit(3);
@@ -500,7 +502,16 @@ public class MainActivity extends BaseActivity
             @Override
             public void onSearchViewShown() {
                 EventBus.getDefault().post(AppConstants.DISABLE_NESTED_SCROLLING);
-//                UiUtils.showView(floatingActionButton, false);
+                if (signedInUserObject != null) {
+                    String userLastSearch = signedInUserObject.getString(AppConstants.USER_LAST_SEARCH);
+                    if (StringUtils.isNotEmpty(userLastSearch)) {
+                        if (viewPager.getCurrentItem() == 0) {
+                            EventBus.getDefault().post(new SearchPeopleEvent(userLastSearch));
+                        } else if (viewPager.getCurrentItem() == 1) {
+                            EventBus.getDefault().post(new SearchChatsEvent(userLastSearch));
+                        }
+                    }
+                }
             }
 
             @Override
@@ -508,7 +519,6 @@ public class MainActivity extends BaseActivity
                 EventBus.getDefault().post(AppConstants.ENABLE_NESTED_SCROLLING);
                 showView(tabLayout, true);
                 EventBus.getDefault().post(AppConstants.SEARCH_VIEW_CLOSED);
-//                UiUtils.showView(floatingActionButton, true);
             }
 
         });
@@ -547,19 +557,32 @@ public class MainActivity extends BaseActivity
             @Override
             public boolean onQueryTextSubmit(String query) {
                 if (viewPager.getCurrentItem() == 0) {
-                    EventBus.getDefault().post(new SearchPeopleEvent(query));
+                    if (StringUtils.isNotEmpty(query)) {
+                        EventBus.getDefault().post(new SearchPeopleEvent(query));
+                    }
                 } else if (viewPager.getCurrentItem() == 1) {
-                    EventBus.getDefault().post(new SearchChatsEvent(query));
+                    if (StringUtils.isNotEmpty(query)) {
+                        EventBus.getDefault().post(new SearchChatsEvent(query));
+                    }
                 }
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if (StringUtils.isNotEmpty(newText)) {
+                    materialSearchView.showProgressBar();
+                } else {
+                    materialSearchView.hideProgressBar();
+                }
                 if (viewPager.getCurrentItem() == 0) {
-                    EventBus.getDefault().post(new SearchPeopleEvent(newText));
+                    if (StringUtils.isNotEmpty(newText)) {
+                        EventBus.getDefault().post(new SearchPeopleEvent(newText));
+                    }
                 } else if (viewPager.getCurrentItem() == 1) {
-                    EventBus.getDefault().post(new SearchChatsEvent(newText));
+                    if (StringUtils.isNotEmpty(newText)) {
+                        EventBus.getDefault().post(new SearchChatsEvent(newText));
+                    }
                 }
                 return true;
             }

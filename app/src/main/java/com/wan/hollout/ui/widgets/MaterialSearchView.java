@@ -29,6 +29,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -61,6 +62,7 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
     private EditText mSearchSrcTextView;
     private ImageButton mBackBtn;
     private ImageButton mVoiceBtn;
+    private ProgressBar progressBar;
     private ImageButton mEmptyBtn;
     private RelativeLayout mSearchTopBar;
 
@@ -164,6 +166,7 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
             mSearchSrcTextView = (EditText) mSearchLayout.findViewById(R.id.searchTextView);
             mBackBtn = (ImageButton) mSearchLayout.findViewById(R.id.action_up_btn);
             mVoiceBtn = (ImageButton) mSearchLayout.findViewById(R.id.action_voice_btn);
+            progressBar = mSearchLayout.findViewById(R.id.action_progress_bar);
             mEmptyBtn = (ImageButton) mSearchLayout.findViewById(R.id.action_empty_btn);
             mTintView = mSearchLayout.findViewById(R.id.transparent_view);
 
@@ -406,7 +409,7 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
         mSuggestionsListView.setAdapter(adapter);
         startFilter(mSearchSrcTextView.getText());
     }
-    
+
     /**
      * Dismiss the suggestions list.
      */
@@ -445,6 +448,16 @@ public class MaterialSearchView extends FrameLayout implements Filter.FilterList
         } else {
             mVoiceBtn.setVisibility(GONE);
         }
+    }
+
+    public void showProgressBar() {
+        UiUtils.showView(mEmptyBtn, false);
+        UiUtils.showView(progressBar, true);
+    }
+
+    public void hideProgressBar() {
+        UiUtils.showView(mEmptyBtn, true);
+        UiUtils.showView(progressBar, false);
     }
 
     /**

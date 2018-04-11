@@ -525,6 +525,10 @@ public class WelcomeActivity extends BaseActivity
     @Override
     public void onResume() {
         super.onResume();
+        if (addAuthStateListener != null) {
+            firebaseAuth.removeAuthStateListener(addAuthStateListener);
+            firebaseAuth.addAuthStateListener(addAuthStateListener);
+        }
         if (shimmerFrameLayout != null) {
             shimmerFrameLayout.startShimmerAnimation();
         }

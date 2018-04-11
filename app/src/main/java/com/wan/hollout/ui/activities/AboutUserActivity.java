@@ -38,6 +38,7 @@ import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
+import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.RequestCodes;
 import com.wan.hollout.utils.UiUtils;
 
@@ -291,6 +292,7 @@ public class AboutUserActivity extends BaseActivity {
                 @Override
                 public void done(Boolean success, Exception e) {
                     if (e == null) {
+                        refreshSearchCriteria();
                         checkAndPushInterests(Arrays.asList(moreAboutUserField.getText().toString().trim().split(",")));
                         UiUtils.dismissProgressDialog(progressDialog);
                         if (!HolloutPreferences.isUserWelcomed()) {
@@ -312,6 +314,14 @@ public class AboutUserActivity extends BaseActivity {
             });
         } else {
             Snackbar.make(rootLayout, cantMoveFurtherErrorMessage(), Snackbar.LENGTH_SHORT).show();
+        }
+    }
+
+    private void refreshSearchCriteria() {
+        ParseObject newSignedInUserObject = AuthUtil.getCurrentUser();
+        if (newSignedInUserObject != null) {
+            newSignedInUserObject.put(AppConstants.SEARCH_CRITERIA, HolloutUtils.constructSearch());
+            AuthUtil.updateCurrentLocalUser(newSignedInUserObject, null);
         }
     }
 

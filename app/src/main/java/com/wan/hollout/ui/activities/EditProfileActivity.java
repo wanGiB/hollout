@@ -368,9 +368,18 @@ public class EditProfileActivity extends BaseActivity implements View.OnClickLis
             public void done(Boolean result, Exception e) {
                 UiUtils.showSafeToast("Profile Update success!");
                 UiUtils.dismissProgressDialog(progressDialog);
+                refreshSearchCriteria();
                 finish();
             }
         });
     }
 
+    private void refreshSearchCriteria() {
+        ParseObject newSignedInUserObject = AuthUtil.getCurrentUser();
+        if (newSignedInUserObject != null) {
+            newSignedInUserObject.put(AppConstants.SEARCH_CRITERIA, HolloutUtils.constructSearch());
+            AuthUtil.updateCurrentLocalUser(newSignedInUserObject, null);
+        }
+    }
+    
 }

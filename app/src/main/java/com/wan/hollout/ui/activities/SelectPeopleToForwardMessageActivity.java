@@ -26,6 +26,8 @@ import com.wan.hollout.ui.adapters.SelectPeopleAdapter;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.ConversationsList;
+import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -68,6 +70,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
     private ParseObject signedInUser;
 
     private String from;
+    private String searchString = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -95,8 +98,9 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                searchView.showProgressBar();
                 people.clear();
-                searchChats(people.size(), newText);
+                searchChats(newText, people.size());
                 return true;
             }
         });
@@ -114,6 +118,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
         ChatMessage message = AppConstants.selectedMessages.get(0);
         for (ConversationItem conversationItem : AppConstants.selectedPeople) {
             sendNewMessage(message, conversationItem.getRecipient());
+            ConversationsList.checkAddToConversation(conversationItem.getRecipient());
         }
         UiUtils.dismissProgressDialog(progressDialog);
         UiUtils.showSafeToast("Message Forwarded!");
@@ -141,6 +146,7 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
             message.setFrom(signedInUserId.toLowerCase());
             message.setTimeStamp(System.currentTimeMillis());
             message.setMessageId(RandomStringUtils.random(6, true, true) + System.currentTimeMillis());
+            HolloutPreferences.updateConversationTime(recipientProps.getString(AppConstants.REAL_OBJECT_ID));
             ChatClient.getInstance().sendMessage(message, recipientProps);
         }
     }
@@ -167,7 +173,9 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
             AppConstants.selectedPeople.clear();
             AppConstants.selectedPeoplePositions.clear();
             selectPeopleAdapter.notifyDataSetChanged();
-            getSupportActionBar().setTitle("Forward Message to:");
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setTitle("Forward Message to:");
+            }
             doneFab.hide();
             return;
         }
@@ -187,8 +195,12 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
         peopleRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
-                if (!people.isEmpty()) {
-                    fetchConversations(people.size());
+                if (StringUtils.isNotEmpty(searchString)) {
+                    searchChats(searchString, people.size());
+                } else {
+                    if (people.size() >= 100) {
+                        fetchConversations(people.size());
+                    }
                 }
             }
         });
@@ -196,96 +208,90 @@ public class SelectPeopleToForwardMessageActivity extends BaseActivity {
 
     private void fetchConversations(final int skip) {
         final ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (signedInUser != null) {
-            List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-            if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
-                peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
-                List<String> exclusions = new ArrayList<>();
-                String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
-                if (!exclusions.contains(signedInUserId)) {
-                    exclusions.add(signedInUserId);
-                }
-                if (!exclusions.contains(from)) {
-                    exclusions.add(from);
-                }
-                peopleAndGroupsQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, exclusions);
-                peopleAndGroupsQuery.setLimit(100);
-                if (skip != 0) {
-                    peopleAndGroupsQuery.setSkip(skip);
-                }
-                peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
-                    @Override
-                    public void done(List<ParseObject> objects, ParseException e) {
-                        if (e == null) {
-                            if (objects != null && !objects.isEmpty()) {
-                                if (skip == 0) {
-                                    people.clear();
-                                }
-                                sortConversations();
-                                selectPeopleAdapter.setSearchString(null);
-                                loadAdapter(objects);
-                            }
-                        }
-                        peopleAndGroupsQuery.cancel();
-                    }
-                });
+        List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
+            List<String> signedInUserChatsCopy = new ArrayList<>(signedInUserChats);
+            if (signedInUserChatsCopy.contains(from)) {
+                signedInUserChatsCopy.remove(from);
             }
+            peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChatsCopy);
+            peopleAndGroupsQuery.setLimit(100);
+            if (skip != 0) {
+                peopleAndGroupsQuery.setSkip(skip);
+            }
+            peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
+
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    UiUtils.showView(progressWheel, false);
+                    MainActivity.materialSearchView.hideProgressBar();
+                    if (e == null) {
+                        if (objects != null && !objects.isEmpty()) {
+                            if (skip == 0) {
+                                people.clear();
+                            }
+                            sortConversations();
+                            loadAdapter(objects);
+                        }
+                    }
+                    peopleAndGroupsQuery.cancel();
+                }
+            });
         }
     }
 
-    private void searchChats(final int skip, final String searchString) {
+    private void searchChats(String searchString, final int skip) {
+        this.searchString = searchString;
+        if (StringUtils.isEmpty(searchString)) {
+            selectPeopleAdapter.setSearchString(null);
+            fetchConversations(0);
+            return;
+        }
         selectPeopleAdapter.setSearchString(searchString);
         final ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-        ParseObject signedInUser = AuthUtil.getCurrentUser();
-        if (signedInUser != null) {
-            List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
-            if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
-                peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
-                List<String> exclusions = new ArrayList<>();
-                String signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
-                if (!exclusions.contains(signedInUserId)) {
-                    exclusions.add(signedInUserId);
-                }
-                if (!exclusions.contains(from)) {
-                    exclusions.add(from);
-                }
-                peopleAndGroupsQuery.whereNotContainedIn(AppConstants.REAL_OBJECT_ID, exclusions);
-                peopleAndGroupsQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
-                peopleAndGroupsQuery.setLimit(100);
-                if (skip != 0) {
-                    peopleAndGroupsQuery.setSkip(skip);
-                }
-                peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
-                    @Override
-                    public void done(List<ParseObject> objects, ParseException e) {
-                        if (e == null) {
-                            if (objects != null && !objects.isEmpty()) {
-                                if (skip == 0) {
-                                    people.clear();
-                                }
-                                sortConversations();
-                                loadAdapter(objects);
-                            }
-                        }
-                        peopleAndGroupsQuery.cancel();
-                    }
-                });
+        List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
+            peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
+            peopleAndGroupsQuery.whereContains(AppConstants.SEARCH_CRITERIA, searchString.toLowerCase());
+            peopleAndGroupsQuery.setLimit(100);
+            if (skip != 0) {
+                peopleAndGroupsQuery.setSkip(skip);
             }
+            peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
+
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    searchView.hideProgressBar();
+                    UiUtils.showView(progressWheel, false);
+                    if (e == null) {
+                        if (objects != null && !objects.isEmpty()) {
+                            if (skip == 0) {
+                                people.clear();
+                            }
+                            sortConversations();
+                            loadAdapter(objects);
+                        }
+                    }
+                    peopleAndGroupsQuery.cancel();
+                }
+            });
         }
+
     }
 
     private void loadAdapter(List<ParseObject> users) {
         if (!users.isEmpty()) {
             for (ParseObject parseUser : users) {
-                ConversationItem conversationItem = new ConversationItem(parseUser);
-                if (!people.contains(conversationItem)) {
-                    people.add(conversationItem);
+                if (!parseUser.getString(AppConstants.REAL_OBJECT_ID)
+                        .equals(signedInUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                    ConversationItem conversationItem = new ConversationItem(parseUser);
+                    if (!people.contains(conversationItem)) {
+                        people.add(conversationItem);
+                    }
                 }
             }
             sortConversations();
         }
-        UiUtils.showView(progressWheel, false);
         selectPeopleAdapter.notifyDataSetChanged();
     }
 

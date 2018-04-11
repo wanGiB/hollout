@@ -2,7 +2,6 @@ package com.wan.hollout.ui.fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.NestedScrollView;
@@ -24,17 +23,16 @@ import com.parse.ParseQuery;
 import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.wan.hollout.R;
-import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
+import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.adapters.ConversationsAdapter;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.ConversationsList;
 import com.wan.hollout.utils.HolloutLogger;
-import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
@@ -70,7 +68,6 @@ public class ConversationsFragment extends BaseFragment {
 
     @BindView(R.id.no_hollout_users_text_view)
     HolloutTextView errorTextView;
-
 
     private List<ConversationItem> conversations = new ArrayList<>();
 
@@ -185,9 +182,12 @@ public class ConversationsFragment extends BaseFragment {
     private void loadAdapter(List<ParseObject> users) {
         if (!users.isEmpty()) {
             for (ParseObject parseUser : users) {
-                ConversationItem conversationItem = new ConversationItem(parseUser);
-                if (!conversations.contains(conversationItem)) {
-                    conversations.add(conversationItem);
+                if (!parseUser.getString(AppConstants.REAL_OBJECT_ID)
+                        .equals(signedInUser.getString(AppConstants.REAL_OBJECT_ID))) {
+                    ConversationItem conversationItem = new ConversationItem(parseUser);
+                    if (!conversations.contains(conversationItem)) {
+                        conversations.add(conversationItem);
+                    }
                 }
             }
             sortConversations();
@@ -201,7 +201,6 @@ public class ConversationsFragment extends BaseFragment {
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             peopleAndGroupsQuery.fromPin(AppConstants.CONVERSATIONS);
             peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
-            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             peopleAndGroupsQuery.setLimit(100);
             peopleAndGroupsQuery.findInBackground(new FindCallback<ParseObject>() {
                 @Override
@@ -238,7 +237,6 @@ public class ConversationsFragment extends BaseFragment {
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
-            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
             peopleAndGroupsQuery.setLimit(100);
             if (skip != 0) {
                 peopleAndGroupsQuery.setSkip(skip);
@@ -247,6 +245,7 @@ public class ConversationsFragment extends BaseFragment {
 
                 @Override
                 public void done(List<ParseObject> objects, ParseException e) {
+                    MainActivity.materialSearchView.hideProgressBar();
                     if (e == null) {
                         if (objects != null && !objects.isEmpty()) {
                             if (skip == 0) {
@@ -406,17 +405,17 @@ public class ConversationsFragment extends BaseFragment {
     }
 
     private void searchChats(String searchString, final int skip) {
-        if (StringUtils.isNotEmpty(searchString)) {
-            conversationsAdapter.setSearchString(searchString);
-        } else {
+        if (StringUtils.isEmpty(searchString)) {
             conversationsAdapter.setSearchString(null);
+            fetchConversations(0);
+            return;
         }
+        conversationsAdapter.setSearchString(searchString);
         final ParseQuery<ParseObject> peopleAndGroupsQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
         List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             peopleAndGroupsQuery.whereContainedIn(AppConstants.REAL_OBJECT_ID, signedInUserChats);
-            peopleAndGroupsQuery.whereNotEqualTo(AppConstants.REAL_OBJECT_ID, signedInUser.getString(AppConstants.REAL_OBJECT_ID));
-            peopleAndGroupsQuery.whereContains(AppConstants.APP_USER_DISPLAY_NAME, searchString.toLowerCase());
+            peopleAndGroupsQuery.whereContains(AppConstants.SEARCH_CRITERIA, searchString.toLowerCase());
             peopleAndGroupsQuery.setLimit(100);
             if (skip != 0) {
                 peopleAndGroupsQuery.setSkip(skip);
@@ -449,11 +448,11 @@ public class ConversationsFragment extends BaseFragment {
                     }
                     peopleAndGroupsQuery.cancel();
                 }
-
             });
         } else {
             UiUtils.toggleFlipperState(contentFlipper, 1);
         }
+
     }
 
 }

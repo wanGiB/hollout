@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
+import android.text.TextUtils;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -40,6 +41,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import static com.wan.hollout.utils.HolloutUtils.constructSearch;
 
 /**
  * @author Wan Clem
@@ -272,6 +275,7 @@ public class AppInstanceDetectionService extends JobIntentService {
         @Override
         protected Void doInBackground(final Location... params) {
             Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+            signedInUser = AuthUtil.getCurrentUser();
             // Get the current location from the input parameter list
             final Location loc = params[0];
             if (signedInUser != null) {
@@ -315,6 +319,7 @@ public class AppInstanceDetectionService extends JobIntentService {
                     signedInUser.put(AppConstants.APP_USER_ADMIN_AREA, HolloutUtils.stripDollar(adminAddress));
                 }
             }
+            signedInUser.put(AppConstants.SEARCH_CRITERIA, constructSearch());
             updateSignedInUserProps(true);
             return null;
         }
