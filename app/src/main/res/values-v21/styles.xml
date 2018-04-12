@@ -24,4 +24,8 @@
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
+    <style name="Theme.MaterialSheetFab" parent="Theme.MaterialSheetFab.Base">
+        <item name="android:statusBarColor">?colorPrimaryDark</item>
+    </style>
+
 </resources>

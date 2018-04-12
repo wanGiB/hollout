@@ -306,5 +306,7 @@
     <color name="default_inactive_item_color">#9e9e9e</color>
     <color name="colorBackgroundHighlightWhite">#8dffffff</color>
 
+    <color name="text_black_87">#de000000</color>
+    <color name="text_white_87">#deFFFFFF</color>
 
 </resources>

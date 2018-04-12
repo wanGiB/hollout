@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="icons">
+        <item>@drawable/ic_format_quote_white_36dp</item>
+        <item>@drawable/ic_directions_run_white_24dp</item>
+        <item>@drawable/ic_event_available_white_24dp</item>
+    </array>
+    <array name="colors">
+        <item>@android:color/holo_blue_light</item>
+        <item>@android:color/holo_red_light</item>
+        <item>@android:color/holo_purple</item>
+    </array>
+</resources>

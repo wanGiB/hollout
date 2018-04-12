@@ -132,4 +132,19 @@
     <dimen name="main_content_height">50dp</dimen>
     <dimen name="centre_content_width">110dp</dimen>
 
+    <dimen name="keyline_spacing">16dp</dimen>
+
+    <dimen name="fab_spacing">0dp</dimen>
+    <dimen name="fab_list_spacing">88dp</dimen>
+
+    <dimen name="sheet_width">210dp</dimen>
+    <dimen name="sheet_spacing">10dp</dimen>
+    <dimen name="sheet_item_spacing">@dimen/keyline_spacing</dimen>
+    <dimen name="sheet_item_image_spacing">24dp</dimen>
+    <dimen name="sheet_item_textsize">16sp</dimen>
+
+    <color name="background_card">#fff</color>
+    <color name="background_snackbar">#323232</color>
+    <dimen name="fab_elevation">4dp</dimen>
+    <dimen name="fab_sheet_elevation">0dp</dimen>
 </resources>

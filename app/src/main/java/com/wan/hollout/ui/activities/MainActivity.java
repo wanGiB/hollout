@@ -55,6 +55,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.gordonwong.materialsheetfab.MaterialSheetFab;
+import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
@@ -69,6 +71,7 @@ import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.NearbyPeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.services.TimeChangeDetectionService;
+import com.wan.hollout.ui.widgets.Fab;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
@@ -109,7 +112,7 @@ import static com.wan.hollout.utils.UiUtils.showView;
 @SuppressWarnings("RedundantCast")
 @SuppressLint("StaticFieldLeak")
 public class MainActivity extends BaseActivity
-        implements ActivityCompat.OnRequestPermissionsResultCallback {
+        implements ActivityCompat.OnRequestPermissionsResultCallback, View.OnClickListener {
 
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
@@ -183,7 +186,10 @@ public class MainActivity extends BaseActivity
     public static Vibrator vibrator;
     private ProgressDialog deleteConversationProgressDialog;
 
-    ParseObject signedInUserObject;
+    private ParseObject signedInUserObject;
+
+    private MaterialSheetFab materialSheetFab;
+    private int statusBarColor;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -196,6 +202,7 @@ public class MainActivity extends BaseActivity
         actionModeBar = findViewById(R.id.action_mode_bar);
         materialSearchView = findViewById(R.id.search_view);
         setSupportActionBar(toolbar);
+        setupFab();
         signedInUserObject = AuthUtil.getCurrentUser();
         loadSignedInUserImage(signedInUserObject);
         Adapter adapter = setupViewPagerAdapter(viewPager);
@@ -955,6 +962,12 @@ public class MainActivity extends BaseActivity
             destroyActionMode();
             return;
         }
+
+        if (materialSheetFab.isSheetVisible()) {
+            materialSheetFab.hideSheet();
+            return;
+        }
+
         if (viewPager.getCurrentItem() != 0) {
             viewPager.setCurrentItem(0);
             return;
@@ -967,11 +980,66 @@ public class MainActivity extends BaseActivity
 
         if (materialSearchView.isSearchOpen()) {
             materialSearchView.closeSearch();
-//            UiUtils.showView(floatingActionButton, true);
             return;
         }
 
         super.onBackPressed();
+    }
+
+    /**
+     * Sets up the Floating action button.
+     */
+    private void setupFab() {
+        Fab fab = (Fab) findViewById(R.id.fab);
+        View sheetView = findViewById(R.id.fab_sheet);
+        View overlay = findViewById(R.id.overlay);
+        int sheetColor = getResources().getColor(R.color.background_card);
+        int fabColor = getResources().getColor(R.color.colorAccent);
+
+        // Create material sheet FAB
+        materialSheetFab = new MaterialSheetFab<>(fab, sheetView, overlay, sheetColor, fabColor);
+
+        // Set material sheet event listener
+        materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
+
+            @Override
+            public void onShowSheet() {
+                // Save current status bar color
+                statusBarColor = getStatusBarColor();
+                // Set darker status bar color to match the dim overlay
+                setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
+            }
+
+            @Override
+            public void onHideSheet() {
+                // Restore status bar color
+                setStatusBarColor(statusBarColor);
+            }
+
+        });
+
+        UiUtils.tintImageView((ImageView) findViewById(R.id.stories_icon), ContextCompat.getColor(this, R.color.hollout_color_one));
+        UiUtils.tintImageView((ImageView) findViewById(R.id.workout_icon), ContextCompat.getColor(this, R.color.hollout_color_three));
+        UiUtils.tintImageView((ImageView) findViewById(R.id.event_icon), ContextCompat.getColor(this, R.color.hollout_color_four));
+
+        // Set material sheet item click listeners
+        findViewById(R.id.fab_sheet_item_new_story).setOnClickListener(this);
+        findViewById(R.id.fab_sheet_item_new_workout_request).setOnClickListener(this);
+        findViewById(R.id.fab_sheet_item_new_event_invite).setOnClickListener(this);
+
+    }
+
+    private int getStatusBarColor() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return getWindow().getStatusBarColor();
+        }
+        return 0;
+    }
+
+    private void setStatusBarColor(int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setStatusBarColor(color);
+        }
     }
 
     public static void destroyActionMode() {
@@ -1258,6 +1326,11 @@ public class MainActivity extends BaseActivity
         if (AppConstants.selectedPeople.isEmpty()) {
             destroyActionMode();
         }
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 
     @SuppressWarnings("RedundantCast")

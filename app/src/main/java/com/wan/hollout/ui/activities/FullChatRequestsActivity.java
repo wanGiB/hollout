@@ -169,13 +169,16 @@ public class FullChatRequestsActivity extends BaseActivity {
     private void loadAdapter(List<ParseObject> objects) {
         final List<ParseObject> deletables = new ArrayList<>();
         for (ParseObject parseObject : objects) {
-            String userAppDisplayName = parseObject.getString(AppConstants.APP_USER_DISPLAY_NAME);
-            if (StringUtils.isNotEmpty(userAppDisplayName)) {
-                if (!chatRequests.contains(parseObject)) {
-                    chatRequests.add(parseObject);
+            ParseObject feedCreator = parseObject.getParseObject(AppConstants.FEED_CREATOR);
+            if (feedCreator != null) {
+                String userAppDisplayName = feedCreator.getString(AppConstants.APP_USER_DISPLAY_NAME);
+                if (StringUtils.isNotEmpty(userAppDisplayName)) {
+                    if (!chatRequests.contains(parseObject)) {
+                        chatRequests.add(parseObject);
+                    }
+                } else {
+                    deletables.add(parseObject);
                 }
-            } else {
-                deletables.add(parseObject);
             }
         }
         chatRequestsAdapter.notifyDataSetChanged();
@@ -186,7 +189,7 @@ public class FullChatRequestsActivity extends BaseActivity {
             ParseObject.deleteAllInBackground(deletables, new DeleteCallback() {
                 @Override
                 public void done(ParseException e) {
-                    if (chatRequests.containsAll(deletables)){
+                    if (chatRequests.containsAll(deletables)) {
                         chatRequests.removeAll(deletables);
                     }
                     deletables.clear();

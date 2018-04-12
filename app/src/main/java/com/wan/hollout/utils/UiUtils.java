@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -611,7 +612,7 @@ public class UiUtils {
      * @param color     tint color
      */
     public static void tintImageView(ImageView imageView, int color) {
-        imageView.setColorFilter(color);
+        imageView.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
     }
 
     public static void showKeyboard(View trigger) {

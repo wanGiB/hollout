@@ -17,8 +17,8 @@ android {
         applicationId "com.wan.hollout"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 68
-        versionName "3.5.8"
+        versionCode 69
+        versionName "3.5.9"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true //important
@@ -134,6 +134,7 @@ dependencies {
     compile "com.hanks:htextview-scale:${htextview_version}"
     compile 'com.vanniktech:emoji-ios:0.5.1'
     compile "com.github.nisrulz:sensey:${sensey_version}"
+    compile 'com.gordonwong:material-sheet-fab:1.2.1'
 }
 
 apply plugin: 'com.google.gms.google-services'
