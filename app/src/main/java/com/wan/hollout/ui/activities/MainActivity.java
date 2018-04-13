@@ -73,7 +73,7 @@ import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.NearbyPeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.services.TimeChangeDetectionService;
-import com.wan.hollout.ui.widgets.Fab;
+import com.wan.hollout.ui.widgets.HolloutFab;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
@@ -939,7 +939,10 @@ public class MainActivity extends BaseActivity
         String currentAppVersion = HolloutUtils.getAppVersionName();
         String remoteAppVersion = FirebaseUtils.getRemoteConfig().getString(AppConstants.LATEST_APP_VERSION);
         if (currentAppVersion != null && remoteAppVersion != null) {
-            if (!currentAppVersion.equals(remoteAppVersion)) {
+            long currentAppVersionLong = Long.parseLong(StringUtils.deleteWhitespace(StringUtils.strip(currentAppVersion.replace(".", ""))));
+            long remoteAppVersionLong = Long.parseLong(StringUtils.deleteWhitespace(StringUtils.strip(remoteAppVersion.replace(".", ""))));
+            HolloutLogger.d("AppVersionsTag", "CurrentAppVersion = " + currentAppVersionLong + " and Remote App Version = " + remoteAppVersionLong);
+            if (remoteAppVersionLong > currentAppVersionLong) {
                 //New App Version is available
                 Snackbar.make(rootLayout, "A New Version of Hollout is available",
                         Snackbar.LENGTH_INDEFINITE).setAction("UPDATE", new View.OnClickListener() {
@@ -1055,14 +1058,14 @@ public class MainActivity extends BaseActivity
      * Sets up the Floating action button.
      */
     private void setupFab() {
-        Fab fab = (Fab) findViewById(R.id.fab);
+        HolloutFab holloutFab = (HolloutFab) findViewById(R.id.fab);
         View sheetView = findViewById(R.id.fab_sheet);
         View overlay = findViewById(R.id.overlay);
         int sheetColor = getResources().getColor(R.color.background_card);
         int fabColor = getResources().getColor(R.color.colorAccent);
 
         // Create material sheet FAB
-        materialSheetFab = new MaterialSheetFab<>(fab, sheetView, overlay, sheetColor, fabColor);
+        materialSheetFab = new MaterialSheetFab<>(holloutFab, sheetView, overlay, sheetColor, fabColor);
 
         // Set material sheet event listener
         materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
@@ -1092,6 +1095,9 @@ public class MainActivity extends BaseActivity
         findViewById(R.id.fab_sheet_item_new_workout_request).setOnClickListener(this);
         findViewById(R.id.fab_sheet_item_new_event_invite).setOnClickListener(this);
 
+        //TODO: Hide Fab for now until the forms for Event, Workout Requests and Stories are all designed
+        holloutFab.hide();
+        UiUtils.showView(holloutFab, false);
     }
 
     private int getStatusBarColor() {

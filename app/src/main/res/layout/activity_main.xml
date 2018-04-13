@@ -178,7 +178,7 @@
         android:layout_height="match_parent">
 
         <!-- Your FAB implementation -->
-        <com.wan.hollout.ui.widgets.Fab
+        <com.wan.hollout.ui.widgets.HolloutFab
             android:id="@+id/fab"
             style="@style/Widget.MaterialSheetFab.Fab"
             android:layout_alignParentBottom="true"

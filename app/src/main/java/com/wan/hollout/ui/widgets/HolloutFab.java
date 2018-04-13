@@ -16,19 +16,19 @@ import com.wan.hollout.R;
  * @author Wan Clem
  */
 
-public class Fab extends FloatingActionButton implements AnimatedFab {
+public class HolloutFab extends FloatingActionButton implements AnimatedFab {
 
     private static final int FAB_ANIM_DURATION = 200;
 
-    public Fab(Context context) {
+    public HolloutFab(Context context) {
         super(context);
     }
 
-    public Fab(Context context, AttributeSet attrs) {
+    public HolloutFab(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public Fab(Context context, AttributeSet attrs, int defStyleAttr) {
+    public HolloutFab(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
