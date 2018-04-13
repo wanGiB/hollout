@@ -615,6 +615,10 @@ public class UiUtils {
         imageView.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
     }
 
+    public static void tintImageViewNoMode(ImageView imageView, int color) {
+        imageView.setColorFilter(color);
+    }
+
     public static void showKeyboard(View trigger) {
         InputMethodManager imm = (InputMethodManager) ApplicationLoader.getInstance().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(trigger, InputMethodManager.SHOW_FORCED);
@@ -662,7 +666,7 @@ public class UiUtils {
         additionalPhotosRecyclerView.setLayoutManager(horizontalLayoutManager);
         additionalPhotosRecyclerView.setAdapter(featuredPhotosCircleAdapter);
 
-        tintImageView(photoView, ContextCompat.getColor(activity, R.color.image_tint));
+        tintImageViewNoMode(photoView, ContextCompat.getColor(activity, R.color.image_tint));
 
         View.OnClickListener onClickListener = new View.OnClickListener() {
 

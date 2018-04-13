@@ -1,13 +1,19 @@
 package com.wan.hollout.models;
 
+import android.support.annotation.NonNull;
+
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.wan.hollout.utils.AppConstants;
+import com.wan.hollout.utils.AuthUtil;
+
+import org.apache.commons.lang3.builder.CompareToBuilder;
 
 /**
  * @author Wan Clem
  */
 
-public class NearbyPerson{
+public class NearbyPerson implements Comparable<NearbyPerson> {
 
     private ParseObject person;
 
@@ -45,6 +51,20 @@ public class NearbyPerson{
         }
         NearbyPerson another = (NearbyPerson) obj;
         return getPersonId().equals(another.getPersonId());
+    }
+
+    @Override
+    public int compareTo(@NonNull NearbyPerson o) {
+        ParseObject otherPerson = o.getPerson();
+        ParseObject signedInUser = AuthUtil.getCurrentUser();
+        if (otherPerson != null && signedInUser != null) {
+            ParseGeoPoint otherPersonGeoPoint = otherPerson.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+            ParseGeoPoint signedInUserParseGeoPoint = signedInUser.getParseGeoPoint(AppConstants.APP_USER_GEO_POINT);
+            if (otherPersonGeoPoint != null && signedInUserParseGeoPoint != null) {
+                return CompareToBuilder.reflectionCompare(signedInUserParseGeoPoint, otherPersonGeoPoint);
+            }
+        }
+        return 0;
     }
 
 }

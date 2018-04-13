@@ -231,12 +231,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 userLocationAndDistanceView.setText("");
 
             } else {
-                if (UiUtils.canShowLocation(parseUser, AppConstants.ENTITY_TYPE_CLOSEBY, new HashMap<String, Object>())) {
-                    String formattedDistance = HolloutUtils.formatDistanceToUser(distanceToUser);
-                    userLocationAndDistanceView.setText(formattedDistance + "KM");
-                } else {
-                    userLocationAndDistanceView.setText("");
-                }
+                String formattedDistance = HolloutUtils.formatDistanceToUser(distanceToUser);
+                userLocationAndDistanceView.setText(formattedDistance + "KM");
             }
 
             String userStatus = parseUser.getString(AppConstants.APP_USER_STATUS);
