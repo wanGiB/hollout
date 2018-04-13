@@ -15,8 +15,9 @@ public class FontUtils {
     private static String FONT_BOLD = "Roboto-Bold.ttf";
     private static String FONT_LIGHT = "Roboto-Light.ttf";
     private static String FONT_MEDIUM = "Roboto-Medium.ttf";
-    private static String DYSPEPSIA = "colophon.ttf";
+    private static String COLOPHON = "colophon.ttf";
     private static String FONT_AWESOME = "fontawesome-webfont.ttf";
+    private static String AVENIR_MEDIUM = "AvenirLTStd-Medium.otf";
 
     private static Map<String, Typeface> sCachedFonts = new HashMap<>();
 
@@ -31,6 +32,7 @@ public class FontUtils {
     public static Typeface selectTypeface(Context context, int textStyle) {
         String RobotoPrefix = "fonts/";
         String font;
+
         switch (textStyle) {
             case 0:
                 font = FontUtils.FONT_REGULAR;
@@ -46,7 +48,7 @@ public class FontUtils {
                 font = FontUtils.FONT_MEDIUM;
                 break;
             case 6:
-                font = FontUtils.DYSPEPSIA;
+                font = FontUtils.COLOPHON;
                 break;
             case 7:
                 font = FontUtils.FONT_AWESOME;
@@ -55,11 +57,18 @@ public class FontUtils {
                 return Typeface.DEFAULT;
             case 9:
                 return Typeface.DEFAULT_BOLD;
+            case 10:
+                font = FontUtils.AVENIR_MEDIUM;
+                break;
+            case 11:
+                return Typeface.create(Typeface.DEFAULT, Typeface.ITALIC);
             default:
                 font = FontUtils.FONT_REGULAR;
                 break;
         }
+
         return FontUtils.getTypeface(context, RobotoPrefix + font);
+
     }
 
 }

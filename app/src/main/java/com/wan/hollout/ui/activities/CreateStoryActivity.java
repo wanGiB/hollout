@@ -9,17 +9,21 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.ViewFlipper;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
-import com.vanniktech.emoji.EmojiEditText;
 import com.vanniktech.emoji.EmojiPopup;
 import com.vanniktech.emoji.listeners.OnEmojiPopupDismissListener;
 import com.vanniktech.emoji.listeners.OnEmojiPopupShownListener;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardOpenListener;
 import com.wan.hollout.R;
+import com.wan.hollout.ui.widgets.StoryBox;
 import com.wan.hollout.utils.RandomColor;
 import com.wan.hollout.utils.UiUtils;
+import com.wonderkiln.camerakit.CameraView;
+
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -30,11 +34,17 @@ import butterknife.ButterKnife;
 
 public class CreateStoryActivity extends BaseActivity implements View.OnClickListener {
 
+    @BindView(R.id.content_flipper)
+    ViewFlipper contentFlipper;
+
     @BindView(R.id.open_emoji)
     ImageView openEmojiView;
 
     @BindView(R.id.change_color)
     ImageView changeStoryBoardColorView;
+
+    @BindView(R.id.change_typeface)
+    ImageView changeTypefaceView;
 
     @BindView(R.id.camera_container_background)
     View cameraContainerBackgroundView;
@@ -46,10 +56,15 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
     View rootView;
 
     @BindView(R.id.story_box)
-    EmojiEditText storyBox;
+    StoryBox storyBox;
+
+    @BindView(R.id.camera)
+    CameraView cameraView;
 
     private EmojiPopup emojiPopup;
     private RandomColor randomColor;
+
+    private Random random;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,16 +72,26 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
         setContentView(R.layout.activity_create_story);
         ButterKnife.bind(this);
         setupEmojiPopup();
-
         randomColor = new RandomColor();
-
+        random = new Random();
         useCameraIconView.setImageDrawable(new IconicsDrawable(this, GoogleMaterial.Icon.gmd_camera)
                 .sizeDp(16).color(Color.WHITE));
-
         openEmojiView.setOnClickListener(this);
-
         changeStoryBoardColorView.setOnClickListener(this);
+        changeTypefaceView.setOnClickListener(this);
+        cameraContainerBackgroundView.setOnClickListener(this);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cameraView.start();
+    }
+
+    @Override
+    protected void onPause() {
+        cameraView.stop();
+        super.onPause();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -111,6 +136,12 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
             case R.id.change_color:
                 randomizeColor();
                 break;
+            case R.id.change_typeface:
+                storyBox.applyCustomFont(this, random.nextInt(12));
+                break;
+            case R.id.camera_container_background:
+                UiUtils.toggleFlipperState(contentFlipper, 1);
+                break;
         }
     }
 
@@ -136,6 +167,11 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
             emojiPopup.dismiss();
             return;
         }
+        if (contentFlipper.getDisplayedChild() != 0) {
+            contentFlipper.setDisplayedChild(0);
+            return;
+        }
+
         super.onBackPressed();
     }
 
