@@ -309,4 +309,5 @@
     <color name="text_black_87">#de000000</color>
     <color name="text_white_87">#deFFFFFF</color>
 
+    <color name="story_background_color">#6e88ab</color>
 </resources>

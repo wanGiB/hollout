@@ -212,6 +212,11 @@
             android:windowSoftInputMode="stateHidden" />
         <activity android:name=".ui.activities.ProfilePreviewActivity" />
 
+        <activity
+            android:name=".ui.activities.CreateStoryActivity"
+            android:configChanges="orientation|screenLayout|screenSize|keyboard"
+            android:windowSoftInputMode="stateHidden" />
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.wan.hollout.provider"

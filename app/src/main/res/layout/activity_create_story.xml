@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/story_background_color"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/camera_container_background"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/use_camera_instead"
+            android:textColor="@color/whitesmoke"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/use_camera_instead_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_menu_camera"
+            tools:ignore="ContentDescription" />
+
+    </LinearLayout>
+
+    <com.vanniktech.emoji.EmojiEditText
+        android:id="@+id/story_box"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/transparent"
+        android:ems="10"
+        android:enabled="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:hint="@string/type_story"
+        android:inputType="textMultiLine"
+        android:isScrollContainer="true"
+        android:maxLines="10"
+        android:paddingEnd="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingStart="10dp"
+        android:textColor="@color/white"
+        android:textColorHint="@color/em_white_87"
+        android:textIsSelectable="true"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:emojiSize="40dp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/open_emoji"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_insert_emoticon_white_48dp"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/change_typeface"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_toEndOf="@+id/open_emoji"
+            android:layout_toRightOf="@id/open_emoji"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_title_white_48dp"
+            tools:ignore="ContentDescription" />
+
+        <ImageView
+            android:id="@+id/change_color"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_toEndOf="@+id/change_typeface"
+            android:layout_toRightOf="@id/change_typeface"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:focusable="true"
+            android:src="@drawable/ic_color_lens_white_48dp"
+            tools:ignore="ContentDescription" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/send_text_only_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:src="@drawable/ic_ami_send_24dp"
+            app:fabSize="normal"
+            app:rippleColor="@color/colorAccentDark"
+            app:useCompatPadding="false" />
+
+    </RelativeLayout>
+
+</LinearLayout>

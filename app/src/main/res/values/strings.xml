@@ -359,4 +359,6 @@
     <string name="activities">Activities</string>
     <string name="more">MORE</string>
     <string name="new_story">New Story</string>
+    <string name="type_story">Type Story</string>
+    <string name="use_camera_instead">Use Camera Instead</string>
 </resources>

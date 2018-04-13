@@ -1094,10 +1094,6 @@ public class MainActivity extends BaseActivity
         findViewById(R.id.fab_sheet_item_new_story).setOnClickListener(this);
         findViewById(R.id.fab_sheet_item_new_workout_request).setOnClickListener(this);
         findViewById(R.id.fab_sheet_item_new_event_invite).setOnClickListener(this);
-
-        //TODO: Hide Fab for now until the forms for Event, Workout Requests and Stories are all designed
-        holloutFab.hide();
-        UiUtils.showView(holloutFab, false);
     }
 
     private int getStatusBarColor() {
@@ -1401,7 +1397,15 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onClick(View v) {
-
+        if (materialSheetFab.isSheetVisible()) {
+            materialSheetFab.hideSheet();
+        }
+        switch (v.getId()) {
+            case R.id.fab_sheet_item_new_story:
+                Intent storiesIntent = new Intent(MainActivity.this, CreateStoryActivity.class);
+                startActivity(storiesIntent);
+                break;
+        }
     }
 
     @SuppressWarnings("RedundantCast")
