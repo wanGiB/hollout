@@ -909,7 +909,30 @@ public class MainActivity extends BaseActivity
         tryAskForPermissions();
         fetchMyPhotoLikes();
         checkIfPhotoIsBlurredOrUnclear();
-        checkIsAppLatest();
+        fetchNewConfigData();
+    }
+
+    public void fetchNewConfigData() {
+        long cacheExpiration = 3600; // 1 hour in seconds.
+        // If your app is using developer mode, cacheExpiration is set to 0, so each fetch will
+        // retrieve values from the service.
+        if (FirebaseUtils.getRemoteConfig().getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 0;
+        }
+        FirebaseUtils.getRemoteConfig().fetch(cacheExpiration).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    // After config data is successfully fetched, it must be activated before newly fetched
+                    // values are returned.
+                    FirebaseUtils.getRemoteConfig().activateFetched();
+                    checkIsAppLatest();
+                } else {
+                    HolloutLogger.d("FirebaseRemoteConfig", "Failed to fetch remote config data");
+                    checkIsAppLatest();
+                }
+            }
+        });
     }
 
     private void checkIsAppLatest() {
