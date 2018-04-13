@@ -3,8 +3,11 @@ package com.wan.hollout.receivers;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.parse.ParseObject;
@@ -14,6 +17,7 @@ import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FirebaseUtils;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 
 /**
@@ -49,11 +53,33 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
                         }
                     }
                 }
-
+                fetchNewConfigData();
             }
         } catch (IllegalArgumentException | IllegalStateException | NullPointerException ignored) {
 
         }
+    }
+
+    public void fetchNewConfigData() {
+        long cacheExpiration = 3600; // 1 hour in seconds.
+        // If your app is using developer mode, cacheExpiration is set to 0, so each fetch will
+        // retrieve values from the service.
+        if (FirebaseUtils.getRemoteConfig().getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 0;
+        }
+        FirebaseUtils.getRemoteConfig().fetch(cacheExpiration).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    // After config data is successfully fetched, it must be activated before newly fetched
+                    // values are returned.
+                    FirebaseUtils.getRemoteConfig().activateFetched();
+
+                } else {
+                    HolloutLogger.d("FirebaseRemoteConfig", "Failed to fetch remote config data");
+                }
+            }
+        });
     }
 
 }
