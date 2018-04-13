@@ -10,6 +10,9 @@ import android.support.multidex.MultiDex;
 import android.support.v4.app.JobIntentService;
 
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.parse.LiveQueryException;
 import com.parse.Parse;
 import com.parse.ParseLiveQueryClient;
@@ -31,9 +34,9 @@ import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AppKeys;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
-import com.wan.hollout.utils.HolloutUtils;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -82,6 +85,7 @@ public class ApplicationLoader extends Application {
         defaultSystemEmojiPref();
         checkAndRegEventBus();
         setupEmoji();
+        fetchNewConfigData();
     }
 
     private void setupEmoji() {
@@ -142,11 +146,12 @@ public class ApplicationLoader extends Application {
     }
 
     private void configureParse() {
+        FirebaseRemoteConfig firebaseRemoteConfig = FirebaseUtils.getRemoteConfig();
         Parse.enableLocalDatastore(this);
         Parse.initialize(new Parse.Configuration.Builder(ApplicationLoader.this)
-                .applicationId(AppKeys.APPLICATION_ID)
-                .clientKey(AppKeys.SERVER_CLIENT_KEY)
-                .server(AppKeys.SERVER_ENDPOINT)
+                .applicationId(firebaseRemoteConfig.getString(AppConstants.PARSE_APPLICATION_ID))
+                .clientKey(firebaseRemoteConfig.getString(AppConstants.PARSE_SERVER_CLIENT_KEY))
+                .server(firebaseRemoteConfig.getString(AppConstants.PARSE_SERVER_ENDPOINT))
                 .enableLocalDataStore()
                 .clientBuilder(getOkHttpClientBuilder())
                 .build());
@@ -195,6 +200,27 @@ public class ApplicationLoader extends Application {
                 }
             }).start();
         }
+    }
+
+    public static void fetchNewConfigData() {
+        long cacheExpiration = 3600; // 1 hour in seconds.
+        // If your app is using developer mode, cacheExpiration is set to 0, so each fetch will
+        // retrieve values from the service.
+        if (FirebaseUtils.getRemoteConfig().getInfo().getConfigSettings().isDeveloperModeEnabled()) {
+            cacheExpiration = 0;
+        }
+        FirebaseUtils.getRemoteConfig().fetch(cacheExpiration).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    // After config data is successfully fetched, it must be activated before newly fetched
+                    // values are returned.
+                    FirebaseUtils.getRemoteConfig().activateFetched();
+                } else {
+                    HolloutLogger.d("FirebaseRemoteConfig", "Failed to fetch remote config data");
+                }
+            }
+        });
     }
 
     public static synchronized ApplicationLoader getInstance() {

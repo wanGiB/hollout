@@ -121,7 +121,11 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
                     usernameEntryView.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(userName),
                             ContextCompat.getColor(activity, R.color.hollout_color_three)));
                 } else {
-                    usernameEntryView.setText(WordUtils.capitalize(userName));
+                    if (StringUtils.isNotEmpty(userName)) {
+                        usernameEntryView.setText(WordUtils.capitalize(userName));
+                    } else {
+                        usernameEntryView.setText(" ");
+                    }
                 }
                 // displaying the first letter of From in icon text
             }
@@ -141,12 +145,16 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
             List<String> aboutSignedInUser = signedInUser.getList(AppConstants.ABOUT_USER);
             if (aboutUser != null && aboutSignedInUser != null) {
                 try {
-                    String aboutUserString = TextUtils.join(",",aboutUser);
+                    String aboutUserString = TextUtils.join(",", aboutUser);
                     if (StringUtils.isNotEmpty(searchString)) {
                         aboutPerson.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(aboutUserString),
                                 ContextCompat.getColor(activity, R.color.hollout_color_three)));
                     } else {
-                        aboutPerson.setText(WordUtils.capitalize(aboutUserString));
+                        if (StringUtils.isNotEmpty(aboutUserString)) {
+                            aboutPerson.setText(WordUtils.capitalize(aboutUserString));
+                        } else {
+                            aboutPerson.setText(" ");
+                        }
                     }
                 } catch (NullPointerException ignored) {
 

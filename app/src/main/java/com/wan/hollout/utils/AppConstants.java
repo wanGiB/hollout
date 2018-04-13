@@ -229,6 +229,11 @@ public class AppConstants {
     public static final String USER_LAST_SEARCH = "user_last_search";
     public static final String SEARCH_CRITERIA = "search_criteria";
 
+    public static final String PARSE_APPLICATION_ID = "parse_application_id";
+    public static final String PARSE_SERVER_CLIENT_KEY = "parse_server_client_key";
+    public static final String PARSE_SERVER_ENDPOINT = "parse_server_endpoint";
+    public static final String LATEST_APP_VERSION = "latest_app_version";
+
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 
     static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;

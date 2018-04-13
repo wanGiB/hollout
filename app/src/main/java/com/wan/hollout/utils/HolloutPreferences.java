@@ -36,6 +36,30 @@ public class HolloutPreferences {
         return getInstance().edit().putBoolean(AppConstants.CAN_ACCESS_LOCATION, false).commit();
     }
 
+    public static String getApplicationId() {
+        return getInstance().getString(AppKeys.APPLICATION_ID, null);
+    }
+
+    public static void setApplicationId(String newApplicationId) {
+        getInstance().edit().putString(AppKeys.APPLICATION_ID, newApplicationId).commit();
+    }
+
+    public static String getServerClientKey() {
+        return getInstance().getString(AppKeys.SERVER_CLIENT_KEY, null);
+    }
+
+    public static void setServerClientKey(String newClientKey) {
+        getInstance().edit().putString(AppKeys.SERVER_CLIENT_KEY, newClientKey).commit();
+    }
+
+    public static String getServerEndPoint() {
+        return getInstance().getString(AppKeys.SERVER_ENDPOINT, null);
+    }
+
+    public static void settServerEndPoint(String newServerEndPoint) {
+        getInstance().edit().putString(AppKeys.SERVER_ENDPOINT, newServerEndPoint).commit();
+    }
+
     @SuppressLint("ApplySharedPref")
     public static void setCanAccessLocation() {
         getInstance().edit().putBoolean(AppConstants.CAN_ACCESS_LOCATION, true).commit();

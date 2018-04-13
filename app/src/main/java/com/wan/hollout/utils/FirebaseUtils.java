@@ -8,17 +8,23 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.wan.hollout.BuildConfig;
 import com.wan.hollout.eventbuses.FileUploadProgressEvent;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.tasks.TaskQueue;
 
+import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Wan Clem
@@ -110,6 +116,29 @@ public class FirebaseUtils {
 
     public static DatabaseReference getServerUpTimeRef() {
         return getRootRef().child(AppConstants.SERVER_UPTIME);
+    }
+
+    private static Map<String, Object> getRemoteConfigDefaults() {
+        return new HashMap<String, Object>() {{
+            put(AppConstants.PARSE_APPLICATION_ID, AppKeys.APPLICATION_ID);
+            put(AppConstants.PARSE_SERVER_CLIENT_KEY, AppKeys.SERVER_CLIENT_KEY);
+            put(AppConstants.PARSE_SERVER_ENDPOINT, AppKeys.SERVER_ENDPOINT);
+            String appVersion = HolloutUtils.getAppVersionName();
+            if (StringUtils.isNotEmpty(appVersion)) {
+                put(AppConstants.LATEST_APP_VERSION, appVersion);
+            }
+        }};
+    }
+
+    public static FirebaseRemoteConfig getRemoteConfig() {
+        FirebaseRemoteConfig remoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings.Builder firebaseRemoteConfigSettingsBuilder = new FirebaseRemoteConfigSettings.Builder();
+        if (BuildConfig.DEBUG) {
+            firebaseRemoteConfigSettingsBuilder.setDeveloperModeEnabled(true);
+        }
+        remoteConfig.setConfigSettings(firebaseRemoteConfigSettingsBuilder.build());
+        remoteConfig.setDefaults(getRemoteConfigDefaults());
+        return remoteConfig;
     }
 
 }

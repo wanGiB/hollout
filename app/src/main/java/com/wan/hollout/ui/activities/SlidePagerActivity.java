@@ -83,6 +83,7 @@ public class SlidePagerActivity extends AppCompatActivity {
         String title = getIntent().getStringExtra(AppConstants.EXTRA_TITLE);
 
         final String userId = getIntent().getStringExtra(AppConstants.EXTRA_USER_ID);
+
         signedInUser = AuthUtil.getCurrentUser();
 
         if (signedInUser != null) {
@@ -127,7 +128,10 @@ public class SlidePagerActivity extends AppCompatActivity {
                                 public void done(ParseException e) {
                                     //Send Push notification to user that I liked his photo
                                     if (userFirebaseCapture != null && userFirebaseCapture.get() != null) {
+                                        UiUtils.showSafeToast("Sending notification");
                                         JsonApiClient.sendFirebasePushNotification(userFirebaseCapture.get(), AppConstants.NOTIFICATION_TYPE_PHOTO_LIKE);
+                                    } else {
+                                        UiUtils.showSafeToast("Failed to send notification");
                                     }
                                 }
                             });

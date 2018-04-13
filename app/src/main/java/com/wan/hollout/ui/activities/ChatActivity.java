@@ -1061,6 +1061,15 @@ public class ChatActivity extends BaseActivity implements
 
         @Override
         public void onClick(View v) {
+            String signedInUserPhoto = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+            if (signedInUserPhoto == null) {
+                UiUtils.showSafeToast("Upload a profile photo first before sending message");
+                return;
+            }
+            if (!StringUtils.containsIgnoreCase(signedInUserPhoto, "firebase")) {
+                UiUtils.showSafeToast("Upload a profile photo first before sending message");
+                return;
+            }
             if (inputPanel.canRecord()) {
                 vibrateVibrator();
                 inputPanel.startRecorder();
@@ -2032,6 +2041,15 @@ public class ChatActivity extends BaseActivity implements
                             break;
                     }
                 } else if (o instanceof ReactionMessageEvent) {
+                    String signedInUserPhoto = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+                    if (signedInUserPhoto == null) {
+                        UiUtils.showSafeToast("Upload a profile photo first before sending message");
+                        return;
+                    }
+                    if (!StringUtils.containsIgnoreCase(signedInUserPhoto, "firebase")) {
+                        UiUtils.showSafeToast("Upload a profile photo first before sending message");
+                        return;
+                    }
                     ReactionMessageEvent reactionMessageEvent = (ReactionMessageEvent) o;
                     String reaction = reactionMessageEvent.getReaction();
                     ChatMessage chatMessage = new ChatMessage();
@@ -2041,6 +2059,15 @@ public class ChatActivity extends BaseActivity implements
                     checkAndAddNewMessage(chatMessage);
                     sendNewMessage(chatMessage);
                 } else if (o instanceof GifMessageEvent) {
+                    String signedInUserPhoto = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+                    if (signedInUserPhoto == null) {
+                        UiUtils.showSafeToast("Upload a profile photo first before sending message");
+                        return;
+                    }
+                    if (!StringUtils.containsIgnoreCase(signedInUserPhoto, "firebase")) {
+                        UiUtils.showSafeToast("Upload a profile photo first before sending message");
+                        return;
+                    }
                     GifMessageEvent gifMessageEvent = (GifMessageEvent) o;
                     ChatMessage chatMessage = new ChatMessage();
                     attachRequiredPropsToMessage(chatMessage, MessageType.GIF);

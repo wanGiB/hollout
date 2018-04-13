@@ -193,7 +193,8 @@
         <com.gordonwong.materialsheetfab.DimOverlayFrameLayout
             android:id="@+id/overlay"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:background="#7b000000" />
 
         <!-- Circular reveal container for the sheet -->
         <io.codetail.widget.RevealLinearLayout
@@ -216,11 +217,13 @@
                     android:orientation="vertical">
 
                     <LinearLayout
+                        android:id="@+id/fab_sheet_item_new_story"
                         style="@style/TextAppearance.MaterialSheetFab.Sheet.Item"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
+                        android:descendantFocusability="beforeDescendants"
                         android:focusable="true"
                         android:orientation="horizontal">
 
@@ -229,18 +232,25 @@
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:layout_gravity="center_vertical"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:src="@drawable/ic_format_quote_white_24dp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:descendantFocusability="beforeDescendants"
+                            android:focusable="false"
                             android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/fab_sheet_item_new_story"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+                                android:clickable="false"
+                                android:focusable="false"
+                                android:longClickable="false"
                                 android:paddingEnd="20dp"
                                 android:paddingLeft="20dp"
                                 android:paddingRight="20dp"
@@ -252,6 +262,8 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+                                android:clickable="false"
+                                android:focusable="false"
                                 android:paddingEnd="20dp"
                                 android:paddingLeft="20dp"
                                 android:paddingRight="20dp"
@@ -265,11 +277,13 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/fab_sheet_item_new_workout_request"
                         style="@style/TextAppearance.MaterialSheetFab.Sheet.Item"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
+                        android:descendantFocusability="beforeDescendants"
                         android:focusable="true"
                         android:orientation="horizontal">
 
@@ -278,18 +292,24 @@
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:layout_gravity="center_vertical"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:src="@drawable/ic_directions_run_white_24dp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:descendantFocusability="beforeDescendants"
+                            android:focusable="false"
                             android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/fab_sheet_item_new_workout_request"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+                                android:clickable="false"
+                                android:focusable="false"
                                 android:paddingEnd="20dp"
                                 android:paddingLeft="20dp"
                                 android:paddingRight="20dp"
@@ -301,7 +321,9 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+                                android:clickable="false"
                                 android:ellipsize="end"
+                                android:focusable="false"
                                 android:maxLines="1"
                                 android:paddingEnd="20dp"
                                 android:paddingLeft="20dp"
@@ -316,11 +338,13 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/fab_sheet_item_new_event_invite"
                         style="@style/TextAppearance.MaterialSheetFab.Sheet.Item"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
+                        android:descendantFocusability="beforeDescendants"
                         android:focusable="true"
                         android:orientation="horizontal">
 
@@ -329,18 +353,24 @@
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:layout_gravity="center_vertical"
+                            android:clickable="false"
+                            android:focusable="false"
                             android:src="@drawable/ic_event_available_white_24dp" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:descendantFocusability="beforeDescendants"
+                            android:focusable="false"
                             android:orientation="vertical">
 
                             <TextView
-                                android:id="@+id/fab_sheet_item_new_event_invite"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+                                android:clickable="false"
+                                android:focusable="false"
                                 android:paddingEnd="20dp"
                                 android:paddingLeft="20dp"
                                 android:paddingRight="20dp"
@@ -352,11 +382,13 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_gravity="center_vertical"
+                                android:clickable="false"
+                                android:focusable="false"
                                 android:paddingEnd="20dp"
                                 android:paddingLeft="20dp"
                                 android:paddingRight="20dp"
                                 android:paddingStart="20dp"
-                                android:text="Invite people to an event"
+                                android:text="Invite people nearby to an event"
                                 android:textColor="@color/grey500"
                                 android:textSize="12sp" />
 

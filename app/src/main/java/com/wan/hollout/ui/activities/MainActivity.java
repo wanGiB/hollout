@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -55,6 +56,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 import com.parse.ParseObject;
@@ -229,6 +231,23 @@ public class MainActivity extends BaseActivity
         createLocationRequest();
         mSettingsClient = LocationServices.getSettingsClient(this);
         buildLocationSettingsRequest();
+        refreshUserToken();
+    }
+
+    private void refreshUserToken() {
+        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+        String savedToken = signedInUserObject.getString(AppConstants.USER_FIREBASE_TOKEN);
+        if (StringUtils.isNotEmpty(refreshedToken)) {
+            if (savedToken == null) {
+                signedInUserObject.put(AppConstants.USER_FIREBASE_TOKEN, refreshedToken);
+                AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
+            } else {
+                if (!savedToken.equals(refreshedToken)) {
+                    signedInUserObject.put(AppConstants.USER_FIREBASE_TOKEN, refreshedToken);
+                    AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
+                }
+            }
+        }
     }
 
     /**
@@ -890,6 +909,29 @@ public class MainActivity extends BaseActivity
         tryAskForPermissions();
         fetchMyPhotoLikes();
         checkIfPhotoIsBlurredOrUnclear();
+        checkIsAppLatest();
+    }
+
+    private void checkIsAppLatest() {
+        String currentAppVersion = HolloutUtils.getAppVersionName();
+        String remoteAppVersion = FirebaseUtils.getRemoteConfig().getString(AppConstants.LATEST_APP_VERSION);
+        if (currentAppVersion != null && remoteAppVersion != null) {
+            if (!currentAppVersion.equals(remoteAppVersion)) {
+                //New App Version is available
+                Snackbar.make(rootLayout, "A New Version of Hollout is available",
+                        Snackbar.LENGTH_INDEFINITE).setAction("UPDATE", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final String appPackageName = getPackageName();
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                        } catch (android.content.ActivityNotFoundException anfe) {
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                        }
+                    }
+                }).show();
+            }
+        }
     }
 
     private void checkIfPhotoIsBlurredOrUnclear() {

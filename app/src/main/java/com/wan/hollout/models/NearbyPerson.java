@@ -1,18 +1,13 @@
 package com.wan.hollout.models;
 
-import android.support.annotation.NonNull;
-
 import com.parse.ParseObject;
 import com.wan.hollout.utils.AppConstants;
-import com.wan.hollout.utils.AuthUtil;
-
-import java.util.List;
 
 /**
  * @author Wan Clem
  */
 
-public class NearbyPerson implements Comparable<NearbyPerson> {
+public class NearbyPerson{
 
     private ParseObject person;
 
@@ -50,21 +45,6 @@ public class NearbyPerson implements Comparable<NearbyPerson> {
         }
         NearbyPerson another = (NearbyPerson) obj;
         return getPersonId().equals(another.getPersonId());
-    }
-
-    @Override
-    public int compareTo(@NonNull NearbyPerson refUser) {
-        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
-        if (signedInUserObject != null) {
-            List<String> aboutSignedInUser = signedInUserObject.getList(AppConstants.ABOUT_USER);
-            List<String> aboutRefUser = refUser.getPerson().getList(AppConstants.ABOUT_USER);
-            if (aboutSignedInUser != null && aboutRefUser != null) {
-                String firstInfoAboutSignedInUser = aboutSignedInUser.get(0);
-                String firstInfoAboutRefUser = aboutRefUser.get(0);
-                return firstInfoAboutSignedInUser.compareTo(firstInfoAboutRefUser);
-            }
-        }
-        return 0;
     }
 
 }
