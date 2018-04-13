@@ -34,6 +34,7 @@
             android:id="@+id/use_camera_instead_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:src="@drawable/ic_menu_camera"
             tools:ignore="ContentDescription" />
 
