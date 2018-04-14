@@ -184,7 +184,9 @@
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_margin="20dp"
+            android:layout_marginBottom="30dp"
+            android:layout_marginEnd="25dp"
+            android:layout_marginRight="25dp"
             app:backgroundTint="@color/white"
             app:elevation="8dp"
             app:fabSize="normal" />

@@ -18,6 +18,7 @@ import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.ui.activities.UserPhotoPreviewActivity;
 import com.wan.hollout.ui.activities.UserProfileActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -183,8 +184,12 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
 
                 @Override
                 public void onClick(View view) {
-                    UiUtils.blinkView(view);
-                    UiUtils.loadUserData(activity, person);
+                    Intent intent = new Intent(activity, UserPhotoPreviewActivity.class);
+                    intent.putExtra(AppConstants.EXTRA_USER, person);
+                    intent.putExtra(activity.getResources().getString(R.string.view_info),
+                            UiUtils.captureValues(activity, userPhotoView));
+                    activity.startActivity(intent);
+                    activity.overridePendingTransition(0, 0);
                 }
 
             });

@@ -136,7 +136,8 @@ dependencies {
     compile 'com.vanniktech:emoji-ios:0.5.1'
     compile "com.github.nisrulz:sensey:${sensey_version}"
     compile 'com.gordonwong:material-sheet-fab:1.2.1'
-    compile 'com.wonderkiln:camerakit:0.13.1'
+    compile "com.github.mancj:SlideUp-Android:2.2.8"
+    compile 'com.otaliastudios:cameraview:1.5.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

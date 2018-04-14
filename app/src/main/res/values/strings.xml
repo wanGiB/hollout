@@ -359,6 +359,11 @@
     <string name="activities">Activities</string>
     <string name="more">MORE</string>
     <string name="new_story">New Story</string>
-    <string name="type_story">Type Story</string>
-    <string name="use_camera_instead">Use Camera Instead</string>
+    <string name="type_story">Create Story</string>
+    <string name="use_camera_instead">Switch to Camera</string>
+    <string name="view_location_left">view_loaction_left</string>
+    <string name="view_location_top">view_location_top</string>
+    <string name="view_width">view_width</string>
+    <string name="view_height">view_height</string>
+    <string name="view_info">view_info</string>
 </resources>

@@ -4,8 +4,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -14,13 +16,13 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.otaliastudios.cameraview.CameraListener;
+import com.otaliastudios.cameraview.CameraOptions;
+import com.otaliastudios.cameraview.CameraView;
+import com.otaliastudios.cameraview.Facing;
+import com.otaliastudios.cameraview.Flash;
+import com.otaliastudios.cameraview.SessionType;
 import com.wan.hollout.R;
-import com.wonderkiln.camerakit.CameraKit;
-import com.wonderkiln.camerakit.CameraKitEventCallback;
-import com.wonderkiln.camerakit.CameraKitImage;
-import com.wonderkiln.camerakit.CameraKitVideo;
-import com.wonderkiln.camerakit.CameraView;
-import com.wonderkiln.camerakit.OnCameraKitEvent;
 
 import java.io.File;
 
@@ -42,10 +44,24 @@ public class CameraControls extends LinearLayout {
     @BindView(R.id.flashButton)
     ImageView flashButton;
 
+    @BindView(R.id.captureButton)
+    ImageView captureButton;
+
     private long captureDownTime;
     private long captureStartTime;
     private boolean pendingVideoCapture;
     private boolean capturingVideo;
+
+    public interface CameraStateChangeListener {
+
+        void photoCaptureStared(long captureStartTime);
+
+        void setVideoCaptureStopped();
+
+        void setVideoCaptureStarted(long captureDownTime);
+    }
+
+    private CameraStateChangeListener cameraStateChangeListener;
 
     public CameraControls(Context context) {
         this(context, null);
@@ -82,9 +98,35 @@ public class CameraControls extends LinearLayout {
             View view = getRootView().findViewById(cameraViewId);
             if (view instanceof CameraView) {
                 cameraView = (CameraView) view;
-                cameraView.bindCameraKitListener(this);
+                cameraView.setVideoMaxSize(3600000);
+                cameraView.addCameraListener(new CameraListener() {
+
+                    @Override
+                    public void onCameraOpened(CameraOptions options) {
+                        super.onCameraOpened(options);
+                    }
+
+                    @Override
+                    public void onCameraClosed() {
+                        super.onCameraClosed();
+                    }
+
+                    @Override
+                    public void onPictureTaken(byte[] jpeg) {
+                        super.onPictureTaken(jpeg);
+                    }
+
+                    @Override
+                    public void onVideoTaken(File video) {
+                        super.onVideoTaken(video);
+                    }
+
+                });
+
                 setFacingImageBasedOnCamera();
+
             }
+
         }
 
         if (coverViewId != -1) {
@@ -94,46 +136,29 @@ public class CameraControls extends LinearLayout {
                 coverView.setVisibility(GONE);
             }
         }
-    }
 
-    private void setFacingImageBasedOnCamera() {
-        if (cameraView.isFacingFront()) {
-            facingButton.setImageResource(R.drawable.ic_facing_back);
-        } else {
-            facingButton.setImageResource(R.drawable.ic_facing_front);
-        }
-    }
+        captureButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pendingVideoCapture = false;
+                if (capturingVideo) {
+                    capturingVideo = false;
+                    cameraView.stopCapturingVideo();
+                    cameraStateChangeListener.setVideoCaptureStopped();
+                    Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.capture_button);
+                    captureButton.setImageDrawable(drawable);
+                    cameraView.setSessionType(SessionType.PICTURE);
+                } else {
+                    captureStartTime = System.currentTimeMillis();
+                    cameraView.capturePicture();
+                    cameraStateChangeListener.photoCaptureStared(captureStartTime);
+                }
+            }
+        });
 
-    //@OnCameraKitEvent(CameraKitImage.class)
-    public void imageCaptured(CameraKitImage image) {
-//        byte[] jpeg = image.getJpeg();
-//
-//        long callbackTime = System.currentTimeMillis();
-//        ResultHolder.dispose();
-//        ResultHolder.setImage(jpeg);
-//        ResultHolder.setNativeCaptureSize(cameraView.getCaptureSize());
-//        ResultHolder.setTimeToCallback(callbackTime - captureStartTime);
-//        Intent intent = new Intent(getContext(), PreviewActivity.class);
-//        getContext().startActivity(intent);
-    }
-
-    @OnCameraKitEvent(CameraKitVideo.class)
-    public void videoCaptured(CameraKitVideo video) {
-        File videoFile = video.getVideoFile();
-        if (videoFile != null) {
-//            ResultHolder.dispose();
-//            ResultHolder.setVideo(videoFile);
-//            ResultHolder.setNativeCaptureSize(cameraView.getCaptureSize());
-//            Intent intent = new Intent(getContext(), PreviewActivity.class);
-//            getContext().startActivity(intent);
-        }
-    }
-
-    @OnTouch(R.id.captureButton)
-    boolean onTouchCapture(View view, MotionEvent motionEvent) {
-        handleViewTouchFeedback(view, motionEvent);
-        switch (motionEvent.getAction()) {
-            case MotionEvent.ACTION_DOWN: {
+        captureButton.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
                 captureDownTime = System.currentTimeMillis();
                 pendingVideoCapture = true;
                 postDelayed(new Runnable() {
@@ -141,32 +166,25 @@ public class CameraControls extends LinearLayout {
                     public void run() {
                         if (pendingVideoCapture) {
                             capturingVideo = true;
-                            cameraView.captureVideo();
+                            cameraView.setSessionType(SessionType.VIDEO);
+                            cameraView.startCapturingVideo(null);
+                            Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.video_capture_started);
+                            captureButton.setImageDrawable(drawable);
+                            cameraStateChangeListener.setVideoCaptureStarted(captureDownTime);
                         }
                     }
                 }, 250);
-                break;
+                return false;
             }
+        });
+    }
 
-            case MotionEvent.ACTION_UP: {
-                pendingVideoCapture = false;
-
-                if (capturingVideo) {
-                    capturingVideo = false;
-                    cameraView.stopVideo();
-                } else {
-                    captureStartTime = System.currentTimeMillis();
-                    cameraView.captureImage(new CameraKitEventCallback<CameraKitImage>() {
-                        @Override
-                        public void callback(CameraKitImage event) {
-                            imageCaptured(event);
-                        }
-                    });
-                }
-                break;
-            }
+    private void setFacingImageBasedOnCamera() {
+        if (cameraView.getFacing() == Facing.FRONT) {
+            facingButton.setImageResource(R.drawable.ic_facing_back);
+        } else {
+            facingButton.setImageResource(R.drawable.ic_facing_front);
         }
-        return true;
     }
 
     @OnTouch(R.id.facingButton)
@@ -184,14 +202,13 @@ public class CameraControls extends LinearLayout {
                             @Override
                             public void onAnimationEnd(Animator animation) {
                                 super.onAnimationEnd(animation);
-                                if (cameraView.isFacingFront()) {
-                                    cameraView.setFacing(CameraKit.Constants.FACING_BACK);
+                                if (cameraView.getFacing() == Facing.FRONT) {
+                                    cameraView.setFacing(Facing.BACK);
                                     changeViewImageResource((ImageView) view, R.drawable.ic_facing_front);
                                 } else {
-                                    cameraView.setFacing(CameraKit.Constants.FACING_FRONT);
+                                    cameraView.setFacing(Facing.FRONT);
                                     changeViewImageResource((ImageView) view, R.drawable.ic_facing_back);
                                 }
-
                                 coverView.animate()
                                         .alpha(0)
                                         .setStartDelay(200)
@@ -219,34 +236,28 @@ public class CameraControls extends LinearLayout {
         handleViewTouchFeedback(view, motionEvent);
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_UP: {
-                if (cameraView.getFlash() == CameraKit.Constants.FLASH_OFF) {
-                    cameraView.setFlash(CameraKit.Constants.FLASH_ON);
+                if (cameraView.getFlash() == Flash.OFF) {
+                    cameraView.setFlash(Flash.ON);
                     changeViewImageResource((ImageView) view, R.drawable.ic_flash_on);
                 } else {
-                    cameraView.setFlash(CameraKit.Constants.FLASH_OFF);
+                    cameraView.setFlash(Flash.ON);
                     changeViewImageResource((ImageView) view, R.drawable.ic_flash_off);
                 }
-
                 break;
             }
         }
         return true;
     }
 
-    boolean handleViewTouchFeedback(View view, MotionEvent motionEvent) {
+    void handleViewTouchFeedback(View view, MotionEvent motionEvent) {
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_DOWN: {
                 touchDownAnimation(view);
-                return true;
+                break;
             }
-
             case MotionEvent.ACTION_UP: {
                 touchUpAnimation(view);
-                return true;
-            }
-
-            default: {
-                return true;
+                break;
             }
         }
     }
@@ -283,6 +294,10 @@ public class CameraControls extends LinearLayout {
                 imageView.setImageResource(resId);
             }
         }, 120);
+    }
+
+    public void setOnCameraStateChangeListener(CameraStateChangeListener cameraStateChangeListener) {
+        this.cameraStateChangeListener = cameraStateChangeListener;
     }
 
 }

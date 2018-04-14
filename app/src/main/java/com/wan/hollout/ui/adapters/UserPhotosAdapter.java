@@ -33,11 +33,10 @@ import butterknife.ButterKnife;
  */
 public class UserPhotosAdapter extends SectionedRecyclerAdapter<UserPhotosAdapter.PhotoHeaderHolder, UserPhotosAdapter.PhotoEntriesHolder> {
 
-    public GalleryActivity galleryActivity;
-    public ArrayList<HolloutUtils.MediaEntry> photoEntries;
+    private GalleryActivity galleryActivity;
+    private ArrayList<HolloutUtils.MediaEntry> photoEntries;
     public LayoutInflater layoutInflater;
-
-    public static SparseBooleanArray selectedIndices;
+    static SparseBooleanArray selectedIndices;
 
     public UserPhotosAdapter(GalleryActivity galleryActivity, ArrayList<HolloutUtils.MediaEntry> photoEntries) {
         this.galleryActivity = galleryActivity;
@@ -164,25 +163,25 @@ public class UserPhotosAdapter extends SectionedRecyclerAdapter<UserPhotosAdapte
         }
     }
 
-    public static class PhotoEntriesHolder extends RecyclerView.ViewHolder {
+    static class PhotoEntriesHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.image_icon_item)
         RoundedImageView imageIconItem;
 
         @BindView(R.id.image_click_item)
         CheckBox photoCheck;
 
-        public PhotoEntriesHolder(View mView) {
+        PhotoEntriesHolder(View mView) {
             super(mView);
             ButterKnife.bind(this, mView);
         }
 
     }
 
-    public static class PhotoHeaderHolder extends RecyclerView.ViewHolder {
+    static class PhotoHeaderHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.header)
-        public HolloutTextView photoHeader;
+        HolloutTextView photoHeader;
 
-        public PhotoHeaderHolder(View view) {
+        PhotoHeaderHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
         }

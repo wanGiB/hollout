@@ -233,6 +233,7 @@ public class AppConstants {
     public static final String PARSE_SERVER_CLIENT_KEY = "parse_server_client_key";
     public static final String PARSE_SERVER_ENDPOINT = "parse_server_endpoint";
     public static final String LATEST_APP_VERSION = "latest_app_version";
+    public static final String EXTRA_USER = "hollout_user_extra";
 
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 

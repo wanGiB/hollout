@@ -162,6 +162,7 @@ import static com.wan.hollout.ui.widgets.AttachmentTypeSelector.OPEN_GALLERY;
  * @author Wan Clem
  * ***/
 @SuppressWarnings({"StatementWithEmptyBody", "FieldCanBeLocal", "unused", "ConstantConditions"})
+@SuppressLint("ClickableViewAccessibility")
 public class ChatActivity extends BaseActivity implements
         KeyboardAwareLinearLayout.OnKeyboardShownListener,
         ActivityCompat.OnRequestPermissionsResultCallback, InputPanel.Listener, View.OnClickListener {
@@ -877,7 +878,6 @@ public class ChatActivity extends BaseActivity implements
         scrollToBottomFrame.setOnClickListener(this);
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private void initTouchListener() {
         composeText.setOnTouchListener(new View.OnTouchListener() {
             @Override

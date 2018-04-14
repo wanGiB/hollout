@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
+import com.wan.hollout.ui.activities.UserPhotoPreviewActivity;
 import com.wan.hollout.ui.utils.DateUtils;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -159,7 +160,12 @@ public class PhotoLikesAdapter extends RecyclerView.Adapter<PhotoLikesAdapter.Ph
             photoLiker.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    UiUtils.loadUserData(activity, originator);
+                    Intent intent = new Intent(activity, UserPhotoPreviewActivity.class);
+                    intent.putExtra(AppConstants.EXTRA_USER, originator);
+                    intent.putExtra(activity.getResources().getString(R.string.view_info),
+                            UiUtils.captureValues(activity, photoLiker));
+                    activity.startActivity(intent);
+                    activity.overridePendingTransition(0, 0);
                 }
             });
         }

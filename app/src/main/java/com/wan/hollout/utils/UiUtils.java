@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.AttrRes;
@@ -513,58 +514,6 @@ public class UiUtils {
         }
     }
 
-    public static void loadUserData(final Activity activity, final ParseObject parseUser) {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                final ParseObject signedInUser = AuthUtil.getCurrentUser();
-                SweetAlertDialog sweetAlertDialog = new SweetAlertDialog(activity);
-                @SuppressLint("InflateParams") final View profilePreview = activity.getLayoutInflater().inflate(R.layout.preview_profile, null);
-                final RecyclerView additionalPhotosRecyclerView = ButterKnife.findById(profilePreview, R.id.additional_photos_recycler_view);
-                final RoundedImageView photoView = ButterKnife.findById(profilePreview, R.id.user_cover_photo_view);
-                final HolloutTextView onlineStatusView = ButterKnife.findById(profilePreview, R.id.user_online_status);
-                final LinearLayout startChatView = ButterKnife.findById(profilePreview, R.id.start_chat);
-                final HolloutTextView viewProfileView = ButterKnife.findById(profilePreview, R.id.view_user_profile);
-                final HolloutTextView usernameView = ButterKnife.findById(profilePreview, R.id.user_name);
-                refreshUserData(signedInUser, additionalPhotosRecyclerView, photoView, onlineStatusView, startChatView, viewProfileView, usernameView, parseUser, activity);
-                final ParseQuery<ParseObject> userStateQuery = ParseQuery.getQuery(AppConstants.PEOPLE_GROUPS_AND_ROOMS);
-                userStateQuery.whereEqualTo(AppConstants.REAL_OBJECT_ID, parseUser.getString(AppConstants.REAL_OBJECT_ID));
-                try {
-                    SubscriptionHandling<ParseObject> subscriptionHandling = ApplicationLoader.getParseLiveQueryClient().subscribe(userStateQuery);
-                    subscriptionHandling.handleEvent(SubscriptionHandling.Event.UPDATE, new SubscriptionHandling.HandleEventCallback<ParseObject>() {
-                        @Override
-                        public void onEvent(ParseQuery<ParseObject> query, final ParseObject object) {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    refreshUserData(signedInUser, additionalPhotosRecyclerView, photoView, onlineStatusView, startChatView, viewProfileView, usernameView, object, activity);
-                                }
-                            });
-                        }
-                    });
-                } catch (NullPointerException ignored) {
-
-                }
-                sweetAlertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialogInterface) {
-                        try {
-                            ApplicationLoader.getParseLiveQueryClient().unsubscribe(userStateQuery);
-                            userStateQuery.cancel();
-                            dialogInterface.cancel();
-                        } catch (NullPointerException ignored) {
-
-                        }
-                    }
-                });
-                sweetAlertDialog.setContentView(profilePreview);
-                if (!sweetAlertDialog.isShowing()) {
-                    sweetAlertDialog.show();
-                }
-            }
-        });
-    }
-
     public static String getDaysAgo(String dateString) {
 
         Context context = ApplicationLoader.getInstance();
@@ -622,98 +571,6 @@ public class UiUtils {
     public static void showKeyboard(View trigger) {
         InputMethodManager imm = (InputMethodManager) ApplicationLoader.getInstance().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(trigger, InputMethodManager.SHOW_FORCED);
-    }
-
-    private static void refreshUserData(final ParseObject signedInUser, RecyclerView additionalPhotosRecyclerView, RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseObject parseUser, final Activity activity) {
-        final String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
-        final String userId = parseUser.getString(AppConstants.REAL_OBJECT_ID);
-        final String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-        Long userLastSeenAt = parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) != 0
-                ? parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) :
-                parseUser.getLong(AppConstants.APP_USER_LAST_SEEN);
-        if (HolloutUtils.isNetWorkConnected(ApplicationLoader.getInstance())
-                && parseUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP) == signedInUser.getLong(AppConstants.USER_CURRENT_TIME_STAMP)) {
-            attachDrawableToTextView(ApplicationLoader.getInstance(), onlineStatusView, R.drawable.ic_online, DrawableDirection.LEFT);
-            onlineStatusView.setText(activity.getString(R.string.online));
-        } else {
-            removeAllDrawablesFromTextView(onlineStatusView);
-            onlineStatusView.setText(getLastSeen(userLastSeenAt));
-        }
-        if (StringUtils.isNotEmpty(username)) {
-            usernameView.setText(WordUtils.capitalize(username));
-        }
-        final List<String> userPhotos = new ArrayList<>();
-        if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
-            if (!userPhotos.contains(userProfilePhotoUrl)) {
-                userPhotos.add(userProfilePhotoUrl);
-            }
-            loadImage(activity, userProfilePhotoUrl, photoView);
-        }
-
-        List<String> userAdditionalPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
-        if (userAdditionalPhotos != null) {
-            if (!userPhotos.containsAll(userAdditionalPhotos)) {
-                userPhotos.addAll(userAdditionalPhotos);
-            }
-        }
-
-        FeaturedPhotosCircleAdapter featuredPhotosCircleAdapter = new
-                FeaturedPhotosCircleAdapter(activity, userPhotos,
-                parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME),
-                parseUser.getString(AppConstants.REAL_OBJECT_ID));
-
-        LinearLayoutManager horizontalLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false);
-        additionalPhotosRecyclerView.setLayoutManager(horizontalLayoutManager);
-        additionalPhotosRecyclerView.setAdapter(featuredPhotosCircleAdapter);
-
-        tintImageViewNoMode(photoView, ContextCompat.getColor(activity, R.color.image_tint));
-
-        View.OnClickListener onClickListener = new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.start_chat:
-                        blinkView(startChatView);
-                        String signedInUserProfilePhoto = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-                        if (StringUtils.isNotEmpty(signedInUserProfilePhoto)) {
-                            Intent mChatIntent = new Intent(activity, ChatActivity.class);
-                            parseUser.put(AppConstants.CHAT_TYPE, AppConstants.CHAT_TYPE_SINGLE);
-                            mChatIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
-                            mChatIntent.putExtra(AppConstants.USER_FRIENDABLE, true);
-                            activity.startActivity(mChatIntent);
-                        } else {
-                            Snackbar.make(activity.getWindow().getDecorView(),
-                                    R.string.upload_new_photo_first, Snackbar.LENGTH_INDEFINITE).setAction(R.string.UPLOAD,
-                                    new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            HolloutUtils.startImagePicker(activity);
-                                        }
-                                    }).show();
-                        }
-                        break;
-                    case R.id.view_user_profile:
-                        blinkView(viewProfileView);
-                        Intent userProfileIntent = new Intent(activity, UserProfileActivity.class);
-                        userProfileIntent.putExtra(AppConstants.USER_PROPERTIES, parseUser);
-                        activity.startActivity(userProfileIntent);
-                        break;
-                    case R.id.user_cover_photo_view:
-                        Intent mProfilePhotoViewIntent = new Intent(activity, SlidePagerActivity.class);
-                        mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_TITLE, username);
-                        ArrayList<String> photos = HolloutUtils.getAllOfAUserPhotos(userProfilePhotoUrl, userPhotos);
-                        mProfilePhotoViewIntent.putStringArrayListExtra(AppConstants.EXTRA_PICTURES, photos);
-                        mProfilePhotoViewIntent.putExtra(AppConstants.EXTRA_USER_ID, userId);
-                        activity.startActivity(mProfilePhotoViewIntent);
-                        break;
-                }
-            }
-        };
-
-        startChatView.setOnClickListener(onClickListener);
-        viewProfileView.setOnClickListener(onClickListener);
-        photoView.setOnClickListener(onClickListener);
     }
 
     public static void snackMessage(String message, View anchorView, boolean shortDuration, String actionMessage, final DoneCallback<Object> actionCallback) {
@@ -1215,6 +1072,17 @@ public class UiUtils {
                 Math.max((int) (r * factor), 0),
                 Math.max((int) (g * factor), 0),
                 Math.max((int) (b * factor), 0));
+    }
+
+    public static Bundle captureValues(Context c, View view) {
+        Bundle b = new Bundle();
+        int[] screenLocation = new int[2];
+        view.getLocationOnScreen(screenLocation);
+        b.putInt(c.getResources().getString(R.string.view_location_left), screenLocation[0]);
+        b.putInt(c.getResources().getString(R.string.view_location_top), screenLocation[1]);
+        b.putInt(c.getResources().getString(R.string.view_width), view.getWidth());
+        b.putInt(c.getResources().getString(R.string.view_height), view.getHeight());
+        return b;
     }
 
 }

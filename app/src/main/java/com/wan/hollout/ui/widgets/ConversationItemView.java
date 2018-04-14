@@ -40,6 +40,7 @@ import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.activities.ChatActivity;
 import com.wan.hollout.ui.activities.MainActivity;
+import com.wan.hollout.ui.activities.UserPhotoPreviewActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
@@ -168,7 +169,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             List<String> aboutSignedInUser = signedInUserObject.getList(AppConstants.ABOUT_USER);
             if (aboutUser != null && aboutSignedInUser != null) {
                 try {
-                    String aboutUserString = TextUtils.join(",",aboutUser);
+                    String aboutUserString = TextUtils.join(",", aboutUser);
                     if (StringUtils.isNotEmpty(searchString)) {
                         aboutPerson.setText(UiUtils.highlightTextIfNecessary(searchString, WordUtils.capitalize(aboutUserString),
                                 ContextCompat.getColor(activity, R.color.hollout_color_three)));
@@ -252,10 +253,12 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
         userPhotoView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                UiUtils.blinkView(view);
-                if (parseObject.getString(AppConstants.OBJECT_TYPE).equals(AppConstants.OBJECT_TYPE_INDIVIDUAL)) {
-                    UiUtils.loadUserData(activity, parseObject);
-                }
+                Intent intent = new Intent(activity, UserPhotoPreviewActivity.class);
+                intent.putExtra(AppConstants.EXTRA_USER, parseObject);
+                intent.putExtra(activity.getResources().getString(R.string.view_info),
+                        UiUtils.captureValues(activity, userPhotoView));
+                activity.startActivity(intent);
+                activity.overridePendingTransition(0, 0);
             }
         });
 

@@ -271,7 +271,7 @@ public class HolloutUtils {
         return false;
     }
 
-    static ArrayList<String> getAllOfAUserPhotos(String profilePhoto, List<String> additionalPhotos) {
+    public static ArrayList<String> getAllOfAUserPhotos(String profilePhoto, List<String> additionalPhotos) {
         ArrayList<String> resultantPhotos = new ArrayList<>();
         resultantPhotos.add(profilePhoto);
         if (additionalPhotos != null) {

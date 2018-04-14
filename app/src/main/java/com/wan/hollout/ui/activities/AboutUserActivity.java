@@ -249,6 +249,7 @@ public class AboutUserActivity extends BaseActivity {
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "I am a")
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "I am ")
                         || StringUtils.startsWith(textInOccupationField, "A ")
+                        || StringUtils.startsWith(textInOccupationField,"I\'m")
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "An ")
                         || StringUtils.startsWithIgnoreCase(textInOccupationField, "The ")) {
                     vibrateDevice(NO_QUALIFIER_TIP);
