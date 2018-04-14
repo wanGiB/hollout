@@ -19,6 +19,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -57,7 +59,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -150,11 +151,27 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 ? ContextCompat.getColor(activity, R.color.blue_100) : android.R.attr.selectableItemBackground);
     }
 
-    private void applyProfilePicture(String profileUrl) {
+    private void applyProfilePicture(String profileUrl, final String name) {
         if (!TextUtils.isEmpty(profileUrl)) {
-            UiUtils.loadImage(activity, profileUrl, userPhotoView);
+            Glide.with(activity).load(profileUrl).listener(new RequestListener<String, GlideDrawable>() {
+                @Override
+                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                    UiUtils.loadName(userPhotoView, name);
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    return false;
+                }
+
+            }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(userPhotoView);
         } else {
-            userPhotoView.setImageResource(R.drawable.empty_profile);
+            if (StringUtils.isNotEmpty(name)) {
+                UiUtils.loadName(userPhotoView, name);
+            } else {
+                userPhotoView.setImageResource(R.drawable.empty_profile);
+            }
         }
     }
 
@@ -195,7 +212,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                     usernameEntryView.setText(WordUtils.capitalize(userName));
                 }
             }
-            applyProfilePicture(userProfilePhoto);
+            applyProfilePicture(userProfilePhoto, userName);
             attachEventHandlers(parseObject);
             if (HolloutUtils.isUserBlocked(parseObject.getString(AppConstants.REAL_OBJECT_ID))) {
                 userStatusOrLastMessageView.setText(activity.getString(R.string.user_blocked));

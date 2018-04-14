@@ -16,7 +16,13 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SubscriptionHandling;
@@ -27,6 +33,7 @@ import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
+import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
@@ -70,6 +77,9 @@ public class UserPhotoPreviewActivity extends AppCompatActivity {
 
     @BindView(R.id.profile_layout)
     View profileLayout;
+
+    @BindView(R.id.progress_bar)
+    ProgressBar progressBar;
 
     Bundle startValues;
     Bundle endValues;
@@ -161,7 +171,7 @@ public class UserPhotoPreviewActivity extends AppCompatActivity {
         }
     }
 
-    private void refreshUserData(final ParseObject signedInUser, RecyclerView additionalPhotosRecyclerView, RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseObject parseUser) {
+    private void refreshUserData(final ParseObject signedInUser, RecyclerView additionalPhotosRecyclerView, final RoundedImageView photoView, HolloutTextView onlineStatusView, final LinearLayout startChatView, final HolloutTextView viewProfileView, HolloutTextView usernameView, final ParseObject parseUser) {
         final String username = parseUser.getString(AppConstants.APP_USER_DISPLAY_NAME);
         final String userId = parseUser.getString(AppConstants.REAL_OBJECT_ID);
         final String userProfilePhotoUrl = parseUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
@@ -184,7 +194,20 @@ public class UserPhotoPreviewActivity extends AppCompatActivity {
             if (!userPhotos.contains(userProfilePhotoUrl)) {
                 userPhotos.add(userProfilePhotoUrl);
             }
-            UiUtils.loadImage(this, userProfilePhotoUrl, photoView);
+            Glide.with(this).load(userProfilePhotoUrl).listener(new RequestListener<String, GlideDrawable>() {
+                @Override
+                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                    UiUtils.loadName(photoView, username);
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    UiUtils.showView(progressBar, false);
+                    return false;
+                }
+
+            }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(photoView);
         }
 
         List<String> userAdditionalPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);

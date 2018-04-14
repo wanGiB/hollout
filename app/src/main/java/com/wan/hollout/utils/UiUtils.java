@@ -2,17 +2,17 @@ package com.wan.hollout.utils;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -33,7 +33,6 @@ import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spannable;
@@ -51,19 +50,18 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.parse.ParseObject;
-import com.parse.ParseQuery;
-import com.parse.SubscriptionHandling;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.components.ApplicationLoader;
@@ -71,14 +69,8 @@ import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.interfaces.ListenableFuture;
 import com.wan.hollout.listeners.NestedViewHideShowScrollListener;
 import com.wan.hollout.listeners.RecyclerViewHideScrollListener;
-import com.wan.hollout.ui.activities.ChatActivity;
-import com.wan.hollout.ui.activities.SlidePagerActivity;
-import com.wan.hollout.ui.activities.UserProfileActivity;
-import com.wan.hollout.ui.adapters.FeaturedPhotosCircleAdapter;
 import com.wan.hollout.ui.widgets.CircularProgressButton;
-import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
-import com.wan.hollout.ui.widgets.SweetAlertDialog;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
@@ -94,8 +86,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import butterknife.ButterKnife;
-
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.indexOfIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -109,6 +99,8 @@ public class UiUtils {
 
     public static Handler handler = new Handler(Looper.getMainLooper());
     private static String TAG = "UiUtils";
+
+    private static ColorGenerator generator = ColorGenerator.MATERIAL;
 
     private static ApplicationLoader mContext = ApplicationLoader.getInstance();
 
@@ -1083,6 +1075,34 @@ public class UiUtils {
         b.putInt(c.getResources().getString(R.string.view_width), view.getWidth());
         b.putInt(c.getResources().getString(R.string.view_height), view.getHeight());
         return b;
+    }
+
+    public static void loadName(ImageView imageView,String name) {
+        String notShownMembers = WordUtils.initials(name.toUpperCase());
+        int color = generator.getRandomColor();
+        TextDrawable.IBuilder builder = TextDrawable.builder()
+                .beginConfig()
+                .endConfig()
+                .round();
+        TextDrawable colouredDrawable = builder.build(notShownMembers, color);
+        Bitmap textBitmap = UiUtils.convertDrawableToBitmap(colouredDrawable);
+        imageView.setImageBitmap(textBitmap);
+    }
+
+    private static Bitmap convertDrawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+        int width = drawable.getIntrinsicWidth();
+        width = width > 0 ? width : 80;
+        int height = drawable.getIntrinsicHeight();
+        height = height > 0 ? height : 80;
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
 }
