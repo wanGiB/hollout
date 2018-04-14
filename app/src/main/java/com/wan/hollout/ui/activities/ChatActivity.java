@@ -358,7 +358,7 @@ public class ChatActivity extends BaseActivity implements
                             int indexOfMessage = messages.indexOf(model);
                             if (indexOfMessage != -1) {
                                 replaceMessageAtIndexAsync(indexOfMessage, model);
-                                checkBangMessageReadSound(model);
+//                                checkBangMessageReadSound(model);
                             }
                             clearAllUnreadMessagesFromRecipient();
                         }
