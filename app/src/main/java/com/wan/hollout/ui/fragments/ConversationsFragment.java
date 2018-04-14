@@ -23,6 +23,7 @@ import com.parse.ParseQuery;
 import com.raizlabs.android.dbflow.runtime.DirectModelNotifier;
 import com.raizlabs.android.dbflow.structure.BaseModel;
 import com.wan.hollout.R;
+import com.wan.hollout.eventbuses.ConversationItemChangedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
@@ -43,6 +44,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -97,20 +99,32 @@ public class ConversationsFragment extends BaseFragment {
                     public void run() {
                         //Check for the model that just changed
                         if (conversationsAdapter.getItemCount() != 0) {
+                            List<Integer> removableIndices = new ArrayList<>();
+
                             for (ConversationItem conversationItem : conversations) {
                                 String conversationId = conversationItem.getObjectId();
                                 if (model.getConversationId().equals(conversationId)) {
                                     int indexOfConversation = conversations.indexOf(conversationItem);
                                     if (indexOfConversation != -1) {
                                         if (action == BaseModel.Action.DELETE) {
-                                            conversations.remove(indexOfConversation);
-                                            conversationsAdapter.notifyItemRemoved(indexOfConversation);
+                                            if (!removableIndices.contains(indexOfConversation)) {
+                                                removableIndices.add(indexOfConversation);
+                                            }
                                         } else {
                                             conversationsAdapter.notifyItemChanged(indexOfConversation);
                                         }
                                     }
                                 }
                             }
+
+                            if (!removableIndices.isEmpty()) {
+                                for (Integer removableIndex : removableIndices) {
+                                    conversations.remove(removableIndex.intValue());
+                                    conversationsAdapter.notifyItemRemoved(removableIndex);
+                                }
+                                removableIndices.clear();
+                            }
+
                         }
                     }
                 });
@@ -392,12 +406,34 @@ public class ConversationsFragment extends BaseFragment {
                                 conversationsAdapter.notifyDataSetChanged();
                             }
                             break;
+                        case AppConstants.CLEAR_ALL_CHANGED_INDICES:
+                            if (!AppConstants.changedIndices.isEmpty()) {
+                                for (Integer index : AppConstants.changedIndices) {
+                                    conversationsAdapter.notifyItemChanged(index);
+                                }
+                                AppConstants.changedIndices.clear();
+                            }
+                            break;
                     }
                 } else if (o instanceof SearchChatsEvent) {
                     SearchChatsEvent searchChatsEvent = (SearchChatsEvent) o;
                     String searchString = searchChatsEvent.getQueryString();
                     ConversationsFragment.this.searchString = searchString;
                     searchChats(searchString, 0);
+                } else if (o instanceof ConversationItemChangedEvent) {
+                    ConversationItemChangedEvent conversationItemChangedEvent = (ConversationItemChangedEvent) o;
+                    ConversationItem conversationItem = new ConversationItem(conversationItemChangedEvent.getParseObject());
+                    int indexOfConversation = conversations.indexOf(conversationItem);
+                    if (indexOfConversation != -1) {
+                        if (conversationItemChangedEvent.isDeleted()) {
+                            conversationsAdapter.notifyItemRemoved(indexOfConversation);
+                        } else {
+                            conversationsAdapter.notifyItemChanged(indexOfConversation);
+                            if (!AppConstants.changedIndices.contains(indexOfConversation)) {
+                                AppConstants.changedIndices.add(indexOfConversation);
+                            }
+                        }
+                    }
                 }
                 EventBus.getDefault().removeAllStickyEvents();
             }

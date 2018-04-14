@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,7 +41,6 @@ import java.util.concurrent.Executors;
 
 @SuppressWarnings("unused")
 public class ChatClient {
-
     protected static final String TAG = "ChatClient";
     private ExecutorService executor = null;
     private static ChatClient instance;

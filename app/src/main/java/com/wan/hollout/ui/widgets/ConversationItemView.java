@@ -38,6 +38,7 @@ import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.enums.MessageDirection;
 import com.wan.hollout.enums.MessageStatus;
 import com.wan.hollout.enums.MessageType;
+import com.wan.hollout.eventbuses.ConversationItemChangedEvent;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
 import com.wan.hollout.ui.activities.ChatActivity;
@@ -437,7 +438,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 AppConstants.selectedPeople.remove(getConversationItem());
                 AppConstants.selectedPeoplePositions.put(getCurrentConversationHashCode(), false);
             }
-            EventBus.getDefault().post(AppConstants.CHECK_SELECTED_CONVERSATIONS);
+            EventBus.getDefault().post(new ConversationItemChangedEvent(parseObject,false));
         } else {
             initChat();
         }
@@ -460,7 +461,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 AppConstants.selectedPeoplePositions.put(getCurrentConversationHashCode(), false);
             }
         }
-        EventBus.getDefault().post(AppConstants.CHECK_SELECTED_CONVERSATIONS);
+        EventBus.getDefault().post(new ConversationItemChangedEvent(parseObject,false));
         return true;
     }
 

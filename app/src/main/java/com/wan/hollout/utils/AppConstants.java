@@ -234,6 +234,7 @@ public class AppConstants {
     public static final String PARSE_SERVER_ENDPOINT = "parse_server_endpoint";
     public static final String LATEST_APP_VERSION = "latest_app_version";
     public static final String EXTRA_USER = "hollout_user_extra";
+    public static final String CLEAR_ALL_CHANGED_INDICES = "clear_all_changed_indices";
 
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 
@@ -322,5 +323,6 @@ public class AppConstants {
     public static String composeText;
     public static boolean retrievingMessages = false;
 
+    public static ArrayList<Integer> changedIndices = new ArrayList<>();
 }
 

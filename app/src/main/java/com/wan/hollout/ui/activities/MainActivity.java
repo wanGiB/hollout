@@ -11,6 +11,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
@@ -61,6 +62,7 @@ import com.gordonwong.materialsheetfab.MaterialSheetFab;
 import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
+import com.wan.hollout.eventbuses.ConversationItemChangedEvent;
 import com.wan.hollout.eventbuses.MessageReceivedEvent;
 import com.wan.hollout.eventbuses.SearchChatsEvent;
 import com.wan.hollout.eventbuses.SearchPeopleEvent;
@@ -201,7 +203,7 @@ public class MainActivity extends BaseActivity
         ButterKnife.bind(this);
         tabLayout = findViewById(R.id.tabs);
         viewPager = findViewById(R.id.viewpager);
-        actionModeBar = findViewById(R.id.action_mode_bar);
+        actionModeBar = findViewById(R.id.action_mode_bar_);
         materialSearchView = findViewById(R.id.search_view);
         setSupportActionBar(toolbar);
         setupFab();
@@ -418,7 +420,7 @@ public class MainActivity extends BaseActivity
                     case R.id.block_user:
                         ConversationItem selectedUserToBlock = AppConstants.selectedPeople.get(0);
                         if (selectedUserToBlock != null) {
-                            ParseObject selectedUserObject = selectedUserToBlock.getRecipient();
+                            final ParseObject selectedUserObject = selectedUserToBlock.getRecipient();
                             if (selectedUserObject != null) {
                                 String userId = selectedUserObject.getString(AppConstants.REAL_OBJECT_ID);
                                 if (!HolloutUtils.isUserBlocked(userId)) {
@@ -429,7 +431,7 @@ public class MainActivity extends BaseActivity
                                             UiUtils.dismissProgressDialog(progressDialog);
                                             if (success) {
                                                 UiUtils.showSafeToast("User blocked successfully!");
-                                                ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
+                                                EventBus.getDefault().post(new ConversationItemChangedEvent(selectedUserObject, true));
                                                 destroyActionMode();
                                             } else {
                                                 UiUtils.showSafeToast("Sorry and error occurred while trying to block user");
@@ -444,7 +446,7 @@ public class MainActivity extends BaseActivity
                                             UiUtils.dismissProgressDialog(progressDialog);
                                             if (success) {
                                                 UiUtils.showSafeToast("User Unblocked successfully!");
-                                                ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
+                                                EventBus.getDefault().post(new ConversationItemChangedEvent(selectedUserObject, false));
                                                 destroyActionMode();
                                             } else {
                                                 UiUtils.showSafeToast("Sorry and error occurred while trying to unblock user");
@@ -867,10 +869,6 @@ public class MainActivity extends BaseActivity
                         case AppConstants.TURN_OFF_ALL_TAB_LAYOUTS:
                             toggleViews();
                             break;
-                        case AppConstants.CHECK_SELECTED_CONVERSATIONS:
-                            updateActionMode();
-                            ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
-                            break;
                         case AppConstants.ACCOUNT_DELETED_EVENT:
                             if (!isFinishing()) {
                                 finish();
@@ -890,6 +888,8 @@ public class MainActivity extends BaseActivity
                         fetchUnreadMessagesCount();
                         EventBus.getDefault().post(AppConstants.ORDER_CONVERSATIONS);
                     }
+                } else if (o instanceof ConversationItemChangedEvent) {
+                    updateActionMode();
                 }
             }
         });
@@ -1113,7 +1113,7 @@ public class MainActivity extends BaseActivity
         UiUtils.showView(actionModeBar, false);
         AppConstants.selectedPeople.clear();
         AppConstants.selectedPeoplePositions.clear();
-        ConversationsFragment.conversationsAdapter.notifyDataSetChanged();
+        EventBus.getDefault().post(AppConstants.CLEAR_ALL_CHANGED_INDICES);
     }
 
     public static boolean isActionModeActivated() {

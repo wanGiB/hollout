@@ -3,7 +3,6 @@ package com.wan.hollout.utils;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 
-import com.google.android.gms.auth.api.Auth;
 import com.parse.ParseObject;
 import com.raizlabs.android.dbflow.config.FlowManager;
 import com.raizlabs.android.dbflow.sql.language.SQLite;
@@ -269,6 +268,8 @@ public class DbUtils {
 
     public static void deleteMessage(ChatMessage message) {
         FlowManager.getModelAdapter(ChatMessage.class).delete(message);
+        FirebaseUtils.getUsersReference().child(message.getConversationId())
+                .child(AppConstants.MESSAGES).child(message.getMessageId()).removeValue();
     }
 
     public static void searchMessages(String searchString, final DoneCallback<List<ChatMessage>> messageSearchDoneCallBack) {

@@ -25,15 +25,18 @@
             android:layout_width="@dimen/icon_width_height"
             android:layout_height="@dimen/icon_width_height"
             android:layout_centerVertical="true"
-            android:layout_marginTop="10dp"
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="16dp"
-            android:layout_marginStart="16dp">
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="10dp">
 
             <com.wan.hollout.ui.widgets.CircleImageView
                 android:id="@+id/icon_profile"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
                 android:src="@drawable/empty_profile"
                 tools:ignore="ContentDescription" />
 
@@ -44,8 +47,7 @@
                 android:layout_alignRight="@id/icon_profile"
                 android:layout_alignTop="@id/icon_profile"
                 android:layout_marginRight="5dp"
-                android:background="@drawable/shape_bubble_online"
-                />
+                android:background="@drawable/shape_bubble_online" />
 
         </RelativeLayout>
 

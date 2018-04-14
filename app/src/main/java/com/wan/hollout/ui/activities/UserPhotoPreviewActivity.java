@@ -188,12 +188,15 @@ public class UserPhotoPreviewActivity extends AppCompatActivity {
         if (StringUtils.isNotEmpty(username)) {
             usernameView.setText(WordUtils.capitalize(username));
         }
+
         final List<String> userPhotos = new ArrayList<>();
+
         if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
             if (!userPhotos.contains(userProfilePhotoUrl)) {
                 userPhotos.add(userProfilePhotoUrl);
             }
             Glide.with(this).load(userProfilePhotoUrl).listener(new RequestListener<String, GlideDrawable>() {
+
                 @Override
                 public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                     UiUtils.loadName(photoView, username);
@@ -207,6 +210,13 @@ public class UserPhotoPreviewActivity extends AppCompatActivity {
                 }
 
             }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(photoView);
+        } else {
+            UiUtils.showView(progressBar, false);
+            if (StringUtils.isNotEmpty(username)) {
+                UiUtils.loadName(photoView, username);
+            } else {
+                photoView.setImageResource(R.drawable.empty_profile);
+            }
         }
 
         List<String> userAdditionalPhotos = parseUser.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
