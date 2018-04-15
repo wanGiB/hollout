@@ -21,6 +21,8 @@ import com.otaliastudios.cameraview.CameraOptions;
 import com.otaliastudios.cameraview.CameraView;
 import com.otaliastudios.cameraview.Facing;
 import com.otaliastudios.cameraview.Flash;
+import com.otaliastudios.cameraview.Gesture;
+import com.otaliastudios.cameraview.GestureAction;
 import com.otaliastudios.cameraview.SessionType;
 import com.wan.hollout.R;
 
@@ -59,6 +61,8 @@ public class CameraControls extends LinearLayout {
         void setVideoCaptureStopped();
 
         void setVideoCaptureStarted(long captureDownTime);
+
+        void onPictureCaptured(byte[] bytesArray);
     }
 
     private CameraStateChangeListener cameraStateChangeListener;
@@ -99,6 +103,8 @@ public class CameraControls extends LinearLayout {
             if (view instanceof CameraView) {
                 cameraView = (CameraView) view;
                 cameraView.setVideoMaxSize(3600000);
+                cameraView.setPlaySounds(true);
+                cameraView.mapGesture(Gesture.PINCH, GestureAction.ZOOM);
                 cameraView.addCameraListener(new CameraListener() {
 
                     @Override
@@ -114,6 +120,7 @@ public class CameraControls extends LinearLayout {
                     @Override
                     public void onPictureTaken(byte[] jpeg) {
                         super.onPictureTaken(jpeg);
+                        cameraStateChangeListener.onPictureCaptured(jpeg);
                     }
 
                     @Override

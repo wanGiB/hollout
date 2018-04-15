@@ -179,7 +179,6 @@ public class AuthUtil {
         HolloutPreferences.getInstance().getAll().clear();
         ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
         ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
-        HolloutUtils.getKryoInstance().reset();
         EventBus.getDefault().post(AppConstants.TERMINATE_APPLICATION);
     }
 

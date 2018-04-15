@@ -11,7 +11,6 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.support.annotation.IdRes;
@@ -195,6 +194,10 @@ public class MainActivity extends BaseActivity
     private MaterialSheetFab materialSheetFab;
     private int statusBarColor;
 
+    /**
+     * SECRET- ZMkq47F9LEO36q2A4ZyDSQLiVhVywBdqQG7iDmHa
+     * TOKEN-7BP1g1cxMrRXm4W1u4278VZRzjq9fO
+     **/
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -717,10 +720,10 @@ public class MainActivity extends BaseActivity
             if (tabView != null) {
                 TextView tabCountView = (TextView) tabView.findViewById(R.id.tab_count);
                 if (tabCountView != null) {
-                    showView(tabCountView, true);
                     if (incrementValue == 0) {
                         showView(tabCountView, false);
                     } else {
+                        showView(tabCountView, true);
                         tabCountView.setText(String.valueOf(incrementValue));
                     }
                 }
@@ -823,7 +826,6 @@ public class MainActivity extends BaseActivity
         fetchUnreadMessagesCount();
     }
 
-
     private void turnOnLocationMessage() {
         UiUtils.snackMessage("To enjoy all features of hollout, please Turn on your location.",
                 rootLayout, true, "OK", new DoneCallback<Object>() {
@@ -832,6 +834,7 @@ public class MainActivity extends BaseActivity
                         Intent mLocationSettingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                         startActivity(mLocationSettingsIntent);
                     }
+
                 });
 
     }
@@ -1298,7 +1301,6 @@ public class MainActivity extends BaseActivity
                     HolloutPreferences.getInstance().getAll().clear();
                     ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
                     ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
-                    HolloutUtils.getKryoInstance().reset();
                     AuthUtil.signOut(MainActivity.this)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override

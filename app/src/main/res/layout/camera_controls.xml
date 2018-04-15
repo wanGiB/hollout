@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:background="@color/colorPrimary"
+    android:background="@android:color/transparent"
     android:weightSum="3">
 
     <FrameLayout
@@ -34,6 +34,9 @@
             android:id="@+id/captureButton"
             android:layout_width="66dp"
             android:layout_height="66dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:layout_gravity="center"
             android:src="@drawable/capture_button" />
 

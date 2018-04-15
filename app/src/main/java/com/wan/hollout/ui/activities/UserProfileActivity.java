@@ -457,7 +457,6 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                         HolloutPreferences.getInstance().getAll().clear();
                                         ParseObject.unpinAllInBackground(AppConstants.APP_USERS);
                                         ParseObject.unpinAllInBackground(AppConstants.HOLLOUT_FEED);
-                                        HolloutUtils.getKryoInstance().reset();
                                         signedInUserObject.unpinInBackground(AppConstants.AUTHENTICATED_USER_DETAILS);
                                         FirebaseAuth.getInstance().signOut();
                                         AuthUtil.signOut(UserProfileActivity.this)

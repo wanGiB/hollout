@@ -2039,6 +2039,9 @@ public class ChatActivity extends BaseActivity implements
                                 copyMessageToClipBoard();
                             }
                             break;
+                        case AppConstants.PICKED_MEDIA_FILES_EMPTY_NOW:
+                            displayInactiveSendButton();
+                            break;
                     }
                 } else if (o instanceof ReactionMessageEvent) {
                     String signedInUserPhoto = signedInUser.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);

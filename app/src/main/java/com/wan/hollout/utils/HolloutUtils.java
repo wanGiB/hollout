@@ -34,7 +34,6 @@ import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.esotericsoftware.kryo.Kryo;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -55,7 +54,6 @@ import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.ChatRequestNegotiationResult;
 import com.wan.hollout.interfaces.DoneCallback;
-import com.wan.hollout.models.ChatMessage;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 
@@ -107,12 +105,6 @@ public class HolloutUtils {
 
     static {
         checkDisplaySize(ApplicationLoader.getInstance());
-    }
-
-    public static Kryo getKryoInstance() {
-        Kryo kryo = new Kryo();
-        kryo.register(ChatMessage.class, new ChatMessageSerializer());
-        return kryo;
     }
 
     private static boolean isMainThread() {
@@ -556,7 +548,7 @@ public class HolloutUtils {
     }
 
     private static final String IMAGE_DIR = "image";
-    private static final String HOLLOUT_IMAGES_FOLDER = "/image";
+    private static final String HOLLOUT_IMAGES_FOLDER = "/Image";
     private static final String HOLLOUT_VIDEOS_FOLDER = "/video";
     private static final String HOLLOUT_CONTACT_FOLDER = "/contact";
     private static final String HOLLOUT_OTHER_FILES_FOLDER = "/other";
@@ -1102,7 +1094,6 @@ public class HolloutUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        HolloutLogger.d("SHA1ofLike", sha1);
         return sha1;
     }
 

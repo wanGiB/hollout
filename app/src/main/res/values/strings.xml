@@ -366,4 +366,5 @@
     <string name="view_width">view_width</string>
     <string name="view_height">view_height</string>
     <string name="view_info">view_info</string>
+    <string name="long_click_for_video_tap_for_picture">Long Click for Video, Tap for Picture</string>
 </resources>

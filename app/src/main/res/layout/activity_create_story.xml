@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/content_flipper"
     android:layout_width="match_parent"
-    android:background="@color/colorPrimary"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary">
 
     <LinearLayout
         android:id="@+id/rootLayout"
@@ -67,7 +67,7 @@
             android:textColor="@color/white"
             android:textColorHint="@color/em_white_87"
             android:textIsSelectable="true"
-            android:textSize="30sp"
+            android:textSize="35sp"
             android:textStyle="bold"
             app:emojiSize="40dp" />
 
@@ -137,57 +137,70 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <com.sothree.slidinguppanel.SlidingUpPanelLayout
+        android:id="@+id/sliding_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@color/black">
-
-            <View
-                android:id="@+id/blackCover"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/black"
-                android:visibility="gone" />
-
-            <com.otaliastudios.cameraview.CameraView
-                android:id="@+id/camera"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:keepScreenOn="true" />
-
-            <com.wan.hollout.ui.widgets.HolloutTextView
-                android:id="@+id/video_started_timer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:layout_margin="10dp"
-                android:background="@drawable/create_group_or_event_button_background"
-                android:paddingBottom="5dp"
-                android:paddingEnd="10dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingStart="10dp"
-                android:paddingTop="5dp"
-                android:text="00:00"
-                android:textColor="@color/white"
-                android:visibility="gone"
-                app:textStyle="medium" />
-
-        </FrameLayout>
+        android:background="@android:color/transparent"
+        android:gravity="bottom"
+        app:umanoDragView="@+id/dragView"
+        app:umanoOverlay="true"
+        app:umanoParallaxOffset="100dp"
+        app:umanoScrollableView="@+id/more_media_recycler_view"
+        app:umanoShadowHeight="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@color/black">
+
+                <View
+                    android:id="@+id/blackCover"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/black"
+                    android:visibility="gone" />
+
+                <com.otaliastudios.cameraview.CameraView
+                    android:id="@+id/camera"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:keepScreenOn="true" />
+
+                <com.wan.hollout.ui.widgets.HolloutTextView
+                    android:id="@+id/video_started_timer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/create_group_or_event_button_background"
+                    android:paddingBottom="5dp"
+                    android:paddingEnd="10dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingTop="5dp"
+                    android:text="00:00"
+                    android:textColor="@color/white"
+                    android:visibility="gone"
+                    app:textStyle="medium" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/dragView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:animateLayoutChanges="true"
-            android:id="@+id/bottom_bar"
-            android:background="@color/colorPrimary"
+            android:background="@android:color/transparent"
             android:orientation="vertical">
 
             <ImageView
@@ -201,30 +214,48 @@
                 android:clickable="true"
                 android:focusable="true" />
 
-            <com.wan.hollout.ui.widgets.RecentPhotoViewRail
-                android:id="@+id/recent_photos"
+            <LinearLayout
+                android:id="@+id/bottom_bar"
                 android:layout_width="match_parent"
-                android:layout_height="90dp"
-                android:background="@color/colorPrimary"
-                android:padding="4dp" />
-
-            <com.wan.hollout.ui.widgets.CameraControls
-                android:id="@+id/camera_controls"
-                android:layout_width="match_parent"
-                android:layout_height="90dp"
-                app:camera="@+id/camera"
-                app:cover="@+id/blackCover" />
-
-            <TextView
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:padding="5dp"
-                android:text="Hold Down to Video"
-                android:textColor="@color/ease_white" />
+                android:layout_gravity="bottom"
+                android:animateLayoutChanges="true"
+                android:background="@android:color/transparent"
+                android:orientation="vertical">
+
+                <com.wan.hollout.ui.widgets.RecentPhotoViewRail
+                    android:id="@+id/recent_photos"
+                    android:layout_width="match_parent"
+                    android:layout_height="90dp"
+                    android:background="@android:color/transparent"
+                    android:visibility="gone" />
+
+                <com.wan.hollout.ui.widgets.CameraControls
+                    android:id="@+id/camera_controls"
+                    android:layout_width="match_parent"
+                    android:layout_height="90dp"
+                    app:camera="@+id/camera"
+                    app:cover="@+id/blackCover" />
+
+                <TextView
+                    android:id="@+id/hold_down_to_video_tag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:padding="5dp"
+                    android:text="@string/long_click_for_video_tap_for_picture"
+                    android:textColor="@color/ease_white"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/more_media_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
         </LinearLayout>
 
-    </LinearLayout>
+    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
 </ViewFlipper>

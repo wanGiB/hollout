@@ -32,7 +32,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 
-import com.esotericsoftware.kryo.NotNull;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
 import com.wan.hollout.R;
@@ -54,6 +53,7 @@ import com.wan.hollout.utils.ViewUtil;
 
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -227,7 +227,6 @@ public class AttachmentTypeSelector extends PopupWindow {
             }
         });
 
-        loaderManager.initLoader(1, null, recentPhotos);
         setupGifsFooterLoader();
         setupGifsAdapter();
 
@@ -254,6 +253,7 @@ public class AttachmentTypeSelector extends PopupWindow {
 
         });
 
+        recentPhotos.fetchRecentImages();
     }
 
     private static InputStream stream;

@@ -128,9 +128,7 @@ public class PickedMediaFilesAdapter extends RecyclerView.Adapter<RecyclerView.V
                         holloutFiles.remove(holloutFile);
                         notifyDataSetChanged();
                     }
-
                     checkAndNotifyObserversOfEmptiness();
-
                 }
             });
 

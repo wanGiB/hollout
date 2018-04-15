@@ -7,9 +7,13 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.content.CursorLoader;
 
+import java.lang.ref.WeakReference;
+
 public class RecentPhotosLoader extends CursorLoader {
 
-    public static Uri BASE_URL = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+    public static Uri EXTERNAL_DIRECTORY_IMAGES_URI = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+
+    private WeakReference<Context> contextWeakReference;
 
     private static final String[] PROJECTION = new String[]{
             MediaStore.Images.ImageColumns._ID,
@@ -19,18 +23,25 @@ public class RecentPhotosLoader extends CursorLoader {
             MediaStore.Images.ImageColumns.MIME_TYPE
     };
 
-    private final Context context;
-
     public RecentPhotosLoader(Context context) {
         super(context);
-        this.context = context.getApplicationContext();
+        contextWeakReference = new WeakReference<>(context);
     }
 
     @Override
     public Cursor loadInBackground() {
-        return context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        Context context = contextWeakReference.get();
+        if (context == null) {
+            return null;
+        }
+        Cursor cursor = context.getContentResolver().query(EXTERNAL_DIRECTORY_IMAGES_URI,
                 PROJECTION, null, null,
-                MediaStore.Images.ImageColumns.DATE_MODIFIED + " DESC");
+                MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
+        if (cursor != null) {
+            cursor.setNotificationUri(context.getContentResolver(), EXTERNAL_DIRECTORY_IMAGES_URI);
+            return cursor;
+        }
+        return null;
     }
-  
+
 }

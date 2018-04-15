@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/photo_list"
+    <com.wan.hollout.ui.widgets.TwoWayGridView
+        android:id="@+id/gridview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="none" />
+        android:layout_height="70dp"
+        android:layout_marginLeft="7dp"
+        android:layout_marginStart="7dp"
+        android:layout_marginTop="7dp"
+        android:background="@color/white"
+        app:cacheColorHint="#E8E8E8"
+        app:columnWidth="80dp"
+        app:gravity="center"
+        app:horizontalSpacing="7dp"
+        app:numColumns="auto_fit"
+        app:numRows="auto_fit"
+        app:rowHeight="70dp"
+        app:scrollDirectionLandscape="horizontal"
+        app:scrollDirectionPortrait="horizontal"
+        app:stretchMode="spacingWidthUniform"
+        app:verticalSpacing="7dp" />
+
 </merge>
