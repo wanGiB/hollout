@@ -194,10 +194,6 @@ public class MainActivity extends BaseActivity
     private MaterialSheetFab materialSheetFab;
     private int statusBarColor;
 
-    /**
-     * SECRET- ZMkq47F9LEO36q2A4ZyDSQLiVhVywBdqQG7iDmHa
-     * TOKEN-7BP1g1cxMrRXm4W1u4278VZRzjq9fO
-     **/
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1097,6 +1093,11 @@ public class MainActivity extends BaseActivity
         findViewById(R.id.fab_sheet_item_new_story).setOnClickListener(this);
         findViewById(R.id.fab_sheet_item_new_workout_request).setOnClickListener(this);
         findViewById(R.id.fab_sheet_item_new_event_invite).setOnClickListener(this);
+
+        //TODO: Uncomment once ready
+        holloutFab.hide();
+        UiUtils.showView(holloutFab, false);
+
     }
 
     private int getStatusBarColor() {

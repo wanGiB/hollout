@@ -1,16 +1,20 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
@@ -32,6 +36,7 @@ import com.vanniktech.emoji.listeners.OnEmojiPopupDismissListener;
 import com.vanniktech.emoji.listeners.OnEmojiPopupShownListener;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardOpenListener;
 import com.wan.hollout.R;
+import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.adapters.PhotosAndVideosAdapter;
 import com.wan.hollout.ui.widgets.CameraControls;
 import com.wan.hollout.ui.widgets.HolloutTextView;
@@ -39,6 +44,7 @@ import com.wan.hollout.ui.widgets.RecentPhotoViewRail;
 import com.wan.hollout.ui.widgets.StoryBox;
 import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
+import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.RandomColor;
@@ -51,6 +57,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -63,6 +70,7 @@ import butterknife.ButterKnife;
  */
 
 public class CreateStoryActivity extends BaseActivity implements View.OnClickListener {
+
 
     @BindView(R.id.content_flipper)
     ViewFlipper contentFlipper;
@@ -115,6 +123,12 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
     @BindView(R.id.more_media_recycler_view)
     RecyclerView moreMediaRecyclerView;
 
+    @BindView(R.id.image_preview)
+    ImageView imagePreview;
+
+    @BindView(R.id.filters_recycler_view)
+    RecyclerView filtersRecyclerView;
+
     private EmojiPopup emojiPopup;
     private RandomColor randomColor;
 
@@ -128,6 +142,8 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
     private PhotosAndVideosAdapter photosAndVideosAdapter;
 
     private List<HolloutUtils.MediaEntry> allMediaEntries = new ArrayList<>();
+
+    private BitmapDecodeTask bitmapDecodeTask;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -248,10 +264,69 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
         recentPhotoViewRail.setListener(new RecentPhotoViewRail.OnItemClickedListener() {
             @Override
             public void onItemClicked(Uri uri) {
-
+                saveLastFlipperIndex();
+                if (bitmapDecodeTask != null) {
+                    bitmapDecodeTask.cancel(true);
+                    bitmapDecodeTask = null;
+                }
+                final ProgressDialog progressDialog = ProgressDialog.show(CreateStoryActivity.this, null, "Please wait...");
+                bitmapDecodeTask = new BitmapDecodeTask(CreateStoryActivity.this,new DoneCallback<Bitmap>() {
+                    @Override
+                    public void done(final Bitmap result, final Exception e) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                UiUtils.dismissProgressDialog(progressDialog);
+                                if (e == null && result != null) {
+                                    UiUtils.toggleFlipperState(contentFlipper, 2);
+//                                    PhotoFiltersAdapter photoFiltersAdapter = new PhotoFiltersAdapter(CreateStoryActivity.this, result);
+//                                    filtersRecyclerView.setLayoutManager(new LinearLayoutManager(CreateStoryActivity.this, LinearLayoutManager.HORIZONTAL, false));
+//                                    filtersRecyclerView.setAdapter(photoFiltersAdapter);
+                                    imagePreview.setImageBitmap(result);
+                                }
+                            }
+                        });
+                    }
+                });
+                bitmapDecodeTask.execute(uri);
             }
+
         });
         fetchMoreMedia();
+    }
+
+    private static Bitmap uriToBitmap(Context context, Uri selectedFileUri) {
+        try {
+            return MediaStore.Images.Media.getBitmap(context.getContentResolver(), selectedFileUri);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    static class BitmapDecodeTask extends AsyncTask<Uri, Void, Bitmap> {
+
+        private DoneCallback<Bitmap> bitmapDoneCallback;
+        private WeakReference<Context> weakReference;
+
+        BitmapDecodeTask(Context context, DoneCallback<Bitmap> bitmapDoneCallback) {
+            this.weakReference = new WeakReference<>(context);
+            this.bitmapDoneCallback = bitmapDoneCallback;
+        }
+
+        @Override
+        protected Bitmap doInBackground(Uri... uris) {
+            if (weakReference.get() == null) {
+                return null;
+            }
+            return uriToBitmap(weakReference.get(), uris[0]);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+            bitmapDoneCallback.done(bitmap, null);
+        }
     }
 
     @Override
@@ -416,6 +491,7 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
                 storyBox.applyCustomFont(this, random.nextInt(12));
                 break;
             case R.id.camera_container_background:
+                saveLastFlipperIndex();
                 UiUtils.toggleFlipperState(contentFlipper, 1);
                 break;
         }
@@ -447,11 +523,30 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
             slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             return;
         }
-        if (contentFlipper.getDisplayedChild() != 0) {
-            contentFlipper.setDisplayedChild(0);
+        int lastIndex = HolloutPreferences.getIndexOfLastDisplayedChild();
+        if (contentFlipper.getDisplayedChild() != lastIndex) {
+            contentFlipper.setDisplayedChild(lastIndex);
             return;
         }
+        HolloutPreferences.saveLastFlipperIndexInStoryActivity(0);
         super.onBackPressed();
     }
 
+    @Override
+    public void onEventAsync(final Object o) {
+        super.onEventAsync(o);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (o instanceof Bitmap) {
+                    Bitmap bitmap = (Bitmap) o;
+                    imagePreview.setImageBitmap(bitmap);
+                }
+            }
+        });
+    }
+
+    private void saveLastFlipperIndex() {
+        HolloutPreferences.saveLastFlipperIndexInStoryActivity(contentFlipper.getDisplayedChild());
+    }
 }

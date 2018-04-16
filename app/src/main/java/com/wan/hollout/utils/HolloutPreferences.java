@@ -251,4 +251,12 @@ public class HolloutPreferences {
         getInstance().edit().putString(AppConstants.EXISTING_CHAT_REQUESTS_STRING, jsonObject.toString()).commit();
     }
 
+    public static void saveLastFlipperIndexInStoryActivity(int displayedChild) {
+        getInstance().edit().putInt(AppConstants.LAST_DISPLAYED_STORY_FLIPPER_INDEX, displayedChild).commit();
+    }
+
+    public static int getIndexOfLastDisplayedChild() {
+        return getInstance().getInt(AppConstants.LAST_DISPLAYED_STORY_FLIPPER_INDEX, 0);
+    }
+
 }

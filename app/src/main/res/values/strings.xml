@@ -358,8 +358,8 @@
     <string name="likes">Likes</string>
     <string name="activities">Activities</string>
     <string name="more">MORE</string>
-    <string name="new_story">New Story</string>
-    <string name="type_story">Create Story</string>
+    <string name="new_story">Share with Friends</string>
+    <string name="type_story">Share Something</string>
     <string name="use_camera_instead">Switch to Camera</string>
     <string name="view_location_left">view_loaction_left</string>
     <string name="view_location_top">view_location_top</string>

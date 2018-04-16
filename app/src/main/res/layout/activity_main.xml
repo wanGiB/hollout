@@ -270,7 +270,7 @@
                                 android:paddingLeft="20dp"
                                 android:paddingRight="20dp"
                                 android:paddingStart="20dp"
-                                android:text="Visible to only your Chats"
+                                android:text="Auto-Deleted after 24hrs"
                                 android:textColor="@color/grey500"
                                 android:textSize="12sp" />
 

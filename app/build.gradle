@@ -17,8 +17,8 @@ android {
         applicationId "com.wan.hollout"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 72
-        versionName "3.6.2"
+        versionCode 73
+        versionName "3.6.3"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true //important
@@ -132,6 +132,7 @@ dependencies {
     compile 'com.gordonwong:material-sheet-fab:1.2.1'
     compile 'com.otaliastudios:cameraview:1.5.0'
     compile 'com.sothree.slidinguppanel:library:3.4.0'
+//    compile 'com.github.mukeshsolanki:photofilter:1.0.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

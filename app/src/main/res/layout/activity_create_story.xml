@@ -258,4 +258,6 @@
 
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 
+    <include layout="@layout/story_preview" />
+
 </ViewFlipper>
