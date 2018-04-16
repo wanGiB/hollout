@@ -73,7 +73,6 @@ import com.wan.hollout.ui.fragments.ActivitiesFragment;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.NearbyPeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
-import com.wan.hollout.ui.services.TimeChangeDetectionService;
 import com.wan.hollout.ui.widgets.HolloutFab;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
@@ -793,7 +792,7 @@ public class MainActivity extends BaseActivity
         if (signedInUserObject != null) {
             loadSignedInUserImage(signedInUserObject);
         }
-        checkStartTimeStampUpdateServer();
+        checkStartTimeStampAndUpdateServer();
         HolloutPreferences.incrementActivityCount();
     }
 
@@ -803,14 +802,13 @@ public class MainActivity extends BaseActivity
         HolloutPreferences.destroyActivityCount();
     }
 
-    private void checkStartTimeStampUpdateServer() {
+    private void checkStartTimeStampAndUpdateServer() {
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null) {
             String email = firebaseUser.getEmail();
             if (email != null) {
-                if (email.equals("holloutdev@gmail.com") || email.equals("wannclem@gmail.com") || email.equals("wanaclem@gmail.com")) {
-                    Intent timeChangedServiceIntent = new Intent(this, TimeChangeDetectionService.class);
-                    startService(timeChangedServiceIntent);
+                if (email.trim().equals("holloutdev@gmail.com") || email.trim().equals("wannclem@gmail.com") || email.trim().equals("wanaclem@gmail.com")) {
+                    HolloutUtils.startTimeDetectionService(this);
                 }
             }
         }

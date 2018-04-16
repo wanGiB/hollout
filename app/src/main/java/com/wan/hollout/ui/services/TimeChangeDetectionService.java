@@ -1,41 +1,46 @@
 package com.wan.hollout.ui.services;
 
-import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.IBinder;
-import android.support.annotation.Nullable;
+import android.os.CountDownTimer;
+import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.v4.app.JobIntentService;
 
-import com.wan.hollout.components.TimeChangedReceiver;
+import com.wan.hollout.utils.FirebaseUtils;
 
 /**
  * @author Wan Clem
  */
 
-public class TimeChangeDetectionService extends Service {
+public class TimeChangeDetectionService extends JobIntentService {
 
-    private TimeChangedReceiver timeChangedReceiver;
+    private CountDownTimer countDownTimer;
 
-    @Nullable
     @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    protected void onHandleWork(@NonNull Intent intent) {
+        FirebaseUtils.updateServerUptime(System.currentTimeMillis());
+        startDummyTimer();
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (timeChangedReceiver != null) {
-            unregisterReceiver(timeChangedReceiver);
-            timeChangedReceiver = null;
-        }
-        timeChangedReceiver = new TimeChangedReceiver();
-        IntentFilter timeFilters = new IntentFilter();
-        timeFilters.addAction("android.intent.action.TIMEZONE_CHANGED");
-        timeFilters.addAction("android.intent.action.TIME_SET");
-        timeFilters.addAction("android.intent.action.BOOT_COMPLETED");
-        timeFilters.addAction("android.intent.action.TIME_TICK");
-        registerReceiver(timeChangedReceiver, timeFilters);
-        return START_STICKY;
+    private void startDummyTimer() {
+        Looper.prepare();
+        countDownTimer = new CountDownTimer(60000, 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                FirebaseUtils.updateServerUptime(System.currentTimeMillis());
+                countDownTimer.start();
+            }
+
+        };
+
+        countDownTimer.start();
+        Looper.loop();
     }
 
 }

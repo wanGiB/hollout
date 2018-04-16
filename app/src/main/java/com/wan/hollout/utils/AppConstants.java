@@ -219,6 +219,7 @@ public class AppConstants {
     public static final String FEED_TYPE_PHOTO_LIKE = "feed_type_photo_like";
     public static final String TERMINATE_APPLICATION = "terminate_application";
     public static final int FIXED_JOB_ID = 6;
+    public static final int FIXED_JOB_ID_ = 7;
     public static final String EXISTING_CHAT_REQUESTS_STRING = "existing_chat_requests_string";
 
     public static final String REQUESTER_NAME = "requester_name";

@@ -14,6 +14,7 @@ import com.parse.ParseObject;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
+import com.wan.hollout.ui.services.TimeChangeDetectionService;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FirebaseUtils;
@@ -48,8 +49,8 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
                     String email = firebaseUser.getEmail();
                     if (email != null) {
                         if (email.equals("holloutdev@gmail.com") || email.equals("wannclem@gmail.com") || email.equals("wanaclem@gmail.com")) {
-                            long currentTime = System.currentTimeMillis();
-                            FirebaseUtils.updateServerUptime(currentTime);
+                            Intent serviceIntent = new Intent();
+                            JobIntentService.enqueueWork(context, TimeChangeDetectionService.class, AppConstants.FIXED_JOB_ID_, serviceIntent);
                         }
                     }
                 }
@@ -74,7 +75,6 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
                     // After config data is successfully fetched, it must be activated before newly fetched
                     // values are returned.
                     FirebaseUtils.getRemoteConfig().activateFetched();
-
                 } else {
                     HolloutLogger.d("FirebaseRemoteConfig", "Failed to fetch remote config data");
                 }

@@ -163,7 +163,7 @@ public class AppInstanceDetectionService extends JobIntentService {
         HolloutLogger.i(TAG, "Removing location updates");
         if (HolloutPreferences.canAccessLocation()) {
             try {
-                if (mFusedLocationClient != null) {
+                if (mFusedLocationClient != null && mLocationCallback != null) {
                     mFusedLocationClient.removeLocationUpdates(mLocationCallback);
                 }
                 stopSelf();
@@ -282,55 +282,59 @@ public class AppInstanceDetectionService extends JobIntentService {
 
         @Override
         protected Void doInBackground(final Location... params) {
-            Context context = contextWeakReference.get();
-            if (context != null) {
-                Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-                signedInUser = AuthUtil.getCurrentUser();
-                // Get the current location from the input parameter list
-                final Location loc = params[0];
-                if (signedInUser != null) {
-                    ParseGeoPoint userGeoPoint = new ParseGeoPoint();
-                    userGeoPoint.setLatitude(loc.getLatitude());
-                    userGeoPoint.setLongitude(loc.getLongitude());
-                    HolloutLogger.d(TAG, "New Geo Points =  " + loc.getLatitude() + ", " + loc.getLongitude());
-                    signedInUser.put(AppConstants.APP_USER_GEO_POINT, userGeoPoint);
-                }
-                try {
-                    addresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
-                } catch (IOException | IllegalArgumentException ignored) {
+            try {
+                Context context = contextWeakReference.get();
+                if (context != null) {
+                    Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+                    signedInUser = AuthUtil.getCurrentUser();
+                    // Get the current location from the input parameter list
+                    final Location loc = params[0];
+                    if (signedInUser != null) {
+                        ParseGeoPoint userGeoPoint = new ParseGeoPoint();
+                        userGeoPoint.setLatitude(loc.getLatitude());
+                        userGeoPoint.setLongitude(loc.getLongitude());
+                        HolloutLogger.d(TAG, "New Geo Points =  " + loc.getLatitude() + ", " + loc.getLongitude());
+                        signedInUser.put(AppConstants.APP_USER_GEO_POINT, userGeoPoint);
+                    }
+                    try {
+                        addresses = geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
+                    } catch (IOException | IllegalArgumentException ignored) {
 
+                    }
+                    if (addresses != null && addresses.size() > 0 && signedInUser != null) {
+                        // Get the first address
+                        Address address = addresses.get(0);
+                        // COUNTRY
+                        final String countryName = address.getCountryName();
+                        //COUNTRY
+                        if (StringUtils.isNotEmpty(countryName)) {
+                            HolloutLogger.d(TAG, "Country Name = " + countryName);
+                            signedInUser.put(AppConstants.APP_USER_COUNTRY, HolloutUtils.stripDollar(countryName));
+                        }
+                        //STREET
+                        final String streetAddress = address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "";
+                        if (StringUtils.isNotEmpty(streetAddress)) {
+                            HolloutLogger.d(TAG, "Street Name = " + streetAddress);
+                            signedInUser.put(AppConstants.APP_USER_STREET, HolloutUtils.stripDollar(streetAddress));
+                        }
+                        //LOCALITY
+                        String locality = address.getLocality();
+                        if (StringUtils.isNotEmpty(locality)) {
+                            HolloutLogger.d(TAG, "Locality Name = " + locality);
+                            signedInUser.put(AppConstants.APP_USER_LOCALITY, HolloutUtils.stripDollar(locality));
+                        }
+                        //Admin
+                        String adminAddress = address.getAdminArea();
+                        if (StringUtils.isNotEmpty(adminAddress)) {
+                            HolloutLogger.d(TAG, "Admin Name = " + adminAddress);
+                            signedInUser.put(AppConstants.APP_USER_ADMIN_AREA, HolloutUtils.stripDollar(adminAddress));
+                        }
+                    }
+                    signedInUser.put(AppConstants.SEARCH_CRITERIA, constructSearch());
+                    updateSignedInUserProps(true);
                 }
-                if (addresses != null && addresses.size() > 0 && signedInUser != null) {
-                    // Get the first address
-                    Address address = addresses.get(0);
-                    // COUNTRY
-                    final String countryName = address.getCountryName();
-                    //COUNTRY
-                    if (StringUtils.isNotEmpty(countryName)) {
-                        HolloutLogger.d(TAG, "Country Name = " + countryName);
-                        signedInUser.put(AppConstants.APP_USER_COUNTRY, HolloutUtils.stripDollar(countryName));
-                    }
-                    //STREET
-                    final String streetAddress = address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0) : "";
-                    if (StringUtils.isNotEmpty(streetAddress)) {
-                        HolloutLogger.d(TAG, "Street Name = " + streetAddress);
-                        signedInUser.put(AppConstants.APP_USER_STREET, HolloutUtils.stripDollar(streetAddress));
-                    }
-                    //LOCALITY
-                    String locality = address.getLocality();
-                    if (StringUtils.isNotEmpty(locality)) {
-                        HolloutLogger.d(TAG, "Locality Name = " + locality);
-                        signedInUser.put(AppConstants.APP_USER_LOCALITY, HolloutUtils.stripDollar(locality));
-                    }
-                    //Admin
-                    String adminAddress = address.getAdminArea();
-                    if (StringUtils.isNotEmpty(adminAddress)) {
-                        HolloutLogger.d(TAG, "Admin Name = " + adminAddress);
-                        signedInUser.put(AppConstants.APP_USER_ADMIN_AREA, HolloutUtils.stripDollar(adminAddress));
-                    }
-                }
-                signedInUser.put(AppConstants.SEARCH_CRITERIA, constructSearch());
-                updateSignedInUserProps(true);
+            } catch (SecurityException ignored) {
+
             }
             return null;
         }
