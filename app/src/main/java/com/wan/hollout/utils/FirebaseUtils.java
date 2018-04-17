@@ -110,10 +110,6 @@ public class FirebaseUtils {
         return getRootRef().child(AppConstants.ARCHIVES);
     }
 
-    public static void updateServerUptime(long currentTime) {
-        getRootRef().child(AppConstants.SERVER_UPTIME).setValue(currentTime);
-    }
-
     public static DatabaseReference getServerUpTimeRef() {
         return getRootRef().child(AppConstants.SERVER_UPTIME);
     }
