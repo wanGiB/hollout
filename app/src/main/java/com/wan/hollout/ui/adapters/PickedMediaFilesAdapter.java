@@ -3,7 +3,6 @@ package com.wan.hollout.ui.adapters;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +15,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
+import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.widgets.CircleImageView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
@@ -71,15 +71,8 @@ public class PickedMediaFilesAdapter extends RecyclerView.Adapter<RecyclerView.V
 
                 sparseBooleanArray.put(position, true);
 
-                if (Build.VERSION.SDK_INT >= 17) {
-                    if (!activity.isDestroyed()) {
-                        Glide.with(activity).load(mediaPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(pickedMediaItemHolder.mediaView);
-                        pickedMediaItemHolder.mediaView.invalidate();
-                    }
-                } else {
-                    Glide.with(activity).load(mediaPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(pickedMediaItemHolder.mediaView);
-                    pickedMediaItemHolder.mediaView.invalidate();
-                }
+                Glide.with(ApplicationLoader.getInstance()).load(mediaPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(pickedMediaItemHolder.mediaView);
+                pickedMediaItemHolder.mediaView.invalidate();
 
                 UiUtils.showView(pickedMediaItemHolder.playMediaIfVideoView, true);
                 pickedMediaItemHolder.playMediaIfVideoView.invalidate();

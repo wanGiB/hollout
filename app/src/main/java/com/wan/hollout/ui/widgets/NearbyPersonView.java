@@ -109,7 +109,7 @@ public class NearbyPersonView extends RelativeLayout implements View.OnClickList
 
     private void applyProfilePicture(String profileUrl, final String name) {
         if (!TextUtils.isEmpty(profileUrl)) {
-            Glide.with(activity).load(profileUrl).listener(new RequestListener<String, GlideDrawable>() {
+            Glide.with(ApplicationLoader.getInstance()).load(profileUrl).listener(new RequestListener<String, GlideDrawable>() {
                 @Override
                 public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                     UiUtils.loadName(userPhotoView, name);

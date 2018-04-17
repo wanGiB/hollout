@@ -8,7 +8,6 @@ import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -154,7 +153,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private void applyProfilePicture(String profileUrl, final String name) {
         if (!TextUtils.isEmpty(profileUrl)) {
-            Glide.with(activity).load(profileUrl).listener(new RequestListener<String, GlideDrawable>() {
+            Glide.with(ApplicationLoader.getInstance()).load(profileUrl).listener(new RequestListener<String, GlideDrawable>() {
                 @Override
                 public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
                     UiUtils.loadName(userPhotoView, name);
@@ -438,7 +437,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 AppConstants.selectedPeople.remove(getConversationItem());
                 AppConstants.selectedPeoplePositions.put(getCurrentConversationHashCode(), false);
             }
-            EventBus.getDefault().post(new ConversationItemChangedEvent(parseObject,false));
+            EventBus.getDefault().post(new ConversationItemChangedEvent(parseObject, false));
         } else {
             initChat();
         }
@@ -461,7 +460,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 AppConstants.selectedPeoplePositions.put(getCurrentConversationHashCode(), false);
             }
         }
-        EventBus.getDefault().post(new ConversationItemChangedEvent(parseObject,false));
+        EventBus.getDefault().post(new ConversationItemChangedEvent(parseObject, false));
         return true;
     }
 
@@ -572,40 +571,18 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
     }
 
     private void loadLastMessageGif(String gifUrl) {
-        if (Build.VERSION.SDK_INT >= 17) {
-            if (!activity.isDestroyed()) {
-                if (StringUtils.isNotEmpty(gifUrl)) {
-                    Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
-
-                        @Override
-                        public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            return false;
-
-                        }
-
-                    }).into(reactionsIndicatorView);
+        if (StringUtils.isNotEmpty(gifUrl)) {
+            Glide.with(ApplicationLoader.getInstance()).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+                @Override
+                public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                    return false;
                 }
-            }
-        } else {
-            if (StringUtils.isNotEmpty(gifUrl)) {
-                Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
 
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        return false;
-                    }
-                }).into(reactionsIndicatorView);
-            }
+                @Override
+                public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    return false;
+                }
+            }).into(reactionsIndicatorView);
         }
     }
 

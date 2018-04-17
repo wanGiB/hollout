@@ -75,6 +75,7 @@ import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.clients.ChatClient;
+import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.enums.MessageDirection;
 import com.wan.hollout.enums.MessageStatus;
 import com.wan.hollout.enums.MessageType;
@@ -1269,13 +1270,7 @@ public class ChatActivity extends BaseActivity implements
 
     public void loadVideoFromPath(ImageView videoView, String videoPath) {
         if (videoView != null) {
-            if (Build.VERSION.SDK_INT >= 17) {
-                if (!this.isDestroyed()) {
-                    Glide.with(this).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
-                }
-            } else {
-                Glide.with(this).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
-            }
+            Glide.with(ApplicationLoader.getInstance()).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
         }
     }
 
@@ -1299,39 +1294,20 @@ public class ChatActivity extends BaseActivity implements
 
     private void loadGif(String gifUrl) {
         if (StringUtils.isNotEmpty(gifUrl)) {
-            if (Build.VERSION.SDK_INT >= 17) {
-                if (!this.isDestroyed()) {
-                    if (StringUtils.isNotEmpty(gifUrl)) {
-                        Glide.with(this).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+            if (StringUtils.isNotEmpty(gifUrl)) {
+                Glide.with(ApplicationLoader.getInstance()).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
 
-                            @Override
-                            public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                return false;
-
-                            }
-                        }).into(replyIconView);
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                        return false;
                     }
-                }
-            } else {
-                if (StringUtils.isNotEmpty(gifUrl)) {
-                    Glide.with(this).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
 
-                        @Override
-                        public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                            return false;
-                        }
+                    @Override
+                    public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        return false;
 
-                        @Override
-                        public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            return false;
-                        }
-                    }).into(replyIconView);
-                }
+                    }
+                }).into(replyIconView);
             }
         }
     }
@@ -1778,13 +1754,7 @@ public class ChatActivity extends BaseActivity implements
                     UiUtils.showView(mediaLengthView, false);
                     break;
                 case AppConstants.FILE_TYPE_VIDEO:
-                    if (Build.VERSION.SDK_INT >= 17) {
-                        if (!this.isDestroyed()) {
-                            Glide.with(this).load(pickedFilePath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(singleMediaViewer);
-                        }
-                    } else {
-                        Glide.with(this).load(pickedFilePath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(singleMediaViewer);
-                    }
+                    Glide.with(ApplicationLoader.getInstance()).load(pickedFilePath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(singleMediaViewer);
                     String fileMime = FileUtils.getMimeType(pickedFilePath);
                     if (HolloutUtils.isVideo(fileMime)) {
                         UiUtils.showView(playSingleMediaIfVideo, true);

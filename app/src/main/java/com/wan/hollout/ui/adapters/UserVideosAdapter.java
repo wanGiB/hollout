@@ -19,6 +19,7 @@ import com.bumptech.glide.Glide;
 import com.wan.hollout.BuildConfig;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
+import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 import com.wan.hollout.utils.AppConstants;
@@ -79,15 +80,8 @@ public class UserVideosAdapter extends RecyclerView.Adapter<UserVideosAdapter.Vi
 
         final String videoPath = videoEntry.path;
 
-        if (Build.VERSION.SDK_INT >= 17) {
-            if (!appCompatActivity.isDestroyed()) {
-                Glide.with(appCompatActivity).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoRowHolder.randomVideoFrame);
-                videoRowHolder.randomVideoFrame.invalidate();
-            }
-        } else {
-            Glide.with(appCompatActivity).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoRowHolder.randomVideoFrame);
-            videoRowHolder.randomVideoFrame.invalidate();
-        }
+        Glide.with(ApplicationLoader.getInstance()).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoRowHolder.randomVideoFrame);
+        videoRowHolder.randomVideoFrame.invalidate();
 
         if (isNotEmpty(videoFileName)) {
             if (isNotEmpty(getQueryString())) {

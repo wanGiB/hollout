@@ -569,13 +569,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     public void loadVideoFromPath(ImageView videoView, String videoPath) {
         if (videoView != null) {
-            if (Build.VERSION.SDK_INT >= 17) {
-                if (!activity.isDestroyed()) {
-                    Glide.with(activity).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
-                }
-            } else {
-                Glide.with(activity).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
-            }
+            Glide.with(ApplicationLoader.getInstance()).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
         }
     }
 
@@ -589,43 +583,21 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         AppConstants.fileSizeOrDurationPositions.put(getMessageHash(), false);
         AppConstants.messageBodyPositions.put(getMessageHash(), false);
         if (StringUtils.isNotEmpty(gifUrl)) {
-            if (Build.VERSION.SDK_INT >= 17) {
-                if (!activity.isDestroyed()) {
-                    if (StringUtils.isNotEmpty(gifUrl)) {
-                        getLoadingGifImageCast().startLoading();
-                        Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+            if (StringUtils.isNotEmpty(gifUrl)) {
+                getLoadingGifImageCast().startLoading();
+                Glide.with(ApplicationLoader.getInstance()).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
 
-                            @Override
-                            public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                getLoadingGifImageCast().stopLoading();
-                                return false;
-
-                            }
-                        }).into(attachedPhotoOrVideoThumbnailView);
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                        return false;
                     }
-                }
-            } else {
-                if (StringUtils.isNotEmpty(gifUrl)) {
-                    getLoadingGifImageCast().startLoading();
-                    Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
 
-                        @Override
-                        public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            getLoadingGifImageCast().stopLoading();
-                            return false;
-                        }
-                    }).into(attachedPhotoOrVideoThumbnailView);
-                }
+                    @Override
+                    public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        getLoadingGifImageCast().stopLoading();
+                        return false;
+                    }
+                }).into(attachedPhotoOrVideoThumbnailView);
             }
         }
     }

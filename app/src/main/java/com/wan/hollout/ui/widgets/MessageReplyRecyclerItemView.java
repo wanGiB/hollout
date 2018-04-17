@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.net.Uri;
-import android.os.Build;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -26,6 +25,7 @@ import com.wan.hollout.animations.KeyframesDrawable;
 import com.wan.hollout.animations.KeyframesDrawableBuilder;
 import com.wan.hollout.animations.deserializers.KFImageDeserializer;
 import com.wan.hollout.animations.model.KFImage;
+import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.enums.MessageType;
 import com.wan.hollout.eventbuses.ScrollToMessageEvent;
 import com.wan.hollout.models.ChatMessage;
@@ -218,13 +218,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
 
     public void loadVideoFromPath(ImageView videoView, String videoPath) {
         if (videoView != null) {
-            if (Build.VERSION.SDK_INT >= 17) {
-                if (!activity.isDestroyed()) {
-                    Glide.with(activity).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
-                }
-            } else {
-                Glide.with(activity).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
-            }
+            Glide.with(ApplicationLoader.getInstance()).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
         }
     }
 
@@ -294,40 +288,19 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
         UiUtils.showView(replyAttachmentView, true);
         replySubTitleView.setText(UiUtils.fromHtml("<b>" + activity.getString(R.string.gif) + "</b>"));
         if (StringUtils.isNotEmpty(gifUrl)) {
-            if (Build.VERSION.SDK_INT >= 17) {
-                if (!activity.isDestroyed()) {
-                    if (StringUtils.isNotEmpty(gifUrl)) {
-                        Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
+            Glide.with(ApplicationLoader.getInstance()).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
 
-                            @Override
-                            public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                return false;
-
-                            }
-                        }).into(replyIconView);
-                    }
+                @Override
+                public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                    return false;
                 }
-            } else {
-                if (StringUtils.isNotEmpty(gifUrl)) {
-                    Glide.with(activity).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
 
-                        @Override
-                        public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                            return false;
-                        }
+                @Override
+                public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    return false;
 
-                        @Override
-                        public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                            return false;
-                        }
-                    }).into(replyIconView);
                 }
-            }
+            }).into(replyIconView);
         }
     }
 

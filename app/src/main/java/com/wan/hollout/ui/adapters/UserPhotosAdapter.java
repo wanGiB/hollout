@@ -11,6 +11,7 @@ import android.widget.CheckBox;
 import com.bumptech.glide.Glide;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
+import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.ClearSelectedAudio;
 import com.wan.hollout.ui.activities.GalleryActivity;
 import com.wan.hollout.ui.widgets.HolloutTextView;
@@ -79,13 +80,7 @@ public class UserPhotosAdapter extends SectionedRecyclerAdapter<UserPhotosAdapte
 
         final HolloutUtils.MediaEntry mediaEntry = photoEntries.get(itemPosition);
 
-        if (Build.VERSION.SDK_INT >= 17) {
-            if (!galleryActivity.isDestroyed()) {
-                Glide.with(galleryActivity).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(holder.imageIconItem);
-            }
-        } else {
-            Glide.with(galleryActivity).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(holder.imageIconItem);
-        }
+        Glide.with(ApplicationLoader.getInstance()).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(holder.imageIconItem);
 
         holder.imageIconItem.setOnClickListener(new View.OnClickListener() {
 

@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.activities;
 
+import android.app.Application;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -195,7 +196,7 @@ public class UserPhotoPreviewActivity extends AppCompatActivity {
             if (!userPhotos.contains(userProfilePhotoUrl)) {
                 userPhotos.add(userProfilePhotoUrl);
             }
-            Glide.with(this).load(userProfilePhotoUrl).listener(new RequestListener<String, GlideDrawable>() {
+            Glide.with(ApplicationLoader.getInstance()).load(userProfilePhotoUrl).listener(new RequestListener<String, GlideDrawable>() {
 
                 @Override
                 public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {

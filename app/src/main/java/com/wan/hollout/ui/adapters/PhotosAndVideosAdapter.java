@@ -1,7 +1,6 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,6 +10,7 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.wan.hollout.R;
+import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.utils.FileUtils;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
@@ -27,11 +27,9 @@ import butterknife.ButterKnife;
 public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<HolloutUtils.MediaEntry> photosAndVideos;
-    private Activity activity;
     private LayoutInflater layoutInflater;
 
     public PhotosAndVideosAdapter(Activity activity, List<HolloutUtils.MediaEntry> photosAndVideos) {
-        this.activity = activity;
         this.photosAndVideos = photosAndVideos;
         layoutInflater = LayoutInflater.from(activity);
     }
@@ -46,7 +44,7 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         PhotosAndVideosHolder photosAndVideosHolder = (PhotosAndVideosHolder) holder;
-        photosAndVideosHolder.bindData(activity, photosAndVideos.get(position));
+        photosAndVideosHolder.bindData(photosAndVideos.get(position));
     }
 
     @Override
@@ -67,14 +65,8 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             ButterKnife.bind(this, itemView);
         }
 
-        void bindData(Activity activity, HolloutUtils.MediaEntry mediaEntry) {
-            if (Build.VERSION.SDK_INT >= 17) {
-                if (!activity.isDestroyed()) {
-                    Glide.with(activity).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(imageIconView);
-                }
-            } else {
-                Glide.with(activity).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(imageIconView);
-            }
+        void bindData(HolloutUtils.MediaEntry mediaEntry) {
+            Glide.with(ApplicationLoader.getInstance()).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(imageIconView);
             String fileMiMeType = FileUtils.getMimeType(mediaEntry.path);
             UiUtils.showView(playMediaIfVideoIconView, HolloutUtils.isVideo(fileMiMeType));
         }

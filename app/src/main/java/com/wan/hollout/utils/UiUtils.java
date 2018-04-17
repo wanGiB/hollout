@@ -278,47 +278,23 @@ public class UiUtils {
     public static void loadImage(final Activity context, final String photoPath, final ImageView imageView) {
         if (imageView != null) {
             if (isNotEmpty(photoPath)) {
-                if (context != null) {
-                    if (Build.VERSION.SDK_INT >= 17) {
-                        if (!context.isDestroyed()) {
-                            Glide.with(context).load(photoPath).listener(new RequestListener<String, GlideDrawable>() {
-                                @Override
-                                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                                    imageView.setImageResource(R.mipmap.ic_launcher);
-                                    HolloutLogger.d(TAG, "An exception was raised while loading an image. Error Message = "
-                                            + (e != null && e.getMessage() != null ? e.getMessage() : "") + " For Photo Url = " + photoPath);
-                                    return false;
-                                }
+                Glide.with(ApplicationLoader.getInstance()).load(photoPath).listener(new RequestListener<String, GlideDrawable>() {
 
-                                @Override
-                                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                    return false;
-                                }
-
-                            }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(imageView);
-                            imageView.invalidate();
-                        }
-                    } else {
-                        Glide.with(context).load(photoPath).listener(new RequestListener<String, GlideDrawable>() {
-
-                            @Override
-                            public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                               /* if (org.parceler.apache.commons.lang.StringUtils.isNotEmpty(placeHolderName)) {
-                                    loadUserNameInitialsIntoBitmap(placeHolderName, imageView);
-                                }*/
-                                imageView.setImageResource(R.mipmap.ic_launcher);
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                return false;
-                            }
-
-                        }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(imageView);
-                        imageView.invalidate();
+                    @Override
+                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                        imageView.setImageResource(R.mipmap.ic_launcher);
+                        HolloutLogger.d(TAG, "An exception was raised while loading an image. Error Message = "
+                                + (e != null && e.getMessage() != null ? e.getMessage() : "") + " For Photo Url = " + photoPath);
+                        return false;
                     }
-                }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                        return false;
+                    }
+
+                }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(imageView);
+                imageView.invalidate();
             }
         }
     }
@@ -762,15 +738,8 @@ public class UiUtils {
     }
 
     public static void loadMusicPreview(Activity activity, ImageView audioIcon, Uri uri) {
-        if (Build.VERSION.SDK_INT >= 17) {
-            if (!activity.isDestroyed()) {
-                Glide.with(activity).load(uri).error(R.drawable.x_ic_folde_music).placeholder(R.drawable.x_ic_folde_music).crossFade().into(audioIcon);
-                audioIcon.invalidate();
-            }
-        } else {
-            Glide.with(activity).load(uri).error(R.drawable.x_ic_folde_music).placeholder(R.drawable.x_ic_folde_music).crossFade().into(audioIcon);
-            audioIcon.invalidate();
-        }
+        Glide.with(ApplicationLoader.getInstance()).load(uri).error(R.drawable.x_ic_folde_music).placeholder(R.drawable.x_ic_folde_music).crossFade().into(audioIcon);
+        audioIcon.invalidate();
     }
 
     public static void bangSound(Context context, int soundId) {
