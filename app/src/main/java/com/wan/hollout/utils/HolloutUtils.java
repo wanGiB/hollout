@@ -28,7 +28,6 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.JobIntentService;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -55,7 +54,6 @@ import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.eventbuses.ChatRequestNegotiationResult;
 import com.wan.hollout.interfaces.DoneCallback;
-import com.wan.hollout.ui.services.TimeChangeDetectionService;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
 
@@ -1113,15 +1111,6 @@ public class HolloutUtils {
             return searchCriteria.toLowerCase();
         }
         return "none";
-    }
-
-    public static void startTimeDetectionService(Context context) {
-        try {
-            Intent serviceIntent = new Intent();
-            JobIntentService.enqueueWork(context, TimeChangeDetectionService.class, AppConstants.FIXED_JOB_ID_, serviceIntent);
-        } catch (IllegalStateException ignored) {
-
-        }
     }
 
 }

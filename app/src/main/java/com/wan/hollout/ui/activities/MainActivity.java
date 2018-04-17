@@ -792,7 +792,6 @@ public class MainActivity extends BaseActivity
         if (signedInUserObject != null) {
             loadSignedInUserImage(signedInUserObject);
         }
-        checkStartTimeStampAndUpdateServer();
         HolloutPreferences.incrementActivityCount();
     }
 
@@ -800,18 +799,6 @@ public class MainActivity extends BaseActivity
     protected void onDestroy() {
         super.onDestroy();
         HolloutPreferences.destroyActivityCount();
-    }
-
-    private void checkStartTimeStampAndUpdateServer() {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            String email = firebaseUser.getEmail();
-            if (email != null) {
-                if (email.trim().equals("holloutdev@gmail.com") || email.trim().equals("wannclem@gmail.com") || email.trim().equals("wanaclem@gmail.com")) {
-                    HolloutUtils.startTimeDetectionService(this);
-                }
-            }
-        }
     }
 
     @Override

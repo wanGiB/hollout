@@ -231,11 +231,6 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
-        <service
-            android:name=".ui.services.TimeChangeDetectionService"
-            android:enabled="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
     </application>
 
 </manifest>

@@ -57,6 +57,50 @@
           "status": 2
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815201272443:android:82e389d9782aff0a",
+        "android_client_info": {
+          "package_name": "com.wan.hollout.servertimeupdater"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "815201272443-9kvdqvmfov00uh9eq63a53vra1gt6vo5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wan.hollout.servertimeupdater",
+            "certificate_hash": "3fe7c378e3a7eedd9e5ea3a5b7b83d19c414ddb6"
+          }
+        },
+        {
+          "client_id": "815201272443-o014lvotvm8j8m6otnjdvpvn0t6jgfs1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSmp5TOlZxErlcoQoDksrtYvkic2D7wPU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "815201272443-o014lvotvm8j8m6otnjdvpvn0t6jgfs1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
     }
   ],
   "configuration_version": "1"

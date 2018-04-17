@@ -9,12 +9,10 @@ import android.support.v4.app.JobIntentService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.parse.ParseObject;
 import com.wan.hollout.clients.CallClient;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
-import com.wan.hollout.ui.services.TimeChangeDetectionService;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FirebaseUtils;
@@ -43,17 +41,6 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
                 }
                 ChatClient.getInstance().startChatClient();
                 CallClient.getInstance().startCallClient();
-
-                FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                if (firebaseUser != null) {
-                    String email = firebaseUser.getEmail();
-                    if (email != null) {
-                        if (email.equals("holloutdev@gmail.com") || email.equals("wannclem@gmail.com") || email.equals("wanaclem@gmail.com")) {
-                            Intent serviceIntent = new Intent();
-                            JobIntentService.enqueueWork(context, TimeChangeDetectionService.class, AppConstants.FIXED_JOB_ID_, serviceIntent);
-                        }
-                    }
-                }
                 fetchNewConfigData();
             }
         } catch (IllegalArgumentException | IllegalStateException | NullPointerException ignored) {
@@ -75,6 +62,7 @@ public class ConnectivityChangedReceiver extends BroadcastReceiver {
                     // After config data is successfully fetched, it must be activated before newly fetched
                     // values are returned.
                     FirebaseUtils.getRemoteConfig().activateFetched();
+
                 } else {
                     HolloutLogger.d("FirebaseRemoteConfig", "Failed to fetch remote config data");
                 }
