@@ -2397,7 +2397,23 @@ public class ChatActivity extends BaseActivity implements
         if (isAContact()) {
             return;
         }
+        checkAndAddToUserChats();
         checkAcceptPendingInvitation();
+    }
+
+    private void checkAndAddToUserChats() {
+        List<String> signedInUserChats = signedInUser.getList(AppConstants.APP_USER_CHATS);
+        if (signedInUserChats != null && !signedInUserChats.contains(getRecipient())) {
+            signedInUserChats.add(getRecipient());
+            signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
+            signedInUser.pinInBackground();
+        }
+        if (signedInUserChats == null) {
+            signedInUserChats = new ArrayList<>();
+            signedInUserChats.add(getRecipient());
+            signedInUser.put(AppConstants.APP_USER_CHATS, signedInUserChats);
+            signedInUser.pinInBackground();
+        }
     }
 
     @SuppressWarnings("unchecked")
