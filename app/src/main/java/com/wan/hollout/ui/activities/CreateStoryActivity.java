@@ -134,6 +134,9 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
     @BindView(R.id.toggle_media)
     Spinner toggleMediaSpinner;
 
+    @BindView(R.id.drag_view_container)
+    View dragViewContainer;
+
     @SuppressLint("StaticFieldLeak")
     public static FloatingActionButton doneWithContentSelection;
 
@@ -215,8 +218,10 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
                 if (slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
                     if (randomCol != 0 && randomCol != -1) {
                         dragView.setBackgroundColor(ContextCompat.getColor(CreateStoryActivity.this, randomCol));
+                        dragViewContainer.setBackgroundColor(ContextCompat.getColor(CreateStoryActivity.this, randomCol));
                     } else {
                         dragView.setBackgroundColor(ContextCompat.getColor(CreateStoryActivity.this, R.color.colorPrimary));
+                        dragViewContainer.setBackgroundColor(ContextCompat.getColor(CreateStoryActivity.this, R.color.colorPrimary));
                     }
                     setToLessIcon();
                 } else {
