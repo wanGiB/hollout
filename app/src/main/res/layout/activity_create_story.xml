@@ -249,10 +249,45 @@
 
             </LinearLayout>
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/more_media_recycler_view"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:background="@color/colorPrimary">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <Spinner
+                        android:id="@+id/toggle_media"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="16dp"
+                        android:entries="@array/toggle_media_array"
+                        android:popupBackground="@color/colorPrimaryDark"
+                        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/more_media_recycler_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                </LinearLayout>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/done_with_contents_selection"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|bottom"
+                    android:layout_margin="20dp"
+                    android:src="@drawable/ic_done_white_24dp" />
+
+            </FrameLayout>
 
         </LinearLayout>
 

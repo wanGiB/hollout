@@ -11,24 +11,14 @@ import com.wan.hollout.ui.adapters.ImageAdapter;
  */
 public class RecentImages {
 
-    public static final String ASCENDING = " ASC";
-    public static final String DESCENDING = " DESC";
-    public static final String DESCRIPTION = "description";
-    public static final String PICASA_ID = "picasa_id";
-    public static final String IS_PRIVATE = "isprivate";
-    public static final String LATITUDE = "latitude";
-    public static final String LONGITUDE = "longitude";
-    public static final String DATE_TAKEN = "datetaken";
-    public static final String ORIENTATION = "orientation";
-    public static final String MINI_THUMB_MAGIC = "mini_thumb_magic";
-    public static final String BUCKET_ID = "bucket_id";
-    public static final String BUCKET_DISPLAY_NAME = "bucket_display_name";
+    private static final String DESCENDING = " DESC";
+    private static final String DATE_TAKEN = "datetaken";
 
     public ImageAdapter getAdapter(Context context) {
         return getAdapter(context, DATE_TAKEN, DESCENDING);
     }
 
-    public ImageAdapter getAdapter(Context context, String columns, String sort) {
+    private ImageAdapter getAdapter(Context context, String columns, String sort) {
         Cursor mImageCursor = null;
         try {
             String[] projection = new String[]{MediaStore.Images.ImageColumns._ID, MediaStore.Images.ImageColumns.DATA,
@@ -38,10 +28,6 @@ public class RecentImages {
             e.printStackTrace();
         }
         return new ImageAdapter(context, mImageCursor);
-    }
-
-    public void cleanupCache() {
-        ImageAdapter.cleanupCache();
     }
 
     public void setDrawable(int drawable) {
@@ -62,10 +48,6 @@ public class RecentImages {
 
     public void setSize(int size) {
         ImageAdapter.IN_SAMPLE_SIZE = size;
-    }
-
-    public void setKind(int kind) {
-        ImageAdapter.KIND = kind;
     }
 
 }

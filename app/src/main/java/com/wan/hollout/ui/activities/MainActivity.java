@@ -240,6 +240,7 @@ public class MainActivity extends BaseActivity
         if (StringUtils.isNotEmpty(refreshedToken)) {
             if (savedToken == null) {
                 signedInUserObject.put(AppConstants.USER_FIREBASE_TOKEN, refreshedToken);
+                signedInUserObject.pinInBackground();
                 AuthUtil.updateCurrentLocalUser(signedInUserObject, null);
             } else {
                 if (!savedToken.equals(refreshedToken)) {
@@ -1080,8 +1081,8 @@ public class MainActivity extends BaseActivity
         findViewById(R.id.fab_sheet_item_new_event_invite).setOnClickListener(this);
 
         //TODO: Uncomment once ready
-        holloutFab.hide();
-        UiUtils.showView(holloutFab, false);
+//        holloutFab.hide();
+//        UiUtils.showView(holloutFab, false);
 
     }
 

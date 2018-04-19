@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,10 +12,13 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
+import com.wan.hollout.ui.activities.CreateStoryActivity;
+import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.FileUtils;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
+import java.io.File;
 import java.util.List;
 
 import butterknife.BindView;
@@ -60,15 +64,57 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         @BindView(R.id.play_media_if_video_icon)
         ImageView playMediaIfVideoIconView;
 
+        @BindView(R.id.checked_indicator)
+        ImageView checkedIndicator;
+
+        @BindView(R.id.image_item_layout)
+        View mainItemView;
+
         PhotosAndVideosHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
 
-        void bindData(HolloutUtils.MediaEntry mediaEntry) {
+        void bindData(final HolloutUtils.MediaEntry mediaEntry) {
             Glide.with(ApplicationLoader.getInstance()).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(imageIconView);
             String fileMiMeType = FileUtils.getMimeType(mediaEntry.path);
             UiUtils.showView(playMediaIfVideoIconView, HolloutUtils.isVideo(fileMiMeType));
+            mainItemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    File file = new File(mediaEntry.path);
+                    if (file.exists()) {
+                        Uri uri = Uri.fromFile(file);
+                        if (AppConstants.selectedUris.size() == 5) {
+                            UiUtils.showSafeToast("Maximum number of sharable media reached");
+                            return;
+                        }
+                        if (!AppConstants.selectedUris.contains(uri)) {
+                            AppConstants.selectedUris.add(uri);
+                            UiUtils.showView(checkedIndicator, true);
+                            mainItemView.setScaleY(0.9f);
+                            mainItemView.setScaleX(0.9f);
+                            CreateStoryActivity.doneWithContentSelection.show();
+                        } else {
+                            AppConstants.selectedUris.remove(uri);
+                            UiUtils.showView(checkedIndicator, false);
+                            mainItemView.setScaleY(1);
+                            mainItemView.setScaleX(1);
+                            if (AppConstants.selectedUris.isEmpty()) {
+                                CreateStoryActivity.doneWithContentSelection.hide();
+                            }
+                        }
+                    } else {
+                        UiUtils.showSafeToast("Error retrieving image. Please pick another");
+                    }
+                }
+            });
+            imageIconView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mainItemView.performClick();
+                }
+            });
         }
 
     }

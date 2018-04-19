@@ -47,6 +47,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -1046,7 +1047,7 @@ public class UiUtils {
         return b;
     }
 
-    public static void loadName(ImageView imageView,String name) {
+    public static void loadName(ImageView imageView, String name) {
         String notShownMembers = WordUtils.initials(name.toUpperCase());
         int color = generator.getRandomColor();
         TextDrawable.IBuilder builder = TextDrawable.builder()
@@ -1072,6 +1073,36 @@ public class UiUtils {
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
         drawable.draw(canvas);
         return bitmap;
+    }
+
+    public static void scaleView(View v, float startScale, float endScale) {
+        Animation anim = new ScaleAnimation(
+                1f, 1f, // Start and end values for the X axis scaling
+                startScale, endScale, // Start and end values for the Y axis scaling
+                Animation.RELATIVE_TO_SELF, 0f, // Pivot point of X scaling
+                Animation.RELATIVE_TO_SELF, 0f); // Pivot point of Y scaling
+        anim.setFillAfter(true); // Needed to keep the result of the animation
+        anim.setDuration(300);
+        v.startAnimation(anim);
+    }
+
+    private static int[] otherRandomColors = new int[]{R.color.hollout_color_one,
+            R.color.hollout_color_two,
+            R.color.hollout_color_three,
+            R.color.teal_A700,
+            R.color.hollout_color_five, R.color.colorFacebook,
+            R.color.colorGoogle, R.color.colorTwitter,
+            R.color.linked_in};
+
+    private static int currentIndex = 0;
+
+    public static int getRandomColor() {
+        if (currentIndex > otherRandomColors.length) {
+            return otherRandomColors[0];
+        }
+        int newColor = otherRandomColors[currentIndex];
+        currentIndex++;
+        return newColor;
     }
 
 }

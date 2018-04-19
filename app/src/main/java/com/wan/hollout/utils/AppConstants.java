@@ -1,5 +1,6 @@
 package com.wan.hollout.utils;
 
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.text.SpannableStringBuilder;
 import android.util.SparseBooleanArray;
@@ -326,5 +327,8 @@ public class AppConstants {
     public static boolean retrievingMessages = false;
 
     public static ArrayList<Integer> changedIndices = new ArrayList<>();
+
+    public static List<Uri> selectedUris = new ArrayList<>();
+
 }
 

@@ -44,6 +44,11 @@
         <item>@null</item>
     </array>
 
+    <array name="toggle_media_array">
+        <item>Photos</item>
+        <item>Videos</item>
+    </array>
+
     <array name="mdcolor_400">
         <item name="red_400" type="color">#e84e40</item>
         <item name="pink_400" type="color">#ec407a</item>

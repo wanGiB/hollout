@@ -1,6 +1,5 @@
 package com.wan.hollout.ui.widgets;
 
-
 import android.content.ContentUris;
 import android.content.Context;
 import android.net.Uri;
@@ -25,8 +24,6 @@ public class RecentPhotoViewRail extends FrameLayout {
     @Nullable
     private OnItemClickedListener listener;
 
-    private RecentImages recentImages;
-
     public RecentPhotoViewRail(Context context) {
         this(context, null);
     }
@@ -42,7 +39,7 @@ public class RecentPhotoViewRail extends FrameLayout {
     }
 
     public void fetchRecentImages() {
-        recentImages = new RecentImages();
+        RecentImages recentImages = new RecentImages();
         final ImageAdapter adapter = recentImages.getAdapter(getContext());
         twoWayGridView.setAdapter(adapter);
         if (adapter.getCount() > 0) {

@@ -17,14 +17,18 @@ import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.ViewFlipper;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -36,6 +40,7 @@ import com.vanniktech.emoji.listeners.OnEmojiPopupDismissListener;
 import com.vanniktech.emoji.listeners.OnEmojiPopupShownListener;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardOpenListener;
 import com.wan.hollout.R;
+import com.wan.hollout.eventbuses.SelectedFileUriEvent;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.ui.adapters.PhotosAndVideosAdapter;
 import com.wan.hollout.ui.widgets.CameraControls;
@@ -47,7 +52,6 @@ import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.PermissionsUtils;
-import com.wan.hollout.utils.RandomColor;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -70,7 +74,6 @@ import butterknife.ButterKnife;
  */
 
 public class CreateStoryActivity extends BaseActivity implements View.OnClickListener {
-
 
     @BindView(R.id.content_flipper)
     ViewFlipper contentFlipper;
@@ -129,8 +132,13 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
     @BindView(R.id.filters_recycler_view)
     RecyclerView filtersRecyclerView;
 
+    @BindView(R.id.toggle_media)
+    Spinner toggleMediaSpinner;
+
+    @SuppressLint("StaticFieldLeak")
+    public static FloatingActionButton doneWithContentSelection;
+
     private EmojiPopup emojiPopup;
-    private RandomColor randomColor;
 
     private Random random;
     private HolloutPermissions holloutPermissions;
@@ -152,7 +160,6 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
         setContentView(R.layout.activity_create_story);
         ButterKnife.bind(this);
         setupEmojiPopup();
-        randomColor = new RandomColor();
         random = new Random();
 
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -162,8 +169,11 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
 
         setToExpandIcon();
 
+        doneWithContentSelection = findViewById(R.id.done_with_contents_selection);
         contentFlipper.setInAnimation(this, R.anim.animation_toggle_in);
         contentFlipper.setOutAnimation(this, R.anim.animation_toggle_out);
+
+        doneWithContentSelection.hide();
 
         openEmojiView.setOnClickListener(this);
         changeStoryBoardColorView.setOnClickListener(this);
@@ -203,10 +213,26 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
                         == SlidingUpPanelLayout.PanelState.COLLAPSED);
 
                 if (slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
+                    dragView.setBackgroundColor(ContextCompat.getColor(CreateStoryActivity.this, R.color.colorPrimary));
                     setToLessIcon();
                 } else {
+                    dragView.setBackgroundColor(Color.BLACK);
                     setToExpandIcon();
                 }
+
+            }
+
+        });
+
+        toggleMediaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                fetchMoreMedia(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
 
             }
 
@@ -224,18 +250,21 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
                 .sizeDp(18).color(Color.WHITE));
     }
 
-    private void fetchMoreMedia() {
-        List<HolloutUtils.MediaEntry> photos = HolloutUtils.getSortedPhotos(this);
-        List<HolloutUtils.MediaEntry> videos = HolloutUtils.getSortedVideos(this);
-        if (photos != null && !photos.isEmpty()) {
-            allMediaEntries.addAll(photos);
-        }
-        if (videos != null && !videos.isEmpty()) {
-            allMediaEntries.addAll(videos);
-        }
+    private void fetchMoreMedia(int position) {
+        List<HolloutUtils.MediaEntry> mediaEntries = position == 0 ? fetchPhotos() : fetchVideos();
+        allMediaEntries.clear();
+        allMediaEntries.addAll(mediaEntries);
         if (photosAndVideosAdapter != null) {
             photosAndVideosAdapter.notifyDataSetChanged();
         }
+    }
+
+    private ArrayList<HolloutUtils.MediaEntry> fetchVideos() {
+        return HolloutUtils.getSortedVideos(this);
+    }
+
+    private ArrayList<HolloutUtils.MediaEntry> fetchPhotos() {
+        return HolloutUtils.getSortedPhotos(this);
     }
 
     public int dpToPx(int dp) {
@@ -264,35 +293,39 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
         recentPhotoViewRail.setListener(new RecentPhotoViewRail.OnItemClickedListener() {
             @Override
             public void onItemClicked(Uri uri) {
-                saveLastFlipperIndex();
-                if (bitmapDecodeTask != null) {
-                    bitmapDecodeTask.cancel(true);
-                    bitmapDecodeTask = null;
-                }
-                final ProgressDialog progressDialog = ProgressDialog.show(CreateStoryActivity.this, null, "Please wait...");
-                bitmapDecodeTask = new BitmapDecodeTask(CreateStoryActivity.this,new DoneCallback<Bitmap>() {
-                    @Override
-                    public void done(final Bitmap result, final Exception e) {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                UiUtils.dismissProgressDialog(progressDialog);
-                                if (e == null && result != null) {
-                                    UiUtils.toggleFlipperState(contentFlipper, 2);
-//                                    PhotoFiltersAdapter photoFiltersAdapter = new PhotoFiltersAdapter(CreateStoryActivity.this, result);
-//                                    filtersRecyclerView.setLayoutManager(new LinearLayoutManager(CreateStoryActivity.this, LinearLayoutManager.HORIZONTAL, false));
-//                                    filtersRecyclerView.setAdapter(photoFiltersAdapter);
-                                    imagePreview.setImageBitmap(result);
-                                }
-                            }
-                        });
-                    }
-                });
-                bitmapDecodeTask.execute(uri);
+                handleSelectedFile(uri);
             }
 
         });
-        fetchMoreMedia();
+        fetchMoreMedia(0);
+    }
+
+    public void handleSelectedFile(Uri uri) {
+        saveLastFlipperIndex();
+        if (bitmapDecodeTask != null) {
+            bitmapDecodeTask.cancel(true);
+            bitmapDecodeTask = null;
+        }
+        final ProgressDialog progressDialog = ProgressDialog.show(CreateStoryActivity.this, null, "Please wait...");
+        bitmapDecodeTask = new BitmapDecodeTask(CreateStoryActivity.this, new DoneCallback<Bitmap>() {
+            @Override
+            public void done(final Bitmap result, final Exception e) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        UiUtils.dismissProgressDialog(progressDialog);
+                        if (e == null && result != null) {
+                            UiUtils.toggleFlipperState(contentFlipper, 2);
+//                                    PhotoFiltersAdapter photoFiltersAdapter = new PhotoFiltersAdapter(CreateStoryActivity.this, result);
+//                                    filtersRecyclerView.setLayoutManager(new LinearLayoutManager(CreateStoryActivity.this, LinearLayoutManager.HORIZONTAL, false));
+//                                    filtersRecyclerView.setAdapter(photoFiltersAdapter);
+                            imagePreview.setImageBitmap(result);
+                        }
+                    }
+                });
+            }
+        });
+        bitmapDecodeTask.execute(uri);
     }
 
     private static Bitmap uriToBitmap(Context context, Uri selectedFileUri) {
@@ -498,18 +531,16 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void randomizeColor() {
-        int randomCol = randomColor.randomColor();
-        randomCol = randomColor.randomColor(randomCol, null, RandomColor.Luminosity.DARK);
+        int randomCol = UiUtils.getRandomColor();
         rootView.setBackgroundColor(randomCol);
-        cameraContainerBackgroundView.setBackgroundColor(UiUtils.darker(randomCol, 0.9f));
+        cameraContainerBackgroundView.setBackgroundColor(randomCol);
         tintToolbarAndTabLayout(randomCol);
     }
 
     private void tintToolbarAndTabLayout(int colorPrimary) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(UiUtils.darker(colorPrimary, 0.9f));
+            window.setStatusBarColor(colorPrimary);
         }
     }
 
@@ -541,6 +572,13 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
                 if (o instanceof Bitmap) {
                     Bitmap bitmap = (Bitmap) o;
                     imagePreview.setImageBitmap(bitmap);
+                } else if (o instanceof SelectedFileUriEvent) {
+                    SelectedFileUriEvent selectedFileUriEvent = (SelectedFileUriEvent) o;
+                    slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    Uri uri = selectedFileUriEvent.getUri();
+                    if (uri != null) {
+                        handleSelectedFile(uri);
+                    }
                 }
             }
         });
