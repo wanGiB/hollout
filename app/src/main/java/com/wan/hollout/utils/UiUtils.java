@@ -1086,22 +1086,26 @@ public class UiUtils {
         v.startAnimation(anim);
     }
 
-    private static int[] otherRandomColors = new int[]{R.color.hollout_color_one,
+    private static int[] otherRandomColors = new int[]{
+            R.color.hollout_color_one,
             R.color.hollout_color_two,
             R.color.hollout_color_three,
             R.color.teal_A700,
-            R.color.hollout_color_five, R.color.colorFacebook,
-            R.color.colorGoogle, R.color.colorTwitter,
+            R.color.hollout_color_five,
+            R.color.colorFacebook,
+            R.color.colorGoogle,
+            R.color.colorTwitter,
             R.color.linked_in};
 
     private static int currentIndex = 0;
 
     public static int getRandomColor() {
-        if (currentIndex > otherRandomColors.length) {
-            return otherRandomColors[0];
+        if (currentIndex > otherRandomColors.length-1) {
+            currentIndex=0;
+            return otherRandomColors[currentIndex];
         }
         int newColor = otherRandomColors[currentIndex];
-        currentIndex++;
+        currentIndex = currentIndex+1;
         return newColor;
     }
 

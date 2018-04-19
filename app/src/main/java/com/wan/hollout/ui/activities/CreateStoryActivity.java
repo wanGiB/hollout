@@ -24,7 +24,6 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -153,6 +152,8 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
 
     private BitmapDecodeTask bitmapDecodeTask;
 
+    private int randomCol;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -211,9 +212,12 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 UiUtils.showView(bottomBar, slidingUpPanelLayout.getPanelState()
                         == SlidingUpPanelLayout.PanelState.COLLAPSED);
-
                 if (slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    dragView.setBackgroundColor(ContextCompat.getColor(CreateStoryActivity.this, R.color.colorPrimary));
+                    if (randomCol != 0 && randomCol != -1) {
+                        dragView.setBackgroundColor(ContextCompat.getColor(CreateStoryActivity.this, randomCol));
+                    } else {
+                        dragView.setBackgroundColor(ContextCompat.getColor(CreateStoryActivity.this, R.color.colorPrimary));
+                    }
                     setToLessIcon();
                 } else {
                     dragView.setBackgroundColor(Color.BLACK);
@@ -531,16 +535,16 @@ public class CreateStoryActivity extends BaseActivity implements View.OnClickLis
     }
 
     private void randomizeColor() {
-        int randomCol = UiUtils.getRandomColor();
-        rootView.setBackgroundColor(randomCol);
-        cameraContainerBackgroundView.setBackgroundColor(randomCol);
+        randomCol = UiUtils.getRandomColor();
+        rootView.setBackgroundColor(ContextCompat.getColor(this, randomCol));
+        cameraContainerBackgroundView.setBackgroundColor(ContextCompat.getColor(this, randomCol));
         tintToolbarAndTabLayout(randomCol);
     }
 
     private void tintToolbarAndTabLayout(int colorPrimary) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
-            window.setStatusBarColor(colorPrimary);
+            window.setStatusBarColor(ContextCompat.getColor(this, colorPrimary));
         }
     }
 
