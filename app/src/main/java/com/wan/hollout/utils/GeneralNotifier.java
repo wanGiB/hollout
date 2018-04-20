@@ -56,7 +56,7 @@ public class GeneralNotifier {
         return (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
     }
 
-    public static void displayIndividualChatRequestNotification(final ParseObject requester) {
+    public static void displayChatRequestNotification(final ParseObject requester) {
 
         ChatClient.getInstance().execute(new Runnable() {
 
@@ -90,13 +90,12 @@ public class GeneralNotifier {
                 builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message).setBigContentTitle(context.getString(R.string.app_name)));
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;
-                if (AppConstants.UNACKNOWLEDGED_CHAT_REQUESTS_COUNT == 0) {
+                if (HolloutUtils.canVibrate()) {
                     notification.defaults |= Notification.DEFAULT_VIBRATE;
                 }
                 notification.defaults |= Notification.DEFAULT_SOUND;
                 if (pendingIntent != null) {
                     notificationHelper.notify(AppConstants.CHAT_REQUEST_NOTIFICATION_ID, notification);
-                    AppConstants.UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = AppConstants.UNACKNOWLEDGED_CHAT_REQUESTS_COUNT + 1;
                 }
 
             }
@@ -144,21 +143,25 @@ public class GeneralNotifier {
                             builder.setStyle(new NotificationCompat.BigTextStyle().bigText(message).setBigContentTitle(context.getString(R.string.app_name)));
                             Notification notification = builder.build();
                             notification.defaults |= Notification.DEFAULT_LIGHTS;
-                            if (AppConstants.NEARBY_KIND_NOTIFICATION_COUNT == 0) {
+                            if (HolloutUtils.canVibrate()) {
                                 notification.defaults |= Notification.DEFAULT_VIBRATE;
                             }
                             notification.defaults |= Notification.DEFAULT_SOUND;
                             if (pendingIntent != null) {
                                 notificationHelper.notify(AppConstants.NEARBY_KIND_NOTIFICATION_ID, notification);
-                                AppConstants.NEARBY_KIND_NOTIFICATION_COUNT = AppConstants.NEARBY_KIND_NOTIFICATION_COUNT + 1;
                             }
                         }
+
                     } catch (NullPointerException ignored) {
 
                     }
+
                 }
+
             }
+
         });
+
     }
 
     private static void displayPhotoLikesNotification(String message) {
@@ -181,7 +184,7 @@ public class GeneralNotifier {
                 setBigContentTitle(context.getString(R.string.app_name)));
         Notification notification = builder.build();
         notification.defaults |= Notification.DEFAULT_LIGHTS;
-        if (AppConstants.NEARBY_KIND_NOTIFICATION_COUNT == 0) {
+        if (HolloutUtils.canVibrate()) {
             notification.defaults |= Notification.DEFAULT_VIBRATE;
         }
         notification.defaults |= Notification.DEFAULT_SOUND;
@@ -195,7 +198,9 @@ public class GeneralNotifier {
         if (signedInUserObject != null) {
             String signedInUserId = signedInUserObject.getString(AppConstants.REAL_OBJECT_ID);
             if (StringUtils.isNotEmpty(signedInUserId)) {
-                FirebaseUtils.getPhotoLikesReference().child(signedInUserId)
+                FirebaseUtils
+                        .getPhotoLikesReference()
+                        .child(signedInUserId)
                         .addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -226,9 +231,13 @@ public class GeneralNotifier {
                             public void onCancelled(DatabaseError databaseError) {
 
                             }
+
                         });
+
             }
+
         }
+
     }
 
     private static Bitmap getBitmapFromURL(final String strURL) {

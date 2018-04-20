@@ -17,8 +17,8 @@ android {
         applicationId "com.wan.hollout"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 78
-        versionName "3.6.8"
+        versionCode 79
+        versionName "3.6.9"
         testInstrumentationRunner "com.wan.hollout"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true //important
@@ -32,6 +32,7 @@ android {
             keyPassword "descriptor"
         }
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -39,9 +40,11 @@ android {
             signingConfig signingConfigs.release
         }
     }
+
     dexOptions {
         jumboMode = true
     }
+
     packagingOptions {
         // findbugs
         exclude 'META-INF/maven/com.google.code.findbugs/jsr305/pom.properties'
@@ -58,10 +61,12 @@ android {
         exclude 'META-INF/ECLIPSE_.RSA'
         exclude 'META-INF/ASL2.0'
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
+
 }
 
 dependencies {

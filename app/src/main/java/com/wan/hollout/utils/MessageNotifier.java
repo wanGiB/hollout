@@ -102,11 +102,8 @@ public class MessageNotifier {
         }
     }
 
-
     public void sendSingleNotification(final ChatMessage message, final ParseObject sender) {
-
         ChatClient.getInstance().execute(new Runnable() {
-
             @Override
             public void run() {
                 Intent userProfileIntent;
@@ -285,6 +282,7 @@ public class MessageNotifier {
                         inboxStyle.addLine(WordUtils.capitalize(message.getFromName()) + " wants to chat with you");
                     }
                 }
+
                 Notification notification = builder.build();
                 notification.defaults |= Notification.DEFAULT_LIGHTS;
                 if (HolloutUtils.canVibrate()) {

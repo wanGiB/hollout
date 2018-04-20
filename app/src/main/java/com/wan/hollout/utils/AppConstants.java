@@ -241,7 +241,6 @@ public class AppConstants {
 
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 
-    static int UNACKNOWLEDGED_CHAT_REQUESTS_COUNT = 0;
     public static int CHAT_REQUEST_NOTIFICATION_ID = 0x11;
     public static int NEW_MESSAGE_NOTIFICATION_ID = 0x12;
 
@@ -302,8 +301,6 @@ public class AppConstants {
     public static SparseBooleanArray bounceablePositions = new SparseBooleanArray();
 
     public static SparseBooleanArray wavePositions = new SparseBooleanArray();
-
-    static int NEARBY_KIND_NOTIFICATION_COUNT = 0;
 
     public static final String MALE = "Male";
     public static final String FEMALE = "Female";

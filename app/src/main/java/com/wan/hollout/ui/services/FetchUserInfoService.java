@@ -66,14 +66,14 @@ public class FetchUserInfoService {
                         }
                     } else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE) && unreadMessage != null) {
                         if (!isAContact(idToFetch.toLowerCase())) {
-                            GeneralNotifier.displayIndividualChatRequestNotification(userObject);
+                            GeneralNotifier.displayChatRequestNotification(userObject);
                             return;
                         }
                         MessageNotifier.getInstance().sendSingleNotification(unreadMessage, userObject);
                         ConversationsList.checkAddToConversation(userObject);
                     } else if (notificationType.equals(AppConstants.NOTIFICATION_TYPE_NEW_MESSAGE) && unreadMessagesFromSameSender != null) {
                         if (!isAContact(idToFetch.toLowerCase())) {
-                            GeneralNotifier.displayIndividualChatRequestNotification(userObject);
+                            GeneralNotifier.displayChatRequestNotification(userObject);
                             return;
                         }
                         MessageNotifier.getInstance().sendSameSenderNotification(unreadMessagesFromSameSender, userObject);
@@ -84,5 +84,4 @@ public class FetchUserInfoService {
             }
         });
     }
-
 }

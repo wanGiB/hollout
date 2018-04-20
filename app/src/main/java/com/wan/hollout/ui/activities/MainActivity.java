@@ -1081,8 +1081,8 @@ public class MainActivity extends BaseActivity
         findViewById(R.id.fab_sheet_item_new_event_invite).setOnClickListener(this);
 
         //TODO: Uncomment once ready
-//        holloutFab.hide();
-//        UiUtils.showView(holloutFab, false);
+        holloutFab.hide();
+        UiUtils.showView(holloutFab, false);
 
     }
 

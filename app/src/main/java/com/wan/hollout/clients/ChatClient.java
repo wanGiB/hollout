@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -90,6 +89,7 @@ public class ChatClient {
             inBoundMessagesDatabaseReference.removeEventListener(inBoundMessagesValueEventListener);
         }
         inBoundMessagesValueEventListener = new ValueEventListener() {
+
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 execute(new Runnable() {
@@ -266,10 +266,8 @@ public class ChatClient {
                         DbUtils.updateMessage(chatMessage);
                     }
                 });
-
             }
         });
-
     }
 
     public ChatMessage getMessage(String messageId) {
