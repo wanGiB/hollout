@@ -342,4 +342,9 @@
         <item name="android:textColor">@color/black</item>
     </style>
 
+    <style name="AppTheme.ImageButton.Light" parent="Widget.AppCompat.Button.Borderless.Colored">
+        <item name="android:tint">@color/grey500</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
+    </style>
+
 </resources>

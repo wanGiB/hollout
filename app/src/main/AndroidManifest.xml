@@ -213,7 +213,7 @@
         <activity android:name=".ui.activities.ProfilePreviewActivity" />
 
         <activity
-            android:name=".ui.activities.CreateStoryActivity"
+            android:name=".ui.activities.CreatePostActivity"
             android:configChanges="orientation|screenLayout|screenSize|keyboard"
             android:windowSoftInputMode="stateHidden" />
 

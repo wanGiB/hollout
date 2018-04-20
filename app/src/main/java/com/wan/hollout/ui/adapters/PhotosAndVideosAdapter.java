@@ -12,7 +12,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
-import com.wan.hollout.ui.activities.CreateStoryActivity;
+import com.wan.hollout.ui.activities.CreatePostActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.FileUtils;
 import com.wan.hollout.utils.HolloutUtils;
@@ -94,14 +94,14 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                             UiUtils.showView(checkedIndicator, true);
                             mainItemView.setScaleY(0.9f);
                             mainItemView.setScaleX(0.9f);
-                            CreateStoryActivity.doneWithContentSelection.show();
+                            CreatePostActivity.doneWithContentSelection.show();
                         } else {
                             AppConstants.selectedUris.remove(uri);
                             UiUtils.showView(checkedIndicator, false);
                             mainItemView.setScaleY(1);
                             mainItemView.setScaleX(1);
                             if (AppConstants.selectedUris.isEmpty()) {
-                                CreateStoryActivity.doneWithContentSelection.hide();
+                                CreatePostActivity.doneWithContentSelection.hide();
                             }
                         }
                     } else {

@@ -16,6 +16,7 @@ import android.provider.Settings;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -51,14 +52,11 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
-import com.gordonwong.materialsheetfab.MaterialSheetFab;
-import com.gordonwong.materialsheetfab.MaterialSheetFabEventListener;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.eventbuses.ConversationItemChangedEvent;
@@ -73,7 +71,6 @@ import com.wan.hollout.ui.fragments.ActivitiesFragment;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
 import com.wan.hollout.ui.fragments.NearbyPeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
-import com.wan.hollout.ui.widgets.HolloutFab;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
 import com.wan.hollout.ui.widgets.sharesheet.LinkProperties;
 import com.wan.hollout.ui.widgets.sharesheet.ShareSheet;
@@ -183,15 +180,15 @@ public class MainActivity extends BaseActivity
     @BindView(R.id.signed_in_user_profile_image_view)
     ImageView signedInUserImageView;
 
+    @BindView(R.id.floating_btn)
+    FloatingActionButton floatingActionButton;
+
     private HolloutPermissions holloutPermissions;
     private SharedPreferences.OnSharedPreferenceChangeListener onSharedPreferenceChangeListener;
     public static Vibrator vibrator;
     private ProgressDialog deleteConversationProgressDialog;
 
     private ParseObject signedInUserObject;
-
-    private MaterialSheetFab materialSheetFab;
-    private int statusBarColor;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -204,7 +201,6 @@ public class MainActivity extends BaseActivity
         actionModeBar = findViewById(R.id.action_mode_bar_);
         materialSearchView = findViewById(R.id.search_view);
         setSupportActionBar(toolbar);
-        setupFab();
         signedInUserObject = AuthUtil.getCurrentUser();
         loadSignedInUserImage(signedInUserObject);
         Adapter adapter = setupViewPagerAdapter(viewPager);
@@ -521,6 +517,7 @@ public class MainActivity extends BaseActivity
         deleteConversation.setOnClickListener(onClickListener);
         destroyActionModeView.setOnClickListener(onClickListener);
         userPhotoContainer.setOnClickListener(onClickListener);
+        floatingActionButton.setOnClickListener(this);
     }
 
     private void attachEventHandlers() {
@@ -1016,11 +1013,6 @@ public class MainActivity extends BaseActivity
             return;
         }
 
-        if (materialSheetFab.isSheetVisible()) {
-            materialSheetFab.hideSheet();
-            return;
-        }
-
         if (viewPager.getCurrentItem() != 0) {
             viewPager.setCurrentItem(0);
             return;
@@ -1037,66 +1029,6 @@ public class MainActivity extends BaseActivity
         }
 
         super.onBackPressed();
-    }
-
-    /**
-     * Sets up the Floating action button.
-     */
-    private void setupFab() {
-        HolloutFab holloutFab = (HolloutFab) findViewById(R.id.fab);
-        View sheetView = findViewById(R.id.fab_sheet);
-        View overlay = findViewById(R.id.overlay);
-        int sheetColor = getResources().getColor(R.color.background_card);
-        int fabColor = getResources().getColor(R.color.colorAccent);
-
-        // Create material sheet FAB
-        materialSheetFab = new MaterialSheetFab<>(holloutFab, sheetView, overlay, sheetColor, fabColor);
-
-        // Set material sheet event listener
-        materialSheetFab.setEventListener(new MaterialSheetFabEventListener() {
-
-            @Override
-            public void onShowSheet() {
-                // Save current status bar color
-                statusBarColor = getStatusBarColor();
-                // Set darker status bar color to match the dim overlay
-                setStatusBarColor(getResources().getColor(R.color.colorPrimaryDark));
-            }
-
-            @Override
-            public void onHideSheet() {
-                // Restore status bar color
-                setStatusBarColor(statusBarColor);
-            }
-
-        });
-
-        UiUtils.tintImageView((ImageView) findViewById(R.id.stories_icon), ContextCompat.getColor(this, R.color.hollout_color_one));
-        UiUtils.tintImageView((ImageView) findViewById(R.id.workout_icon), ContextCompat.getColor(this, R.color.hollout_color_three));
-        UiUtils.tintImageView((ImageView) findViewById(R.id.event_icon), ContextCompat.getColor(this, R.color.hollout_color_four));
-
-        // Set material sheet item click listeners
-        findViewById(R.id.fab_sheet_item_new_story).setOnClickListener(this);
-        findViewById(R.id.fab_sheet_item_new_workout_request).setOnClickListener(this);
-        findViewById(R.id.fab_sheet_item_new_event_invite).setOnClickListener(this);
-
-        //TODO: Uncomment once ready
-        holloutFab.hide();
-        UiUtils.showView(holloutFab, false);
-
-    }
-
-    private int getStatusBarColor() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            return getWindow().getStatusBarColor();
-        }
-        return 0;
-    }
-
-    private void setStatusBarColor(int color) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(color);
-        }
     }
 
     public static void destroyActionMode() {
@@ -1386,12 +1318,9 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onClick(View v) {
-        if (materialSheetFab.isSheetVisible()) {
-            materialSheetFab.hideSheet();
-        }
         switch (v.getId()) {
-            case R.id.fab_sheet_item_new_story:
-                Intent storiesIntent = new Intent(MainActivity.this, CreateStoryActivity.class);
+            case R.id.floating_btn:
+                Intent storiesIntent = new Intent(MainActivity.this, CreatePostActivity.class);
                 startActivity(storiesIntent);
                 break;
         }

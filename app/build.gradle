@@ -95,7 +95,6 @@ dependencies {
     compile 'com.google.firebase:firebase-messaging:12.0.1'
     compile 'com.google.firebase:firebase-storage:12.0.1'
     compile 'com.google.firebase:firebase-config:12.0.1'
-    compile 'com.gordonwong:material-sheet-fab:1.2.1'
     compile 'com.google.android.gms:play-services-auth:12.0.1'
     compile 'com.github.bumptech.glide:glide:3.8.0'
     compile 'com.github.machinarius:preferencefragment:0.1.1'
