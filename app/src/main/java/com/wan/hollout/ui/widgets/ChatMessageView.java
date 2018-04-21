@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.ContactsContract;
@@ -545,9 +544,7 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
             AppConstants.messageBodyPositions.put(getMessageHash(), false);
             messageBodyView.setText(activity.getString(R.string.video));
         }
-
         playMediaIfVideoIcon.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 UiUtils.blinkView(v);
@@ -555,16 +552,13 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
                 mViewVideoIntent.setDataAndType(Uri.parse(new File(message.getLocalUrl()).exists() ? message.getLocalUrl() : message.getRemoteUrl()), "video/*");
                 activity.startActivity(mViewVideoIntent);
             }
-
         });
-
         attachedPhotoOrVideoThumbnailView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 playMediaIfVideoIcon.performClick();
             }
         });
-
     }
 
     public void loadVideoFromPath(ImageView videoView, String videoPath) {

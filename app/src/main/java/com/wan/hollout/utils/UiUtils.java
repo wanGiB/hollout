@@ -1099,25 +1099,28 @@ public class UiUtils {
     }
 
     private static int[] otherRandomColors = new int[]{
-            R.color.hollout_color_one,
-            R.color.hollout_color_two,
-            R.color.hollout_color_three,
-            R.color.teal_A700,
+            R.color.gplus_color_3,
+            R.color.teal_900,
             R.color.hollout_color_five,
+            R.color.purple_A700,
             R.color.colorFacebook,
             R.color.colorGoogle,
             R.color.colorTwitter,
-            R.color.linked_in};
+            R.color.linked_in,
+            R.color.text_dark,
+            R.color.hollout_material_grey_800,
+            R.color.textsecure_primary_dark,
+    };
 
     private static int currentIndex = 0;
 
     public static int getRandomColor() {
-        if (currentIndex > otherRandomColors.length-1) {
-            currentIndex=0;
+        if (currentIndex > otherRandomColors.length - 1) {
+            currentIndex = 0;
             return otherRandomColors[currentIndex];
         }
         int newColor = otherRandomColors[currentIndex];
-        currentIndex = currentIndex+1;
+        currentIndex = currentIndex + 1;
         return newColor;
     }
 

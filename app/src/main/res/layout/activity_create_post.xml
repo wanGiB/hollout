@@ -112,6 +112,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingStart="10dp"
+            android:cursorVisible="false"
             android:textColor="@color/white"
             android:textColorHint="@color/em_white_87"
             android:textIsSelectable="true"
@@ -143,8 +144,7 @@
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:focusable="true"
-                android:rotation="45"
-                app:srcCompat="@drawable/ic_attach_file_24dp"
+                android:src="@drawable/ic_camera_alt_white_48dp"
                 tools:ignore="ContentDescription" />
 
             <ImageView

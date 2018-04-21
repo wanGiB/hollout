@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -126,7 +127,6 @@ import com.wan.hollout.utils.UiUtils;
 import com.wan.hollout.utils.VCFContactData;
 
 import net.alhazmy13.mediapicker.Image.ImagePicker;
-import net.alhazmy13.mediapicker.Video.VideoPicker;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -173,6 +173,8 @@ public class ChatActivity extends BaseActivity implements
     private static final int PLACE_LOCATION_PICKER_REQUEST_CODE = 20;
     protected static final int MESSAGE_TYPE_RECEIVED_CALL = 1;
     protected static final int MESSAGE_TYPE_SENT_CALL = 2;
+
+    private static final int REQUEST_TAKE_VIDEO = 1;
 
     private AttachmentTypeSelector attachmentTypeSelector;
 
@@ -1728,8 +1730,12 @@ public class ChatActivity extends BaseActivity implements
     }
 
     public void openCameraToShootVideo() {
-        new VideoPicker.Builder(this).mode(VideoPicker.Mode.CAMERA).directory(VideoPicker.Directory.DEFAULT)
-                .build();
+        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 60);
+        intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
+        File videoOutputFile = HolloutUtils.getOutputMediaFile(AppConstants.CAPTURE_MEDIA_TYPE_VIDEO);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, videoOutputFile);
+        startActivityForResult(intent, REQUEST_TAKE_VIDEO);
     }
 
     @SuppressLint("CommitPrefEdits")
@@ -1776,20 +1782,25 @@ public class ChatActivity extends BaseActivity implements
                     singleMediaViewer.setImageResource(R.drawable.attach_audio);
                     break;
             }
-
             singleMediaViewer.setOnClickListener(new View.OnClickListener() {
 
                 @Override
                 public void onClick(View view) {
-                    if (pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_PHOTO)) {
-                        UiUtils.previewSelectedFile(ChatActivity.this, pickedHolloutFile);
-                    } else if (pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_VIDEO)
-                            || pickedHolloutFile.getFileType().equals(AppConstants.FILE_TYPE_AUDIO)) {
-                        FileUtils.openFile(new File(pickedHolloutFile.getLocalFilePath()), ChatActivity.this);
+                    switch (pickedHolloutFile.getFileType()) {
+                        case AppConstants.FILE_TYPE_PHOTO:
+                            UiUtils.previewSelectedFile(ChatActivity.this, pickedHolloutFile);
+                            break;
+                        case AppConstants.FILE_TYPE_AUDIO:
+                            FileUtils.openFile(new File(pickedFilePath), getCurrentActivityInstance());
+                            break;
+                        default:
+                            Intent videoIntent = new Intent(Intent.ACTION_VIEW);
+                            videoIntent.setDataAndType(Uri.parse(pickedFilePath), "video/*");
+                            startActivity(videoIntent);
+                            break;
                     }
                 }
             });
-
         } else {
             UiUtils.showView(singleMediaFrame, false);
             UiUtils.showView(singleMediaViewer, false);
@@ -1820,6 +1831,18 @@ public class ChatActivity extends BaseActivity implements
         }
     }
 
+    public String getRealPathFromURI(Uri contentUri) {
+        try {
+            String[] proj = {MediaStore.Video.Media.DATA};
+            Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } catch (Exception e) {
+            return contentUri.getPath();
+        }
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1834,10 +1857,11 @@ public class ChatActivity extends BaseActivity implements
                     }
                 }
             }
-        } else if (requestCode == VideoPicker.VIDEO_PICKER_REQUEST_CODE && resultCode == RESULT_OK) {
-            String mPath = data.getStringExtra(VideoPicker.EXTRA_VIDEO_PATH);
-            if (StringUtils.isNotEmpty(mPath)) {
-                previewSinglePickedFile(AppConstants.FILE_TYPE_VIDEO, mPath);
+        } else if (requestCode == REQUEST_TAKE_VIDEO && resultCode == RESULT_OK) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                String realUri = getRealPathFromURI(uri);
+                previewSinglePickedFile(AppConstants.FILE_TYPE_VIDEO, realUri);
             }
             //Your Code
         } else if (requestCode == AppConstants.REQUEST_CODE_PICK_FROM_GALLERY && resultCode == RESULT_OK) {

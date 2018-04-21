@@ -1,6 +1,7 @@
 package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -72,44 +73,43 @@ public class SelectedFilesAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
 
         void bindData(final Activity activity, final int position, final SelectedFilesAdapter selectedFilesAdapter) {
-
             final Uri uri = AppConstants.selectedUris.get(position);
-
             String filePath = uri.getPath();
-
-            Glide.with(ApplicationLoader.getInstance()).load(filePath)
+            String fileMiMeType = FileUtils.getMimeType(uri.getPath());
+            boolean isVideo = HolloutUtils.isVideo(fileMiMeType);
+            Glide.with(ApplicationLoader.getInstance())
+                    .load(filePath)
                     .error(R.drawable.x_ic_blank_picture)
                     .placeholder(R.drawable.x_ic_blank_picture)
                     .crossFade()
                     .into(imageIconView);
-
-            String fileMiMeType = FileUtils.getMimeType(filePath);
-            UiUtils.showView(playMediaIfVideoIconView, HolloutUtils.isVideo(fileMiMeType));
+            UiUtils.showView(playMediaIfVideoIconView, isVideo);
             mainItemView.setOnClickListener(new View.OnClickListener() {
-
                 @Override
                 public void onClick(View v) {
-                    UiUtils.previewSelectedFile(activity, uri);
+                    String fileMiMeType = FileUtils.getMimeType(uri.toString());
+                    boolean isVideo = HolloutUtils.isVideo(fileMiMeType);
+                    if (isVideo) {
+                        Intent videoIntent = new Intent(Intent.ACTION_VIEW);
+                        videoIntent.setDataAndType(Uri.parse(uri.getPath()), "video/*");
+                        activity.startActivity(videoIntent);
+                    } else {
+                        UiUtils.previewSelectedFile(activity, uri);
+                    }
                 }
-
             });
-
             imageIconView.setOnClickListener(new View.OnClickListener() {
-
                 @Override
                 public void onClick(View v) {
                     mainItemView.performClick();
                 }
-
             });
             removeFileView.setOnClickListener(new View.OnClickListener() {
-
                 @Override
                 public void onClick(View v) {
                     AppConstants.selectedUris.remove(uri);
                     selectedFilesAdapter.notifyDataSetChanged();
                 }
-
             });
 
         }

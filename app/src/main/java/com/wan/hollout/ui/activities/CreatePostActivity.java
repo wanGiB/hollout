@@ -1,12 +1,17 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -14,6 +19,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -45,6 +52,7 @@ import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -56,6 +64,9 @@ import butterknife.ButterKnife;
  * @author Wan Clem
  */
 public class CreatePostActivity extends BaseActivity implements View.OnClickListener {
+
+    private static final int REQUEST_TAKE_VIDEO = 1;
+    private static final int REQUEST_TAKE_PHOTO = 2;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -209,6 +220,7 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
             }
         });
 
+        checkAndShowSelectedFiles();
     }
 
     private void checkAndShowSelectedFiles() {
@@ -325,6 +337,30 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
                 return false;
             }
         });
+
+        storyBox.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (StringUtils.isNotEmpty(s.toString().trim())){
+                    storyBox.setCursorVisible(true);
+                }else {
+                    storyBox.setCursorVisible(false);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+
+        });
+
     }
 
     @Override
@@ -367,6 +403,53 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
             return;
         }
         super.onBackPressed();
+    }
+
+    public void initPhotoCapture() {
+        Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, REQUEST_TAKE_PHOTO);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                AppConstants.selectedUris.add(uri);
+                checkAndShowSelectedFiles();
+            }
+        } else if (requestCode == REQUEST_TAKE_VIDEO && resultCode == Activity.RESULT_OK) {
+            Uri uri = data.getData();
+            if (uri != null) {
+                String realUri = getRealPathFromURI(uri);
+                if (realUri != null) {
+                    Uri videoUri = Uri.parse(realUri);
+                    AppConstants.selectedUris.add(videoUri);
+                    checkAndShowSelectedFiles();
+                }
+            }
+        }
+    }
+
+    public String getRealPathFromURI(Uri contentUri) {
+        try {
+            String[] proj = {MediaStore.Video.Media.DATA};
+            Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+        } catch (Exception e) {
+            return contentUri.getPath();
+        }
+    }
+
+    public void shootVideo() {
+        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 60);
+        intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
+        File videoOutputFile = HolloutUtils.getOutputMediaFile(AppConstants.CAPTURE_MEDIA_TYPE_VIDEO);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, videoOutputFile);
+        startActivityForResult(intent, REQUEST_TAKE_VIDEO);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.wan.hollout.ui.adapters;
 
-import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -22,7 +21,6 @@ import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
-
 
 import java.util.ArrayList;
 
@@ -77,72 +75,65 @@ public class UserPhotosAdapter extends SectionedRecyclerAdapter<UserPhotosAdapte
 
     @Override
     public void onBindItemViewHolder(final PhotoEntriesHolder holder, final int itemPosition) {
-
         final HolloutUtils.MediaEntry mediaEntry = photoEntries.get(itemPosition);
-
-        Glide.with(ApplicationLoader.getInstance()).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(holder.imageIconItem);
-
+        Glide.with(ApplicationLoader.getInstance())
+                .load(mediaEntry.path)
+                .error(R.drawable.x_ic_blank_picture)
+                .placeholder(R.drawable.x_ic_blank_picture)
+                .crossFade()
+                .into(holder.imageIconItem);
         holder.imageIconItem.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
-
                 if (HolloutUtils.getFileSizeInMB(mediaEntry.fileSize) <= 10) {
-
                     if (UserMusicAdapter.selectedIndices != null) {
                         UserMusicAdapter.selectedIndices.clear();
                         EventBus.getDefault().post(new ClearSelectedAudio(true));
                     }
-
                     HolloutFile newHolloutFile = new HolloutFile();
                     newHolloutFile.setFileType(AppConstants.FILE_TYPE_PHOTO);
                     newHolloutFile.setLocalFilePath(mediaEntry.path);
-
                     ArrayList<HolloutFile> selectedHolloutFiles = galleryActivity.getSelectedFiles();
-
                     if (selectedHolloutFiles.size() < 10 && !selectedHolloutFiles.contains(newHolloutFile)) {
                         galleryActivity.addFile(newHolloutFile);
                         selectedIndices.put(itemPosition, true);
                         holder.photoCheck.setChecked(true);
+                        holder.imageIconItem.setScaleX(0.9f);
+                        holder.imageIconItem.setScaleY(0.9f);
                     } else {
                         if (selectedHolloutFiles.contains(newHolloutFile)) {
                             galleryActivity.removeFile(newHolloutFile);
                         }
                         selectedIndices.put(itemPosition, false);
                         holder.photoCheck.setChecked(false);
+                        holder.imageIconItem.setScaleX(1f);
+                        holder.imageIconItem.setScaleY(1f);
                     }
-
                     if (galleryActivity.getSelectedFiles().size() == 10) {
                         UiUtils.showSafeToast("Maximum number of files to transfer reached");
                     }
-
                 } else {
                     UiUtils.showSafeToast("File size is too large. You can only send 10MB files for now.");
                     holder.photoCheck.setChecked(false);
                     selectedIndices.put(itemPosition, false);
                 }
-
             }
-
         });
-
         holder.photoCheck.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View view) {
-
                 holder.imageIconItem.performClick();
-
             }
-
         });
-
         if (selectedIndices.get(itemPosition)) {
             holder.photoCheck.setChecked(true);
+            holder.imageIconItem.setScaleX(0.9f);
+            holder.imageIconItem.setScaleY(0.9f);
         } else {
             holder.photoCheck.setChecked(false);
+            holder.imageIconItem.setScaleX(1f);
+            holder.imageIconItem.setScaleY(1f);
         }
-
     }
 
     @Override
@@ -159,6 +150,7 @@ public class UserPhotosAdapter extends SectionedRecyclerAdapter<UserPhotosAdapte
     }
 
     static class PhotoEntriesHolder extends RecyclerView.ViewHolder {
+
         @BindView(R.id.image_icon_item)
         RoundedImageView imageIconItem;
 
@@ -173,6 +165,7 @@ public class UserPhotosAdapter extends SectionedRecyclerAdapter<UserPhotosAdapte
     }
 
     static class PhotoHeaderHolder extends RecyclerView.ViewHolder {
+
         @BindView(R.id.header)
         HolloutTextView photoHeader;
 
@@ -180,5 +173,7 @@ public class UserPhotosAdapter extends SectionedRecyclerAdapter<UserPhotosAdapte
             super(view);
             ButterKnife.bind(this, view);
         }
+
     }
+
 }

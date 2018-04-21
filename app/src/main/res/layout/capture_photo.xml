@@ -9,7 +9,7 @@
     android:orientation="horizontal">
 
     <com.wan.hollout.ui.widgets.RoundedImageView
-        android:id="@+id/capture_video"
+        android:id="@+id/capture_video_or_photo"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/selectableItemBackground"

@@ -42,7 +42,7 @@ public class AppConstants {
     static final String LAST_FILE_CAPTION = "last_file_caption";
 
     static final int CAPTURE_MEDIA_TYPE_IMAGE = 1;
-    static final int CAPTURE_MEDIA_TYPE_VIDEO = 2;
+    public static final int CAPTURE_MEDIA_TYPE_VIDEO = 2;
     public static final int CAPTURE_MEDIA_TYPE_AUDIO = 3;
 
     private static final String HOLLOUT_FOLDER_PATH = "Hollout";

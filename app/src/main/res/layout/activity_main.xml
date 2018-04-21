@@ -177,7 +177,8 @@
             app:fabSize="normal"
             app:layout_anchor="@id/viewpager"
             app:layout_anchorGravity="bottom|end"
-            app:backgroundTint="#6e88ab"
+            app:backgroundTint="@android:color/white"
+            app:rippleColor="@color/colorAccent"
             app:srcCompat="@drawable/ic_create_24dp" />
 
     </android.support.design.widget.CoordinatorLayout>

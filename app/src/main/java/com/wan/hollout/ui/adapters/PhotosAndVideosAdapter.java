@@ -1,9 +1,9 @@
 package com.wan.hollout.ui.adapters;
 
-import android.app.Activity;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,7 +38,10 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private final int ITEM_TYPE_SHOOT_VIDEO = 1;
     private final int ITEM_TYPE_NORMAL = 2;
 
-    public PhotosAndVideosAdapter(Activity activity, List<HolloutUtils.MediaEntry> photosAndVideos) {
+    private CreatePostActivity createPostActivity;
+
+    public PhotosAndVideosAdapter(CreatePostActivity activity, List<HolloutUtils.MediaEntry> photosAndVideos) {
+        this.createPostActivity = activity;
         this.photosAndVideos = photosAndVideos;
         layoutInflater = LayoutInflater.from(activity);
     }
@@ -77,7 +80,11 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         PhotosAndVideosHolder photosAndVideosHolder = (PhotosAndVideosHolder) holder;
-        photosAndVideosHolder.bindData(photosAndVideos.get(position), position);
+        try {
+            photosAndVideosHolder.bindData(createPostActivity, photosAndVideos.get(position), position);
+        } catch (IndexOutOfBoundsException ignore) {
+
+        }
     }
 
     @Override
@@ -90,6 +97,10 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
         @Nullable
         @BindView(R.id.image_icon_item)
         ImageView imageIconView;
+
+        @Nullable
+        @BindView(R.id.capture_video_or_photo)
+        ImageView captureVideoOrPhoto;
 
         @Nullable
         @BindView(R.id.play_media_if_video_icon)
@@ -108,7 +119,7 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             ButterKnife.bind(this, itemView);
         }
 
-        void bindData(final HolloutUtils.MediaEntry mediaEntry, int position) {
+        void bindData(final CreatePostActivity createPostActivity, final HolloutUtils.MediaEntry mediaEntry, final int position) {
             if (mediaEntry != null) {
                 if (imageIconView != null) {
                     Glide.with(ApplicationLoader.getInstance()).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(imageIconView);
@@ -116,6 +127,7 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                 String fileMiMeType = FileUtils.getMimeType(mediaEntry.path);
                 UiUtils.showView(playMediaIfVideoIconView, HolloutUtils.isVideo(fileMiMeType));
                 if (mainItemView != null && imageIconView != null) {
+                    UiUtils.tintImageView(checkedIndicator, ContextCompat.getColor(createPostActivity, R.color.hollout_color_one));
                     mainItemView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -152,15 +164,24 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     imageIconView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            mainItemView.performClick();
+                            if (mainItemView != null) {
+                                mainItemView.performClick();
+                            }
                         }
                     });
                 }
 
                 File file = new File(mediaEntry.path);
                 Uri uri = Uri.fromFile(file);
-                if (checkedIndicator != null) {
+                if (checkedIndicator != null && mainItemView != null) {
                     UiUtils.showView(checkedIndicator, AppConstants.selectedUris.contains(uri));
+                    if (AppConstants.selectedUris.contains(uri)) {
+                        mainItemView.setScaleY(0.9f);
+                        mainItemView.setScaleX(0.9f);
+                    } else {
+                        mainItemView.setScaleY(1);
+                        mainItemView.setScaleX(1);
+                    }
                 }
             }
 
@@ -169,18 +190,23 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
                     mainItemView.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            UiUtils.showSafeToast("Clicked");
+                            if (position == 0) {
+                                createPostActivity.shootVideo();
+                            } else {
+                                createPostActivity.initPhotoCapture();
+                            }
                         }
                     });
                 }
-                if (imageIconView != null) {
-                    imageIconView.setOnClickListener(new View.OnClickListener() {
+                if (captureVideoOrPhoto != null) {
+                    captureVideoOrPhoto.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             mainItemView.performClick();
                         }
                     });
                 }
+
             }
 
         }
