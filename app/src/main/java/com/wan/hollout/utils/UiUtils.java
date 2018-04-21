@@ -1110,6 +1110,7 @@ public class UiUtils {
             R.color.text_dark,
             R.color.hollout_material_grey_800,
             R.color.textsecure_primary_dark,
+            android.R.color.white
     };
 
     private static int currentIndex = 0;

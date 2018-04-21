@@ -114,7 +114,6 @@ import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FilePathFinder;
 import com.wan.hollout.utils.FileUtils;
 import com.wan.hollout.utils.GeneralNotifier;
-import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -736,12 +735,10 @@ public class ChatActivity extends BaseActivity implements
             mediaRecorder.setOnInfoListener(new MediaRecorder.OnInfoListener() {
                 @Override
                 public void onInfo(MediaRecorder mr, int what, int extra) {
-                    HolloutLogger.d("MediaRecordInfo", " What:" + what + ",Extra:" + extra);
                 }
             });
             recordingInProgress = true;
         } catch (Exception e) {
-            HolloutLogger.d("MediaRecordInfo", e.getMessage());
         }
     }
 
@@ -811,7 +808,6 @@ public class ChatActivity extends BaseActivity implements
     }
 
     private void handleClickedAttachmentType(int type) {
-        HolloutLogger.d("ChatActivity", "Selected: " + type);
         switch (type) {
             case ADD_IMAGE:
                 openCameraToTakePhoto();
@@ -1210,12 +1206,10 @@ public class ChatActivity extends BaseActivity implements
                 UiUtils.showView(replyIconView, true);
                 UiUtils.showView(playReplyMessageIfVideo, true);
                 if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
-                    HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
                     UiUtils.loadImage(ChatActivity.this, messageToReplyTo.getThumbnailUrl(), replyIconView);
                     UiUtils.showView(playReplyMessageIfVideo, true);
                 } else {
                     if (localThumbFile.exists()) {
-                        HolloutLogger.d("VideoThumbnailPath", "Local Video Thumb exists with value = " + localThumbFile);
                         loadVideoFromPath(replyIconView, messageToReplyTo.getLocalThumb());
                     }
                 }

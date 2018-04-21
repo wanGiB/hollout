@@ -180,7 +180,6 @@ public class NearbyPeopleFragment extends BaseFragment {
             peopleRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
             RecyclerViewUtils.setFooterView(peopleRecyclerView, footerView);
             UiUtils.showView(footerView, false);
-
             nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
                 @Override
                 public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {

@@ -81,6 +81,13 @@ public class AuthUtil {
 
     public static void updateCurrentLocalUser(final ParseObject updatableProps, @Nullable  final DoneCallback<Boolean> successCallback) {
         runLegacyDataCleanUp(updatableProps);
+        List<String> signedInUserChats = updatableProps.getList(AppConstants.APP_USER_CHATS);
+        if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
+            if (signedInUserChats.contains(null)) {
+                signedInUserChats.remove(null);
+            }
+            updatableProps.put(AppConstants.APP_USER_CHATS, signedInUserChats);
+        }
         updatableProps.pinInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {

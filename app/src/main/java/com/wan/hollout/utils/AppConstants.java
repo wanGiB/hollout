@@ -238,6 +238,9 @@ public class AppConstants {
     public static final String EXTRA_USER = "hollout_user_extra";
     public static final String CLEAR_ALL_CHANGED_INDICES = "clear_all_changed_indices";
     public static final String LAST_DISPLAYED_STORY_FLIPPER_INDEX = "index_of_last_displayed_chiled";
+    public static final String FEED_TYPE_SIMPLE_TEXT = "feed_type_simple_text";
+    public static final String FEED_SEEN = "seen_feed";
+    public static final String FEED_TYPE_PHOTO_OR_VIDEO = "feed_type_photo_or_video";
 
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 

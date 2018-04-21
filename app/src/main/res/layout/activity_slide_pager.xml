@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context="com.wan.hollout.ui.activities.WelcomeActivity">
+    tools:context="com.wan.hollout.ui.feeds.WelcomeActivity">
 
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/parent_view"

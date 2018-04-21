@@ -57,7 +57,6 @@ import com.wan.hollout.ui.activities.EaseShowImageActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FileUtils;
-import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.LocationUtils;
 import com.wan.hollout.utils.UiUtils;
@@ -205,7 +204,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         messageBubbleLayout.setOnLongClickListener(this);
         UiUtils.showView(timeTextView, false);
         UiUtils.showView(deliveryStatusView, false);
-        HolloutLogger.d("MessageInAdapterProps", messageObject.toString());
         checkAndRegEventBus();
     }
 
@@ -348,7 +346,6 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
 
     private void checkAndRedrawSomeViews(int messageBubbleWidth) {
         if (contentView != null && messageReplyRecyclerItemView != null && messageReplyRecyclerItemView.getVisibility() == VISIBLE) {
-            HolloutLogger.d("ViewParams", "BubbleWidth for " + message.getMessageId() + " is = " + messageBubbleWidth);
             ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
             layoutParams.width = messageBubbleWidth;
             contentView.setLayoutParams(layoutParams);
@@ -516,12 +513,10 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         String remoteVideoThumbnailUrl = message.getThumbnailUrl();
         File localThumbFile = new File(message.getLocalThumb());
         if (StringUtils.isNotEmpty(remoteVideoThumbnailUrl)) {
-            HolloutLogger.d("VideoThumbnailPath", "Remote Video Thumb exists with value = " + remoteVideoThumbnailUrl);
             UiUtils.showView(photoVideoProgressView, false);
             UiUtils.loadImage(activity, message.getThumbnailUrl(), attachedPhotoOrVideoThumbnailView);
         } else {
             if (localThumbFile.exists()) {
-                HolloutLogger.d("VideoThumbnailPath", "Local Video Thumb exists with value = " + localThumbFile);
                 loadVideoFromPath(attachedPhotoOrVideoThumbnailView, message.getLocalThumb());
             }
         }
@@ -635,8 +630,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         try {
             String firstLink = (String) includedLinks.get(includedLinks.size() - 1);
             linkPreview.setData(firstLink);
-        } catch (IndexOutOfBoundsException e) {
-            HolloutLogger.d(TAG, "IndexOutOfBoundsException with error message = " + e.getMessage());
+        } catch (IndexOutOfBoundsException ignored) {
+
         }
     }
 
@@ -682,10 +677,8 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     private void invalidateMessageBubble() {
         if (AppConstants.selectedMessagesPositions.get(getMessageHash())) {
             setBackgroundColor(ContextCompat.getColor(activity, R.color.lighter_blue));
-            HolloutLogger.d("SelectionTag", "Selected MessageId = " + message.getMessageId());
         } else {
             setBackgroundColor(Color.TRANSPARENT);
-            HolloutLogger.d("SelectionTag", "UnSelected MessageId = " + message.getMessageId());
         }
     }
 

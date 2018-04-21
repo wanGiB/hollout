@@ -89,9 +89,6 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
     @BindView(R.id.story_box)
     StoryBox storyBox;
 
-    @BindView(R.id.dragView)
-    View dragView;
-
     @BindView(R.id.sliding_layout)
     SlidingUpPanelLayout slidingUpPanelLayout;
 
@@ -123,8 +120,6 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
     private PhotosAndVideosAdapter photosAndVideosAdapter;
     private List<HolloutUtils.MediaEntry> allMediaEntries = new ArrayList<>();
 
-    private SelectedFilesAdapter selectedFilesAdapter;
-
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -143,16 +138,12 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
         changeStoryBoardColorView.setOnClickListener(this);
         changeTypefaceView.setOnClickListener(this);
         holloutPermissions = new HolloutPermissions(this, rootView);
-
         photosAndVideosAdapter = new PhotosAndVideosAdapter(this, allMediaEntries);
-
         StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         moreMediaRecyclerView.setLayoutManager(gridLayoutManager);
         moreMediaRecyclerView.setHasFixedSize(true);
         moreMediaRecyclerView.setAdapter(photosAndVideosAdapter);
-
         loadMedia();
-
         slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
 
@@ -175,7 +166,6 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
             }
 
         });
-
         toggleMediaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
             @Override
@@ -189,7 +179,6 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
             }
 
         });
-
         addAttachments.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -200,33 +189,57 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
                 }
             }
         });
-
-        Drawable closeDrawable = new IconicsDrawable(this, GoogleMaterial.Icon.gmd_close).color(Color.WHITE).sizeDp(24);
+        Drawable closeDrawable = new IconicsDrawable(this, GoogleMaterial.Icon.gmd_chevron_left).color(Color.WHITE).sizeDp(24);
         closeActivityView.setImageDrawable(closeDrawable);
-
         closeActivityView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 finish();
             }
         });
-
         loadUserPhoto();
-
         doneWithContentSelection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 checkAndShowSelectedFiles();
             }
         });
-
         checkAndShowSelectedFiles();
+        tintIconsEaseGray();
+    }
+
+    private void tintIconsEaseGray() {
+        int easeGray = ContextCompat.getColor(this, R.color.ease_gray);
+        UiUtils.tintImageView(closeActivityView, easeGray);
+        UiUtils.tintImageView(addAttachments, easeGray);
+        UiUtils.tintImageView(changeTypefaceView, easeGray);
+        UiUtils.tintImageView(changeStoryBoardColorView, easeGray);
+        UiUtils.tintImageView(openEmojiView, easeGray);
+        storyBox.setHintTextColor(easeGray);
+        storyBox.setTextColor(Color.BLACK);
+        rootView.setBackgroundColor(ContextCompat.getColor(this, R.color.ease_gray_dark));
+        composeContainer.setBackgroundColor(Color.WHITE);
+        tintToolbarAndTabLayout(easeGray);
+    }
+
+    private void tintIconsWhite(int randomColor) {
+        int whiteColor = Color.WHITE;
+        UiUtils.tintImageView(closeActivityView, whiteColor);
+        UiUtils.tintImageView(addAttachments, whiteColor);
+        UiUtils.tintImageView(changeTypefaceView, whiteColor);
+        UiUtils.tintImageView(changeStoryBoardColorView, whiteColor);
+        UiUtils.tintImageView(openEmojiView, whiteColor);
+        storyBox.setHintTextColor(whiteColor);
+        storyBox.setTextColor(whiteColor);
+        rootView.setBackgroundColor(randomColor);
+        composeContainer.setBackgroundColor(randomColor);
+        tintToolbarAndTabLayout(randomColor);
     }
 
     private void checkAndShowSelectedFiles() {
         if (!AppConstants.selectedUris.isEmpty()) {
             UiUtils.showView(selectedFilesForUpload, true);
-            selectedFilesAdapter = new SelectedFilesAdapter(CreatePostActivity.this);
+            SelectedFilesAdapter selectedFilesAdapter = new SelectedFilesAdapter(CreatePostActivity.this);
             selectedFilesForUpload.setLayoutManager(new LinearLayoutManager(CreatePostActivity.this, LinearLayoutManager.HORIZONTAL, false));
             selectedFilesForUpload.setAdapter(selectedFilesAdapter);
         }
@@ -347,9 +360,9 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (StringUtils.isNotEmpty(s.toString().trim())){
+                if (StringUtils.isNotEmpty(s.toString().trim())) {
                     storyBox.setCursorVisible(true);
-                }else {
+                } else {
                     storyBox.setCursorVisible(false);
                 }
             }
@@ -380,15 +393,17 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
 
     private void randomizeColor() {
         int randomCol = UiUtils.getRandomColor();
-        rootView.setBackgroundColor(ContextCompat.getColor(this, randomCol));
-        composeContainer.setBackgroundColor(ContextCompat.getColor(this, randomCol));
-        tintToolbarAndTabLayout(randomCol);
+        if (randomCol == android.R.color.white) {
+            tintIconsEaseGray();
+        } else {
+            tintIconsWhite(ContextCompat.getColor(this, randomCol));
+        }
     }
 
     private void tintToolbarAndTabLayout(int colorPrimary) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
-            window.setStatusBarColor(ContextCompat.getColor(this, colorPrimary));
+            window.setStatusBarColor(colorPrimary);
         }
     }
 

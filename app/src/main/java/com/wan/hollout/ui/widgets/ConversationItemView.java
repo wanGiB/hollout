@@ -46,7 +46,6 @@ import com.wan.hollout.ui.activities.UserPhotoPreviewActivity;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.DbUtils;
-import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
@@ -307,7 +306,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private void setupDefaults() {
         if (lastMessage != null) {
-            HolloutLogger.d("LastMessageTracker", "Last Message in conversation is not null");
             UiUtils.showView(msgTimeStampView, true);
             long lastMessageTime = lastMessage.getTimeStamp();
             parseObject.put(AppConstants.LAST_CONVERSATION_TIME_WITH, lastMessageTime);
@@ -337,7 +335,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
             AppConstants.lastMessageAvailablePositions.put(getMessageId(), true);
             setupLastMessage(lastMessage);
         } else {
-            HolloutLogger.d("LastMessageTracker", "Last Message in conversation is null");
             parseObject.put(AppConstants.LAST_CONVERSATION_TIME_WITH, 0);
             UiUtils.showView(msgTimeStampView, false);
             AppConstants.lastMessageAvailablePositions.put(getMessageId(), false);
@@ -385,7 +382,6 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                             public void run() {
                                 String newObjectRealId = object.getString(AppConstants.REAL_OBJECT_ID);
                                 String personId = getConversationId();
-                                HolloutLogger.d("ObjectUpdate", "A new object has changed. Object Id = " + newObjectRealId + " RefObjectId = " + personId);
                                 if (newObjectRealId.equals(personId)) {
                                     setupConversation(object, searchString);
                                 }

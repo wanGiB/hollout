@@ -63,13 +63,13 @@
     <color name="aliyun_divider_line">#1f000000</color>
     <color name="list_item_secondary_text">#546e7a</color>
     <color name="ease_gray">#adb9c1</color>
+    <color name="ease_gray_dark">#5c6e79</color>
     <color name="conversation_background">#eeeeee</color>
     <color name="list_item_primary_text">#1b1d1d</color>
     <color name="capp_listitem_pressed_bg">#ffebebeb</color>
     <color name="capp_title_text_color">#de000000</color>
     <color name="capp_description_text_color">#8a000000</color>
     <color name="textIconColorPrimary">#FFFFFF</color>
-
     <color name="outgoing_bubbles_color">#FBF0DA</color>
     <color name="incoming_bubbles_color">#F1F6F8</color>
     <color name="unread_news_feed_background">#EBFAFF</color>

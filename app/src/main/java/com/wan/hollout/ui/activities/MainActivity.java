@@ -67,8 +67,8 @@ import com.wan.hollout.eventbuses.UnreadFeedsBadge;
 import com.wan.hollout.interfaces.DoneCallback;
 import com.wan.hollout.models.ChatMessage;
 import com.wan.hollout.models.ConversationItem;
-import com.wan.hollout.ui.fragments.ActivitiesFragment;
 import com.wan.hollout.ui.fragments.ConversationsFragment;
+import com.wan.hollout.ui.fragments.FeedsFragment;
 import com.wan.hollout.ui.fragments.NearbyPeopleFragment;
 import com.wan.hollout.ui.services.AppInstanceDetectionService;
 import com.wan.hollout.ui.widgets.MaterialSearchView;
@@ -82,7 +82,6 @@ import com.wan.hollout.utils.DbUtils;
 import com.wan.hollout.utils.FirebaseUtils;
 import com.wan.hollout.utils.FontUtils;
 import com.wan.hollout.utils.GeneralNotifier;
-import com.wan.hollout.utils.HolloutLogger;
 import com.wan.hollout.utils.HolloutPermissions;
 import com.wan.hollout.utils.HolloutPreferences;
 import com.wan.hollout.utils.HolloutUtils;
@@ -300,22 +299,15 @@ public class MainActivity extends BaseActivity
                 int statusCode = ((ApiException) e).getStatusCode();
                 switch (statusCode) {
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        HolloutLogger.i("AppInstanceDetectionService",
-                                "Location settings are not satisfied. Attempting to upgrade " +
-                                        "location settings ");
                         try {
                             // Show the dialog by calling startResolutionForResult(), and check the
                             // result in onActivityResult().
                             ResolvableApiException rae = (ResolvableApiException) e;
                             rae.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
-                        } catch (IntentSender.SendIntentException sie) {
-                            HolloutLogger.i("AppInstanceDetectionService", "PendingIntent unable to execute request.");
+                        } catch (IntentSender.SendIntentException ignored) {
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        String errorMessage = "Location settings are inadequate, and cannot be " +
-                                "fixed here. Fix in Settings.";
-                        HolloutLogger.e("AppInstanceDetectionService", errorMessage);
                         runOnMain(new Runnable() {
                             @Override
                             public void run() {
@@ -728,7 +720,7 @@ public class MainActivity extends BaseActivity
         Adapter adapter = new Adapter(this, getSupportFragmentManager());
         adapter.addFragment(new NearbyPeopleFragment(), this.getString(R.string.nearby));
         adapter.addFragment(new ConversationsFragment(), this.getString(R.string.chats));
-        adapter.addFragment(new ActivitiesFragment(), this.getString(R.string.activities));
+        adapter.addFragment(new FeedsFragment(), this.getString(R.string.feeds_));
         viewPager.setAdapter(adapter);
         return adapter;
     }
@@ -910,7 +902,6 @@ public class MainActivity extends BaseActivity
                     FirebaseUtils.getRemoteConfig().activateFetched();
                     checkIsAppLatest();
                 } else {
-                    HolloutLogger.d("FirebaseRemoteConfig", "Failed to fetch remote config data");
                     checkIsAppLatest();
                 }
             }
@@ -923,7 +914,6 @@ public class MainActivity extends BaseActivity
         if (currentAppVersion != null && remoteAppVersion != null) {
             long currentAppVersionLong = Long.parseLong(StringUtils.deleteWhitespace(StringUtils.strip(currentAppVersion.replace(".", ""))));
             long remoteAppVersionLong = Long.parseLong(StringUtils.deleteWhitespace(StringUtils.strip(remoteAppVersion.replace(".", ""))));
-            HolloutLogger.d("AppVersionsTag", "CurrentAppVersion = " + currentAppVersionLong + " and Remote App Version = " + remoteAppVersionLong);
             if (remoteAppVersionLong > currentAppVersionLong) {
                 //New App Version is available
                 Snackbar.make(rootLayout, "A New Version of Hollout is available",
