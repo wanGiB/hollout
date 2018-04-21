@@ -25,6 +25,7 @@ import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,11 +35,11 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import me.zhanghai.android.materialratingbar.MaterialRatingBar;
 
 /**
  * @author Wan Clem
  */
-
 public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItemHolder> implements
         StickyRecyclerHeadersAdapter<FeedsAdapter.DateItemHolder> {
 
@@ -83,6 +84,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
             case ITEM_TYPE_PHOTO_OR_VIDEO:
                 break;
             case ITEM_TYPE_TEXT:
+                layoutRes = R.layout.recycler_item_text_status;
                 break;
         }
         View itemView = layoutInflater.inflate(layoutRes, parent, false);
@@ -127,6 +129,34 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
     static class ActivityItemHolder extends RecyclerView.ViewHolder {
 
         @Nullable
+        @BindView(R.id.status_avatar)
+        ImageView statusAvatarView;
+
+        @Nullable
+        @BindView(R.id.status_display_name)
+        TextView statusDisplayNameView;
+
+        @Nullable
+        @BindView(R.id.status_timestamp_info)
+        TextView statusTimeStampInfoView;
+
+        @Nullable
+        @BindView(R.id.status_content)
+        TextView statusContentView;
+
+        @Nullable
+        @BindView(R.id.rate_status)
+        MaterialRatingBar rateStatus;
+
+        @Nullable
+        @BindView(R.id.init_chat_cause_of_status)
+        ImageView initiateChatCauseOfStatus;
+
+        @Nullable
+        @BindView(R.id.status_more)
+        ImageView statusMoreOptionsView;
+
+        @Nullable
         @BindView(R.id.photo_liker)
         ImageView photoLiker;
 
@@ -158,27 +188,97 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
         void bindData(final Activity activity, final ParseObject activityObject) {
             String feedType = activityObject.getString(AppConstants.FEED_TYPE);
             final ParseObject originator = activityObject.getParseObject(AppConstants.FEED_CREATOR);
+            String originatorId = originator.getString(AppConstants.REAL_OBJECT_ID);
+
             String displayName = originator.getString(AppConstants.APP_USER_DISPLAY_NAME);
+            ParseObject signedInUser = AuthUtil.getCurrentUser();
+
+            String signedInUserId = null;
+            if (signedInUser != null) {
+                signedInUserId = signedInUser.getString(AppConstants.REAL_OBJECT_ID);
+            }
+
             String profilePhotoUrl = originator.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
 
             if (feedType.equals(AppConstants.FEED_TYPE_PHOTO_LIKE)) {
                 setupPhotoLikeView(activity, activityObject, originator, displayName, profilePhotoUrl);
-            } else {
+            } else if (feedType.equals(AppConstants.FEED_TYPE_SIMPLE_TEXT)) {
+                UiUtils.tintImageViewNoMode(initiateChatCauseOfStatus, ContextCompat.getColor(activity, R.color.ease_gray));
                 //Display Normal Feed View
+                String originatorName = originator.getString(AppConstants.APP_USER_DISPLAY_NAME);
+                String originatorPhotoUrl = originator.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+                String postBody = originator.getString(AppConstants.POST_BODY);
+                Date dateCreated = activityObject.getCreatedAt();
+                if (StringUtils.isNotEmpty(originatorName)) {
+                    if (statusDisplayNameView != null) {
+                        statusDisplayNameView.setText(WordUtils.capitalize(originatorName));
+                    }
+                }
+                if (statusTimeStampInfoView != null) {
+                    statusTimeStampInfoView.setText(AppConstants.DATE_FORMATTER_IN_12HRS.format(dateCreated));
+                }
+                if (StringUtils.isNotEmpty(originatorPhotoUrl)) {
+                    UiUtils.loadImage(activity, originatorPhotoUrl, statusAvatarView);
+                } else {
+                    UiUtils.loadName(statusAvatarView, originatorName);
+                }
+                if (statusContentView != null) {
+                    statusContentView.setText(postBody);
+                }
+                UiUtils.showView(statusMoreOptionsView, signedInUserId != null && signedInUserId.equals(originatorId));
             }
+
         }
 
-        private void setupPhotoLikeView(final Activity activity, final ParseObject activityObject, final ParseObject originator, String displayName, String profilePhotoUrl) {
+        private void setupPhotoLikeView(final Activity activity, final ParseObject activityObject,
+                                        final ParseObject originator,
+                                        String displayName,
+                                        String profilePhotoUrl) {
+
+            ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+            String signedInUserPhotoUrl = null;
+            String signedInUserCoverPhoto = null;
+            List<String> userFeaturedPhotos = new ArrayList<>();
+
+            if (signedInUserObject != null) {
+                signedInUserPhotoUrl = signedInUserObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
+                signedInUserCoverPhoto = signedInUserObject.getString(AppConstants.APP_USER_COVER_PHOTO);
+                userFeaturedPhotos = signedInUserObject.getList(AppConstants.APP_USER_FEATURED_PHOTOS);
+            }
+
             final String likedPhoto = activityObject.getString(AppConstants.LIKED_PHOTO);
+
+            String message = "your photo";
+
+            if (signedInUserPhotoUrl != null) {
+                if (signedInUserPhotoUrl.equals(likedPhoto)) {
+                    message = "your profile photo";
+                }
+            }
+
+            if (signedInUserCoverPhoto != null) {
+                if (signedInUserCoverPhoto.equals(likedPhoto)) {
+                    message = "your cover photo";
+                }
+            }
+
+            if (userFeaturedPhotos != null && !userFeaturedPhotos.isEmpty()) {
+                if (userFeaturedPhotos.contains(likedPhoto)) {
+                    message = "one of your featured photos";
+                }
+            }
+
             boolean seenByOwner = activityObject.getBoolean(AppConstants.SEEN_BY_OWNER);
             Date likeDate = activityObject.getCreatedAt();
             if (descriptionView != null) {
-                descriptionView.setText(UiUtils.fromHtml("<font color=#000000><b>" + displayName + "</b></font> likes your photo"));
+                descriptionView.setText(UiUtils.fromHtml("<font color=#000000><b>" + displayName + "</b></font> likes " + message));
             }
+
             String msgTime = AppConstants.DATE_FORMATTER_IN_12HRS.format(likeDate);
             if (timeView != null) {
                 timeView.setText(msgTime);
             }
+
             if (StringUtils.isNotEmpty(profilePhotoUrl)) {
                 UiUtils.loadImage(activity, profilePhotoUrl, photoLiker);
             } else {
@@ -186,10 +286,12 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
                     photoLiker.setImageResource(R.drawable.empty_profile);
                 }
             }
+
             UiUtils.loadImage(activity, likedPhoto, likedPhotoImageView);
             if (parentView != null) {
                 parentView.setBackgroundColor(seenByOwner ? Color.WHITE : ContextCompat.getColor(activity, R.color.unread_news_feed_background));
             }
+
             if (clickableContainer != null) {
                 clickableContainer.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -209,7 +311,9 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
                     }
                 });
             }
+
             photoLiker.setOnClickListener(new View.OnClickListener() {
+
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(activity, UserPhotoPreviewActivity.class);
@@ -219,8 +323,11 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
                     activity.startActivity(intent);
                     activity.overridePendingTransition(0, 0);
                 }
+
             });
+
         }
+
     }
 
     static class DateItemHolder extends RecyclerView.ViewHolder {

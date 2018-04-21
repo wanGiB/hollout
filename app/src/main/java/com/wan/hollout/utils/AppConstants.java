@@ -241,6 +241,11 @@ public class AppConstants {
     public static final String FEED_TYPE_SIMPLE_TEXT = "feed_type_simple_text";
     public static final String FEED_SEEN = "seen_feed";
     public static final String FEED_TYPE_PHOTO_OR_VIDEO = "feed_type_photo_or_video";
+    public static final String SAVE_COMPLETED = "save_completed";
+    public static final String POST_COLOR = "post_color";
+    public static final String POST_TYPEFACE = "post_typeface";
+    public static final String POST_BODY = "post_body";
+    public static final String REFRESH_FEEDS = "refresh_feeds";
 
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 

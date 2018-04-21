@@ -38,6 +38,7 @@ import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -118,6 +119,10 @@ public class FeedsFragment extends BaseFragment {
                             break;
                         case AppConstants.ENABLE_NESTED_SCROLLING:
                             nestedScrollView.setNestedScrollingEnabled(true);
+                            break;
+                        case AppConstants.REFRESH_FEEDS:
+                            fetchFeeds(0);
+                            EventBus.getDefault().removeStickyEvent(AppConstants.REFRESH_FEEDS);
                             break;
                     }
                 }
@@ -288,15 +293,19 @@ public class FeedsFragment extends BaseFragment {
         List<String> signedInUserChats = signedInUserObject.getList(AppConstants.APP_USER_CHATS);
         ParseQuery<ParseObject> fromUserChatsQuery = null;
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
+            String signedInUserId = signedInUserObject.getString(AppConstants.REAL_OBJECT_ID);
             if (signedInUserChats.contains(null)) {
                 signedInUserChats.remove(null);
             }
+            if (!signedInUserChats.contains(signedInUserId)) {
+                signedInUserChats.add(signedInUserId);
+            }
             fromUserChatsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
-            fromUserChatsQuery.whereContainedIn(AppConstants.FEED_CREATOR_ID, signedInUserChats);
-            List<String>requiredFeedTypes = new ArrayList<>();
+            List<String> requiredFeedTypes = new ArrayList<>();
             requiredFeedTypes.add(AppConstants.FEED_TYPE_SIMPLE_TEXT);
             requiredFeedTypes.add(AppConstants.FEED_TYPE_PHOTO_OR_VIDEO);
             fromUserChatsQuery.whereContainedIn(AppConstants.FEED_TYPE, requiredFeedTypes);
+            fromUserChatsQuery.whereContainedIn(AppConstants.FEED_CREATOR_ID, signedInUserChats);
             excludeRequests(fromUserChatsQuery);
         }
 

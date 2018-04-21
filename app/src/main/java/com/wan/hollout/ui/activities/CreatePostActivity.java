@@ -2,6 +2,7 @@ package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -27,13 +28,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.SaveCallback;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.vanniktech.emoji.EmojiPopup;
 import com.vanniktech.emoji.listeners.OnEmojiPopupDismissListener;
@@ -51,6 +55,7 @@ import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.UiUtils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -110,6 +115,9 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
     @BindView(R.id.selected_files_for_upload)
     RecyclerView selectedFilesForUpload;
 
+    @BindView(R.id.post_button)
+    Button postButton;
+
     @SuppressLint("StaticFieldLeak")
     public static ImageView doneWithContentSelection;
 
@@ -119,6 +127,11 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
     private Vibrator vibrator;
     private PhotosAndVideosAdapter photosAndVideosAdapter;
     private List<HolloutUtils.MediaEntry> allMediaEntries = new ArrayList<>();
+
+    int postColor = android.R.color.white;
+    int postTypeface = 0;
+
+    private ParseObject signedInUserObject;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -206,6 +219,56 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
         });
         checkAndShowSelectedFiles();
         tintIconsEaseGray();
+
+
+        postButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                final ProgressDialog progressDialog;
+                ParseObject newPostObject = new ParseObject(AppConstants.HOLLOUT_FEED);
+                String postBody = storyBox.getText().toString().trim();
+
+                if (AppConstants.selectedUris.isEmpty()) {
+                    if (StringUtils.isEmpty(postBody)) {
+                        UiUtils.showSafeToast("Say something");
+                        return;
+                    }
+                    progressDialog = ProgressDialog.show(CreatePostActivity.this, "A minute", "Sharing post with friends.");
+                    //This is a text post
+                    newPostObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_SIMPLE_TEXT);
+                    newPostObject.put(AppConstants.SAVE_COMPLETED, true);
+                } else {
+                    progressDialog = ProgressDialog.show(CreatePostActivity.this, "A minute", "Sharing post with friends.");
+                    newPostObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_PHOTO_OR_VIDEO);
+                    newPostObject.put(AppConstants.SAVE_COMPLETED, false);
+                }
+
+                newPostObject.put(AppConstants.POST_COLOR, postColor);
+                newPostObject.put(AppConstants.POST_TYPEFACE, postTypeface);
+                newPostObject.put(AppConstants.POST_BODY, postBody);
+                newPostObject.put(AppConstants.FEED_CREATOR, AuthUtil.getCurrentUser());
+                newPostObject.put(AppConstants.FEED_CREATOR_ID, signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
+
+                newPostObject.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        UiUtils.dismissProgressDialog(progressDialog);
+                        if (e == null) {
+                            UiUtils.bangSound(getCurrentActivityInstance(), R.raw.post_completed);
+                            AppConstants.selectedUris.clear();
+                            EventBus.getDefault().postSticky(AppConstants.REFRESH_FEEDS);
+                            finish();
+                        } else {
+                            UiUtils.showSafeToast("Error sharing post. Please try again.");
+                        }
+                    }
+                });
+
+            }
+
+        });
+
     }
 
     private void tintIconsEaseGray() {
@@ -259,7 +322,8 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
     }
 
     private void loadUserPhoto() {
-        ParseObject signedInUserObject = AuthUtil.getCurrentUser();
+
+        signedInUserObject = AuthUtil.getCurrentUser();
         if (signedInUserObject != null) {
             String signedInUserPhotoUrl = signedInUserObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
             if (StringUtils.isNotEmpty(signedInUserPhotoUrl)) {
@@ -386,17 +450,18 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
                 randomizeColor();
                 break;
             case R.id.change_typeface:
-                storyBox.applyCustomFont(this, random.nextInt(12));
+                postTypeface = random.nextInt(12);
+                storyBox.applyCustomFont(this, postTypeface);
                 break;
         }
     }
 
     private void randomizeColor() {
-        int randomCol = UiUtils.getRandomColor();
-        if (randomCol == android.R.color.white) {
+        postColor = UiUtils.getRandomColor();
+        if (postColor == android.R.color.white) {
             tintIconsEaseGray();
         } else {
-            tintIconsWhite(ContextCompat.getColor(this, randomCol));
+            tintIconsWhite(ContextCompat.getColor(this, postColor));
         }
     }
 

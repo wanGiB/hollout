@@ -148,4 +148,5 @@
     <dimen name="fab_elevation">4dp</dimen>
     <dimen name="fab_sheet_elevation">0dp</dimen>
     <dimen name="detail_backdrop_height">150dp</dimen>
+    <dimen name="status_avatar_padding">10dp</dimen>
 </resources>

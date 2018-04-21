@@ -848,6 +848,9 @@ public class MainActivity extends BaseActivity
                                 finish();
                             }
                             break;
+                        case AppConstants.REFRESH_FEEDS:
+                            viewPager.setCurrentItem(2);
+                            break;
                     }
                 } else if (o instanceof UnreadFeedsBadge) {
                     UnreadFeedsBadge unreadFeedsBadge = (UnreadFeedsBadge) o;
