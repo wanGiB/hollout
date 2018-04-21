@@ -3,6 +3,7 @@ package com.wan.hollout.ui.adapters;
 import android.app.Activity;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,6 +34,10 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     private List<HolloutUtils.MediaEntry> photosAndVideos;
     private LayoutInflater layoutInflater;
 
+    private final int ITEM_TYPE_CAPTURE_PHOTO = 0;
+    private final int ITEM_TYPE_SHOOT_VIDEO = 1;
+    private final int ITEM_TYPE_NORMAL = 2;
+
     public PhotosAndVideosAdapter(Activity activity, List<HolloutUtils.MediaEntry> photosAndVideos) {
         this.photosAndVideos = photosAndVideos;
         layoutInflater = LayoutInflater.from(activity);
@@ -41,32 +46,60 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = layoutInflater.inflate(R.layout.all_media_recycler_item, parent, false);
+        View itemView;
+        int layoutRes = 0;
+        switch (viewType) {
+            case ITEM_TYPE_NORMAL:
+                layoutRes = R.layout.all_media_recycler_item;
+                break;
+            case ITEM_TYPE_CAPTURE_PHOTO:
+                layoutRes = R.layout.capture_photo;
+                break;
+            case ITEM_TYPE_SHOOT_VIDEO:
+                layoutRes = R.layout.capture_video;
+                break;
+        }
+        itemView = layoutInflater.inflate(layoutRes, parent, false);
         return new PhotosAndVideosHolder(itemView);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0) {
+            return ITEM_TYPE_SHOOT_VIDEO;
+        } else if (position == 1) {
+            return ITEM_TYPE_CAPTURE_PHOTO;
+        } else {
+            return ITEM_TYPE_NORMAL;
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         PhotosAndVideosHolder photosAndVideosHolder = (PhotosAndVideosHolder) holder;
-        photosAndVideosHolder.bindData(photosAndVideos.get(position));
+        photosAndVideosHolder.bindData(photosAndVideos.get(position), position);
     }
 
     @Override
     public int getItemCount() {
-        return !photosAndVideos.isEmpty() ? photosAndVideos.size() : 0;
+        return !photosAndVideos.isEmpty() ? photosAndVideos.size() + 2 : 0;
     }
 
     static class PhotosAndVideosHolder extends RecyclerView.ViewHolder {
 
+        @Nullable
         @BindView(R.id.image_icon_item)
         ImageView imageIconView;
 
+        @Nullable
         @BindView(R.id.play_media_if_video_icon)
         ImageView playMediaIfVideoIconView;
 
+        @Nullable
         @BindView(R.id.checked_indicator)
         ImageView checkedIndicator;
 
+        @Nullable
         @BindView(R.id.image_item_layout)
         View mainItemView;
 
@@ -75,46 +108,81 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
             ButterKnife.bind(this, itemView);
         }
 
-        void bindData(final HolloutUtils.MediaEntry mediaEntry) {
-            Glide.with(ApplicationLoader.getInstance()).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(imageIconView);
-            String fileMiMeType = FileUtils.getMimeType(mediaEntry.path);
-            UiUtils.showView(playMediaIfVideoIconView, HolloutUtils.isVideo(fileMiMeType));
-            mainItemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    File file = new File(mediaEntry.path);
-                    if (file.exists()) {
-                        Uri uri = Uri.fromFile(file);
-                        if (AppConstants.selectedUris.size() == 5) {
-                            UiUtils.showSafeToast("Maximum number of sharable media reached");
-                            return;
-                        }
-                        if (!AppConstants.selectedUris.contains(uri)) {
-                            AppConstants.selectedUris.add(uri);
-                            UiUtils.showView(checkedIndicator, true);
-                            mainItemView.setScaleY(0.9f);
-                            mainItemView.setScaleX(0.9f);
-                            CreatePostActivity.doneWithContentSelection.show();
-                        } else {
-                            AppConstants.selectedUris.remove(uri);
-                            UiUtils.showView(checkedIndicator, false);
-                            mainItemView.setScaleY(1);
-                            mainItemView.setScaleX(1);
-                            if (AppConstants.selectedUris.isEmpty()) {
-                                CreatePostActivity.doneWithContentSelection.hide();
+        void bindData(final HolloutUtils.MediaEntry mediaEntry, int position) {
+            if (mediaEntry != null) {
+                if (imageIconView != null) {
+                    Glide.with(ApplicationLoader.getInstance()).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(imageIconView);
+                }
+                String fileMiMeType = FileUtils.getMimeType(mediaEntry.path);
+                UiUtils.showView(playMediaIfVideoIconView, HolloutUtils.isVideo(fileMiMeType));
+                if (mainItemView != null && imageIconView != null) {
+                    mainItemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            File file = new File(mediaEntry.path);
+                            if (file.exists()) {
+                                Uri uri = Uri.fromFile(file);
+                                if (!AppConstants.selectedUris.contains(uri)) {
+                                    if (AppConstants.selectedUris.size() == 5) {
+                                        UiUtils.showSafeToast("Maximum number of sharable media reached");
+                                        return;
+                                    }
+                                    AppConstants.selectedUris.add(uri);
+                                    UiUtils.showView(checkedIndicator, true);
+                                    mainItemView.setScaleY(0.9f);
+                                    mainItemView.setScaleX(0.9f);
+                                    UiUtils.showView(CreatePostActivity.doneWithContentSelection, true);
+                                } else {
+                                    AppConstants.selectedUris.remove(uri);
+                                    UiUtils.showView(checkedIndicator, false);
+                                    mainItemView.setScaleY(1);
+                                    mainItemView.setScaleX(1);
+                                    if (AppConstants.selectedUris.isEmpty()) {
+                                        UiUtils.showView(CreatePostActivity.doneWithContentSelection, false);
+                                    }
+                                }
+                            } else {
+                                UiUtils.showSafeToast("Error retrieving image. Please pick another");
                             }
                         }
-                    } else {
-                        UiUtils.showSafeToast("Error retrieving image. Please pick another");
-                    }
+                    });
                 }
-            });
-            imageIconView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mainItemView.performClick();
+
+                if (imageIconView != null) {
+                    imageIconView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mainItemView.performClick();
+                        }
+                    });
                 }
-            });
+
+                File file = new File(mediaEntry.path);
+                Uri uri = Uri.fromFile(file);
+                if (checkedIndicator != null) {
+                    UiUtils.showView(checkedIndicator, AppConstants.selectedUris.contains(uri));
+                }
+            }
+
+            if (position == 0 || position == 1) {
+                if (mainItemView != null) {
+                    mainItemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            UiUtils.showSafeToast("Clicked");
+                        }
+                    });
+                }
+                if (imageIconView != null) {
+                    imageIconView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mainItemView.performClick();
+                        }
+                    });
+                }
+            }
+
         }
 
     }

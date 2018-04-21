@@ -1,14 +1,16 @@
 package com.wan.hollout.ui.activities;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
@@ -22,6 +24,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.iconics.IconicsDrawable;
 import com.parse.ParseObject;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.vanniktech.emoji.EmojiPopup;
@@ -30,6 +34,7 @@ import com.vanniktech.emoji.listeners.OnEmojiPopupShownListener;
 import com.vanniktech.emoji.listeners.OnSoftKeyboardOpenListener;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.adapters.PhotosAndVideosAdapter;
+import com.wan.hollout.ui.adapters.SelectedFilesAdapter;
 import com.wan.hollout.ui.widgets.StoryBox;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
@@ -91,8 +96,14 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
     @BindView(R.id.activity_compose)
     View composeContainer;
 
+    @BindView(R.id.close_activity)
+    ImageView closeActivityView;
+
+    @BindView(R.id.selected_files_for_upload)
+    RecyclerView selectedFilesForUpload;
+
     @SuppressLint("StaticFieldLeak")
-    public static FloatingActionButton doneWithContentSelection;
+    public static ImageView doneWithContentSelection;
 
     private EmojiPopup emojiPopup;
     private Random random;
@@ -100,7 +111,8 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
     private Vibrator vibrator;
     private PhotosAndVideosAdapter photosAndVideosAdapter;
     private List<HolloutUtils.MediaEntry> allMediaEntries = new ArrayList<>();
-    private int randomCol;
+
+    private SelectedFilesAdapter selectedFilesAdapter;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -112,18 +124,24 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
         setupEmojiPopup();
         random = new Random();
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        Drawable doneIcon = new IconicsDrawable(this, GoogleMaterial.Icon.gmd_done).sizeDp(24).color(Color.WHITE);
         doneWithContentSelection = findViewById(R.id.done_with_contents_selection);
-        doneWithContentSelection.hide();
+        doneWithContentSelection.setImageDrawable(doneIcon);
+        UiUtils.showView(doneWithContentSelection, false);
         openEmojiView.setOnClickListener(this);
         changeStoryBoardColorView.setOnClickListener(this);
         changeTypefaceView.setOnClickListener(this);
         holloutPermissions = new HolloutPermissions(this, rootView);
+
         photosAndVideosAdapter = new PhotosAndVideosAdapter(this, allMediaEntries);
+
         StaggeredGridLayoutManager gridLayoutManager = new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
         moreMediaRecyclerView.setLayoutManager(gridLayoutManager);
         moreMediaRecyclerView.setHasFixedSize(true);
         moreMediaRecyclerView.setAdapter(photosAndVideosAdapter);
+
         loadMedia();
+
         slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         slidingUpPanelLayout.addPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
 
@@ -135,6 +153,7 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
             @Override
             public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
                 if (slidingUpPanelLayout.getPanelState() == SlidingUpPanelLayout.PanelState.COLLAPSED) {
+                    checkAndShowSelectedFiles();
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -147,6 +166,7 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
         });
 
         toggleMediaSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 fetchMoreMedia(position);
@@ -156,15 +176,49 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
+
         });
+
         addAttachments.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 UiUtils.dismissKeyboard(storyBox);
                 slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                if (photosAndVideosAdapter != null) {
+                    photosAndVideosAdapter.notifyDataSetChanged();
+                }
             }
         });
+
+        Drawable closeDrawable = new IconicsDrawable(this, GoogleMaterial.Icon.gmd_close).color(Color.WHITE).sizeDp(24);
+        closeActivityView.setImageDrawable(closeDrawable);
+
+        closeActivityView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         loadUserPhoto();
+
+        doneWithContentSelection.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkAndShowSelectedFiles();
+            }
+        });
+
+    }
+
+    private void checkAndShowSelectedFiles() {
+        if (!AppConstants.selectedUris.isEmpty()) {
+            UiUtils.showView(selectedFilesForUpload, true);
+            selectedFilesAdapter = new SelectedFilesAdapter(CreatePostActivity.this);
+            selectedFilesForUpload.setLayoutManager(new LinearLayoutManager(CreatePostActivity.this, LinearLayoutManager.HORIZONTAL, false));
+            selectedFilesForUpload.setAdapter(selectedFilesAdapter);
+        }
+        slidingUpPanelLayout.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
     }
 
     @Override
@@ -289,7 +343,7 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
     }
 
     private void randomizeColor() {
-        randomCol = UiUtils.getRandomColor();
+        int randomCol = UiUtils.getRandomColor();
         rootView.setBackgroundColor(ContextCompat.getColor(this, randomCol));
         composeContainer.setBackgroundColor(ContextCompat.getColor(this, randomCol));
         tintToolbarAndTabLayout(randomCol);
@@ -313,17 +367,6 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
             return;
         }
         super.onBackPressed();
-    }
-
-    @Override
-    public void onEventAsync(final Object o) {
-        super.onEventAsync(o);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-            }
-        });
     }
 
 }

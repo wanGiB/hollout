@@ -726,14 +726,26 @@ public class UiUtils {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
         RoundedImageView previewImageView = new RoundedImageView(activity);
         previewImageView.setCornerRadius(5);
-
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(700,
                 700);
-
         previewImageView.setLayoutParams(layoutParams);
         previewImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         UiUtils.loadImage(activity, holloutFile.getLocalFilePath(), previewImageView);
+        builder.setView(previewImageView);
+        builder.create().show();
+    }
+
+    public static void previewSelectedFile(Activity activity, Uri holloutFile) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        RoundedImageView previewImageView = new RoundedImageView(activity);
+        previewImageView.setCornerRadius(5);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(700,
+                700);
+        previewImageView.setLayoutParams(layoutParams);
+        previewImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        UiUtils.loadImage(activity, holloutFile.getPath(), previewImageView);
         builder.setView(previewImageView);
         builder.create().show();
     }

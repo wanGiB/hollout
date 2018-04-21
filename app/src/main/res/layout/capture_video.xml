@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/image_item_layout"
+    android:layout_width="match_parent"
+    android:layout_height="150dp"
+    android:layout_margin="2dp"
+    android:orientation="horizontal">
+
+    <com.wan.hollout.ui.widgets.RoundedImageView
+        android:id="@+id/capture_video"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:scaleType="centerCrop"
+        android:src="@color/medium_grey"
+        app:riv_border_color="@color/white"
+        app:riv_border_width="1dp"
+        app:riv_corner_radius="1dp"
+        tools:ignore="ContentDescription" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/ic_videocam_white_48dp"
+            tools:ignore="ContentDescription" />
+
+        <com.wan.hollout.ui.widgets.HolloutTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Shoot Video"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+</FrameLayout>

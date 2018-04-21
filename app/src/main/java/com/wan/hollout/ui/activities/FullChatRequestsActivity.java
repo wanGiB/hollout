@@ -179,6 +179,8 @@ public class FullChatRequestsActivity extends BaseActivity {
                 } else {
                     deletables.add(parseObject);
                 }
+            }else {
+                deletables.add(parseObject);
             }
         }
         chatRequestsAdapter.notifyDataSetChanged();
