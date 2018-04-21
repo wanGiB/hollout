@@ -19,6 +19,7 @@ import com.wan.hollout.R;
 import com.wan.hollout.ui.activities.SlidePagerActivity;
 import com.wan.hollout.ui.activities.UserPhotoPreviewActivity;
 import com.wan.hollout.ui.utils.DateUtils;
+import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.HolloutUtils;
@@ -142,7 +143,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
 
         @Nullable
         @BindView(R.id.status_content)
-        TextView statusContentView;
+        HolloutTextView statusContentView;
 
         @Nullable
         @BindView(R.id.rate_status)

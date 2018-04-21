@@ -66,7 +66,7 @@
 
     </LinearLayout>
 
-    <TextView
+    <com.wan.hollout.ui.widgets.HolloutTextView
         android:id="@+id/status_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -74,16 +74,17 @@
         android:layout_marginBottom="4dp"
         android:layout_toEndOf="@+id/status_avatar"
         android:layout_toRightOf="@+id/status_avatar"
+        android:background="@color/em_white_38"
         android:focusable="true"
         android:gravity="center"
-        android:background="@color/em_white_38"
         android:lineSpacingMultiplier="1.1"
         android:minHeight="100dp"
         android:padding="20dp"
         android:text="What the Hell?"
         android:textColor="@color/black"
         android:textSize="30sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        app:emojiSize="40dp" />
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/init_chat_cause_of_status"
@@ -101,14 +102,14 @@
 
     <me.zhanghai.android.materialratingbar.MaterialRatingBar
         android:id="@+id/rate_status"
+        style="@style/Widget.MaterialRatingBar.RatingBar"
         android:layout_width="wrap_content"
         android:layout_height="50dp"
+        android:layout_below="@id/status_content"
         android:layout_marginLeft="-3dp"
         android:layout_marginRight="-3dp"
-        android:layout_below="@id/status_content"
         android:layout_toEndOf="@+id/status_avatar"
         android:layout_toRightOf="@+id/status_avatar"
-        android:rating="2.5"
-        style="@style/Widget.MaterialRatingBar.RatingBar" />
+        android:rating="2.5" />
 
 </RelativeLayout>
