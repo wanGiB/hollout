@@ -225,6 +225,7 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
 
             @Override
             public void onClick(View v) {
+                UiUtils.dismissKeyboard(storyBox);
                 final ProgressDialog progressDialog;
                 ParseObject newPostObject = new ParseObject(AppConstants.HOLLOUT_FEED);
                 String postBody = storyBox.getText().toString().trim();

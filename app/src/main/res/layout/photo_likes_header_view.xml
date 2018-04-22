@@ -22,7 +22,7 @@
             android:padding="8dp">
 
             <com.wan.hollout.ui.widgets.CircleImageView
-                android:id="@+id/third_requester"
+                android:id="@+id/third_liker"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginLeft="40dp"
@@ -32,7 +32,7 @@
                 app:border_width="1dp" />
 
             <com.wan.hollout.ui.widgets.CircleImageView
-                android:id="@+id/second_requester"
+                android:id="@+id/second_liker"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_marginLeft="20dp"
@@ -42,7 +42,7 @@
                 app:border_width="1dp" />
 
             <com.wan.hollout.ui.widgets.CircleImageView
-                android:id="@+id/first_requester"
+                android:id="@+id/first_liker"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:src="@drawable/ease_default_image"
@@ -52,12 +52,12 @@
         </FrameLayout>
 
         <com.wan.hollout.ui.widgets.HolloutTextView
-            android:id="@+id/requests_count_header"
+            android:id="@+id/photo_likes_count_header"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_gravity="center_vertical|center_horizontal"
             android:layout_weight="1"
-            android:text="2 New Chat Requests"
+            android:text="2 people liked your photo"
             android:textColor="@color/colorAccent"
             android:textSize="12sp"
             app:textStyle="medium" />

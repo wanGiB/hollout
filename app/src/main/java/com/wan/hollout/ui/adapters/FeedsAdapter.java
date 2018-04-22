@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +38,6 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import me.zhanghai.android.materialratingbar.MaterialRatingBar;
 
 /**
  * @author Wan Clem
@@ -146,12 +147,12 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
         HolloutTextView statusContentView;
 
         @Nullable
-        @BindView(R.id.rate_status)
-        MaterialRatingBar rateStatus;
+        @BindView(R.id.status_content_container)
+        CardView statusContentContainer;
 
         @Nullable
-        @BindView(R.id.init_chat_cause_of_status)
-        ImageView initiateChatCauseOfStatus;
+        @BindView(R.id.like_status)
+        FloatingActionButton initiateChatCauseOfStatus;
 
         @Nullable
         @BindView(R.id.status_more)
@@ -208,25 +209,46 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
                 //Display Normal Feed View
                 String originatorName = originator.getString(AppConstants.APP_USER_DISPLAY_NAME);
                 String originatorPhotoUrl = originator.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);
-                String postBody = originator.getString(AppConstants.POST_BODY);
+                String postBody = activityObject.getString(AppConstants.POST_BODY);
+                int postTypeface = activityObject.getInt(AppConstants.POST_TYPEFACE);
+                int postColor = activityObject.getInt(AppConstants.POST_COLOR);
+
                 Date dateCreated = activityObject.getCreatedAt();
+
                 if (StringUtils.isNotEmpty(originatorName)) {
                     if (statusDisplayNameView != null) {
                         statusDisplayNameView.setText(WordUtils.capitalize(originatorName));
                     }
                 }
+
                 if (statusTimeStampInfoView != null) {
                     statusTimeStampInfoView.setText(AppConstants.DATE_FORMATTER_IN_12HRS.format(dateCreated));
                 }
+
                 if (StringUtils.isNotEmpty(originatorPhotoUrl)) {
                     UiUtils.loadImage(activity, originatorPhotoUrl, statusAvatarView);
                 } else {
                     UiUtils.loadName(statusAvatarView, originatorName);
                 }
+
                 if (statusContentView != null) {
                     statusContentView.setText(postBody);
+                    statusContentView.applyCustomFont(activity, postTypeface);
+                    if (postColor != android.R.color.white) {
+                        if (statusContentContainer != null) {
+                            statusContentContainer.setCardBackgroundColor(ContextCompat.getColor(activity, postColor));
+                        }
+                        statusContentView.setTextColor(Color.WHITE);
+                    } else {
+                        if (statusContentContainer != null) {
+                            statusContentContainer.setCardBackgroundColor(Color.WHITE);
+                        }
+                        statusContentView.setTextColor(Color.BLACK);
+                    }
                 }
+
                 UiUtils.showView(statusMoreOptionsView, signedInUserId != null && signedInUserId.equals(originatorId));
+
             }
 
         }
@@ -265,7 +287,7 @@ public class FeedsAdapter extends RecyclerView.Adapter<FeedsAdapter.ActivityItem
 
             if (userFeaturedPhotos != null && !userFeaturedPhotos.isEmpty()) {
                 if (userFeaturedPhotos.contains(likedPhoto)) {
-                    message = "one of your featured photos";
+                    message = "your featured photo";
                 }
             }
 

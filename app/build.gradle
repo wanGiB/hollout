@@ -134,7 +134,6 @@ dependencies {
     compile "com.github.nisrulz:sensey:${sensey_version}"
     compile 'com.gordonwong:material-sheet-fab:1.2.1'
     compile 'com.sothree.slidinguppanel:library:3.4.0'
-    compile 'me.zhanghai.android.materialratingbar:library:1.2.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

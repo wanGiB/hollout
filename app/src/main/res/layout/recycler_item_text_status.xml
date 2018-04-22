@@ -1,115 +1,175 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/status_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="14dp"
-    android:paddingRight="14dp">
+    android:layout_margin="8dp"
+    app:cardBackgroundColor="@color/whitesmoke">
 
-    <com.wan.hollout.ui.widgets.RoundedImageView
-        android:id="@+id/status_avatar"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginEnd="14dp"
-        android:layout_marginRight="14dp"
-        android:layout_marginTop="14dp"
-        android:scaleType="centerCrop"
-        app:riv_corner_radius="3dp"
-        tools:src="@drawable/ease_default_image" />
-
-    <LinearLayout
-        android:id="@+id/status_name_bar"
+    <RelativeLayout
+        android:id="@+id/status_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@+id/status_avatar"
-        android:layout_toRightOf="@+id/status_avatar"
-        android:orientation="horizontal"
-        android:paddingBottom="4dp"
-        android:paddingTop="@dimen/status_avatar_padding">
+        android:layout_marginTop="10dp">
 
-        <TextView
-            android:id="@+id/status_display_name"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/status_originator_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:ellipsize="end"
-            android:maxLines="2"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="15sp"
-            android:textStyle="normal|bold"
-            tools:text="Wan" />
+            android:layout_marginBottom="5dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:orientation="horizontal"
+            android:paddingTop="10dp">
 
-        <TextView
-            android:id="@+id/status_timestamp_info"
-            android:layout_width="wrap_content"
+            <com.wan.hollout.ui.widgets.RoundedImageView
+                android:id="@+id/status_avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="5dp"
+                android:layout_marginRight="5dp"
+                android:scaleType="centerCrop"
+                app:riv_corner_radius="3dp"
+                tools:src="@drawable/ease_default_image" />
+
+            <LinearLayout
+                android:id="@+id/status_name_bar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="3dp"
+                android:layout_marginStart="3dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/status_display_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="15sp"
+                    android:textStyle="normal|bold"
+                    tools:text="Wan" />
+
+                <TextView
+                    android:id="@+id/status_timestamp_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:textColor="@color/ease_gray"
+                    android:textSize="14sp"
+                    tools:text="13:37" />
+
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/status_more"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone"
+                app:srcCompat="@drawable/ic_more_horiz_24dp"
+                tools:ignore="ContentDescription" />
+
+        </LinearLayout>
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/status_content_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="4dp"
-            android:layout_marginStart="4dp"
-            android:textColor="@color/ease_gray"
-            android:textSize="14sp"
-            tools:text="13:37" />
+            android:layout_below="@+id/status_originator_container"
+            android:layout_marginEnd="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginStart="10dp"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            app:cardBackgroundColor="@color/white"
+            app:cardCornerRadius="3dp"
+            app:cardElevation="1dp">
 
-        <ImageView
-            android:id="@+id/status_more"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_gravity="center_vertical"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:clickable="true"
-            android:focusable="true"
-            android:visibility="gone"
-            app:srcCompat="@drawable/ic_more_horiz_24dp"
-            tools:ignore="ContentDescription" />
+            <com.wan.hollout.ui.widgets.HolloutTextView
+                android:id="@+id/status_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:focusable="true"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.1"
+                android:minHeight="100dp"
+                android:padding="20dp"
+                android:text="What the Hell?"
+                android:textColor="@color/black"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:emojiSize="40dp" />
 
-    </LinearLayout>
+        </android.support.v7.widget.CardView>
 
-    <com.wan.hollout.ui.widgets.HolloutTextView
-        android:id="@+id/status_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/status_name_bar"
-        android:layout_marginBottom="4dp"
-        android:layout_toEndOf="@+id/status_avatar"
-        android:layout_toRightOf="@+id/status_avatar"
-        android:background="@color/em_white_38"
-        android:focusable="true"
-        android:gravity="center"
-        android:lineSpacingMultiplier="1.1"
-        android:minHeight="100dp"
-        android:padding="20dp"
-        android:text="What the Hell?"
-        android:textColor="@color/black"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        app:emojiSize="40dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/status_content_container"
+            android:background="@color/whitesmoke"
+            android:orientation="horizontal">
 
-    <android.support.v7.widget.AppCompatImageView
-        android:id="@+id/init_chat_cause_of_status"
-        android:layout_width="30dp"
-        android:layout_height="50dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/status_content"
-        android:layout_centerVertical="true"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:clickable="true"
-        android:focusable="true"
-        android:src="@drawable/ic_open_in_new_black_48dp"
-        tools:ignore="ContentDescription" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="top"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:animateLayoutChanges="true"
+                android:orientation="horizontal">
 
-    <me.zhanghai.android.materialratingbar.MaterialRatingBar
-        android:id="@+id/rate_status"
-        style="@style/Widget.MaterialRatingBar.RatingBar"
-        android:layout_width="wrap_content"
-        android:layout_height="50dp"
-        android:layout_below="@id/status_content"
-        android:layout_marginLeft="-3dp"
-        android:layout_marginRight="-3dp"
-        android:layout_toEndOf="@+id/status_avatar"
-        android:layout_toRightOf="@+id/status_avatar"
-        android:rating="2.5" />
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/like_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/like"
+                    app:backgroundTint="@color/white"
+                    app:elevation="2dp"
+                    app:fabSize="mini"
+                    app:rippleColor="@color/colorAccent"
+                    app:useCompatPadding="true" />
 
-</RelativeLayout>
+                <EditText
+                    android:id="@+id/comment_box"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:background="@drawable/sent_bubble"
+                    android:cursorVisible="false"
+                    android:hint="Comment"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_chat_black_48dp" />
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/comment_on_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:rotation="-25"
+                    android:src="@drawable/ic_ami_send_24dp"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/colorAccent"
+                    app:elevation="2dp"
+                    app:fabSize="mini"
+                    app:useCompatPadding="true" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

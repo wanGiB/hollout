@@ -1,5 +1,6 @@
 package com.wan.hollout.ui.widgets;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
@@ -28,7 +29,7 @@ public class StoryBox extends EmojiEditText {
 
     private void init(Context context, AttributeSet attrs) {
         if (attrs != null) {
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.HolloutTextView);
+            @SuppressLint("CustomViewStyleable") TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.HolloutTextView);
             int textStyle;
             if (a.hasValue(R.styleable.HolloutTextView_textStyle)) {
                 textStyle = a.getInt(R.styleable.HolloutTextView_textStyle, 0);

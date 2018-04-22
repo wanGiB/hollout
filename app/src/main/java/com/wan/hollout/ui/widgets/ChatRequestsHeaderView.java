@@ -30,9 +30,6 @@ public class ChatRequestsHeaderView extends LinearLayout {
     @BindView(R.id.requests_count_header)
     HolloutTextView requestsCountHeaderView;
 
-    @BindView(R.id.nearby_header_view)
-    HolloutTextView nearbyHeaderView;
-
     @BindView(R.id.first_requester)
     CircleImageView firstRequesterView;
 
@@ -108,11 +105,6 @@ public class ChatRequestsHeaderView extends LinearLayout {
 
     public void attachEventHandlers(Activity activity) {
         handleClicks(activity);
-    }
-
-    @SuppressWarnings("SameParameterValue")
-    public void showNearbyHeader(boolean canShowNearbyHeader) {
-        UiUtils.showView(nearbyHeaderView, canShowNearbyHeader);
     }
 
     public void bindData(Activity activity, ParseObject chatRequest, CircleImageView requesterPhotoView) {

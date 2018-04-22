@@ -3,9 +3,9 @@ package com.wan.hollout.ui.widgets;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Typeface;
-import android.support.v7.widget.AppCompatTextView;
 import android.util.AttributeSet;
 
+import com.vanniktech.emoji.EmojiTextView;
 import com.wan.hollout.R;
 import com.wan.hollout.utils.FontUtils;
 
@@ -13,7 +13,7 @@ import com.wan.hollout.utils.FontUtils;
  * @author Wan Clem
  */
 
-public class HolloutTextView extends AppCompatTextView {
+public class HolloutTextView extends EmojiTextView {
 
     private static final String DEFAULT_SCHEMA = "xmlns:android=\"http://schemas.android.com/apk/res/android\"";
 
@@ -41,7 +41,7 @@ public class HolloutTextView extends AppCompatTextView {
         }
     }
 
-    private void applyCustomFont(Context context, int textStyle) {
+    public void applyCustomFont(Context context, int textStyle) {
         Typeface typeface = FontUtils.selectTypeface(context, textStyle);
         if (typeface != null) {
             setTypeface(typeface);

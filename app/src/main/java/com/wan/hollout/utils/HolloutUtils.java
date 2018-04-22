@@ -15,6 +15,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
@@ -1122,4 +1123,5 @@ public class HolloutUtils {
         toIndex = Math.min(size, toIndex);
         return list.subList(fromIndex, toIndex);
     }
+
 }

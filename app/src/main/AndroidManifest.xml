@@ -100,32 +100,39 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".ui.activities.WelcomeActivity"
             android:screenOrientation="portrait"
             android:theme="@style/FullscreenTheme" />
+
         <activity
             android:name=".ui.activities.MainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/app_name"
             android:launchMode="singleTop"
-            android:theme="@style/AppTheme" />
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="stateHidden" />
+
         <activity
             android:name=".ui.activities.GalleryActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/gallery"
             android:theme="@style/AppTheme" />
+
         <activity
             android:name=".ui.activities.ComposeStatusActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/app_name"
             android:theme="@style/AppTheme" />
+
         <activity
             android:name=".ui.activities.AboutUserActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/about_you"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden" />
+
         <activity
             android:name=".ui.activities.ChatActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
@@ -140,6 +147,7 @@
             android:label="@string/you_are"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden" />
+
         <activity
             android:name=".ui.activities.UserProfileActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
@@ -176,21 +184,26 @@
             android:name=".ui.activities.SlidePagerActivity"
             android:configChanges="orientation|screenLayout|screenSize"
             android:theme="@style/FullscreenTheme" />
+
         <activity
             android:name=".ui.activities.SettingsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:label="@string/profile"
             android:theme="@style/AppTheme"
             android:windowSoftInputMode="stateHidden" />
+
         <activity
             android:name=".ui.activities.FullChatRequestsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize|screenLayout"
             android:theme="@style/AppTheme" />
+
         <activity
             android:name=".ui.activities.SelectPeopleToForwardMessageActivity"
             android:configChanges="orientation"
             android:theme="@style/AppTheme" />
+
         <activity android:name=".ui.activities.EaseShowImageActivity" />
+
         <activity
             android:name=".ui.activities.PrivacyPolicyPreview"
             android:configChanges="orientation|keyboardHidden|screenLayout|screenSize"

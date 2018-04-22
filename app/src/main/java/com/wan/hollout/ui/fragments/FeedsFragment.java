@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -31,6 +30,7 @@ import com.wan.hollout.ui.activities.MainActivity;
 import com.wan.hollout.ui.adapters.FeedsAdapter;
 import com.wan.hollout.ui.widgets.ChatRequestsHeaderView;
 import com.wan.hollout.ui.widgets.HolloutTextView;
+import com.wan.hollout.ui.widgets.PhotoLikesHeaderView;
 import com.wan.hollout.utils.AppConstants;
 import com.wan.hollout.utils.AuthUtil;
 import com.wan.hollout.utils.FirebaseUtils;
@@ -68,6 +68,9 @@ public class FeedsFragment extends BaseFragment {
 
     @BindView(R.id.chat_requests_view)
     ChatRequestsHeaderView chatRequestsHeaderView;
+
+    @BindView(R.id.photo_likes_view)
+    PhotoLikesHeaderView photoLikesHeaderView;
 
     @BindView(R.id.swipe_refresh_layout)
     SwipeRefreshLayout swipeRefreshLayout;
@@ -121,6 +124,7 @@ public class FeedsFragment extends BaseFragment {
                             nestedScrollView.setNestedScrollingEnabled(true);
                             break;
                         case AppConstants.REFRESH_FEEDS:
+                            swipeRefreshLayout.setRefreshing(true);
                             fetchFeeds(0);
                             EventBus.getDefault().removeStickyEvent(AppConstants.REFRESH_FEEDS);
                             break;
@@ -154,7 +158,6 @@ public class FeedsFragment extends BaseFragment {
                         List<ParseObject> firstThreeObjects = HolloutUtils.safeSubList(objects, 0, 3);
                         UiUtils.showView(chatRequestsHeaderView, true);
                         chatRequestsHeaderView.setChatRequests(getActivity(), firstThreeObjects, objects.size());
-                        chatRequestsHeaderView.showNearbyHeader(true);
                         showFeedsAvailableIndicator();
                     } else {
                         if (e != null) {
@@ -165,6 +168,7 @@ public class FeedsFragment extends BaseFragment {
                     if (canLoadFeeds) {
                         fetchFeeds(0);
                     }
+                    fetchPhotoLikes();
                 }
             });
         }
@@ -284,14 +288,44 @@ public class FeedsFragment extends BaseFragment {
                 .updateChildren(updatableProps);
     }
 
-    private void fetchFeeds(final int skip) {
-        ParseQuery<ParseObject> photoLikesQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+    private void fetchPhotoLikes() {
+        final ParseQuery<ParseObject> photoLikesQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
         photoLikesQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
         photoLikesQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_PHOTO_LIKE);
-        excludeRequests(photoLikesQuery);
+        photoLikesQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null && objects != null && !objects.isEmpty()) {
+                    List<String> likersIds = new ArrayList<>();
+                    List<ParseObject> firstThreeUniqueLikers = new ArrayList<>();
+                    for (ParseObject object : objects) {
+                        String objectId = object.getString(AppConstants.REAL_OBJECT_ID);
+                        if (!likersIds.contains(objectId)) {
+                            likersIds.add(objectId);
+                            if (firstThreeUniqueLikers.size() < 3) {
+                                firstThreeUniqueLikers.add(object);
+                            }
+                        }
+                    }
+                    UiUtils.showView(photoLikesHeaderView, true);
+                    photoLikesHeaderView.setPhotoRequests(getActivity(), firstThreeUniqueLikers, likersIds.size());
+                    showFeedsAvailableIndicator();
+                } else {
+                    if (e != null) {
+                        UiUtils.showView(photoLikesHeaderView, false);
+                    }
+                }
+                photoLikesQuery.cancel();
+                photoLikesHeaderView.attachEventHandlers(getActivity());
+            }
+        });
+    }
+
+    private void fetchFeeds(final int skip) {
 
         List<String> signedInUserChats = signedInUserObject.getList(AppConstants.APP_USER_CHATS);
-        ParseQuery<ParseObject> fromUserChatsQuery = null;
+        ParseQuery<ParseObject> userFeedQuery = null;
+
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             String signedInUserId = signedInUserObject.getString(AppConstants.REAL_OBJECT_ID);
             if (signedInUserChats.contains(null)) {
@@ -300,43 +334,30 @@ public class FeedsFragment extends BaseFragment {
             if (!signedInUserChats.contains(signedInUserId)) {
                 signedInUserChats.add(signedInUserId);
             }
-            fromUserChatsQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+            userFeedQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             List<String> requiredFeedTypes = new ArrayList<>();
             requiredFeedTypes.add(AppConstants.FEED_TYPE_SIMPLE_TEXT);
             requiredFeedTypes.add(AppConstants.FEED_TYPE_PHOTO_OR_VIDEO);
-            fromUserChatsQuery.whereContainedIn(AppConstants.FEED_TYPE, requiredFeedTypes);
-            fromUserChatsQuery.whereContainedIn(AppConstants.FEED_CREATOR_ID, signedInUserChats);
-            excludeRequests(fromUserChatsQuery);
+            userFeedQuery.whereContainedIn(AppConstants.FEED_TYPE, requiredFeedTypes);
+            userFeedQuery.whereContainedIn(AppConstants.FEED_CREATOR_ID, signedInUserChats);
         }
 
-        ParseQuery<ParseObject> resultantFeedQuery;
-        if (fromUserChatsQuery == null) {
-            resultantFeedQuery = photoLikesQuery;
-        } else {
-            List<ParseQuery<ParseObject>> orQueries = new ArrayList<>();
-            orQueries.add(photoLikesQuery);
-            orQueries.add(fromUserChatsQuery);
-            resultantFeedQuery = ParseQuery.or(orQueries);
-        }
-        if (!feeds.isEmpty()) {
-            resultantFeedQuery.setSkip(skip);
-        }
-        resultantFeedQuery.include(AppConstants.FEED_CREATOR);
-        resultantFeedQuery.setLimit(30);
-        resultantFeedQuery.findInBackground(new FindCallback<ParseObject>() {
-            @Override
-            public void done(List<ParseObject> objects, ParseException e) {
-                List<ParseObject> unseenFeeds = new ArrayList<>();
-                if (e == null && objects != null && !objects.isEmpty()) {
-                    if (skip == 0) {
-                        feeds.clear();
-                        feedsAdapter.notifyDataSetChanged();
-                    }
-                    for (ParseObject feedObject : objects) {
-                        String feedType = feedObject.getString(AppConstants.FEED_TYPE);
-                        if (feedType.equals(AppConstants.FEED_TYPE_PHOTO_LIKE)) {
-                            feeds.add(feedObject);
-                        } else {
+        if (userFeedQuery != null) {
+            if (!feeds.isEmpty()) {
+                userFeedQuery.setSkip(skip);
+            }
+            userFeedQuery.include(AppConstants.FEED_CREATOR);
+            userFeedQuery.setLimit(30);
+            userFeedQuery.findInBackground(new FindCallback<ParseObject>() {
+                @Override
+                public void done(List<ParseObject> objects, ParseException e) {
+                    List<ParseObject> unseenFeeds = new ArrayList<>();
+                    if (e == null && objects != null && !objects.isEmpty()) {
+                        if (skip == 0) {
+                            feeds.clear();
+                            feedsAdapter.notifyDataSetChanged();
+                        }
+                        for (ParseObject feedObject : objects) {
                             ParseObject feedCreator = feedObject.getParseObject(AppConstants.FEED_CREATOR);
                             if (feedCreator != null) {
                                 List<String> originatorUserChats = feedCreator.getList(AppConstants.APP_USER_CHATS);
@@ -351,32 +372,26 @@ public class FeedsFragment extends BaseFragment {
                                 }
                             }
                         }
+                        Collections.sort(feeds, feedsSorter);
+                        feedsAdapter.notifyDataSetChanged();
                     }
-                    Collections.sort(feeds, feedsSorter);
-                    feedsAdapter.notifyDataSetChanged();
+
+                    UiUtils.showView(nothingToLoadView, feeds.isEmpty());
+                    UiUtils.showView(progressBar, false);
+                    swipeRefreshLayout.setRefreshing(false);
+                    UiUtils.showView(footerView, false);
+
+                    if (!unseenFeeds.isEmpty()) {
+                        showFeedsAvailableIndicator();
+                        unseenFeeds.clear();
+                    }
+
                 }
 
-                UiUtils.showView(nothingToLoadView, feeds.isEmpty());
-                UiUtils.showView(progressBar, false);
-                swipeRefreshLayout.setRefreshing(false);
-                UiUtils.showView(footerView, false);
+            });
 
-                if (!unseenFeeds.isEmpty()) {
-                    showFeedsAvailableIndicator();
-                    unseenFeeds.clear();
-                }
+        }
 
-            }
-
-        });
-
-    }
-
-    private void excludeRequests(ParseQuery<ParseObject> exclusiveQuery) {
-        List<String> notNeededFeedTypes = new ArrayList<>();
-        notNeededFeedTypes.add(AppConstants.FEED_TYPE_CHAT_REQUEST);
-        notNeededFeedTypes.add(AppConstants.FEED_TYPE_JOIN_GROUP_REQUEST);
-        exclusiveQuery.whereNotContainedIn(AppConstants.FEED_TYPE, notNeededFeedTypes);
     }
 
 }
