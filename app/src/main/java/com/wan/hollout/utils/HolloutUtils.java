@@ -11,9 +11,11 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
@@ -50,6 +52,7 @@ import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.wan.hollout.R;
 import com.wan.hollout.bean.AudioFile;
 import com.wan.hollout.clients.ChatClient;
 import com.wan.hollout.components.ApplicationLoader;
@@ -82,6 +85,7 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+import static android.graphics.Paint.ANTI_ALIAS_FLAG;
 import static com.wan.hollout.utils.AppConstants.LANGUAGE_PREF;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -1122,6 +1126,76 @@ public class HolloutUtils {
         fromIndex = Math.max(0, fromIndex);
         toIndex = Math.min(size, toIndex);
         return list.subList(fromIndex, toIndex);
+    }
+
+    public static Bitmap drawTextAsBitmap(String text, float textSize, int textColor, Typeface typeface) {
+        Paint paint = new Paint(ANTI_ALIAS_FLAG);
+        paint.setTextSize(textSize);
+        paint.setColor(textColor);
+        paint.setTextAlign(Paint.Align.CENTER);
+        paint.setTypeface(typeface);
+        float baseline = -paint.ascent(); // ascent() is negative
+        int width = (int) (paint.measureText(text) + 0.5f); // round
+        int height = (int) (baseline + paint.descent() + 0.5f);
+        Bitmap image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(image);
+        canvas.drawText(text, 0, baseline, paint);
+        return image;
+    }
+
+    @SuppressLint("StringFormatInvalid")
+    public static String timeAgo(long millis) {
+        long diff = new Date().getTime() - millis;
+        Resources r = ApplicationLoader.getInstance().getResources();
+
+        String prefix = r.getString(R.string.time_ago_prefix);
+        String suffix = r.getString(R.string.time_ago_suffix);
+
+        double seconds = Math.abs(diff) / 1000;
+        double minutes = seconds / 60;
+        double hours = minutes / 60;
+        double days = hours / 24;
+        double years = days / 365;
+
+        String words;
+
+        if (seconds < 45) {
+            words = r.getString(R.string.time_ago_seconds, Math.round(seconds));
+        } else if (seconds < 90) {
+            words = r.getString(R.string.time_ago_minute, 1);
+        } else if (minutes < 45) {
+            words = r.getString(R.string.time_ago_minutes, Math.round(minutes));
+        } else if (minutes < 90) {
+            words = r.getString(R.string.time_ago_hour, 1);
+        } else if (hours < 24) {
+            words = r.getString(R.string.time_ago_hours, Math.round(hours));
+        } else if (hours < 42) {
+            words = r.getString(R.string.time_ago_day, 1);
+        } else if (days < 30) {
+            words = r.getString(R.string.time_ago_days, Math.round(days));
+        } else if (days < 45) {
+            words = r.getString(R.string.time_ago_month, 1);
+        } else if (days < 365) {
+            words = r.getString(R.string.time_ago_months, Math.round(days / 30));
+        } else if (years < 1.5) {
+            words = r.getString(R.string.time_ago_year, 1);
+        } else {
+            words = r.getString(R.string.time_ago_years, Math.round(years));
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if (prefix != null && prefix.length() > 0) {
+            sb.append(prefix).append(" ");
+        }
+
+        sb.append(words);
+
+        if (suffix != null && suffix.length() > 0) {
+            sb.append(" ").append(suffix);
+        }
+
+        return sb.toString().trim();
     }
 
 }

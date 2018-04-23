@@ -348,6 +348,12 @@
         <attr name="border_color" format="color" />
     </declare-styleable>
 
+    <declare-styleable name="DashedCircleView">
+        <attr name="dashed_border_width" format="dimension" />
+        <attr name="dashed_border_color" format="color" />
+        <attr name="dashed_stories_count" format="dimension" />
+    </declare-styleable>
+
     <attr name="emoji_tab_strip_background" format="color" />
     <attr name="emoji_tab_indicator" format="color" />
     <attr name="emoji_tab_underline" format="color" />

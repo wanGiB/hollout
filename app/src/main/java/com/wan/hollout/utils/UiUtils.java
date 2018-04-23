@@ -11,9 +11,14 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
+import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.Shape;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -71,6 +76,7 @@ import com.wan.hollout.interfaces.ListenableFuture;
 import com.wan.hollout.listeners.NestedViewHideShowScrollListener;
 import com.wan.hollout.listeners.RecyclerViewHideScrollListener;
 import com.wan.hollout.ui.widgets.CircularProgressButton;
+import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 
 import org.apache.commons.lang3.StringUtils;
@@ -1067,6 +1073,17 @@ public class UiUtils {
                 .endConfig()
                 .round();
         TextDrawable colouredDrawable = builder.build(notShownMembers, color);
+        Bitmap textBitmap = UiUtils.convertDrawableToBitmap(colouredDrawable);
+        imageView.setImageBitmap(textBitmap);
+    }
+
+    public static void loadNameAsImage(ImageView imageView, String name) {
+        int color = generator.getRandomColor();
+        TextDrawable.IBuilder builder = TextDrawable.builder()
+                .beginConfig()
+                .endConfig()
+                .round();
+        TextDrawable colouredDrawable = builder.build(name, color);
         Bitmap textBitmap = UiUtils.convertDrawableToBitmap(colouredDrawable);
         imageView.setImageBitmap(textBitmap);
     }

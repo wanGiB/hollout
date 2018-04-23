@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -137,8 +138,9 @@ public class PhotoLikesHeaderView extends LinearLayout {
         final ProgressBar progressBar = bottomView.findViewById(R.id.progress_bar);
         RecyclerView photoLikesRecyclerView = bottomView.findViewById(R.id.photo_likes_recycler_view);
         feedsAdapter = new FeedsAdapter(activity, photoLikes);
-        LinearLayoutManager linearLayoutManager=new LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false);
         photoLikesRecyclerView.setLayoutManager(linearLayoutManager);
+        photoLikesRecyclerView.addItemDecoration(new DividerItemDecoration(activity, DividerItemDecoration.VERTICAL));
         photoLikesRecyclerView.setAdapter(feedsAdapter);
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(activity);
         bottomSheetDialog.setContentView(bottomView);
@@ -147,8 +149,8 @@ public class PhotoLikesHeaderView extends LinearLayout {
         photoLikesRecyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
-                if (!photoLikes.isEmpty() && photoLikes.size()>=30){
-                    fetchPhotoLikes(progressBar,photoLikes.size());
+                if (!photoLikes.isEmpty() && photoLikes.size() >= 30) {
+                    fetchPhotoLikes(progressBar, photoLikes.size());
                 }
             }
         });

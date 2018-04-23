@@ -134,6 +134,7 @@ dependencies {
     compile "com.github.nisrulz:sensey:${sensey_version}"
     compile 'com.gordonwong:material-sheet-fab:1.2.1'
     compile 'com.sothree.slidinguppanel:library:3.4.0'
+    compile 'com.github.stfalcon:multiimageview:0.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

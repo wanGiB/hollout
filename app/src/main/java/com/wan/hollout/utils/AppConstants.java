@@ -246,6 +246,10 @@ public class AppConstants {
     public static final String POST_TYPEFACE = "post_typeface";
     public static final String POST_BODY = "post_body";
     public static final String REFRESH_FEEDS = "refresh_feeds";
+    public static final String USER_STORIES = "user_stories";
+    public static final String WORKOUT_REQUESTS = "workout_requests";
+    public static final String STORY_LIST = "story_list";
+    public static final String STATUS_EXPIRATION = "status_expiration";
 
     public static boolean CHAT_INVITATION_ACCEPTED = false;
 

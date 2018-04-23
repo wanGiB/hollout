@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.liucanwen.app.headerfooterrecyclerview.HeaderAndFooterRecyclerViewAdapter;
 import com.liucanwen.app.headerfooterrecyclerview.RecyclerViewUtils;
+import com.parse.DeleteCallback;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -211,8 +213,9 @@ public class FeedsFragment extends BaseFragment {
     private void setupFeedsAdapter() {
         feedsAdapter = new FeedsAdapter(getActivity(), feeds);
         HeaderAndFooterRecyclerViewAdapter headerAndFooterRecyclerViewAdapter = new HeaderAndFooterRecyclerViewAdapter(feedsAdapter);
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        feedsRecyclerView.setLayoutManager(linearLayoutManager);
+        LinearLayoutManager staggeredGridLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        feedsRecyclerView.setLayoutManager(staggeredGridLayoutManager);
+        feedsRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
         feedsRecyclerView.addItemDecoration(new StickyRecyclerHeadersDecoration(feedsAdapter));
         feedsRecyclerView.setAdapter(headerAndFooterRecyclerViewAdapter);
         RecyclerViewUtils.setFooterView(feedsRecyclerView, footerView);
@@ -292,6 +295,7 @@ public class FeedsFragment extends BaseFragment {
         final ParseQuery<ParseObject> photoLikesQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
         photoLikesQuery.whereEqualTo(AppConstants.FEED_RECIPIENT_ID, signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
         photoLikesQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_PHOTO_LIKE);
+        photoLikesQuery.whereEqualTo(AppConstants.SEEN_BY_OWNER, false);
         photoLikesQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> objects, ParseException e) {
@@ -336,10 +340,11 @@ public class FeedsFragment extends BaseFragment {
             }
             userFeedQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
             List<String> requiredFeedTypes = new ArrayList<>();
-            requiredFeedTypes.add(AppConstants.FEED_TYPE_SIMPLE_TEXT);
-            requiredFeedTypes.add(AppConstants.FEED_TYPE_PHOTO_OR_VIDEO);
+            requiredFeedTypes.add(AppConstants.USER_STORIES);
+            requiredFeedTypes.add(AppConstants.WORKOUT_REQUESTS);
             userFeedQuery.whereContainedIn(AppConstants.FEED_TYPE, requiredFeedTypes);
             userFeedQuery.whereContainedIn(AppConstants.FEED_CREATOR_ID, signedInUserChats);
+            userFeedQuery.include(AppConstants.STORY_LIST);
         }
 
         if (userFeedQuery != null) {
@@ -358,6 +363,8 @@ public class FeedsFragment extends BaseFragment {
                             feedsAdapter.notifyDataSetChanged();
                         }
                         for (ParseObject feedObject : objects) {
+                            String feedType = feedObject.getString(AppConstants.FEED_TYPE);
+                            checkAndDeleteExpiredStories(feedObject, feedType);
                             ParseObject feedCreator = feedObject.getParseObject(AppConstants.FEED_CREATOR);
                             if (feedCreator != null) {
                                 List<String> originatorUserChats = feedCreator.getList(AppConstants.APP_USER_CHATS);
@@ -392,6 +399,30 @@ public class FeedsFragment extends BaseFragment {
 
         }
 
+    }
+
+    private void checkAndDeleteExpiredStories(final ParseObject feedObject, String feedType) {
+        if (feedType.equals(AppConstants.USER_STORIES)) {
+            final List<ParseObject> storyList = feedObject.getList(AppConstants.STORY_LIST);
+            if (storyList != null && !storyList.isEmpty()) {
+                for (final ParseObject storyObject : storyList) {
+                    long statusExpirationTime = storyObject.getLong(AppConstants.STATUS_EXPIRATION);
+                    if (System.currentTimeMillis() >= statusExpirationTime) {
+                        //This status has expired. Prepare for deletion
+                        storyObject.deleteInBackground(new DeleteCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                if (storyList.contains(storyObject)) {
+                                    storyList.remove(storyObject);
+                                }
+                                feedObject.put(AppConstants.STORY_LIST, storyList);
+                                feedObject.saveInBackground();
+                            }
+                        });
+                    }
+                }
+            }
+        }
     }
 
 }

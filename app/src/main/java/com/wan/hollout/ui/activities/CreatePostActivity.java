@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -35,8 +36,10 @@ import android.widget.Spinner;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
+import com.parse.GetCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import com.vanniktech.emoji.EmojiPopup;
@@ -54,11 +57,17 @@ import com.wan.hollout.utils.HolloutUtils;
 import com.wan.hollout.utils.PermissionsUtils;
 import com.wan.hollout.utils.UiUtils;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -225,9 +234,8 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
 
             @Override
             public void onClick(View v) {
-                UiUtils.dismissKeyboard(storyBox);
                 final ProgressDialog progressDialog;
-                ParseObject newPostObject = new ParseObject(AppConstants.HOLLOUT_FEED);
+                final ParseObject newPostObject = new ParseObject(AppConstants.HOLLOUT_FEED);
                 String postBody = storyBox.getText().toString().trim();
 
                 if (AppConstants.selectedUris.isEmpty()) {
@@ -244,32 +252,82 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
                     newPostObject.put(AppConstants.FEED_TYPE, AppConstants.FEED_TYPE_PHOTO_OR_VIDEO);
                     newPostObject.put(AppConstants.SAVE_COMPLETED, false);
                 }
-
                 newPostObject.put(AppConstants.POST_COLOR, postColor);
                 newPostObject.put(AppConstants.POST_TYPEFACE, postTypeface);
                 newPostObject.put(AppConstants.POST_BODY, postBody);
                 newPostObject.put(AppConstants.FEED_CREATOR, AuthUtil.getCurrentUser());
                 newPostObject.put(AppConstants.FEED_CREATOR_ID, signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
 
-                newPostObject.saveInBackground(new SaveCallback() {
+                Date statusExpirationDate = new Date(System.currentTimeMillis());
+                Date twentyFourHoursFromNow = DateUtils.addHours(statusExpirationDate, 24);
+                newPostObject.put(AppConstants.STATUS_EXPIRATION, twentyFourHoursFromNow.getTime());
+
+                ParseQuery<ParseObject> userStoriesQuery = ParseQuery.getQuery(AppConstants.HOLLOUT_FEED);
+                userStoriesQuery.whereEqualTo(AppConstants.FEED_CREATOR_ID, signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
+                userStoriesQuery.whereEqualTo(AppConstants.FEED_TYPE, AppConstants.USER_STORIES);
+                userStoriesQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                     @Override
-                    public void done(ParseException e) {
-                        UiUtils.dismissProgressDialog(progressDialog);
-                        if (e == null) {
-                            UiUtils.bangSound(getCurrentActivityInstance(), R.raw.post_completed);
-                            AppConstants.selectedUris.clear();
-                            EventBus.getDefault().postSticky(AppConstants.REFRESH_FEEDS);
-                            finish();
+                    public void done(ParseObject object, ParseException e) {
+                        if (e == null && object != null) {
+                            List<ParseObject> existingStories = object.getList(AppConstants.STORY_LIST);
+                            if (existingStories == null) {
+                                existingStories = new ArrayList<>();
+                            }
+                            existingStories.add(newPostObject);
+                            object.put(AppConstants.STORY_LIST, existingStories);
+                            object.put(AppConstants.FEED_SEEN, false);
+                            object.saveInBackground(new SaveCallback() {
+                                @Override
+                                public void done(ParseException e) {
+                                    checkStoryShared(e, progressDialog);
+                                }
+                            });
                         } else {
-                            UiUtils.showSafeToast("Error sharing post. Please try again.");
+                            if (e != null) {
+                                if (e.getCode() == ParseException.OBJECT_NOT_FOUND) {
+                                    ParseObject newStoryLine = new ParseObject(AppConstants.HOLLOUT_FEED);
+                                    newStoryLine.put(AppConstants.FEED_TYPE, AppConstants.USER_STORIES);
+                                    newStoryLine.put(AppConstants.FEED_CREATOR_ID, signedInUserObject.getString(AppConstants.REAL_OBJECT_ID));
+                                    newStoryLine.put(AppConstants.FEED_CREATOR, signedInUserObject);
+
+                                    List<ParseObject> storiesInStoryLine = new ArrayList<>();
+                                    storiesInStoryLine.add(newPostObject);
+                                    newStoryLine.put(AppConstants.STORY_LIST, storiesInStoryLine);
+                                    newStoryLine.saveInBackground(new SaveCallback() {
+
+                                        @Override
+                                        public void done(ParseException e) {
+                                            checkStoryShared(e, progressDialog);
+                                        }
+
+                                    });
+
+                                }
+
+                            }
+
                         }
+
                     }
+
                 });
 
             }
 
         });
 
+    }
+
+    private void checkStoryShared(ParseException e, ProgressDialog progressDialog) {
+        UiUtils.dismissProgressDialog(progressDialog);
+        if (e == null) {
+            UiUtils.bangSound(getCurrentActivityInstance(), R.raw.post_completed);
+            AppConstants.selectedUris.clear();
+            EventBus.getDefault().postSticky(AppConstants.REFRESH_FEEDS);
+            finish();
+        } else {
+            UiUtils.showSafeToast("Error sharing post. Please try again.");
+        }
     }
 
     private void tintIconsEaseGray() {
