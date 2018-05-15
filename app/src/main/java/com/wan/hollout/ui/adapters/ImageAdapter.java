@@ -13,10 +13,11 @@ import android.widget.CursorAdapter;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.wan.hollout.R;
 import com.wan.hollout.ui.widgets.BetterImageView;
 import com.wan.hollout.ui.widgets.TwoWayAbsListView;
+import com.wan.hollout.utils.UiUtils;
 
 @SuppressWarnings("unused")
 public class ImageAdapter extends CursorAdapter {
@@ -75,7 +76,8 @@ public class ImageAdapter extends CursorAdapter {
         Uri uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
         ImageView imageView = (ImageView) view;
         imageView.setImageBitmap(mDefaultBitmap);
-        Glide.with(context).load(uri).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(imageView);
+        RequestOptions requestOptions = UiUtils.getRequestOptions();
+        Glide.with(context).setDefaultRequestOptions(requestOptions).load(uri).into(imageView);
     }
 
     @Override

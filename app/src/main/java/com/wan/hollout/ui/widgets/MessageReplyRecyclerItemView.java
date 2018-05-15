@@ -16,9 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.RequestOptions;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
 import com.wan.hollout.animations.KeyframesDrawable;
@@ -217,8 +215,9 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
     }
 
     public void loadVideoFromPath(ImageView videoView, String videoPath) {
+        RequestOptions requestOptions = UiUtils.getRequestOptions().error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video);
         if (videoView != null) {
-            Glide.with(ApplicationLoader.getInstance()).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
+            Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions).load(videoPath).into(videoView);
         }
     }
 
@@ -288,19 +287,7 @@ public class MessageReplyRecyclerItemView extends RelativeLayout implements View
         UiUtils.showView(replyAttachmentView, true);
         replySubTitleView.setText(UiUtils.fromHtml("<b>" + activity.getString(R.string.gif) + "</b>"));
         if (StringUtils.isNotEmpty(gifUrl)) {
-            Glide.with(ApplicationLoader.getInstance()).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
-
-                @Override
-                public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                    return false;
-                }
-
-                @Override
-                public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                    return false;
-
-                }
-            }).into(replyIconView);
+            Glide.with(ApplicationLoader.getInstance()).asGif().load(gifUrl).into(replyIconView);
         }
     }
 

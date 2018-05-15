@@ -3,7 +3,7 @@ package com.wan.hollout.ui.adapters;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spanned;
@@ -16,6 +16,7 @@ import android.widget.Filterable;
 import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.wan.hollout.BuildConfig;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
@@ -67,22 +68,19 @@ public class UserVideosAdapter extends RecyclerView.Adapter<UserVideosAdapter.Vi
     }
 
     @Override
-    public VideoRowHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public VideoRowHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View convertView = layoutInflater.inflate(R.layout.video_list_item, parent, false);
         return new VideoRowHolder(convertView);
     }
 
     @Override
-    public void onBindViewHolder(final VideoRowHolder videoRowHolder, int position) {
-
+    public void onBindViewHolder(@NonNull final VideoRowHolder videoRowHolder, int position) {
         final HolloutUtils.MediaEntry videoEntry = filteredVideoEntries.get(position);
         String videoFileName = videoEntry.fileName;
-
         final String videoPath = videoEntry.path;
-
-        Glide.with(ApplicationLoader.getInstance()).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoRowHolder.randomVideoFrame);
+        RequestOptions requestOptions = UiUtils.getRequestOptions().error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video);
+        Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions).load(videoPath).into(videoRowHolder.randomVideoFrame);
         videoRowHolder.randomVideoFrame.invalidate();
-
         if (isNotEmpty(videoFileName)) {
             if (isNotEmpty(getQueryString())) {
                 Spanned highlightTextIfNecessary = UiUtils.highlightTextIfNecessary(queryString, videoFileName, ContextCompat.getColor(appCompatActivity, R.color.colorPrimary));
@@ -91,12 +89,9 @@ public class UserVideosAdapter extends RecyclerView.Adapter<UserVideosAdapter.Vi
                 UiUtils.setTextOnView(videoRowHolder.videoName, videoFileName);
             }
         }
-
         UiUtils.setTextOnView(videoRowHolder.videoSize, String.valueOf(HolloutUtils.getFileSizeInMB(videoEntry.fileSize) + "MB"));
         UiUtils.setTextOnView(videoRowHolder.videoDurationTime, UiUtils.getTimeString(videoEntry.fileDuration));
-
         videoRowHolder.videoCheck.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 if (!BuildConfig.DEBUG) {
@@ -110,20 +105,15 @@ public class UserVideosAdapter extends RecyclerView.Adapter<UserVideosAdapter.Vi
                     sendBackSelectedVideo(videoEntry);
                 }
             }
-
         });
-
         videoRowHolder.videoParent.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 Intent mViewVideoIntent = new Intent(Intent.ACTION_VIEW);
                 mViewVideoIntent.setDataAndType(Uri.parse(videoPath), "video/*");
                 appCompatActivity.startActivity(mViewVideoIntent);
             }
-
         });
-
     }
 
     private void sendBackSelectedVideo(HolloutUtils.MediaEntry videoEntry) {

@@ -11,14 +11,9 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.DashPathEffect;
-import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.Shape;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -29,6 +24,7 @@ import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.DimenRes;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -63,9 +59,11 @@ import android.widget.ViewFlipper;
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.amulyakhare.textdrawable.util.ColorGenerator;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.parse.ParseObject;
 import com.wan.hollout.R;
@@ -76,7 +74,6 @@ import com.wan.hollout.interfaces.ListenableFuture;
 import com.wan.hollout.listeners.NestedViewHideShowScrollListener;
 import com.wan.hollout.listeners.RecyclerViewHideScrollListener;
 import com.wan.hollout.ui.widgets.CircularProgressButton;
-import com.wan.hollout.ui.widgets.HolloutTextView;
 import com.wan.hollout.ui.widgets.RoundedImageView;
 
 import org.apache.commons.lang3.StringUtils;
@@ -282,25 +279,27 @@ public class UiUtils {
         }
     }
 
+    @NonNull
+    public static RequestOptions getRequestOptions() {
+        return new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
+    }
+
     public static void loadImage(final Activity context, final String photoPath, final ImageView imageView) {
         if (imageView != null) {
             if (isNotEmpty(photoPath)) {
-                Glide.with(ApplicationLoader.getInstance()).load(photoPath).listener(new RequestListener<String, GlideDrawable>() {
-
+                Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(getRequestOptions()).load(photoPath).listener(new RequestListener<Drawable>() {
                     @Override
-                    public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                         imageView.setImageResource(R.mipmap.ic_launcher);
-                        HolloutLogger.d(TAG, "An exception was raised while loading an image. Error Message = "
-                                + (e != null && e.getMessage() != null ? e.getMessage() : "") + " For Photo Url = " + photoPath);
+                        HolloutLogger.d(TAG, "An exception was raised while loading an image. Error Message = " + (e != null ? e.getMessage() : "") + " For Photo Url = " + photoPath);
                         return false;
                     }
 
                     @Override
-                    public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                         return false;
                     }
-
-                }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(imageView);
+                }).into(imageView);
                 imageView.invalidate();
             }
         }
@@ -757,7 +756,8 @@ public class UiUtils {
     }
 
     public static void loadMusicPreview(Activity activity, ImageView audioIcon, Uri uri) {
-        Glide.with(ApplicationLoader.getInstance()).load(uri).error(R.drawable.x_ic_folde_music).placeholder(R.drawable.x_ic_folde_music).crossFade().into(audioIcon);
+        RequestOptions requestOptions = getRequestOptions().error(R.drawable.x_ic_folde_music).placeholder(R.drawable.x_ic_folde_music);
+        Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions).load(uri).into(audioIcon);
         audioIcon.invalidate();
     }
 

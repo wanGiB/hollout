@@ -27,8 +27,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.john.waveview.WaveView;
 import com.tonyodev.fetch2.Download;
@@ -557,8 +560,9 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
     }
 
     public void loadVideoFromPath(ImageView videoView, String videoPath) {
+        RequestOptions requestOptions = UiUtils.getRequestOptions().error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video);
         if (videoView != null) {
-            Glide.with(ApplicationLoader.getInstance()).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
+            Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions).load(videoPath).into(videoView);
         }
     }
 
@@ -574,15 +578,14 @@ public class ChatMessageView extends RelativeLayout implements View.OnClickListe
         if (StringUtils.isNotEmpty(gifUrl)) {
             if (StringUtils.isNotEmpty(gifUrl)) {
                 getLoadingGifImageCast().startLoading();
-                Glide.with(ApplicationLoader.getInstance()).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
-
+                Glide.with(ApplicationLoader.getInstance()).asGif().load(gifUrl).listener(new RequestListener<GifDrawable>() {
                     @Override
-                    public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<GifDrawable> target, boolean isFirstResource) {
                         return false;
                     }
 
                     @Override
-                    public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
                         getLoadingGifImageCast().stopLoading();
                         return false;
                     }

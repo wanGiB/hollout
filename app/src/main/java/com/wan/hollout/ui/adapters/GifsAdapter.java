@@ -2,12 +2,15 @@ package com.wan.hollout.ui.adapters;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -75,19 +78,17 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         void bindGif(final String gifUrl) {
             if (StringUtils.isNotEmpty(gifUrl)) {
                 giphyImageView.startLoading();
-                Glide.with(ApplicationLoader.getInstance()).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
-
+                Glide.with(ApplicationLoader.getInstance()).asGif().load(gifUrl).listener(new RequestListener<GifDrawable>() {
                     @Override
-                    public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<GifDrawable> target, boolean isFirstResource) {
                         return false;
                     }
 
                     @Override
-                    public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                    public boolean onResourceReady(GifDrawable resource, Object model, Target<GifDrawable> target, DataSource dataSource, boolean isFirstResource) {
                         giphyImageView.stopLoading();
                         return false;
                     }
-
                 }).into(giphyImageView);
             }
             parentView.setOnClickListener(new View.OnClickListener() {
@@ -96,14 +97,11 @@ public class GifsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     EventBus.getDefault().post(new GifMessageEvent(gifUrl));
                 }
             });
-
             giphyImageView.setOnClickListener(new View.OnClickListener() {
-
                 @Override
                 public void onClick(View view) {
                     parentView.performClick();
                 }
-
             });
 
         }

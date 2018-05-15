@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.utils.AppConstants;
@@ -77,13 +78,15 @@ public class SelectedFilesAdapter extends RecyclerView.Adapter<RecyclerView.View
             String filePath = uri.getPath();
             String fileMiMeType = FileUtils.getMimeType(uri.getPath());
             boolean isVideo = HolloutUtils.isVideo(fileMiMeType);
-            Glide.with(ApplicationLoader.getInstance())
+            RequestOptions requestOptions = UiUtils.getRequestOptions().error(R.drawable.x_ic_blank_picture)
+                    .placeholder(R.drawable.x_ic_blank_picture);
+
+            Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions)
                     .load(filePath)
-                    .error(R.drawable.x_ic_blank_picture)
-                    .placeholder(R.drawable.x_ic_blank_picture)
-                    .crossFade()
                     .into(imageIconView);
+
             UiUtils.showView(playMediaIfVideoIconView, isVideo);
+
             mainItemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -98,6 +101,7 @@ public class SelectedFilesAdapter extends RecyclerView.Adapter<RecyclerView.View
                     }
                 }
             });
+            
             imageIconView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

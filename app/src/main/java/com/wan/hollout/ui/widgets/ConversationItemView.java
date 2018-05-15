@@ -8,6 +8,8 @@ import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
@@ -18,10 +20,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
@@ -152,19 +156,20 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private void applyProfilePicture(String profileUrl, final String name) {
         if (!TextUtils.isEmpty(profileUrl)) {
-            Glide.with(ApplicationLoader.getInstance()).load(profileUrl).listener(new RequestListener<String, GlideDrawable>() {
+            RequestOptions requestOptions = getRequestOptions();
+            Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions).
+                    load(profileUrl).listener(new RequestListener<Drawable>() {
                 @Override
-                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     UiUtils.loadName(userPhotoView, name);
                     return false;
                 }
 
                 @Override
-                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
                     return false;
                 }
-
-            }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(userPhotoView);
+            }).into(userPhotoView);
         } else {
             if (StringUtils.isNotEmpty(name)) {
                 UiUtils.loadName(userPhotoView, name);
@@ -172,6 +177,11 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
                 userPhotoView.setImageResource(R.drawable.empty_profile);
             }
         }
+    }
+
+    @NonNull
+    private RequestOptions getRequestOptions() {
+        return new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL);
     }
 
     public int getMessageId() {
@@ -568,17 +578,7 @@ public class ConversationItemView extends RelativeLayout implements View.OnClick
 
     private void loadLastMessageGif(String gifUrl) {
         if (StringUtils.isNotEmpty(gifUrl)) {
-            Glide.with(ApplicationLoader.getInstance()).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
-                @Override
-                public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                    return false;
-                }
-
-                @Override
-                public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                    return false;
-                }
-            }).into(reactionsIndicatorView);
+            Glide.with(ApplicationLoader.getInstance()).asGif().load(gifUrl).into(reactionsIndicatorView);
         }
     }
 

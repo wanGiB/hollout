@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.components.ApplicationLoader;
@@ -76,12 +77,13 @@ public class UserPhotosAdapter extends SectionedRecyclerAdapter<UserPhotosAdapte
     @Override
     public void onBindItemViewHolder(final PhotoEntriesHolder holder, final int itemPosition) {
         final HolloutUtils.MediaEntry mediaEntry = photoEntries.get(itemPosition);
-        Glide.with(ApplicationLoader.getInstance())
+        RequestOptions requestOptions = UiUtils.getRequestOptions().error(R.drawable.x_ic_blank_picture)
+                .placeholder(R.drawable.x_ic_blank_picture);
+
+        Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions)
                 .load(mediaEntry.path)
-                .error(R.drawable.x_ic_blank_picture)
-                .placeholder(R.drawable.x_ic_blank_picture)
-                .crossFade()
                 .into(holder.imageIconItem);
+
         holder.imageIconItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

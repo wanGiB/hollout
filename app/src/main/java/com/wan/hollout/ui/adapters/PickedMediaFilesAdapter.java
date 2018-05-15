@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.wan.hollout.R;
 import com.wan.hollout.bean.HolloutFile;
 import com.wan.hollout.components.ApplicationLoader;
@@ -71,7 +72,8 @@ public class PickedMediaFilesAdapter extends RecyclerView.Adapter<RecyclerView.V
 
                 sparseBooleanArray.put(position, true);
 
-                Glide.with(ApplicationLoader.getInstance()).load(mediaPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(pickedMediaItemHolder.mediaView);
+                RequestOptions requestOptions = UiUtils.getRequestOptions().error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video);
+                Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions).load(mediaPath).into(pickedMediaItemHolder.mediaView);
                 pickedMediaItemHolder.mediaView.invalidate();
 
                 UiUtils.showView(pickedMediaItemHolder.playMediaIfVideoView, true);

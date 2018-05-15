@@ -54,6 +54,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
@@ -1265,8 +1266,9 @@ public class ChatActivity extends BaseActivity implements
     }
 
     public void loadVideoFromPath(ImageView videoView, String videoPath) {
+        RequestOptions requestOptions = UiUtils.getRequestOptions().error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video);
         if (videoView != null) {
-            Glide.with(ApplicationLoader.getInstance()).load(videoPath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(videoView);
+            Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions).load(videoPath).into(videoView);
         }
     }
 
@@ -1291,19 +1293,7 @@ public class ChatActivity extends BaseActivity implements
     private void loadGif(String gifUrl) {
         if (StringUtils.isNotEmpty(gifUrl)) {
             if (StringUtils.isNotEmpty(gifUrl)) {
-                Glide.with(ApplicationLoader.getInstance()).load(gifUrl).asGif().listener(new RequestListener<String, GifDrawable>() {
-
-                    @Override
-                    public boolean onException(Exception e, String model, Target<GifDrawable> target, boolean isFirstResource) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean onResourceReady(GifDrawable resource, String model, Target<GifDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                        return false;
-
-                    }
-                }).into(replyIconView);
+                Glide.with(ApplicationLoader.getInstance()).asGif().load(gifUrl).into(replyIconView);
             }
         }
     }
@@ -1747,6 +1737,7 @@ public class ChatActivity extends BaseActivity implements
             UiUtils.showView(singleMediaFrame, true);
             UiUtils.showView(singleMediaViewer, true);
             UiUtils.showView(cancelPickedSingleMedia, true);
+            RequestOptions requestOptions = UiUtils.getRequestOptions().error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video);
             switch (fileType) {
                 case AppConstants.FILE_TYPE_PHOTO:
                     UiUtils.loadImage(this, pickedFilePath, singleMediaViewer);
@@ -1754,7 +1745,7 @@ public class ChatActivity extends BaseActivity implements
                     UiUtils.showView(mediaLengthView, false);
                     break;
                 case AppConstants.FILE_TYPE_VIDEO:
-                    Glide.with(ApplicationLoader.getInstance()).load(pickedFilePath).error(R.drawable.ex_completed_ic_video).placeholder(R.drawable.ex_completed_ic_video).crossFade().into(singleMediaViewer);
+                    Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions).load(pickedFilePath).into(singleMediaViewer);
                     String fileMime = FileUtils.getMimeType(pickedFilePath);
                     if (HolloutUtils.isVideo(fileMime)) {
                         UiUtils.showView(playSingleMediaIfVideo, true);

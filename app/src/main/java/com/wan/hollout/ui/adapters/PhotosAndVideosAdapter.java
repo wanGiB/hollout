@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.wan.hollout.R;
 import com.wan.hollout.components.ApplicationLoader;
 import com.wan.hollout.ui.activities.CreatePostActivity;
@@ -121,8 +122,9 @@ public class PhotosAndVideosAdapter extends RecyclerView.Adapter<RecyclerView.Vi
 
         void bindData(final CreatePostActivity createPostActivity, final HolloutUtils.MediaEntry mediaEntry, final int position) {
             if (mediaEntry != null) {
+                RequestOptions requestOptions = UiUtils.getRequestOptions().error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture);
                 if (imageIconView != null) {
-                    Glide.with(ApplicationLoader.getInstance()).load(mediaEntry.path).error(R.drawable.x_ic_blank_picture).placeholder(R.drawable.x_ic_blank_picture).crossFade().into(imageIconView);
+                    Glide.with(ApplicationLoader.getInstance()).setDefaultRequestOptions(requestOptions).load(mediaEntry.path).into(imageIconView);
                 }
                 String fileMiMeType = FileUtils.getMimeType(mediaEntry.path);
                 UiUtils.showView(playMediaIfVideoIconView, HolloutUtils.isVideo(fileMiMeType));

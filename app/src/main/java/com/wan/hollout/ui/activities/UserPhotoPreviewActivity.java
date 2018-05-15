@@ -1,7 +1,7 @@
 package com.wan.hollout.ui.activities;
 
-import android.app.Application;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,8 +20,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.parse.ParseObject;
@@ -189,28 +189,29 @@ public class UserPhotoPreviewActivity extends AppCompatActivity {
         if (StringUtils.isNotEmpty(username)) {
             usernameView.setText(WordUtils.capitalize(username));
         }
-
         final List<String> userPhotos = new ArrayList<>();
-
         if (StringUtils.isNotEmpty(userProfilePhotoUrl)) {
             if (!userPhotos.contains(userProfilePhotoUrl)) {
                 userPhotos.add(userProfilePhotoUrl);
             }
-            Glide.with(ApplicationLoader.getInstance()).load(userProfilePhotoUrl).listener(new RequestListener<String, GlideDrawable>() {
+            Glide.with(ApplicationLoader.getInstance())
+                    .setDefaultRequestOptions(UiUtils.getRequestOptions())
+                    .load(userProfilePhotoUrl)
+                    .listener(new RequestListener<Drawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target,
+                                                    boolean isFirstResource) {
+                            UiUtils.loadName(photoView, username);
+                            return false;
+                        }
 
-                @Override
-                public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
-                    UiUtils.loadName(photoView, username);
-                    return false;
-                }
-
-                @Override
-                public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                    UiUtils.showView(progressBar, false);
-                    return false;
-                }
-
-            }).diskCacheStrategy(DiskCacheStrategy.ALL).crossFade().into(photoView);
+                        @Override
+                        public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target,
+                                                       DataSource dataSource, boolean isFirstResource) {
+                            UiUtils.showView(progressBar, false);
+                            return false;
+                        }
+                    }).into(photoView);
         } else {
             UiUtils.showView(progressBar, false);
             if (StringUtils.isNotEmpty(username)) {
