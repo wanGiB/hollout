@@ -381,7 +381,6 @@ public class CreatePostActivity extends BaseActivity implements View.OnClickList
     }
 
     private void loadUserPhoto() {
-
         signedInUserObject = AuthUtil.getCurrentUser();
         if (signedInUserObject != null) {
             String signedInUserPhotoUrl = signedInUserObject.getString(AppConstants.APP_USER_PROFILE_PHOTO_URL);

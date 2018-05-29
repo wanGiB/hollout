@@ -3,9 +3,13 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Hollout.iml" filepath="$PROJECT_DIR$/Hollout.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Hollout.iml" filepath="$PROJECT_DIR$/Hollout.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Hollout.iml" filepath="$PROJECT_DIR$/.idea/Hollout.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/sinch-android-rtc-3.12.3/sinch-android-rtc-3.12.3.iml" filepath="$PROJECT_DIR$/sinch-android-rtc-3.12.3/sinch-android-rtc-3.12.3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sinch-android-rtc-3.12.3/sinch-android-rtc-3.12.3.iml" filepath="$PROJECT_DIR$/sinch-android-rtc-3.12.3/sinch-android-rtc-3.12.3.iml" />
+      <module fileurl="file://$PROJECT_DIR$/truesdk/truesdk.iml" filepath="$PROJECT_DIR$/truesdk/truesdk.iml" />
       <module fileurl="file://$PROJECT_DIR$/truesdk/truesdk.iml" filepath="$PROJECT_DIR$/truesdk/truesdk.iml" />
     </modules>
   </component>

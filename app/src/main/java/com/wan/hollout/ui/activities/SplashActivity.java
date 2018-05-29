@@ -75,6 +75,7 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
+    //TODO: Init a better way of database reinitialization when time is right
     private void reInitializeDatabase() {
         FlowManager.init(new FlowConfig.Builder(this)
                 .addDatabaseConfig(new DatabaseConfig.Builder(HolloutDb.class)
