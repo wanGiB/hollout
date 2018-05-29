@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/people_content_flipper"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <ProgressBar
         android:layout_width="wrap_content"
@@ -71,8 +70,7 @@
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/white">
+        android:layout_height="match_parent">
 
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/nested_scroll_view"
@@ -83,7 +81,6 @@
                 android:id="@+id/people_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@android:color/white"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         </android.support.v4.widget.NestedScrollView>
