@@ -109,34 +109,6 @@ public class FeedsFragment extends BaseFragment {
     }
 
     @Override
-    public void onEventAsync(final Object o) {
-        UiUtils.runOnMain(new Runnable() {
-            @Override
-            public void run() {
-                if (o instanceof String) {
-                    String s = (String) o;
-                    switch (s) {
-                        case AppConstants.CHECK_FOR_NEW_CHAT_REQUESTS:
-                            checkForNewChatRequests();
-                            break;
-                        case AppConstants.DISABLE_NESTED_SCROLLING:
-                            nestedScrollView.setNestedScrollingEnabled(false);
-                            break;
-                        case AppConstants.ENABLE_NESTED_SCROLLING:
-                            nestedScrollView.setNestedScrollingEnabled(true);
-                            break;
-                        case AppConstants.REFRESH_FEEDS:
-                            swipeRefreshLayout.setRefreshing(true);
-                            fetchFeeds(0);
-                            EventBus.getDefault().removeStickyEvent(AppConstants.REFRESH_FEEDS);
-                            break;
-                    }
-                }
-            }
-        });
-    }
-
-    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         feedsRecyclerView.setNestedScrollingEnabled(false);
@@ -250,8 +222,7 @@ public class FeedsFragment extends BaseFragment {
                                     long dataSnapShotCount = dataSnapshot.getChildrenCount();
                                     if (dataSnapShotCount != 0) {
                                         GenericTypeIndicator<HashMap<String, Object>> genericTypeIndicator = new
-                                                GenericTypeIndicator<HashMap<String, Object>>() {
-                                                };
+                                                GenericTypeIndicator<HashMap<String, Object>>() {};
                                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                             HashMap<String, Object> photoLike = snapshot.getValue(genericTypeIndicator);
                                             if (photoLike != null) {
@@ -326,10 +297,8 @@ public class FeedsFragment extends BaseFragment {
     }
 
     private void fetchFeeds(final int skip) {
-
         List<String> signedInUserChats = signedInUserObject.getList(AppConstants.APP_USER_CHATS);
         ParseQuery<ParseObject> userFeedQuery = null;
-
         if (signedInUserChats != null && !signedInUserChats.isEmpty()) {
             String signedInUserId = signedInUserObject.getString(AppConstants.REAL_OBJECT_ID);
             if (signedInUserChats.contains(null)) {
@@ -346,7 +315,6 @@ public class FeedsFragment extends BaseFragment {
             userFeedQuery.whereContainedIn(AppConstants.FEED_CREATOR_ID, signedInUserChats);
             userFeedQuery.include(AppConstants.STORY_LIST);
         }
-
         if (userFeedQuery != null) {
             if (!feeds.isEmpty()) {
                 userFeedQuery.setSkip(skip);
@@ -382,7 +350,6 @@ public class FeedsFragment extends BaseFragment {
                         Collections.sort(feeds, feedsSorter);
                         feedsAdapter.notifyDataSetChanged();
                     }
-
                     UiUtils.showView(nothingToLoadView, feeds.isEmpty());
                     UiUtils.showView(progressBar, false);
                     swipeRefreshLayout.setRefreshing(false);
@@ -392,13 +359,9 @@ public class FeedsFragment extends BaseFragment {
                         showFeedsAvailableIndicator();
                         unseenFeeds.clear();
                     }
-
                 }
-
             });
-
         }
-
     }
 
     private void checkAndDeleteExpiredStories(final ParseObject feedObject, String feedType) {
@@ -423,6 +386,34 @@ public class FeedsFragment extends BaseFragment {
                 }
             }
         }
+    }
+
+    @Override
+    public void onEventAsync(final Object o) {
+        UiUtils.runOnMain(new Runnable() {
+            @Override
+            public void run() {
+                if (o instanceof String) {
+                    String s = (String) o;
+                    switch (s) {
+                        case AppConstants.CHECK_FOR_NEW_CHAT_REQUESTS:
+                            checkForNewChatRequests();
+                            break;
+                        case AppConstants.DISABLE_NESTED_SCROLLING:
+                            nestedScrollView.setNestedScrollingEnabled(false);
+                            break;
+                        case AppConstants.ENABLE_NESTED_SCROLLING:
+                            nestedScrollView.setNestedScrollingEnabled(true);
+                            break;
+                        case AppConstants.REFRESH_FEEDS:
+                            swipeRefreshLayout.setRefreshing(true);
+                            fetchFeeds(0);
+                            EventBus.getDefault().removeStickyEvent(AppConstants.REFRESH_FEEDS);
+                            break;
+                    }
+                }
+            }
+        });
     }
 
 }
