@@ -1,15 +1,6 @@
-
-![Screenshot 1](link_to_screenshot_1)
-![Screenshot 2](link_to_screenshot_2)
-![Screenshot 3](link_to_screenshot_3)
-
 # Hollout - Open Source Dating App Template
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yourusername/your-repository-name/blob/master/LICENSE)
-
-Hollout is the simplest way to FREELY discover and connect with new and interesting people in your current location.
-
-Welcome to Hollout, an open-source dating app template for Android, built with Java. This project was originally developed by [Wan] but has since been open-sourced for the community to use as a template for a dating app.
+Hollout is the simplest way to FREELY discover and connect with new and interesting people in your current location built for Android using Java. This project was originally developed by me but has since been open-sourced for the community to use as a template for a dating app.
 
 ## Features
 
